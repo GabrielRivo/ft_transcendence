@@ -10,6 +10,8 @@ import { createElement, createComponent, Fragment, FragmentComponent } from './c
 import { render } from './core/render';
 import { useState, useEffect, useContext, createContext } from './core/hooks/index';
 
+export type * from './types';
+
 const myReact = {
   createElement,
   createComponent,

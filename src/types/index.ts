@@ -1,22 +1,14 @@
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      [elemName: string]: any;
-    }
-  }
-}
-
 export interface Props {
   [key: string]: any;
   children?: Element[];
 }
 
-export interface Element {
+export type Element = {
   type: string | Function | symbol;
   props: Props;
 }
 
-export interface TextElement {
+export type TextElement = {
   type: "TEXT_ELEMENT";
   props: {
     nodeValue: any;
@@ -24,7 +16,7 @@ export interface TextElement {
   };
 }
 
-export interface Fiber {
+export type Fiber = {
   type: string | Function | symbol;
   props: Props;
   dom: Node | null;
@@ -45,10 +37,9 @@ export type Hook = {
   cleanup: Function | null;
 };
 
-export interface Context {
+export type Context = {
   _currentValue: any;
   Provider: (props: { children: any, value: any }) => Element;
   Consumer: (props: { children: (value: any) => Element }) => Element;
 }
 
-export { };
