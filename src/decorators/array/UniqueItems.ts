@@ -1,4 +1,4 @@
-import { createConstraintDecorator } from '../factory';
+import { createConstraintDecorator } from '../factory.js';
 
 /**
  * Check if all items in the array are unique.

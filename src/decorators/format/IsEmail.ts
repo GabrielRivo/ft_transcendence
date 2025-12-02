@@ -1,4 +1,4 @@
-import { createCustomValidator } from '../factory';
+import { createCustomValidator } from '../factory.js';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

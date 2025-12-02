@@ -1,1 +1,1 @@
-export * from './AdditionalProperties';
+export * from './AdditionalProperties.js';

@@ -1,4 +1,4 @@
-import { createConstraintDecorator } from '../factory';
+import { createConstraintDecorator } from '../factory.js';
 
 export const MinItems = createConstraintDecorator<number>(
 	'minItems',

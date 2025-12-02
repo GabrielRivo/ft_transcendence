@@ -1,4 +1,4 @@
-import { createConstraintDecorator } from '../factory';
+import { createConstraintDecorator } from '../factory.js';
 
 export const MaxLength = createConstraintDecorator<number>(
 	'maxLength',

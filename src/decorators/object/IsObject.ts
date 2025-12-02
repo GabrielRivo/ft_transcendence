@@ -1,4 +1,4 @@
-import { createTypeDecorator, updateAndSetMetadata } from '../factory';
+import { createTypeDecorator, updateAndSetMetadata } from '../factory.js';
 
 type NestedDto = new () => any;
 

@@ -1,11 +1,11 @@
-export * from './ajv';
-export * from './decorators/array';
-export * from './decorators/class';
-export * from './decorators/common';
-export { createCustomValidator } from './decorators/factory';
-export * from './decorators/format';
-export * from './decorators/number';
-export * from './decorators/object';
-export * from './decorators/string';
-export * from './schema-generator';
+export * from './ajv.js';
+export * from './decorators/array/index.js';
+export * from './decorators/class/index.js';
+export * from './decorators/common/index.js';
+export { createCustomValidator } from './decorators/factory.js';
+export * from './decorators/format/index.js';
+export * from './decorators/number/index.js';
+export * from './decorators/object/index.js';
+export * from './decorators/string/index.js';
+export * from './schema-generator.js';
 

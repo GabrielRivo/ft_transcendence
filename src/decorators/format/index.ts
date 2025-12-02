@@ -1,1 +1,1 @@
-export * from './IsEmail';
+export * from './IsEmail.js';

@@ -1,2 +1,2 @@
-export * from './IsNullable';
-export * from './IsRequired';
+export * from './IsNullable.js';
+export * from './IsRequired.js';

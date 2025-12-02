@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { METADATA_KEYS } from '../../metadata.keys';
+import { METADATA_KEYS } from '../../metadata.keys.js';
 
 export function IsRequired(options?: { message?: string }): PropertyDecorator {
 	return (target: object, propertyKey: string | symbol) => {

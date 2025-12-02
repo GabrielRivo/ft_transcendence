@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { METADATA_KEYS } from './metadata.keys';
+import { METADATA_KEYS } from './metadata.keys.js';
 
 export function generateSchema(DtoClass: Function) {
 	const validations = Reflect.getMetadata(METADATA_KEYS.validation, DtoClass);

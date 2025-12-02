@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { createConstraintDecorator } from '../factory';
+import { createConstraintDecorator } from '../factory.js';
 
 export const MinLength = createConstraintDecorator<number>(
 	'minLength',

@@ -1,4 +1,4 @@
-import { createCustomValidator } from '../factory';
+import { createCustomValidator } from '../factory.js';
 
 export const IsRange = createCustomValidator<Array<number>>(
 	'is-range',

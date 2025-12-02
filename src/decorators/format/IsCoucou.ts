@@ -1,4 +1,4 @@
-import { createCustomValidator } from '../factory';
+import { createCustomValidator } from '../factory.js';
 
 export const IsCoucou = createCustomValidator<string>(
 	'is-coucou',

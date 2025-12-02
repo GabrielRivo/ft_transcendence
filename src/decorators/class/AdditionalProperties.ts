@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { METADATA_KEYS } from '../../metadata.keys';
+import { METADATA_KEYS } from '../../metadata.keys.js';
 
 interface AdditionalPropertiesOptions {
 	message?: string;
