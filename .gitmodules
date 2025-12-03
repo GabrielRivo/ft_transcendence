@@ -1,12 +1,16 @@
 [submodule "packages/my-react"]
 	path = packages/my-react
 	url = git@github.com:thetranscendence/my-react.git
+	branch = main
 [submodule "packages/my-react-router"]
 	path = packages/my-react-router
 	url = git@github.com:thetranscendence/my-react-router.git
+	branch = main
 [submodule "packages/my-fastify-decorators"]
 	path = packages/my-fastify-decorators
 	url = git@github.com:thetranscendence/my-fastify-decorators.git
+	branch = main
 [submodule "packages/my-class-validator"]
 	path = packages/my-class-validator
 	url = git@github.com:thetranscendence/my-class-validator.git
+	branch = main
