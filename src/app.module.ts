@@ -1,9 +1,11 @@
 import { Module } from 'my-fastify-decorators';
 import { GameModule } from './game/game.module.js';
+import { GestionModule } from './gestion/gestion.module.js';
 
 @Module({
 	imports: [
-	GameModule
+	GameModule,
+	GestionModule
 ],
 })
 export class AppModule {}

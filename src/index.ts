@@ -6,7 +6,7 @@ import bootstrapPlugin from './plugins/bootstrap-plugin.js';
 import socketPlugin from './plugins/socket-plugin.js';
 import sqlitePlugin from './plugins/sqlite-plugin.js';
 
-const app = Fastify({ logger: true, ignoreTrailingSlash: true });
+const app = Fastify({ logger: true, routerOptions : { ignoreTrailingSlash: true } });
 
 const AjvCtor: any = (Ajv as any).default ?? Ajv;
 const addAjvErrors: any = (ajvErrors as any).default ?? ajvErrors;
@@ -32,7 +32,6 @@ app.setSchemaErrorFormatter((errors) => {
 	const err: any = new Error(message);
 	err.statusCode = 400;
 	err.validation = errors;
-	// On évite de pointer systématiquement sur index.ts
 	err.stack = undefined;
 
 	return err as Error;
