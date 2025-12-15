@@ -10,6 +10,8 @@ import { hashPassword, verifyPassword } from '../utils/crypto.js';
 import { DbExchangeService } from './dbExchange.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/register.dto.js';
+
+import type { JWT } from '@fastify/jwt';
 import { ProviderBasic, ProviderKeys, providers } from './providers.js';
 
 // WARNING a rajouter dans my-fastify-decorators
@@ -19,13 +21,32 @@ class BadGatewayException extends HttpException {
 	}
 }
 
+type TokenData = {
+	token_type: 'bearer' | 'Bearer';
+	access_token: string;
+	refresh_token: string;
+	error: string;
+};
+
+type UserData = {
+	id: number;
+	email: string;
+	avatar_url: string;
+	login: string;
+	name: string;
+	provider: string;
+	provider_id: string;
+	created_at: string;
+	updated_at: string;
+};
+
 @Service()
 export class AuthService {
 	@Inject(DbExchangeService)
 	private dbExchange!: DbExchangeService;
 
 	@InjectPlugin('jwt')
-	private jwt!: any;
+	private jwt!: JWT;
 
 	async register(dto: RegisterDto) {
 		const { email, password } = dto;
@@ -123,7 +144,7 @@ export class AuthService {
 
 		if (!tokenRes.ok) throw new BadGatewayException(`${providers[provider].id} login failed 1`);
 
-		const tokenData: any = await tokenRes.json();
+		const tokenData: TokenData = (await tokenRes.json()) as TokenData;
 		if (tokenData.error)
 			throw new UnauthorizedException(`${providers[provider].id} login failed 1`);
 
@@ -140,7 +161,7 @@ export class AuthService {
 		if (!userRes.ok) throw new BadGatewayException(`${providers[provider].id} login failed`);
 
 		console.log(userRes);
-		const userData: any = await userRes.json();
+		const userData: UserData = (await userRes.json()) as UserData;
 
 		let user = await this.dbExchange.getUserByProviderId(provider, String(userData.id));
 

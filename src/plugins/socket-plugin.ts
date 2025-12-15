@@ -14,12 +14,12 @@ async function socketPlugin(fastify: FastifyInstance) {
 	fastify.decorate('io', io);
 
 	fastify.addHook('preClose', (done) => {
-		(fastify as any).io.local.disconnectSockets(true);
+		(fastify as FastifyInstance & { io: Server }).io.local.disconnectSockets(true);
 		done();
 	});
 
 	fastify.addHook('onClose', (_fastify, done: () => void) => {
-		(fastify as any).io.close();
+		(fastify as FastifyInstance & { io: Server }).io.close();
 		done();
 	});
 }

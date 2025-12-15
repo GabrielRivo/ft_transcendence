@@ -8,12 +8,21 @@ import jwtPlugin from './plugins/jwt-plugin.js';
 import socketPlugin from './plugins/socket-plugin.js';
 import sqlitePlugin from './plugins/sqlite-plugin.js';
 
-const app = Fastify({ logger: true, routerOptions: { ignoreTrailingSlash: true } });
+const app = Fastify({
+	logger: true,
+	routerOptions: {
+		ignoreTrailingSlash: true,
+		ignoreDuplicateSlashes: true,
+		// bodyLimit: 1024 * 1024 * 10,
+		// maxParamLength: 100,
+		// caseSensitive: false,
+		// trustProxy: true, // WARNING: a revoir
+	},
+});
 
-const AjvCtor: any = (Ajv as any).default ?? Ajv;
-const addAjvErrors: any = (ajvErrors as any).default ?? ajvErrors;
-const ajv = new AjvCtor({ allErrors: true, $data: true, messages: true, coerceTypes: true } as any);
-addAjvErrors(ajv);
+const addAjvErrors = ajvErrors.default;
+const ajv = new Ajv.default({ allErrors: true, $data: true, messages: true, coerceTypes: true });
+addAjvErrors.default(ajv);
 
 registerValidators(ajv);
 
@@ -23,8 +32,15 @@ app.register(socketPlugin);
 app.register(bootstrapPlugin);
 
 app.setValidatorCompiler(({ schema }) => {
-	return ajv.compile(schema as any);
+	return ajv.compile(schema);
 });
+
+type SchemaError = Error & {
+	validation: Ajv.ErrorObject[];
+	code: string;
+	statusCode: number;
+	stack: undefined;
+};
 
 app.setSchemaErrorFormatter((errors) => {
 	const message =
@@ -32,12 +48,13 @@ app.setSchemaErrorFormatter((errors) => {
 			.map((e) => e.message)
 			.filter(Boolean)
 			.join('; ') || 'Validation error';
-	const err: any = new Error(message);
+	const err = new Error(message) as SchemaError;
 	err.statusCode = 400;
+	err.code = 'DTO_VALIDATION_ERROR';
 	err.validation = errors;
 	err.stack = undefined;
 
-	return err as Error;
+	return err;
 });
 
 async function start() {

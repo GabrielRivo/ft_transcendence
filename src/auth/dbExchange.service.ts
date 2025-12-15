@@ -4,18 +4,26 @@ import { ProviderKeys } from './providers.js';
 
 @Service()
 export class DbExchangeService {
-	private existingPrepare: Statement<any>;
-	private addUserPrepare: Statement<any>;
-	private getUserByEmailPrepare: Statement<any>;
-	private getUserByIdPrepare: Statement<any>;
-	private storeRefreshTokenPrepare: Statement<any>;
-	private revokeRefreshTokenPrepare: Statement<any>;
-	private generateTokensPrepare: Statement<any>;
-	private getRefreshTokenPrepare: Statement<any>;
-	private getUserByProviderIdPrepare: Statement<any>;
-	private addUserByProviderIdPrepare: Statement<any>;
-	private findRefreshTokenPrepare: Statement<any>;
-	private getAllUsersPrepare: Statement<any>;
+	private existingPrepare: Statement<{ email: string }>;
+	private addUserPrepare: Statement<{ email: string; password_hash: string }>;
+	private getUserByEmailPrepare: Statement<{ email: string }>;
+	private getUserByIdPrepare: Statement<{ id: number }>;
+	private storeRefreshTokenPrepare: Statement<{
+		user_id: number;
+		token: string;
+		expires_at: string;
+	}>;
+	private revokeRefreshTokenPrepare: Statement<{ token: string }>;
+	private generateTokensPrepare: Statement<{ id: number }>;
+	private getRefreshTokenPrepare: Statement<{ token: string }>;
+	private getUserByProviderIdPrepare: Statement<{ provider: ProviderKeys; provider_id: string }>;
+	private addUserByProviderIdPrepare: Statement<{
+		provider: ProviderKeys;
+		provider_id: string;
+		password_hash: string;
+	}>;
+	private findRefreshTokenPrepare: Statement<{ token: string }>;
+	private getAllUsersPrepare: Statement<Record<string, never>>;
 	@InjectPlugin('db')
 	private db!: Database;
 
@@ -95,18 +103,11 @@ export class DbExchangeService {
 	}
 
 	async addUserByProviderId(provider: ProviderKeys, provider_id: string) {
-		console.log('addUserByProviderId', provider, provider_id);
-		try {
-			return this.addUserByProviderIdPrepare.run({
-				provider,
-				provider_id,
-				password_hash: '',
-			}) as RunResult;
-		} catch (error) {
-			console.error('Error adding user by provider id', error);
-			// throw new BadGatewayException(`${provider} - TA OUBLIER UN TRUC POUR LE PROVIDER!`);
-		}
-		return this.addUserByProviderIdPrepare.run({ provider, provider_id }) as RunResult;
+		return this.addUserByProviderIdPrepare.run({
+			provider,
+			provider_id,
+			password_hash: '',
+		}) as RunResult;
 	}
 
 	async findRefreshToken(token: string) {
