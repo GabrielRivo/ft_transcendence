@@ -2,4 +2,4 @@ node_modules
 .env
 dist
 db.sqlite
-./data/db.sqlite-*
+data/db.sqlite-*
