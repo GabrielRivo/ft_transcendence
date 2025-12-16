@@ -1,7 +1,7 @@
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    project: 'tsconfig.json',
+    project: 'tsconfig.eslint.json',
     sourceType: 'module',
     ecmaVersion: 'latest',
   },
@@ -24,4 +24,14 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'warn',
     'no-useless-catch': 'warn',
   },
+  overrides: [
+    {
+      files: [
+        '**/*.spec.ts'
+      ],
+      rules: {
+        '@typescript-eslint/no-explicit-any': 'off',
+      },
+    },
+  ],
 };

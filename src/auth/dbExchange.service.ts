@@ -32,7 +32,9 @@ export class DbExchangeService {
 		this.addUserPrepare = this.db.prepare(
 			'INSERT INTO users (email, password_hash) VALUES (@email, @password_hash)',
 		);
-		this.getUserByEmailPrepare = this.db.prepare('SELECT * FROM users WHERE email = @email');
+		this.getUserByEmailPrepare = this.db.prepare(
+			"SELECT * FROM users WHERE email = @email AND provider = 'email'",
+		);
 		this.getUserByIdPrepare = this.db.prepare('SELECT * FROM users WHERE id = @id');
 		this.storeRefreshTokenPrepare = this.db.prepare(
 			'INSERT INTO refresh_tokens (user_id, token, expires_at) VALUES (@user_id, @token, @expires_at)',
@@ -53,7 +55,7 @@ export class DbExchangeService {
 		this.findRefreshTokenPrepare = this.db.prepare(
 			'SELECT * FROM refresh_tokens WHERE token = @token',
 		);
-		this.getAllUsersPrepare = this.db.prepare('SELECT id, email, provider, provider_id FROM users');
+		this.getAllUsersPrepare = this.db.prepare('SELECT * FROM users');
 	}
 
 	async existing(email: string) {

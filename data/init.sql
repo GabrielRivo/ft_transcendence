@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT UNIQUE,
     email TEXT UNIQUE,
     password_hash VARCHAR(64) NOT NULL,
-    provider TEXT CHECK(provider IN ('github', 'google', 'email', 'discord')), -- # Warning: check provider
+    provider TEXT CHECK(provider IN ('github', 'google', 'email', 'discord')) DEFAULT 'email', -- # Warning: check provider
     provider_id TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -32,11 +32,11 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
     expires_at TEXT NOT NULL,
     revoked INTEGER DEFAULT 0,    -- 0 = Valide, 1 = Revoque
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
+
     -- foreign key: Si un user est delete, ses tokens le sont aussi
     CONSTRAINT fk_user
-        FOREIGN KEY (user_id) 
-        REFERENCES users (id) 
+        FOREIGN KEY (user_id)
+        REFERENCES users (id)
         ON DELETE CASCADE
 );
 
