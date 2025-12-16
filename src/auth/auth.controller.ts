@@ -30,7 +30,6 @@ export class AuthController {
 	@Post('/register')
 	@BodySchema(RegisterSchema)
 	async register(@Body() dto: RegisterDto) {
-		// return { message: 'Register' };
 		return this.authService.register(dto);
 	}
 
