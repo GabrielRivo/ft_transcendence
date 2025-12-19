@@ -12,6 +12,7 @@ export interface Props {
 }
 
 export interface Element {
+  key?: string | number;
   type: string | Function | symbol;
   props: Props;
 }

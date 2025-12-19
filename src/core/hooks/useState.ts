@@ -21,33 +21,25 @@ export function useState<T>(initial: T): [T, (action: T | ((prev: T) => T)) => v
   
   const hook = {
     state: oldHook ? oldHook.state : initial,
-    queue: [] as any[],
+    queue: oldHook ? oldHook.queue : [] as any[],
   };
 
-  const actions = oldHook ? oldHook.queue : [];
+  const actions = hook.queue;
   actions.forEach(action => {
     hook.state = typeof action === 'function' ? action(hook.state) : action;
   });
-
-
-  // re check plus tard // WARNING
   
+  // Important: on vide la queue in-place pour conserver la référence du tableau
+  // Cela permet aux closures "stale" de setState de continuer à fonctionner
+  // car elles pointent vers ce même tableau.
+  actions.length = 0;
+
   const setState = (action: T | ((prev: T) => T)) => {
-    // Push action to the *current* hook's queue (which will be oldHook in next render)
-    // But wait, 'hook' here is the ONE created during render.
-    // If we are in event handler, we are outside render.
-    // The 'hook' variable is closed over.
-    // So we push to this hook's queue.
     hook.queue.push(action);
     
     const currentRoot = getCurrentRoot();
-    const wipRoot = getWipRoot();
+    // const wipRoot = getWipRoot();
 
-    // If a render is already in progress (wipRoot exists), we shouldn't reset it
-    // UNLESS we want to support batching or restart? 
-    // Simple implementation: if wipRoot exists, we might be interrupting? 
-    // Or we just overwrite it to start over from root with new state.
-    
     if (currentRoot) {
       const newWipRoot = {
         type: "ROOT",
