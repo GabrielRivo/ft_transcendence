@@ -8,6 +8,13 @@ export type Element = {
   props: Props;
 }
 
+export type FragmentType = {
+  type: "FRAGMENT";
+  props: {
+    children: Element[];
+  };
+}
+
 export type TextElement = {
   type: "TEXT_ELEMENT";
   props: {

@@ -11,7 +11,7 @@ export function reconcileChildren(wipFiber: Fiber, elements: Element[]): void {
     const element = elements[index];
     let newFiber: Fiber | null = null;
 
-    const sameType = oldFiber && element && element.type === oldFiber.type;
+    const sameType = oldFiber && element && element.type === oldFiber.type && element.props.key === oldFiber.props.key;
 
     if (sameType && oldFiber) {
       newFiber = {
