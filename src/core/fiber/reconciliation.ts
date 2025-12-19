@@ -13,6 +13,7 @@ export function reconcileChildren(wipFiber: Fiber, elements: Element[]): void {
 
     const sameType = oldFiber && element && element.type === oldFiber.type && element.props.key === oldFiber.props.key;
 
+    // on update le fiber existant
     if (sameType && oldFiber) {
       newFiber = {
         type: oldFiber.type,
@@ -24,6 +25,7 @@ export function reconcileChildren(wipFiber: Fiber, elements: Element[]): void {
       };
     }
     
+    // on creer un nouveau fiber
     if (element && !sameType) {
       newFiber = {
         type: element.type,
@@ -35,11 +37,12 @@ export function reconcileChildren(wipFiber: Fiber, elements: Element[]): void {
       };
     }
     
-    // Safety check for Provider children
+    // on verifie que le fiber est un provider "securite"
     if (newFiber && newFiber.type === 'CONTEXT_PROVIDER') {
-      newFiber.dom = null; // Ensure no DOM node for Provider
+      newFiber.dom = null;
     }
     
+    // on supprime le fiber existant
     if (oldFiber && !sameType) {
       oldFiber.effectTag = "DELETION";
       getDeletions().push(oldFiber);
@@ -49,10 +52,20 @@ export function reconcileChildren(wipFiber: Fiber, elements: Element[]): void {
       oldFiber = oldFiber.sibling;
     }
 
-    if (index === 0) {
-      wipFiber.child = newFiber || undefined;
-    } else if (element && prevSibling) {
-      prevSibling.sibling = newFiber || undefined;
+    // if (index === 0) {
+    //   wipFiber.child = newFiber || undefined;
+    // } else if (element && prevSibling) {
+    //   prevSibling.sibling = newFiber || undefined;
+    // }
+
+    // amelioration chainage parent enfant
+    if (newFiber) {
+      if (!prevSibling) {
+        wipFiber.child = newFiber;
+      } else {
+        prevSibling.sibling = newFiber;
+      }
+      prevSibling = newFiber;
     }
 
     prevSibling = newFiber;
