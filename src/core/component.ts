@@ -52,6 +52,7 @@ export function getWipFiber(): Fiber | null {
 
 // Fragment components
 export const Fragment = Symbol('Fragment');
+const DomHTMLElement = Symbol('DomHTMLElement');
 
 export function FragmentComponent(props: { children?: any[] }): Element {
   return {
@@ -69,6 +70,7 @@ export function createComponent(type: string | Function, props: Props | null, ..
 
 // Création d'éléments (équivalent à React.createElement)
 export function createElement(type: string | Function, props: Props | null, ...children: any[]): Element {
+  // console.log('createElement', type, props, children);
   return {
     type,
     props: {
@@ -90,23 +92,41 @@ export function createTextElement(text: any): TextElement {
   };
 }
 
+// Helper pour vérifier si on est dans un contexte SVG
+function isInSvg(fiber: Fiber | null): boolean {
+  if (!fiber) return false;
+  if (fiber.type === "svg") return true;
+  if (fiber.type === "foreignObject") return false;
+  return isInSvg(fiber.parent || null);
+}
+
 // Création de nœuds DOM
 export function createDom(fiber: Fiber): Node {
+  // console.log('createDom', fiber);
+
+  // Détection SVG
+  const isSvg = fiber.type === "svg" || isInSvg(fiber.parent || null);
+
   const dom = fiber.type === "TEXT_ELEMENT"
     ? document.createTextNode("")
-    : document.createElement(fiber.type as string);
-
-  updateDom(dom, {}, fiber.props || {});
+    : isSvg
+      ? document.createElementNS("http://www.w3.org/2000/svg", fiber.type as string)
+      : document.createElement(fiber.type as string);
+  
+  updateDom(dom, {}, fiber.props || {}, fiber.type !== "TEXT_ELEMENT");
   return dom;
 }
 
 // Mise à jour des propriétés DOM
-export function updateDom(dom: any, prevProps: Props, nextProps: Props): void {
+export function updateDom(dom: any, prevProps: Props, nextProps: Props, isNotText: boolean = false): void {
   const isEvent = (key: string): boolean => key.startsWith("on");
   const isProperty = (key: string): boolean => key !== "children" && !isEvent(key);
   const isNew = (prev: Props, next: Props) => (key: string): boolean => prev[key] !== next[key];
   const isGone = (prev: Props, next: Props) => (key: string): boolean => !(key in next);
+  
+  const isSvg = dom instanceof SVGElement;
 
+  // console.log('updateDom', prevProps, nextProps);
   // Supprimer les anciens event listeners
   Object.keys(prevProps)
     .filter(isEvent)
@@ -121,7 +141,15 @@ export function updateDom(dom: any, prevProps: Props, nextProps: Props): void {
     .filter(isProperty)
     .filter(isGone(prevProps, nextProps))
     .forEach(name => {
-      dom[name] = "";
+      if (name === "className" && isSvg) {
+          dom.removeAttribute("class");
+      } else {
+          dom[name] = "";
+          // Note: removeAttribute might be safer for some attributes
+          if (isNotText) {
+             dom.removeAttribute(name);
+          }
+      }
     });
 
   // Ajouter ou mettre à jour les propriétés
@@ -129,7 +157,30 @@ export function updateDom(dom: any, prevProps: Props, nextProps: Props): void {
     .filter(isProperty)
     .filter(isNew(prevProps, nextProps))
     .forEach(name => {
-      dom[name] = nextProps[name];
+      // console.log('TEST-A', name, nextProps[name]);
+      
+      if (name === "className") {
+        if (isSvg) {
+          dom.setAttribute("class", nextProps[name]);
+        } else {
+          dom.className = nextProps[name];
+        }
+      } else {
+        // Pour les propriétés standard
+        if (!isSvg) {
+            dom[name] = nextProps[name];
+        } else {
+            // Pour SVG, on privilégie setAttribute pour tout sauf style/dataset ?
+            // Mais dom[name] = ... peut marcher pour 'id', etc.
+            // On fait les deux ou juste setAttribute pour SVG.
+            // setAttribute est plus sûr pour SVG.
+            dom.setAttribute(name, nextProps[name]);
+        }
+
+        if (isNotText && name !== "className" && !isSvg) {
+          dom.setAttribute(name, nextProps[name]);
+        }
+      }
     });
 
   // Ajouter les nouveaux event listeners
@@ -140,4 +191,4 @@ export function updateDom(dom: any, prevProps: Props, nextProps: Props): void {
       const eventType = name.toLowerCase().substring(2);
       dom.addEventListener(eventType, nextProps[name]);
     });
-} 
+}
