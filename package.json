@@ -27,6 +27,7 @@
 		"vitest": "^1.0.0"
 	},
 	"dependencies": {
+		"@babylonjs/core": "8.33.2",
 		"@tailwindcss/vite": "^4.1.18",
 		"my-react": "workspace:*",
 		"my-react-router": "workspace:*",

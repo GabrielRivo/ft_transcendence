@@ -2,8 +2,9 @@ import { createElement } from 'my-react';
 import { Router } from 'my-react-router';
 
 import { Test } from './pages/test';
-import { NotFoundPage } from './pages/notFoundPage';
 import { Home } from './pages/home';
+
+import { NotFoundPage } from './pages/errors/notFoundPage';
 import { MainLayout } from './layout/mainLayout';
 
 const routes = [
