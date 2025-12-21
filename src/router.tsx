@@ -7,21 +7,21 @@ import { Home } from './pages/home';
 import { MainLayout } from './layout/mainLayout';
 
 const routes = [
-  {
-    layout: MainLayout,
-    routes: [
-      {
-        path: '/',
-        component: Home,
-      },
-      {
-        path: '/test',
-        component: Test,
-      },
-    ],
-  },
+	{
+		layout: MainLayout,
+		routes: [
+			{
+				path: '/',
+				component: Home,
+			},
+			{
+				path: '/test',
+				component: Test,
+			},
+		],
+	},
 ];
 
 export default function App() {
-  return <Router groups={routes} NoFound={<NotFoundPage />} />;
+	return <Router groups={routes} NoFound={<NotFoundPage />} />;
 }

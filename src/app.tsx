@@ -4,7 +4,7 @@ import './index.css';
 
 const root = document.getElementById('root');
 if (root) {
-  render(<App />, root as HTMLElement);
+	render(<App />, root as HTMLElement);
 } else {
-  console.error('Element root not found!');
+	console.error('Element root not found!');
 }

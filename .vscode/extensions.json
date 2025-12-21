@@ -1,15 +1,15 @@
 {
-  "recommendations": [
-    "mgmcdermott.vscode-language-babel",
-    "kamikillerto.vscode-colorize",
-    "dbaeumer.vscode-eslint",
-    "mkxml.vscode-filesize",
-    "vincaslt.highlight-matching-tag",
-    "wix.vscode-import-cost",
-    "ms-vscode.vscode-typescript-next",
-    "PKief.material-icon-theme",
-    "esbenp.prettier-vscode",
-    "YoavBls.pretty-ts-errors",
-    "bradlc.vscode-tailwindcss"
-  ]
+	"recommendations": [
+		"mgmcdermott.vscode-language-babel",
+		"kamikillerto.vscode-colorize",
+		"dbaeumer.vscode-eslint",
+		"mkxml.vscode-filesize",
+		"vincaslt.highlight-matching-tag",
+		"wix.vscode-import-cost",
+		"ms-vscode.vscode-typescript-next",
+		"PKief.material-icon-theme",
+		"esbenp.prettier-vscode",
+		"YoavBls.pretty-ts-errors",
+		"bradlc.vscode-tailwindcss"
+	]
 }

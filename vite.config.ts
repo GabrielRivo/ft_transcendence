@@ -1,19 +1,17 @@
 import { defineConfig } from 'vite';
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  root: 'src',
-  publicDir: '../public',
-  build: {
-    outDir: '../dist',
-    emptyOutDir: true,
-  },
-  esbuild: {
-    jsx: 'transform',
-    jsxFactory: 'createElement',
-    jsxFragment: 'Fragment',
-  },
-  plugins: [
-    tailwindcss(),
-  ]
-}); 
+	root: 'src',
+	publicDir: '../public',
+	build: {
+		outDir: '../dist',
+		emptyOutDir: true,
+	},
+	esbuild: {
+		jsx: 'transform',
+		jsxFactory: 'createElement',
+		jsxFragment: 'Fragment',
+	},
+	plugins: [tailwindcss()],
+});
