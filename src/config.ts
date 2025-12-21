@@ -5,6 +5,7 @@ dotenv.config();
 
 const config = {
 	sample: process.env.SAMPLE || 'default_sample_value',
+	env : "development"
 };
 
 export default config;
