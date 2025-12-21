@@ -37,6 +37,10 @@ export interface Fiber {
   hooks?: Hook[];
 }
 
+export interface RefObject<T> {
+  current: T | null;
+}
+
 export type Hook = {
   state: any;
   queue: any[];
