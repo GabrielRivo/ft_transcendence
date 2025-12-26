@@ -6,37 +6,37 @@ import { AddFriendSchema, AddFriendDto } from './dto/addFriend.dto.js';
 @Controller('/friend-management')
 export class FriendManagementController {
     
-    @Inject(FriendManagementService)
-    private friend_managementService!: FriendManagementService;
+	@Inject(FriendManagementService)
+	private friend_managementService!: FriendManagementService;
 
-    @Inject(BlockManagementService)
-    private blockService!: BlockManagementService;
-
-
-    @Post('/friend')
-    @BodySchema(AddFriendSchema)
-    add_friend(@Body() data: AddFriendDto) {
-        return this.friend_managementService.add_friend(data.userId, data.otherId);
-    }
-
-    @Delete('/friend')
-    @BodySchema(AddFriendSchema)
-    delete_friend(@Body() data: AddFriendDto) {
-        return this.friend_managementService.delete_friend(data.userId, data.otherId);
-    }
+	@Inject(BlockManagementService)
+	private blockService!: BlockManagementService;
 
 
-    @Post('/block')
-    @BodySchema(AddFriendSchema)
-    block_user(@Body() data: AddFriendDto) {
-        return this.blockService.block_user(data.userId, data.otherId);
-    }
+	@Post('/friend')
+	@BodySchema(AddFriendSchema)
+	add_friend(@Body() data: AddFriendDto) {
+		return this.friend_managementService.add_friend(data.userId, data.otherId);
+	}
 
-    @Delete('/block')
-    @BodySchema(AddFriendSchema)
-    unblock_user(@Body() data: AddFriendDto) {
-        return this.blockService.unblock_user(data.userId, data.otherId);
-    }
+	@Delete('/friend')
+	@BodySchema(AddFriendSchema)
+	delete_friend(@Body() data: AddFriendDto) {
+    	return this.friend_managementService.delete_friend(data.userId, data.otherId);
+	}
+
+
+	@Post('/block')
+	@BodySchema(AddFriendSchema)
+	block_user(@Body() data: AddFriendDto) {
+		return this.blockService.block_user(data.userId, data.otherId);
+	}
+
+	@Delete('/block')
+	@BodySchema(AddFriendSchema)
+	unblock_user(@Body() data: AddFriendDto) {
+		return this.blockService.unblock_user(data.userId, data.otherId);
+	}
 }
  
 	// @Get('/friend/:id')
