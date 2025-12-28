@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kibana
+spec:
+  ports:
+    - port: 42560 # default port: 5601
+      targetPort: 5601
+  selector:
+    app: kibana
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kibana
+spec:
+  selector:
+    matchLabels:
+      app: kibana
+  template:
+    metadata:
+      labels:
+        app: kibana
+      annotations:
+        vault.hashicorp.com/agent-inject: "true"
+        vault.hashicorp.com/role: "kibana-role"
+        vault.hashicorp.com/agent-inject-secret-config: "secret/data/infra/kibana"
+        vault.hashicorp.com/agent-inject-template-config: |
+          {{- with secret "secret/data/infra/kibana" -}}
+            export XPACK_SECURITY_ENCRYPTIONKEY={{ .Data.data.encryption_key | toJSON }}
+            export XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY={{ .Data.data.encryption_key | toJSON }}
+            export XPACK_REPORTING_ENCRYPTIONKEY={{ .Data.data.encryption_key | toJSON }}
+            export KIBANA_SYSTEM_PASSWORD={{ .Data.data.password | toJSON }}
+          {{- end -}}
+    spec:
+      serviceAccountName: kibana
+      containers:
+        - name: kibana
+          image: docker.elastic.co/kibana/kibana:8.11.1
+          env:
+            - name: ELASTICSEARCH_HOST
+              value: "http://elasticsearch:42920"
+            - name: ELASTICSEARCH_USERNAME
+              value: "kibana_system"
+            - name: ELASTICSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name:  kibana-dummy-secret # Hack: k8s demande une ref, mais on l'écrase via le script
+                  key: password
+                  optional: true
+          command: ["/bin/sh", "-c"]
+          args: ["sleep 3600"]
+          ports:
+            - containerPort: 5601

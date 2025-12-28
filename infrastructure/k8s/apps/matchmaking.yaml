@@ -1,0 +1,97 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: matchmaking
+  labels:
+    app: matchmaking
+spec:
+  ports:
+    - port: 3000
+      targetPort: 3000
+      name: http
+  selector:
+    app: matchmaking
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: matchmaking
+spec:
+  serviceName: matchmaking
+  replicas: 1
+  selector:
+    matchLabels:
+      app: matchmaking
+  template:
+    metadata:
+      labels:
+        app: matchmaking
+      annotations:
+        # ======================================================================
+        # CONFIGURATION DE L'INJECTION VAULT (Zero Trust)
+        # ======================================================================
+        # 1. Active l'injection du sidecar Vault Agent dans ce Pod
+        vault.hashicorp.com/agent-inject: "true"
+        
+        # 2. Spécifie le rôle (doit correspondre à celui configuré dans Vault)
+        vault.hashicorp.com/role: "matchmaking-role"
+        
+        # 3. Définit quel secret récupérer (Chemin KV v2)
+        vault.hashicorp.com/agent-inject-secret-config: "secret/data/app/matchmaking"
+        
+        # 4. Formate le fichier de sortie (.env)
+        # Ce template écrit un fichier que l'application pourra "sourcer"
+        vault.hashicorp.com/agent-inject-template-config: |
+          {{- with secret "secret/data/app/matchmaking" -}}
+            {{- range $k, $v := .Data.data }}
+            export {{ $k | toUpper }}={{ $v | toJSON }}
+            {{- end }}
+          {{- end -}}
+    spec:
+      serviceAccountName: matchmaking
+      
+      # SÉCURITÉ : fsGroup configure automatiquement les droits du volume /data
+      # L'utilisateur 1000 (node) pourra lire et écrire dedans.
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+
+      containers:
+        - name: matchmaking
+          image: matchmaking:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 3000
+          command: ["/bin/sh", "-c"]
+          # Chargement des secrets puis lancement de l'application
+          args: [". /vault/secrets/config && node apps/matchmaking/dist/src/index.js"]
+          
+          volumeMounts:
+            - name: data-volume
+              mountPath: /data
+          
+          # Vérifie que l'API répond
+          livenessProbe:
+            httpGet:
+              path: /matchmaking/health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          
+          readinessProbe:
+            httpGet:
+              path: /matchmaking/health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+
+  volumeClaimTemplates:
+    - metadata:
+        name: data-volume
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: "local-path"
+        resources:
+          requests:
+            storage: 100Mi
