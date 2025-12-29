@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-config
+data:
+  LOG_LEVEL: "info"
+  REDIRECT_URI: "https://test.ft-transcendence.example.com"
+  USER_SERVICE_URL: "http://auth-service.ft-transcendence-test.svc.cluster.local:3000"
+  MATCHMAKING_SERVICE_URL: "http://matchmaking-service.ft-transcendence-test.svc.cluster.local:3001"

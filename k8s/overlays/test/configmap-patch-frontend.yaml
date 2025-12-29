@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  VITE_APP_ENV: "test"
+  VITE_API_URL: "https://test-api.ft-transcendence.example.com"
+  VITE_AUTH_SERVICE_URL: "https://test-api.ft-transcendence.example.com/auth"
+  VITE_MATCHMAKING_SERVICE_URL: "https://test-api.ft-transcendence.example.com/matchmaking"
+  VITE_GAME_SERVICE_URL: "https://test-api.ft-transcendence.example.com/game"
+  VITE_WS_URL: "wss://test-api.ft-transcendence.example.com"

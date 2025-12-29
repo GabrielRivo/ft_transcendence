@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: test-quota
+  namespace: ft-transcendence-test
+  labels:
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: resource-quota
+    environment: test
+spec:
+  hard:
+    requests.cpu: '16'
+    requests.memory: 32Gi
+    limits.cpu: '32'
+    limits.memory: 64Gi
+    persistentvolumeclaims: '10'
+    pods: '50'
+    services.loadbalancers: '0'
+    services.nodeports: '5'

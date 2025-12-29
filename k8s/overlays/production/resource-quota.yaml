@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: production-quota
+  namespace: ft-transcendence-production
+  labels:
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: resource-quota
+    environment: production
+spec:
+  hard:
+    requests.cpu: '32'
+    requests.memory: 64Gi
+    limits.cpu: '64'
+    limits.memory: 128Gi
+    persistentvolumeclaims: '20'
+    pods: '100'
+    services.loadbalancers: '3'
+    services.nodeports: '10'

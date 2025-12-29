@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: matchmaking-config
+  labels:
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: matchmaking
+    app.kubernetes.io/managed-by: kustomize
+data:
+  PORT: "3001"
+  MATCHMAKING_TICK_RATE_MS: "2000"
+  INITIAL_ELO_RANGE: "50"
+  EXPANSION_STEP_ELO: "100"
+  EXPANSION_INTERVAL_SEC: "5"
+  MAX_ELO_RANGE: "500"
+  MATCH_PROPOSAL_TIMEOUT_SEC: "16"
+  LOG_LEVEL: "info"
+  USER_SERVICE_URL: "http://auth-service:3000"
+  GAME_SERVICE_URL: "http://game-service:3002"
+  RABBITMQ_EXCHANGE: "ft-transcendence"
+  RABBITMQ_QUEUE_MATCHMAKING: "matchmaking-events"
+  REDIS_KEY_PREFIX: "matchmaking:"
+  REDIS_QUEUE_KEY: "matchmaking:queue"
