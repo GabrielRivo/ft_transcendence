@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ft-transcendence-test
+  labels:
+    name: ft-transcendence-test
+    environment: test
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: namespace
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

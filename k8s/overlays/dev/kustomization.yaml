@@ -8,17 +8,49 @@ namespace: ft-transcendence-dev
 
 resources:
   - ../../base
+  - namespace.yaml
   - resource-quota.yaml
   - limit-range.yaml
 
 patches:
-  - path: namespace-patch-test.yaml
-  - path: namespace-patch-production.yaml
-  - path: configmap-patch-auth.yaml
-  - path: configmap-patch-matchmaking.yaml
-  - path: configmap-patch-frontend.yaml
-  - path: storage-patch.yaml
+  - target:
+      kind: ConfigMap
+      name: auth-config
+    path: configmap-patch-auth.yaml
+  - target:
+      kind: ConfigMap
+      name: matchmaking-config
+    path: configmap-patch-matchmaking.yaml
+  - target:
+      kind: ConfigMap
+      name: frontend-config
+    path: configmap-patch-frontend.yaml
+  - target:
+      kind: PersistentVolumeClaim
+      name: auth-db-pvc
+    path: storage-patch-auth.yaml
+  - target:
+      kind: PersistentVolumeClaim
+      name: matchmaking-db-pvc
+    path: storage-patch-matchmaking.yaml
+  - target:
+      kind: StatefulSet
+      name: redis
+    path: redis-patch.yaml
 
-configMapGenerator: []
+resources:
+  - redis-secret.yaml
+
+configMapGenerator:
+  - name: redis-config
+    files:
+      - redis.conf
+    options:
+      labels:
+        app: redis
+        app.kubernetes.io/name: ft-transcendence
+        app.kubernetes.io/part-of: ft-transcendence
+        app.kubernetes.io/component: redis
+      disableNameSuffixHash: false
 
 secretGenerator: []

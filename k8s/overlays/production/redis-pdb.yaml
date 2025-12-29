@@ -1,0 +1,14 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: redis-pdb
+  labels:
+    app: redis
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: redis
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: redis

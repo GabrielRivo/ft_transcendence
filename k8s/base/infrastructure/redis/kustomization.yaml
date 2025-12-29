@@ -4,4 +4,10 @@ kind: Kustomization
 metadata:
   name: redis-base
 
-resources: []
+resources:
+  - statefulset.yaml
+  - service.yaml
+  - secret.yaml
+
+# Note: Le ConfigMap redis-config est généré dans les overlays pour chaque environnement
+# car chaque environnement a besoin de sa propre configuration Redis

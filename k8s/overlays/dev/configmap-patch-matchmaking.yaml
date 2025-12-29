@@ -2,6 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: matchmaking-config
+  labels:
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: matchmaking
+    app.kubernetes.io/managed-by: kustomize
 data:
   LOG_LEVEL: 'debug'
   MATCHMAKING_TICK_RATE_MS: '1000'

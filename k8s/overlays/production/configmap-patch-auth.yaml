@@ -2,8 +2,13 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: auth-config
+  labels:
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: auth
+    app.kubernetes.io/managed-by: kustomize
 data:
-  LOG_LEVEL: "warn"
-  REDIRECT_URI: "https://ft-transcendence.example.com"
-  USER_SERVICE_URL: "http://auth-service.ft-transcendence-production.svc.cluster.local:3000"
-  MATCHMAKING_SERVICE_URL: "http://matchmaking-service.ft-transcendence-production.svc.cluster.local:3001"
+  LOG_LEVEL: 'warn'
+  REDIRECT_URI: 'https://ft-transcendence.example.com'
+  USER_SERVICE_URL: 'http://auth-service.ft-transcendence-production.svc.cluster.local:3000'
+  MATCHMAKING_SERVICE_URL: 'http://matchmaking-service.ft-transcendence-production.svc.cluster.local:3001'

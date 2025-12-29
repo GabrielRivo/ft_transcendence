@@ -5,8 +5,8 @@ metadata:
   name: ft-transcendence-base
 
 resources:
-  - namespaces/
   - configmaps/
   - secrets/
   - infrastructure/
   - applications/
+# Note: Les namespaces sont créés dans chaque overlay pour éviter les conflits
