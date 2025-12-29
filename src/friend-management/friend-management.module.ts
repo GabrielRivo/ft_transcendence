@@ -1,6 +1,6 @@
-import { Module } from 'my-fastify-decorators';
-import { FriendManagementController } from './friend-management.controller.js';
-import { FriendManagementService } from './friend-management.service.js';
+import { Module } from 'my-fastify-decorators'
+import { FriendManagementController } from './friend-management.controller.js'
+import { FriendManagementService } from './friend-management.service.js'
 
 @Module({
 	controllers: [FriendManagementController],
