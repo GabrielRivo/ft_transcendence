@@ -22,3 +22,6 @@
 	path = apps/matchmaking
 	url = git@github.com:thetranscendence/matchmaking.git
 	branch = main
+[submodule "infrastructure"]
+	path = infrastructure
+	url = git@github.com:thetranscendence/infrastructure.git
