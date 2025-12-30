@@ -25,3 +25,4 @@
 [submodule "infrastructure"]
 	path = infrastructure
 	url = git@github.com:thetranscendence/infrastructure.git
+	branch = main
