@@ -1,7 +1,15 @@
+# Module du Frontend
+# Ce fichier devra référencer les ressources Kubernetes pour servir l'application React :
+# - Deployment (Nginx ou serveur statique)
+# - Service (accès réseau)
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 metadata:
   name: frontend-base
 
-resources: []
+resources:
+  # TODO: Ajouter les fichiers de ressources une fois créés
+  # - deployment.yaml
+  # - service.yaml

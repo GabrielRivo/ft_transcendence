@@ -1,3 +1,6 @@
+# Configuration du Service de Matchmaking
+# Définit les règles de jeu, les timeouts et les paramètres de l'algorithme.
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,17 +11,34 @@ metadata:
     app.kubernetes.io/component: matchmaking
     app.kubernetes.io/managed-by: kustomize
 data:
-  PORT: "3001"
-  MATCHMAKING_TICK_RATE_MS: "2000"
-  INITIAL_ELO_RANGE: "50"
-  EXPANSION_STEP_ELO: "100"
-  EXPANSION_INTERVAL_SEC: "5"
-  MAX_ELO_RANGE: "500"
-  MATCH_PROPOSAL_TIMEOUT_SEC: "16"
-  LOG_LEVEL: "info"
-  USER_SERVICE_URL: "http://auth-service:3000"
-  GAME_SERVICE_URL: "http://game-service:3002"
-  RABBITMQ_EXCHANGE: "ft-transcendence"
-  RABBITMQ_QUEUE_MATCHMAKING: "matchmaking-events"
-  REDIS_KEY_PREFIX: "matchmaking:"
-  REDIS_QUEUE_KEY: "matchmaking:queue"
+  # --- Configuration Serveur ---
+  PORT: '3001'
+  LOG_LEVEL: 'info'
+
+  # --- Algorithme de Matchmaking ---
+  # Fréquence de vérification de la file d'attente (en ms)
+  MATCHMAKING_TICK_RATE_MS: '2000'
+
+  # Logique d'élargissement de la recherche (ELO)
+  # On commence par chercher un adversaire à +/- 50 ELO
+  INITIAL_ELO_RANGE: '50'
+  # Toutes les 5 secondes, on élargit la recherche de 100 ELO
+  EXPANSION_STEP_ELO: '100'
+  EXPANSION_INTERVAL_SEC: '5'
+  # On ne cherche jamais au-delà de +/- 500 ELO
+  MAX_ELO_RANGE: '500'
+
+  # Temps laissé au joueur pour accepter un match proposé (16s)
+  MATCH_PROPOSAL_TIMEOUT_SEC: '16'
+
+  # --- Communication Inter-Services ---
+  USER_SERVICE_URL: 'http://auth-service:3000'
+  GAME_SERVICE_URL: 'http://game-service:3002'
+
+  # --- Event Bus (RabbitMQ) ---
+  RABBITMQ_EXCHANGE: 'ft-transcendence'
+  RABBITMQ_QUEUE_MATCHMAKING: 'matchmaking-events'
+
+  # --- Redis (File d'attente & État) ---
+  REDIS_KEY_PREFIX: 'matchmaking:'
+  REDIS_QUEUE_KEY: 'matchmaking:queue'

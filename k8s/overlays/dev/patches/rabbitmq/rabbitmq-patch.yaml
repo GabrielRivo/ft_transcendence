@@ -8,9 +8,6 @@ spec:
     spec:
       containers:
         - name: rabbitmq
-          env:
-            - name: RABBITMQ_NODENAME
-              value: rabbit@rabbitmq-0
           resources:
             requests:
               memory: '256Mi'

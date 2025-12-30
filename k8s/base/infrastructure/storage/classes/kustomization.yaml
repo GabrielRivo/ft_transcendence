@@ -1,0 +1,9 @@
+# Gestion des Classes de Stockage
+# Définit les types de disques disponibles (Drivers).
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - standard.yaml
+  - fast-ssd.yaml

@@ -1,3 +1,7 @@
+# Fichier de configuration de base Kustomize (Base Layer)
+# Ce fichier définit les ressources communes à tous les environnements.
+# Il sert de socle pour les overlays (dev, production, test) qui viendront surcharger ces configurations.
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -5,10 +9,18 @@ metadata:
   name: ft-transcendence-base
 
 resources:
+  # 1. Configuration globale
+  # Charge les ConfigMaps de base
   - configmaps/
-  - secrets/
-  # Vous pouvez importer ces dossiers individuellement dans vos overlays
-  # si vous souhaitez séparer le cycle de vie Infra vs Apps
+
+  # 2. Infrastructure partagée
+  # Contient les dépendances techniques : PostgreSQL, Redis, Ingress, etc.
+  # Ces ressources sont stables et changent moins souvent que le code applicatif.
   - infrastructure/
+
+  # 3. Microservices applicatifs
+  # Contient les déploiements de vos applications (Auth, Matchmaking, Frontend, etc.)
   - applications/
-# Note: Les namespaces sont créés dans chaque overlay pour éviter les conflits
+# Note importante sur l'isolation :
+# Aucun namespace n'est défini ici. Ils sont gérés spécifiquement dans chaque overlay
+# (ex: namespace.yaml dans overlays/dev) pour éviter les conflits et garantir l'isolation.

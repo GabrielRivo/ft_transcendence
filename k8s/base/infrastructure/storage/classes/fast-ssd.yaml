@@ -1,0 +1,26 @@
+# Classe de Stockage Haute Performance (SSD/NVMe)
+# Usage : Bases de données transactionnelles (Postgres), Caches persistants (Redis AOF).
+# Performance : Élevée (Faible latence, IOPS élevés).
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: fast-ssd
+  labels:
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: storage
+    storage-class: fast-ssd
+
+# Provisioner : Configuré en 'no-provisioner' par défaut.
+# À surcharger dans les overlays Cloud par des drivers performants (ex: io1, pd-ssd).
+provisioner: kubernetes.io/no-provisioner
+
+# Optimise le placement des Pods près de leurs données haute performance.
+volumeBindingMode: WaitForFirstConsumer
+
+# Permet d'agrandir le volume après sa création.
+allowVolumeExpansion: true
+
+parameters:
+  type: fast-ssd

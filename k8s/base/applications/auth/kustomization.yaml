@@ -1,7 +1,16 @@
+# Module du Service d'Authentification
+# Ce fichier devra référencer les ressources Kubernetes spécifiques à l'Auth :
+# - Deployment (le pod qui tourne le code NestJS)
+# - Service (l'accès réseau interne)
+# - (Optionnel) HorizontalPodAutoscaler, Ingress spécifique...
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 metadata:
   name: auth-base
 
-resources: []
+resources:
+  # TODO: Ajouter les fichiers de ressources une fois créés
+  # - deployment.yaml
+  # - service.yaml

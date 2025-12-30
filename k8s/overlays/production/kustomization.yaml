@@ -38,7 +38,7 @@ patches:
     path: patches/storage/storage-patch-matchmaking.yaml
   - target:
       kind: StatefulSet
-      name: redis
+      name: redis-master
     path: patches/redis/redis-patch.yaml
   - target:
       kind: Secret
@@ -54,42 +54,17 @@ patches:
     path: resources/rabbitmq-secret.yaml
   - target:
       kind: Deployment
-      name: nginx-ingress-controller
+      name: nginx-ingress-ingress-nginx-controller
     path: patches/nginx/nginx-deployment-patch.yaml
   - target:
       kind: Service
-      name: nginx-ingress-controller
+      name: nginx-ingress-ingress-nginx-controller
     path: patches/nginx/nginx-service-patch.yaml
   - target:
       kind: ConfigMap
-      name: nginx-config
+      name: nginx-ingress-ingress-nginx-controller
     path: patches/nginx/nginx-configmap-patch.yaml
   - target:
       kind: ClusterRoleBinding
-      name: nginx-ingress-controller
+      name: nginx-ingress-ingress-nginx-controller
     path: patches/nginx/nginx-rbac-patch.yaml
-
-configMapGenerator:
-  - name: redis-config
-    files:
-      - configs/redis.conf
-    options:
-      labels:
-        app: redis
-        app.kubernetes.io/name: ft-transcendence
-        app.kubernetes.io/part-of: ft-transcendence
-        app.kubernetes.io/component: redis
-      disableNameSuffixHash: false
-  - name: rabbitmq-config
-    files:
-      - configs/rabbitmq.conf
-      - configs/enabled_plugins
-    options:
-      labels:
-        app: rabbitmq
-        app.kubernetes.io/name: ft-transcendence
-        app.kubernetes.io/part-of: ft-transcendence
-        app.kubernetes.io/component: rabbitmq
-      disableNameSuffixHash: true
-
-secretGenerator: []

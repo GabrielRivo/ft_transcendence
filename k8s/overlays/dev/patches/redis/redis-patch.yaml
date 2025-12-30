@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: redis
+  name: redis-master
 spec:
   replicas: 1
   template:
@@ -17,7 +17,7 @@ spec:
               cpu: '200m'
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: redis-data
       spec:
         accessModes:
           - ReadWriteOnce

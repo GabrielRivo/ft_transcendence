@@ -1,3 +1,9 @@
+# Gestionnaire de Stockage (Storage Layer)
+# Point d'entrée principal pour la gestion du stockage.
+# Structure refactorisée en deux sous-modules :
+# - classes/ : Les types de disques (Infrastructure)
+# - claims/  : Les demandes d'espace (Application)
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -5,7 +11,5 @@ metadata:
   name: storage-base
 
 resources:
-  - storageclass-standard.yaml
-  - storageclass-fast-ssd.yaml
-  - pvc-auth-db.yaml
-  - pvc-matchmaking-db.yaml
+  - classes/
+  - claims/

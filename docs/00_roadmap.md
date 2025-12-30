@@ -143,10 +143,9 @@ Cette roadmap détaille la stratégie de migration de l'infrastructure Docker Co
 
 #### 2.2 Redis
 
-- [x] Créer les manifests de base pour Redis
-  - Deployment avec StatefulSet pour la persistance
-  - Service ClusterIP
-  - ConfigMap pour la configuration
+- [x] Migrer vers le Chart Helm Bitnami (`redis`)
+  - Utilisation de l'image officielle Docker Hub `redis:7.2`
+  - Configuration via `values.yaml` et Kustomize `helmCharts`
 - [x] Configurer la persistance avec PersistentVolume
 - [x] Ajouter les health checks (liveness/readiness probes)
 - [x] Créer les overlays pour dev/test/prod
@@ -156,18 +155,17 @@ Cette roadmap détaille la stratégie de migration de l'infrastructure Docker Co
 
 #### 2.3 RabbitMQ
 
-- [x] Créer les manifests de base pour RabbitMQ
-  - StatefulSet pour la persistance
-  - Service ClusterIP
-  - ConfigMap pour la configuration
+- [x] Migrer vers le Chart Helm Bitnami (`rabbitmq`)
+  - Utilisation de l'image officielle Docker Hub `rabbitmq:3.12-management`
+  - Configuration via `values.yaml` et Kustomize `helmCharts`
 - [x] Configurer la persistance et la haute disponibilité
-- [x] Ajouter les health checks
+- [x] Ajouter les health checks (custom probes avec `rabbitmq-diagnostics`)
 - [x] Créer les overlays pour dev/test/prod
 - [x] Documenter la configuration des exchanges et queues
 
 #### 2.4 Nginx Ingress Controller
 
-- [x] Déployer le Nginx Ingress Controller
+- [x] Migrer vers le Chart Helm Kubernetes (`ingress-nginx`)
 - [x] Configurer ModSecurity/WAF pour la sécurité
 - [x] Créer les ConfigMaps pour la configuration Nginx
 - [x] Configurer les annotations pour Cloudflare (production)

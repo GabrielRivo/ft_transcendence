@@ -5,9 +5,12 @@ metadata:
   name: rabbitmq-base
 
 resources:
-  - statefulset.yaml
-  - service.yaml
   - secret.yaml
-# Note: Le ConfigMap rabbitmq-config est généré dans les overlays pour chaque environnement
-# car chaque environnement a besoin de sa propre configuration RabbitMQ
-# Le ConfigMap inclut rabbitmq.conf et enabled_plugins
+
+helmCharts:
+  - name: rabbitmq
+    repo: https://charts.bitnami.com/bitnami
+    version: 12.0.0 # Vérifier version récente
+    releaseName: rabbitmq
+    namespace: ft-transcendence
+    valuesFile: values.yaml

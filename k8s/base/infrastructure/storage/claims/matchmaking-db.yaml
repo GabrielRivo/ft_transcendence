@@ -1,0 +1,25 @@
+# Demande de Volume Persistant (PVC) pour la DB de Matchmaking
+# Stocke l'historique des parties, les stats des joueurs et les logs de jeu.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: matchmaking-db-pvc
+  labels:
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: matchmaking
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # RWO (ReadWriteOnce) : Le volume est exclusif à une instance de la DB.
+  accessModes:
+    - ReadWriteOnce
+
+  resources:
+    requests:
+      # Taille initiale : 1 Go.
+      # Grâce à 'allowVolumeExpansion: true' dans la StorageClass, on pourra augmenter ceci plus tard sans downtime.
+      storage: 1Gi
+
+  # Note : Le choix entre HDD (standard) et SSD (fast-ssd) se fera dans les overlays
+  # en définissant le champ 'storageClassName'.

@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-ingress-controller
+  name: nginx-ingress-ingress-nginx-controller
 spec:
   replicas: 3
   template:
@@ -11,13 +11,13 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             - labelSelector:
                 matchExpressions:
-                  - key: app
+                  - key: app.kubernetes.io/name
                     operator: In
                     values:
-                      - nginx-ingress-controller
+                      - ingress-nginx
               topologyKey: kubernetes.io/hostname
       containers:
-        - name: nginx-ingress-controller
+        - name: controller
           resources:
             requests:
               memory: '512Mi'

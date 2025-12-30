@@ -1,0 +1,88 @@
+# Configuration RabbitMQ pour le Chart Bitnami
+# Ref: https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq
+
+fullnameOverride: rabbitmq
+
+global:
+  storageClass: 'local-path'
+
+image:
+  registry: docker.io
+  repository: rabbitmq
+  tag: '3.12-management'
+
+auth:
+  existingPasswordSecret: rabbitmq-secret
+  existingErlangSecret: rabbitmq-secret
+  username: user
+
+replicaCount: 1
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+
+persistence:
+  enabled: true
+  size: 8Gi
+
+configuration: |
+  log.console.level = info
+  listeners.tcp.default = 5672
+  management.tcp.port = 15672
+  management.tcp.ip = 0.0.0.0
+  vm_memory_high_watermark.relative = 0.4
+  heartbeat = 60
+  frame_max = 131072
+  channel_max = 2047
+
+plugins: 'rabbitmq_management rabbitmq_prometheus'
+
+service:
+  type: ClusterIP
+  ports:
+    amqp: 5672
+    dist: 25672
+    manager: 15672
+    metrics: 9419
+
+metrics:
+  enabled: true
+  plugins: 'rabbitmq_prometheus'
+
+podSecurityContext:
+  enabled: true
+  fsGroup: 1001
+
+containerSecurityContext:
+  enabled: true
+  runAsUser: 1001
+  runAsNonRoot: true
+
+# Health checks personnalisés pour l'image officielle RabbitMQ (sans curl)
+# L'image officielle n'a pas curl, donc on utilise rabbitmq-diagnostics à la place
+customLivenessProbe:
+  exec:
+    command:
+      - rabbitmq-diagnostics
+      - ping
+  initialDelaySeconds: 120
+  periodSeconds: 30
+  timeoutSeconds: 20
+  failureThreshold: 6
+  successThreshold: 1
+
+customReadinessProbe:
+  exec:
+    command:
+      - rabbitmq-diagnostics
+      - ping
+  initialDelaySeconds: 10
+  periodSeconds: 30
+  timeoutSeconds: 20
+  failureThreshold: 3
+  successThreshold: 1

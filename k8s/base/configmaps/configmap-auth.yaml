@@ -1,3 +1,9 @@
+# Configuration Publique du Service d'Authentification
+# Remplaçant du .env pour les variables NON SENSIBLES dans Kubernetes.
+#
+# ATTENTION : Ne JAMAIS mettre de mots de passe, clés privées ou tokens ici.
+# Utilisez des objets 'Secret' pour les données sensibles.
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,17 +14,33 @@ metadata:
     app.kubernetes.io/component: auth
     app.kubernetes.io/managed-by: kustomize
 data:
-  PORT: "3000"
-  JWT_EXPIRES_IN: "15m"
-  JWT_REFRESH_TOKEN_EXPIRES_IN: "7d"
-  JWT_REFRESH_TOKEN_ROTATION: "604800000"
-  CRYPTO_KEY_LENGTH: "64"
-  CRYPTO_SALT_LENGTH: "16"
-  REDIRECT_URI: "http://localhost:3000"
-  LOG_LEVEL: "info"
-  GITHUB_CLIENT_ID: ""
-  DISCORD_CLIENT_ID: ""
-  USER_SERVICE_URL: "http://auth-service:3000"
-  MATCHMAKING_SERVICE_URL: "http://matchmaking-service:3000"
-  RABBITMQ_EXCHANGE: "ft-transcendence"
-  RABBITMQ_QUEUE_AUTH: "auth-events"
+  # --- Configuration Serveur ---
+  PORT: '3000'
+  LOG_LEVEL: 'info'
+
+  # --- Configuration JWT (Tokens) ---
+  JWT_EXPIRES_IN: '15m'
+  JWT_REFRESH_TOKEN_EXPIRES_IN: '7d'
+  JWT_REFRESH_TOKEN_ROTATION: '604800000'
+
+  # --- Paramètres de Chiffrement ---
+  CRYPTO_KEY_LENGTH: '64'
+  CRYPTO_SALT_LENGTH: '16'
+
+  # --- URLs et Redirections ---
+  # En Prod, localhost sera remplacé par le vrai domaine via un overlay/patch
+  REDIRECT_URI: 'http://localhost:3000'
+
+  # --- Identifiants OAuth Publics (Client IDs uniquement) ---
+  # Les Client SECRETS doivent aller dans un objet k8s Secret !
+  GITHUB_CLIENT_ID: ''
+  DISCORD_CLIENT_ID: ''
+
+  # --- Communication Inter-Services ---
+  # URLs internes du cluster Kubernetes
+  USER_SERVICE_URL: 'http://auth-service:3000'
+  MATCHMAKING_SERVICE_URL: 'http://matchmaking-service:3000'
+
+  # --- Event Bus (RabbitMQ) ---
+  RABBITMQ_EXCHANGE: 'ft-transcendence'
+  RABBITMQ_QUEUE_AUTH: 'auth-events'

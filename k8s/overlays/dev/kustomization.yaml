@@ -1,3 +1,7 @@
+# Configuration de l'Environnement de DÉVELOPPEMENT
+# Cet overlay modifie la base pour créer un environnement léger, isolé et permissif.
+# Usage : kustomize build infrastructure/k8s/overlays/dev | kubectl apply -f -
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -13,6 +17,7 @@ resources:
   - ../../base
 
 patches:
+  # --- Adaptation des ConfigMaps (Variables d'env) ---
   - target:
       kind: ConfigMap
       name: auth-config
@@ -25,6 +30,8 @@ patches:
       kind: ConfigMap
       name: frontend-config
     path: patches/frontend/configmap-patch-frontend.yaml
+
+  # --- Adaptation du Stockage ---
   - target:
       kind: PersistentVolumeClaim
       name: auth-db-pvc
@@ -33,56 +40,38 @@ patches:
       kind: PersistentVolumeClaim
       name: matchmaking-db-pvc
     path: patches/storage/storage-patch-matchmaking.yaml
+
+  # --- Adaptation des Services Stateful (Redis/RabbitMQ) ---
+  # Note: Les noms sont ceux générés par Helm avec fullnameOverride
   - target:
       kind: StatefulSet
-      name: redis
+      name: redis-master
     path: patches/redis/redis-patch.yaml
+  - target:
+      kind: StatefulSet
+      name: rabbitmq
+    path: patches/rabbitmq/rabbitmq-patch.yaml
+
+  # Surcharge des Secrets (Placeholder -> Valeurs Dev explicites)
   - target:
       kind: Secret
       name: redis-secret
     path: resources/redis-secret.yaml
   - target:
-      kind: StatefulSet
-      name: rabbitmq
-    path: patches/rabbitmq/rabbitmq-patch.yaml
-  - target:
       kind: Secret
       name: rabbitmq-secret
     path: resources/rabbitmq-secret.yaml
+
+  # --- Adaptation Nginx ---
   - target:
       kind: Deployment
-      name: nginx-ingress-controller
+      name: nginx-ingress-ingress-nginx-controller
     path: patches/nginx/nginx-deployment-patch.yaml
   - target:
       kind: Service
-      name: nginx-ingress-controller
+      name: nginx-ingress-ingress-nginx-controller
     path: patches/nginx/nginx-service-patch.yaml
   - target:
       kind: ClusterRoleBinding
-      name: nginx-ingress-controller
+      name: nginx-ingress-ingress-nginx-controller
     path: patches/nginx/nginx-rbac-patch.yaml
-
-configMapGenerator:
-  - name: redis-config
-    files:
-      - configs/redis.conf
-    options:
-      labels:
-        app: redis
-        app.kubernetes.io/name: ft-transcendence
-        app.kubernetes.io/part-of: ft-transcendence
-        app.kubernetes.io/component: redis
-      disableNameSuffixHash: true
-  - name: rabbitmq-config
-    files:
-      - configs/rabbitmq.conf
-      - configs/enabled_plugins
-    options:
-      labels:
-        app: rabbitmq
-        app.kubernetes.io/name: ft-transcendence
-        app.kubernetes.io/part-of: ft-transcendence
-        app.kubernetes.io/component: rabbitmq
-      disableNameSuffixHash: true
-
-secretGenerator: []

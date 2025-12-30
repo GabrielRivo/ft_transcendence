@@ -1,3 +1,7 @@
+# Configuration du Frontend (Application React/Vite)
+# Variables exposées au navigateur (client-side).
+# Dans Vite, seules les variables préfixées par VITE_ sont accessibles.
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,11 +12,21 @@ metadata:
     app.kubernetes.io/component: frontend
     app.kubernetes.io/managed-by: kustomize
 data:
-  VITE_API_URL: "http://localhost:3000"
-  VITE_AUTH_SERVICE_URL: "http://localhost:3000"
-  VITE_MATCHMAKING_SERVICE_URL: "http://localhost:3001"
-  VITE_GAME_SERVICE_URL: "http://localhost:3002"
-  VITE_WS_URL: "ws://localhost:3001"
-  VITE_GITHUB_CLIENT_ID: ""
-  VITE_DISCORD_CLIENT_ID: ""
-  VITE_APP_ENV: "development"
+  # --- Environnement ---
+  VITE_APP_ENV: 'development'
+
+  # --- URLs des APIs Publiques ---
+  # Ces URLs doivent être accessibles depuis le navigateur de l'utilisateur.
+  # En dev local avec port-forwarding ou Docker, c'est souvent localhost.
+  # En production, ce sera le domaine public (ex: https://api.transcendence.com)
+  VITE_API_URL: 'http://localhost:3000'
+  VITE_AUTH_SERVICE_URL: 'http://localhost:3000'
+  VITE_MATCHMAKING_SERVICE_URL: 'http://localhost:3001'
+  VITE_GAME_SERVICE_URL: 'http://localhost:3002'
+
+  # WebSocket pour le temps réel
+  VITE_WS_URL: 'ws://localhost:3001'
+
+  # --- Configuration OAuth (Public) ---
+  VITE_GITHUB_CLIENT_ID: ''
+  VITE_DISCORD_CLIENT_ID: ''

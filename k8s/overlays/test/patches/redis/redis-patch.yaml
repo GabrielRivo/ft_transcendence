@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: redis
+  name: redis-master
 spec:
   replicas: 3
   template:
@@ -13,7 +13,7 @@ spec:
               podAffinityTerm:
                 labelSelector:
                   matchExpressions:
-                    - key: app
+                    - key: app.kubernetes.io/name
                       operator: In
                       values:
                         - redis
@@ -29,7 +29,7 @@ spec:
               cpu: '500m'
   volumeClaimTemplates:
     - metadata:
-        name: data
+        name: redis-data
       spec:
         accessModes:
           - ReadWriteOnce

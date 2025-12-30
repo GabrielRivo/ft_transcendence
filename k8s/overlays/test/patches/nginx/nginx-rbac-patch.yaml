@@ -1,8 +1,8 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: nginx-ingress-controller
+  name: nginx-ingress-ingress-nginx-controller
 subjects:
   - kind: ServiceAccount
-    name: nginx-ingress-controller
+    name: nginx-ingress-ingress-nginx-controller
     namespace: ft-transcendence-test

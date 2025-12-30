@@ -1,3 +1,7 @@
+# Gestionnaire de l'Infrastructure Technique (Base Layer)
+# Ce fichier rassemble tous les services tiers et outils techniques nécessaires au fonctionnement du système.
+# Contrairement aux "applications" (votre code), ces services sont souvent des images officielles (Redis, Postgres, etc.)
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -5,10 +9,30 @@ metadata:
   name: infrastructure-base
 
 resources:
+  # --- Sécurité & Secrets ---
+  # Hashicorp Vault pour la gestion centralisée et sécurisée des secrets
   - vault/
+
+  # --- Routing & Entrée ---
+  # Contrôleur Ingress (Nginx) pour gérer le trafic entrant HTTP/HTTPS
   - nginx/
+
+  # --- Message Broker ---
+  # RabbitMQ pour la communication asynchrone entre microservices (Events)
   - rabbitmq/
+
+  # --- Cache & Performance ---
+  # Redis pour le cache, les sessions et les files d'attente rapides (Matchmaking)
   - redis/
+
+  # --- Persistance de Données ---
+  # Bases de données SQL (PostgreSQL) et configurations de stockage (PVC, StorageClass)
   - storage/
+
+  # --- Logging Centralisé (Stack ELK) ---
+  # Elasticsearch, Logstash, Kibana pour l'agrégation et l'analyse des logs
   - elk/
+
+  # --- Monitoring & Alerting ---
+  # Prometheus (métriques) et Grafana (dashboards) pour surveiller la santé du cluster
   - monitoring/

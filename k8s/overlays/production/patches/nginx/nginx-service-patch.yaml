@@ -1,19 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-ingress-controller
+  name: nginx-ingress-ingress-nginx-controller
   annotations:
-    # Annotations Cloudflare pour la production
-    # Note: Ces annotations sont utilisées si Cloudflare est configuré en proxy mode
-    # Pour utiliser Cloudflare en mode proxy, configurer le DNS pour pointer vers l'IP du LoadBalancer
-    # et activer le proxy dans Cloudflare Dashboard
-    # Les headers Cloudflare seront automatiquement ajoutés par Cloudflare
-    # Pour la protection DDoS et WAF, utiliser les règles Cloudflare Dashboard
     service.beta.kubernetes.io/external-traffic: OnlyLocal
-    # MetalLB annotations (si utilisé)
     metallb.universe.tf/address-pool: production-pool
 spec:
   type: LoadBalancer
-  # En production, LoadBalancer avec protection Cloudflare
   externalTrafficPolicy: Local
-  # externalTrafficPolicy: Local préserve l'IP source du client

@@ -5,8 +5,12 @@ metadata:
   name: redis-base
 
 resources:
-  - statefulset.yaml
-  - service.yaml
   - secret.yaml
-# Note: Le ConfigMap redis-config est généré dans les overlays pour chaque environnement
-# car chaque environnement a besoin de sa propre configuration Redis
+
+helmCharts:
+  - name: redis
+    repo: https://charts.bitnami.com/bitnami
+    version: 18.0.1 # Vérifier version récente compatible
+    releaseName: redis
+    namespace: ft-transcendence # Sera surchargé par l'overlay
+    valuesFile: values.yaml

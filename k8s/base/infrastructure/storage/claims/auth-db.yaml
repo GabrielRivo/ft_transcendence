@@ -1,0 +1,30 @@
+# Demande de Volume Persistant (PVC) pour la DB d'Authentification
+# Ce fichier demande à Kubernetes de provisionner un disque pour stocker les données utilisateurs.
+# Les données survivront ainsi au redémarrage ou à la destruction du Pod Postgres.
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: auth-db-pvc
+  labels:
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: auth
+    app.kubernetes.io/managed-by: kustomize
+spec:
+  # Mode d'accès : ReadWriteOnce
+  # Le volume peut être monté en lecture-écriture par un seul noeud.
+  # C'est le mode standard pour une base de données classique (non distribuée).
+  accessModes:
+    - ReadWriteOnce
+
+  # Ressources demandées
+  # 1Gi est une valeur par défaut minimale pour le développement.
+  # Pour la prod, cette valeur pourra être augmentée via un patch dans l'overlay.
+  resources:
+    requests:
+      storage: 1Gi
+
+  # Note sur le StorageClass :
+  # Le champ 'storageClassName' est délibérément omis ici ou laissé vide.
+  # Il sera injecté par l'overlay (dev -> standard, prod -> fast-ssd) ou prendra la valeur par défaut du cluster.

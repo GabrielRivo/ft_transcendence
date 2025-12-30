@@ -1,0 +1,9 @@
+# Gestion des Demandes de Volume (PVC)
+# Définit les réservations d'espace disque pour les applications.
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - auth-db.yaml
+  - matchmaking-db.yaml

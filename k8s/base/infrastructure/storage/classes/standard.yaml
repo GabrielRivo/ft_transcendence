@@ -1,0 +1,28 @@
+# Classe de Stockage Standard
+# Usage : Données générales, Logs, Backups, Fichiers statiques.
+# Performance : Moyenne (équivalent HDD ou SSD standard).
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: standard
+  labels:
+    app.kubernetes.io/name: ft-transcendence
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/component: storage
+    storage-class: standard
+
+# Provisioner : 'no-provisioner' est utilisé ici pour la base locale/générique.
+# Dans un environnement Cloud (AWS/GCP), ceci sera remplacé par le driver du provider (ex: gp2, pd-standard).
+# En local, cela signifie souvent qu'on utilise des volumes locaux ou statiques.
+provisioner: kubernetes.io/no-provisioner
+
+# Attend qu'un Pod utilise le volume avant de le créer/binder.
+# Cela permet au scheduler de placer le Pod et le Volume dans la même zone de disponibilité.
+volumeBindingMode: WaitForFirstConsumer
+
+# Permet d'agrandir le volume après sa création sans perte de données.
+allowVolumeExpansion: true
+
+parameters:
+  type: standard

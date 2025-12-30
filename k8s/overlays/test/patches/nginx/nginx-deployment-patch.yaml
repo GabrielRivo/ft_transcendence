@@ -1,13 +1,13 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nginx-ingress-controller
+  name: nginx-ingress-ingress-nginx-controller
 spec:
   replicas: 2
   template:
     spec:
       containers:
-        - name: nginx-ingress-controller
+        - name: controller
           resources:
             requests:
               memory: '256Mi'

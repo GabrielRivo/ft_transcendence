@@ -1,3 +1,7 @@
+# Configuration Publique de l'Infrastructure Partagée
+# Définit les paramètres de connexion aux services techniques (DB, Cache, Message Broker).
+# Note : Les mots de passe (DB_PASSWORD, RABBITMQ_PASSWORD) sont dans des Secrets.
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,20 +12,37 @@ metadata:
     app.kubernetes.io/component: infrastructure
     app.kubernetes.io/managed-by: kustomize
 data:
-  RABBITMQ_DEFAULT_USER: "guest"
-  RABBITMQ_DEFAULT_VHOST: "/"
-  RABBITMQ_DEFAULT_EXCHANGE: "ft-transcendence"
-  REDIS_MAX_CONNECTIONS: "100"
-  REDIS_CONNECT_TIMEOUT: "5000"
-  REDIS_COMMAND_TIMEOUT: "5000"
-  ELASTICSEARCH_HOST: "elasticsearch"
-  ELASTICSEARCH_PORT: "9200"
-  ELASTICSEARCH_INDEX_PREFIX: "ft-transcendence"
-  LOGSTASH_HOST: "logstash"
-  LOGSTASH_PORT: "5044"
-  KIBANA_HOST: "kibana"
-  KIBANA_PORT: "5601"
-  PROMETHEUS_HOST: "prometheus"
-  PROMETHEUS_PORT: "9090"
-  GRAFANA_HOST: "grafana"
-  GRAFANA_PORT: "3000"
+  # --- Message Broker (RabbitMQ) ---
+  # Paramètres de base pour les échanges de messages
+  RABBITMQ_DEFAULT_USER: 'guest'
+  RABBITMQ_DEFAULT_VHOST: '/'
+  RABBITMQ_DEFAULT_EXCHANGE: 'ft-transcendence'
+
+  # --- Cache & Store (Redis) ---
+  # Configuration des timeouts et limites de connexion
+  REDIS_MAX_CONNECTIONS: '100'
+  REDIS_CONNECT_TIMEOUT: '5000'
+  REDIS_COMMAND_TIMEOUT: '5000'
+
+  # --- Logging & Observabilité (Stack ELK) ---
+  # Elasticsearch : Moteur de recherche et d'indexation des logs
+  ELASTICSEARCH_HOST: 'elasticsearch'
+  ELASTICSEARCH_PORT: '9200'
+  ELASTICSEARCH_INDEX_PREFIX: 'ft-transcendence'
+
+  # Logstash : Pipeline de traitement des logs
+  LOGSTASH_HOST: 'logstash'
+  LOGSTASH_PORT: '5044'
+
+  # Kibana : Visualisation des logs
+  KIBANA_HOST: 'kibana'
+  KIBANA_PORT: '5601'
+
+  # --- Monitoring (Prometheus & Grafana) ---
+  # Prometheus : Collecte des métriques
+  PROMETHEUS_HOST: 'prometheus'
+  PROMETHEUS_PORT: '9090'
+
+  # Grafana : Tableaux de bord de monitoring
+  GRAFANA_HOST: 'grafana'
+  GRAFANA_PORT: '3000'

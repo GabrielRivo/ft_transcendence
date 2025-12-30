@@ -1,0 +1,9 @@
+# Helm Charts téléchargés localement
+# Ces dossiers sont générés automatiquement par Kustomize lors de la résolution des Helm charts
+# Ils ne doivent pas être versionnés car ils sont régénérés à chaque build
+**/charts/
+**/charts/**/*
+
+# Fichiers Helm générés
+Chart.lock
+.helm/

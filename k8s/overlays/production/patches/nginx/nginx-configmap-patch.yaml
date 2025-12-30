@@ -1,23 +1,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: nginx-config
+  name: nginx-ingress-ingress-nginx-controller
 data:
-  # Configuration renforcée pour la production
   enable-ssl-passthrough: 'false'
   enable-vts-status: 'true'
   use-forwarded-headers: 'true'
   compute-full-forwarded-for: 'true'
   use-proxy-protocol: 'true'
-  # Rate limiting renforcé pour la production
   limit-conn-zone-variable: '$binary_remote_addr'
   limit-req-zone-variable: '$binary_remote_addr'
-  # Headers de sécurité (via ConfigMap séparé)
-  # Note: Les headers de sécurité sont configurés via le ConfigMap nginx-headers
-  # Cloudflare Real IP
-  # Si Cloudflare est utilisé en proxy mode, utiliser les IPs Cloudflare pour déterminer l'IP réelle
-  # Voir: https://www.cloudflare.com/ips/
-  # Les headers Cloudflare seront automatiquement ajoutés par Cloudflare en proxy mode:
-  # - CF-Connecting-IP: IP réelle du client
-  # - CF-Ray: ID de requête Cloudflare
-  # - CF-Visitor: Protocole utilisé (http/https)

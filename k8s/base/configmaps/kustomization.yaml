@@ -1,3 +1,7 @@
+# Gestionnaire des ConfigMaps de base
+# Ce fichier recense toutes les ConfigMaps contenant les configurations communes/par défaut.
+# Ces valeurs seront utilisées si elles ne sont pas surchargées dans les overlays (dev/prod).
+
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
@@ -5,7 +9,14 @@ metadata:
   name: configmaps-base
 
 resources:
+  # Configuration du service d'Authentification (paramètres JWT, expiration, etc.)
   - configmap-auth.yaml
+
+  # Configuration du service de Matchmaking (règles de jeu, timeouts)
   - configmap-matchmaking.yaml
+
+  # Configuration du Frontend (variables exposées au client, URLs API publiques)
   - configmap-frontend.yaml
+
+  # Configuration globale de l'Infrastructure (hosts DB partagés, Redis commun)
   - configmap-infrastructure.yaml

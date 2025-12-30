@@ -1,0 +1,65 @@
+# Configuration Redis pour le Chart Bitnami
+# Ref: https://github.com/bitnami/charts/tree/main/bitnami/redis
+
+fullnameOverride: redis
+
+global:
+  redis:
+    password: '' # Sera injecté via secret externe 'redis-secret'
+
+image:
+  registry: docker.io
+  repository: redis
+  tag: '7.2'
+
+architecture: standalone
+
+auth:
+  enabled: true
+  existingSecret: redis-secret
+  existingSecretPasswordKey: password
+
+master:
+  persistence:
+    enabled: true
+    size: 5Gi # Valeur par défaut, surchargée par overlay
+
+  resources:
+    requests:
+      cpu: 250m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Configuration Redis (redis.conf)
+  configuration: |
+    save 900 1
+    save 300 10
+    save 60 10000
+    dbfilename dump.rdb
+    dir /data
+    appendonly yes
+    appendfilename "appendonly.aof"
+    appendfsync everysec
+    maxmemory 256mb
+    maxmemory-policy allkeys-lru
+    protected-mode yes
+    # Note: rename-command syntax changed in Redis 7.2+
+    # To disable commands, comment them out or use ACL instead
+    loglevel notice
+
+  podSecurityContext:
+    fsGroup: 1001
+  containerSecurityContext:
+    runAsUser: 1001
+    runAsNonRoot: true
+
+replica:
+  replicaCount: 0
+
+sentinel:
+  enabled: false
+
+metrics:
+  enabled: false

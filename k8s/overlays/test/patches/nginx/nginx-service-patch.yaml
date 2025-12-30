@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nginx-ingress-controller
+  name: nginx-ingress-ingress-nginx-controller
 spec:
-  type: LoadBalancer
-  # En test, on utilise LoadBalancer mais sans exposition publique
+  type: ClusterIP
+  # En test, on utilise ClusterIP, l'exposition se fait via Ingress
