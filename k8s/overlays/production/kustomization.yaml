@@ -1,0 +1,22 @@
+# ------------------------------------------------------------------------------
+# Kustomize Overlay: Production Environment
+# ------------------------------------------------------------------------------
+# This file customizes the "base" configuration specifically for the 'production' environment.
+#
+# Purpose:
+# - Inherits all resources from ../../base.
+# - Applies specific labels to identify resources belonging to the 'production' environment.
+# - Critical for applying production-grade configurations (e.g., higher replicas, stricter security)
+#   via patches in the future.
+# ------------------------------------------------------------------------------
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+# Apply 'environment: production' label to all resources.
+labels:
+  - pairs:
+      environment: production

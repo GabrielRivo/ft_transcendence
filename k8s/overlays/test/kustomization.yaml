@@ -1,0 +1,21 @@
+# ------------------------------------------------------------------------------
+# Kustomize Overlay: Test Environment
+# ------------------------------------------------------------------------------
+# This file customizes the "base" configuration specifically for the 'test' environment.
+#
+# Purpose:
+# - Inherits all resources from ../../base.
+# - Applies specific labels to identify resources belonging to the 'test' environment.
+# - Used for integration testing (CI/CD pipelines).
+# ------------------------------------------------------------------------------
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+# Apply 'environment: test' label to all resources.
+labels:
+  - pairs:
+      environment: test
