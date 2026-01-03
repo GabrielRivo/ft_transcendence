@@ -1,0 +1,38 @@
+# ------------------------------------------------------------------------------
+# Kubernetes StorageClass Definition for ft_transcendence
+# ------------------------------------------------------------------------------
+# This file defines a custom StorageClass for handling persistent volumes in the
+# K3s cluster. It relies on the default 'local-path' provisioner but applies
+# specific policies for data safety and scheduling optimization.
+# ------------------------------------------------------------------------------
+
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: ft-local-path
+  annotations:
+    # We do not want this to be the default class automatically.
+    # Users/Manifests must explicitly request 'ft-local-path'.
+    storageclass.kubernetes.io/is-default-class: "false"
+    description: "Custom local storage with Retain policy for data safety"
+
+# Use the standard K3s local-path provisioner.
+# This maps PVCs to host directories (usually under /var/lib/rancher/k3s/storage).
+provisioner: rancher.io/local-path
+
+# ReclaimPolicy: Retain
+# ---------------------
+# Critical for databases (Postgres/SQLite) and Vault.
+# When a PersistentVolumeClaim (PVC) is deleted, the underlying PersistentVolume (PV)
+# and the actual data on disk are KEPT, not deleted.
+# This prevents accidental data loss during namespace cleanup or PVC recreation.
+# An administrator must manually clean up the PV/Data if it is truly no longer needed.
+reclaimPolicy: Retain
+
+# VolumeBindingMode: WaitForFirstConsumer
+# ---------------------------------------
+# Delays the binding and provisioning of a PersistentVolume until a Pod using
+# the PVC is created. This ensures that the PV is provisioned on the same node
+# where the Pod is scheduled (essential for local storage in multi-node clusters,
+# and good practice even in single-node to avoid binding race conditions).
+volumeBindingMode: WaitForFirstConsumer
