@@ -1,0 +1,115 @@
+# Vault Helm Chart Configuration
+# Context: ft-transcendence DevOps Module
+# Purpose: Define values for the official HashiCorp Vault Helm chart
+# Usage: helm upgrade --install vault hashicorp/vault -f vault.yaml
+
+global:
+  # Enable Vault deployment
+  enabled: true
+  # Disable TLS for the initial setup to simplify the development environment.
+  # In a strict production environment, this should be handled via Ingress termination or Service Mesh.
+  tlsDisable: true
+
+# Injector Agent
+# Description: The agent injector allows injecting secrets into pods via annotations.
+# Decision: Disabled because we plan to use External Secrets Operator (ESO) for secret management later in the project.
+injector:
+  enabled: false
+
+server:
+  # Image Configuration
+  image:
+    repository: hashicorp/vault
+    tag: "1.15.2" # Pinned version for reproducibility
+
+  # Resource Management
+  # Description: Define requests and limits to ensure Vault has guaranteed resources
+  # without starving other components in the cluster.
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 512Mi
+      cpu: 500m
+
+  # Standalone Mode
+  # Description: Run Vault as a single pod.
+  # Justification: Sufficient for development and the scale of ft-transcendence.
+  # Avoids the complexity of HA (High Availability) and Consul/Raft setup for now.
+  standalone:
+    enabled: true
+    config: |
+      ui = true
+      disable_mlock = true
+
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+        # In standalone, we store data locally in the file backend
+      }
+
+      storage "file" {
+        path = "/vault/data"
+      }
+
+  # StatefulSet Configuration
+  # Description: The Vault server runs as a StatefulSet.
+  statefulSet:
+    # Security Context
+    # Description: Comply with 'restricted' Pod Security Standards (PSS).
+    # Note: The Vault Helm chart requires security contexts under statefulSet.securityContext.
+    securityContext:
+      pod:
+        runAsNonRoot: true
+        runAsUser: 100
+        runAsGroup: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      container:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        capabilities:
+          drop:
+            - ALL
+
+  # Volume Management
+  # Description: Since we use readOnlyRootFilesystem: true, we must provide writable storage
+  # for temporary files needed by Vault startup scripts.
+  # Note: Use 'volumes' and 'volumeMounts' (not 'extraVolumes' which is deprecated).
+  volumes:
+    - name: tmp-storage
+      emptyDir: {}
+
+  volumeMounts:
+    - name: tmp-storage
+      mountPath: /tmp
+
+  # Data Storage (PVC)
+  # Description: Persistent Volume Claim to ensure Vault data (encrypted secrets, policies)
+  # survives pod restarts or rescheduling.
+  dataStorage:
+    enabled: true
+    size: 1Gi
+    mountPath: "/vault/data"
+    # Use our custom storage class 'ft-local-path' defined in k8s/base/storage-class.yaml
+    # Critical Benefit: reclaimingPolicy is 'Retain', preventing accidental data loss if PVC is deleted.
+    storageClass: "ft-local-path"
+
+  # Service Configuration
+  # Description: Expose Vault internally in the cluster.
+  service:
+    enabled: true
+    type: ClusterIP
+    port: 8200
+    targetPort: 8200
+
+# Web UI
+# Description: Enable the Vault Web UI for easier debugging and management during development.
+ui:
+  enabled: true
+  serviceType: "LoadBalancer" # Allows accessing the UI externally (handled by Klipper in K3s)
+  serviceNodePort: null
+  externalPort: 8200

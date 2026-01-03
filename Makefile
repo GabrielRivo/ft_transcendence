@@ -225,8 +225,9 @@ base-up: _check-prerequisites
 # Target: vault-up
 # Description: Installs Vault using the official HashiCorp Helm chart.
 # Deploys into the 'vault' namespace.
+# Depends on base-up to ensure namespace and storage classes exist.
 .PHONY: vault-up
-vault-up: _add-helm-repos
+vault-up: base-up _add-helm-repos
 	@echo -e "$(INFO) Installing Vault in namespace $(BOLD)$(NS_VAULT)$(RESET)..."
 	@helm upgrade --install vault hashicorp/vault \
 		--namespace $(NS_VAULT) \
@@ -250,7 +251,7 @@ vault-down:
 # Description: Installs the ELK Stack (Elasticsearch, Logstash, Kibana).
 # Deploys into the 'logging' namespace.
 .PHONY: elk-up
-elk-up: _add-helm-repos
+elk-up: base-up _add-helm-repos
 	@echo -e "$(INFO) Installing Elasticsearch in namespace $(BOLD)$(NS_LOGGING)$(RESET)..."
 	@helm upgrade --install elasticsearch elastic/elasticsearch \
 		--namespace $(NS_LOGGING) \
@@ -288,7 +289,7 @@ elk-down:
 # Description: Installs Prometheus and Grafana via kube-prometheus-stack.
 # Deploys into the 'monitoring' namespace.
 .PHONY: monitoring-up
-monitoring-up: _add-helm-repos
+monitoring-up: base-up _add-helm-repos
 	@echo -e "$(INFO) Installing kube-prometheus-stack in namespace $(BOLD)$(NS_MONITORING)$(RESET)..."
 	@helm upgrade --install prometheus prometheus-community/kube-prometheus-stack \
 		--namespace $(NS_MONITORING) \
@@ -312,7 +313,7 @@ monitoring-down:
 # Description: Installs infrastructure services (Redis, RabbitMQ).
 # Deploys into the 'production' namespace.
 .PHONY: infra-up
-infra-up: _add-helm-repos
+infra-up: base-up _add-helm-repos
 	@echo -e "$(INFO) Installing Redis in namespace $(BOLD)$(NS_PRODUCTION)$(RESET)..."
 	@helm upgrade --install redis bitnami/redis \
 		--namespace $(NS_PRODUCTION) \
