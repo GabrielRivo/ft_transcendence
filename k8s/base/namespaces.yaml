@@ -1,0 +1,137 @@
+# ------------------------------------------------------------------------------
+# Kubernetes Namespaces Definition for ft_transcendence
+# ------------------------------------------------------------------------------
+# This file defines the 7 base namespaces required for the project structure.
+# It includes standard Kubernetes labels and Pod Security Standards enforcement.
+# ------------------------------------------------------------------------------
+
+# --- Application Environments ---
+
+# 1. Development Namespace
+# Used for local development and feature testing.
+# Security: Baseline (allows standard container capabilities).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dev
+  labels:
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/managed-by: kustomize
+    environment: dev
+    # Pod Security Standards
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Development environment for local testing and features"
+
+---
+# 2. Test Namespace
+# Used for integration testing and QA.
+# Security: Baseline.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: test
+  labels:
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/managed-by: kustomize
+    environment: test
+    # Pod Security Standards
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Integration testing and QA environment"
+
+---
+# 3. Production Namespace
+# Used for live user traffic.
+# Security: Restricted (highest security level, requires hardening).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production
+  labels:
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/managed-by: kustomize
+    environment: production
+    # Pod Security Standards
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Production environment for live applications"
+
+---
+# --- Infrastructure Namespaces ---
+
+# 4. Vault Namespace
+# Hosts HashiCorp Vault for secret management.
+# Security: Baseline (Vault may need specific capabilities).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: vault
+  labels:
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/managed-by: kustomize
+    environment: infra
+    # Pod Security Standards
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "HashiCorp Vault for secrets management"
+
+---
+# 5. Logging Namespace
+# Hosts the ELK Stack (Elasticsearch, Logstash, Kibana).
+# Security: Baseline (ES often requires sysctl or fsgroup modifications).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: logging
+  labels:
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/managed-by: kustomize
+    environment: infra
+    # Pod Security Standards
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Logging stack (ELK) for centralized logs"
+
+---
+# 6. Monitoring Namespace
+# Hosts Prometheus and Grafana.
+# Security: Baseline (Monitoring agents often need host access).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+  labels:
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/managed-by: kustomize
+    environment: infra
+    # Pod Security Standards
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Monitoring stack (Prometheus, Grafana)"
+
+---
+# 7. Ingress Namespace
+# Hosts the Ingress Controller (nginx).
+# Security: Privileged (or Baseline depending on config) - defaulting to Baseline with warnings,
+# but Ingress Controllers often need specific permissions handled by their Helm chart.
+# We set Baseline here as a safe default for the namespace policy.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+  labels:
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/managed-by: kustomize
+    environment: infra
+    # Pod Security Standards
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted
+  annotations:
+    description: "Ingress Controller for external access management"
