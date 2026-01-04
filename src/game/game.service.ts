@@ -20,14 +20,22 @@ export class GameService {
         }
         else {
             this.queue.push(client);
+			//attend 15 sec, si le joueur est toujours dans la queue, le retirer
+			setTimeout(() => {
+				if (this.queue.includes(client)) {
+					this.queue = this.queue.filter(c => c !== client);
+					console.log(`Client ${client.id} removed from queue due to timeout. Queue length: ${this.queue.length}`);
+					client.emit("queueTimeout", { message: "You have been removed from the queue due to inactivity." });
+				}
+            }, 15000);
             console.log(`Client ${client.id} added to queue. Queue length: ${this.queue.length}`);
             if (this.queue.length >= 2) {
                 const player1 = this.queue.shift()!;
                 const player2 = this.queue.shift()!;
                 const gameId = `game-${this.gameCount++}`;
                 this.createGame(gameId, player1, player2);
-                player1.emit("gameCreated", { gameId, message: `Game ${gameId} created successfully! You are Player 1.` });
-                player2.emit("gameCreated", { gameId, message: `Game ${gameId} created successfully! You are Player 2.` });
+                player1.emit("gameJoined", { gameId, message: `Game ${gameId} created successfully! You are Player 1.` });
+                player2.emit("gameJoined", { gameId, message: `Game ${gameId} created successfully! You are Player 2.` });
             }
         }
     }
