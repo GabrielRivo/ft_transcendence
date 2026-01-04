@@ -44,8 +44,11 @@ lerna-debug.log*
 /.idea
 /.nova
 !/.vscode
+/.vscodeignore
 /.zed
 /.cursor
+/.cursorrules
+
 
 # temp
 .temp
