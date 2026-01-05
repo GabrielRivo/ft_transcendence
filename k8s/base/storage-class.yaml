@@ -29,7 +29,10 @@ provisioner: rancher.io/local-path
 # An administrator must manually clean up the PV/Data if it is truly no longer needed.
 reclaimPolicy: Retain
 
-# VolumeBindingMode: Immediate
+# VolumeBindingMode: WaitForFirstConsumer
 # ---------------------------------------
-# Changed from WaitForFirstConsumer to Immediate to fix pending PVC issues in local env.
-volumeBindingMode: Immediate
+# Delays the binding and provisioning of a PersistentVolume until a Pod using
+# the PVC is created. This ensures that the PV is provisioned on the same node
+# where the Pod is scheduled (essential for local storage in multi-node clusters,
+# and good practice even in single-node to avoid binding race conditions).
+volumeBindingMode: WaitForFirstConsumer

@@ -177,8 +177,9 @@ _clean-base:
 # Target: up
 # Description: Deploys the entire infrastructure stack in the correct order.
 # Order: Prerequisites -> Base -> Vault -> Infrastructure -> ELK -> Monitoring
+# Note: Now includes Vault Initialization and Secrets Population
 .PHONY: up
-up: _check-prerequisites base-up vault-up infra-up elk-up monitoring-up
+up: _check-prerequisites base-up vault-up vault-init vault-secrets infra-up elk-up monitoring-up
 	@echo -e "\n$(SUCCESS) $(BOLD)Infrastructure successfully deployed!$(RESET)"
 	@echo -e "You can check the status with: $(BOLD)make status$(RESET)"
 
@@ -193,8 +194,14 @@ down: monitoring-down elk-down infra-down vault-down
 # Target: clean
 # Description: Completely destroys the infrastructure, INCLUDING DATA.
 # Calls 'down' first, then deletes PVCs and base resources (namespaces).
+# It also removes the local .vault-keys file to ensure a fresh start next time.
+# WARNING: Also deletes 'Released' PersistentVolumes (orphan data from Retain policy).
 .PHONY: clean
 clean: down _clean-pvcs _clean-base
+	@echo -e "$(WARN) removing local vault keys..."
+	@rm -f $(INFRASTRUCTURE_DIR)/../.vault-keys
+	@echo -e "$(WARN) Cleaning up released PersistentVolumes..."
+	@kubectl get pv | grep Released | awk '{print $$1}' | xargs -r kubectl delete pv || true
 	@echo -e "\n$(SUCCESS) $(BOLD)Infrastructure completely cleaned (Data destroyed).$(RESET)"
 
 # ==============================================================================
@@ -234,6 +241,55 @@ vault-up: base-up _add-helm-repos
 		--values $(HELM_VALUES_DIR)/vault.yaml \
 		--wait --timeout $(TIMEOUT_READY)
 	@echo -e "$(SUCCESS) Vault installed."
+
+# Target: vault-init
+# Description: Initializes Vault, unseals it, enables KV v2, applies policies and K8s auth.
+# Uses the setup-vault.sh script.
+.PHONY: vault-init
+vault-init:
+	@echo -e "$(INFO) Initializing and Configuring Vault..."
+	@$(SCRIPTS_DIR)/setup-vault.sh
+	@echo -e "$(SUCCESS) Vault initialized and configured."
+
+# Target: vault-secrets
+# Description: Populates Vault with initial random secrets for microservices.
+# Uses the init-secrets.sh script.
+.PHONY: vault-secrets
+vault-secrets:
+	@echo -e "$(INFO) Populating initial secrets..."
+	@$(SCRIPTS_DIR)/init-secrets.sh
+	@echo -e "$(SUCCESS) Secrets populated."
+
+# Target: vault-unseal
+# Description: Helper target to manually unseal Vault if needed (e.g. after restart).
+# In practice, vault-init handles this idempotently, but this is a shortcut.
+.PHONY: vault-unseal
+vault-unseal:
+	@echo -e "$(INFO) Attempting to unseal Vault..."
+	@# Re-run setup script which handles unseal check
+	@$(SCRIPTS_DIR)/setup-vault.sh
+	@echo -e "$(SUCCESS) Unseal check complete."
+
+# Target: vault-policies
+# Description: Reloads Vault policies from the policies directory.
+# Useful when developing new policies without full init.
+.PHONY: vault-policies
+vault-policies:
+	@echo -e "$(INFO) Reloading Vault policies..."
+	@# We can reuse setup-vault.sh which applies policies every run
+	@$(SCRIPTS_DIR)/setup-vault.sh
+	@echo -e "$(SUCCESS) Policies reloaded."
+
+# Target: vault-status
+# Description: Displays detailed Vault status.
+.PHONY: vault-status
+vault-status:
+	@echo -e "$(INFO) Vault Status:"
+	@kubectl exec -n $(NS_VAULT) vault-0 -- vault status || true
+	@echo -e "\n$(INFO) Auth Methods:"
+	@kubectl exec -n $(NS_VAULT) vault-0 -- vault auth list || true
+	@echo -e "\n$(INFO) Secrets Engines:"
+	@kubectl exec -n $(NS_VAULT) vault-0 -- vault secrets list || true
 
 # Target: vault-down
 # Description: Uninstalls Vault and removes related resources.
@@ -405,6 +461,9 @@ help:
 	@echo -e "\n$(BOLD)Component Targets:$(RESET)"
 	@echo -e "  $(CYAN)base-up$(RESET)       Apply base manifests"
 	@echo -e "  $(CYAN)vault-up/down$(RESET) Manage Vault"
+	@echo -e "  $(CYAN)vault-init$(RESET)    Initialize and Unseal Vault"
+	@echo -e "  $(CYAN)vault-secrets$(RESET) Populate initial secrets"
+	@echo -e "  $(CYAN)vault-status$(RESET)  Show detailed Vault status"
 	@echo -e "  $(CYAN)elk-up/down$(RESET)   Manage ELK Stack"
 	@echo -e "  $(CYAN)infra-up/down$(RESET) Manage Redis/RabbitMQ"
 	@echo -e "  $(CYAN)monitoring-up/down$(RESET) Manage Monitoring"
