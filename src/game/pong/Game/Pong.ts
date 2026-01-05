@@ -10,6 +10,7 @@ import Ball from "../Ball.js";
 import Wall from "../Wall.js";
 import InputManager from "../InputManager.js";
 import Game from "./Game.js";
+import { dir } from "console";
 
 class Pong extends Game {
     private gameService : GameService;
@@ -145,7 +146,26 @@ class Pong extends Game {
             this.services.Engine!.runRenderLoop(() => {
                 this.player1!.update();
                 this.player2!.update();
+				this.player1!.paddle.model.computeWorldMatrix(true);
+    			this.player2!.paddle.model.computeWorldMatrix(true);
+
                 this.ball!.update();
+				this.nsp!.to(this.id).emit('gameUpdate', {
+					p1: {
+						pos: this.player1!.paddle.getPosition(),
+						dir: this.player1!.paddle.getDirection(),
+						score: this.player1!.score
+					},
+					p2: {
+						pos: this.player2!.paddle.getPosition(),
+						dir: this.player2!.paddle.getDirection(),
+						score: this.player2!.score
+					},
+					ball: {
+						pos: this.ball!.getPosition(),
+						dir: this.ball!.getDirection()
+					}
+				});
             });
         }
     }
@@ -160,6 +180,12 @@ class Pong extends Game {
     }
 
     dispose(): void {
+		this.disconnectTimeout.forEach((timeout) => {
+			if (timeout) {
+				clearTimeout(timeout);
+			}
+		});
+		this.disconnectTimeout.clear();
 
         this.services.Engine!.stopRenderLoop();
 

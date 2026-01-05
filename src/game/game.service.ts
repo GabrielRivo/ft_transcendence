@@ -33,22 +33,28 @@ export class GameService {
                 const player1 = this.queue.shift()!;
                 const player2 = this.queue.shift()!;
                 const gameId = `game-${this.gameCount++}`;
-                this.createGame(gameId, player1.data.userId, player2.data.userId);
-                this.connectPlayer(player1);
-                this.connectPlayer(player2);
+                if (this.createGame(gameId, player1.data.userId, player2.data.userId)) {
+                    this.connectPlayer(player1);
+                    this.connectPlayer(player2);
+                }
                 /*player1.emit("gameJoined", { gameId, message: `Game ${gameId} created successfully! You are Player 1.` });
                 player2.emit("gameJoined", { gameId, message: `Game ${gameId} created successfully! You are Player 2.` });*/
             }
         }
     }
 
-    public createGame(id: string, player1Id: string, player2Id: string) {
+    public createGame(id: string, player1Id: string, player2Id: string): boolean {
+		if (this.gamesByPlayer.has(player1Id) || this.gamesByPlayer.has(player2Id)) {
+			console.log(`One of the players is already in a game. Cannot create new game ${id}.`);
+			return false;
+		}
         const gameInstance = new Pong(id, player1Id, player2Id, this);
         this.gamesByPlayer.set(player1Id, gameInstance);
         this.gamesByPlayer.set(player2Id, gameInstance);
         this.games.set(id, gameInstance);
         gameInstance.initialize();
         console.log(`Game instance ${id} created with players ${player1Id} and ${player2Id}`);
+		return true;
     }
 
     public disconnectPlayer(client: Socket) {

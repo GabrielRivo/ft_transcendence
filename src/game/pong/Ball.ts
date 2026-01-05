@@ -44,6 +44,9 @@ class Ball {
         this.position = position;
         this.model.position.copyFrom(position);
     }
+	getPosition() : Vector3 {
+		return this.position;
+	}
 
     setDir(direction: Vector3) {
         this.direction = direction.normalize();
@@ -52,6 +55,9 @@ class Ball {
         this.direction = direction.normalize();
         this.model.setDirection(this.direction);
     }
+	getDirection() : Vector3 {
+		return this.direction;
+	}
 
     speedUp() {
         if (this.speed < this.maxSpeed)
@@ -74,7 +80,6 @@ class Ball {
         
         let ray = new Ray(this.position, this.direction, distance + (this.diameter / 2));
         let overlapping = this.services.Collision!.isInside(this.position, "paddle");
-
 
         let hit = this.services.Scene!.pickWithRay(ray, (mesh) => mesh !== this.model && mesh.isPickable && !overlapping.find(m => m === mesh));
         

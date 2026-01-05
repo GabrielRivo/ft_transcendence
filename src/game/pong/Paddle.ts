@@ -16,7 +16,8 @@ class Paddle {
 
     constructor(services: Services, owner?: any) {
         this.services = services;
-        this.model = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15});
+        //this.model = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15});
+		this.model = MeshBuilder.CreateBox("paddle", {size: 0.30, width: 5.0 , height: 0.30});
         let material = new StandardMaterial("playerMat", this.services.Scene);
         material.emissiveColor = new Color3(0.8, 0, 0.2);
         this.model.material = material;
@@ -33,13 +34,23 @@ class Paddle {
     setDirection(direction: Vector3) {
         this.direction = direction;
     }
+	getDirection() : Vector3 {
+		return this.direction;
+	}
     setModelDirection(modelDirection: Vector3) {
         this.modelDirection = modelDirection;
         this.model.setDirection(modelDirection);
     }
+	getModelDirection() : Vector3 {
+		return this.modelDirection;
+	}
+
     setPosition(position: Vector3) {
         this.model.position.copyFrom(position);
     }
+	getPosition() : Vector3 {
+		return this.model.position;
+	}
 
     move() {
         const basePos : Vector3 = this.model.position.clone();

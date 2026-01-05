@@ -50,7 +50,7 @@ export class GameGateway {
 		console.log(`Total connected clients: ${this.count}`);
 	}
 
-	@SubscribeMessage('gameUpdate')
+	@SubscribeMessage('playerInput')
 	handleGameUpdate(client: Socket, data: any) {
 		console.log(`Received game update from client ${client.id}:`, data);
 		// this.gameService.processGameUpdate(data);
