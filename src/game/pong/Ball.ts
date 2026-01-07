@@ -121,11 +121,11 @@ class Ball {
         const name : string = pickedMesh.name;
 
         if (name === "deathBar" || name === "paddle" || name === "wall") {
-            let impact = this.findRadialImpact();
+            let impact = this.findRadialImpact(pickedMesh);
             if (impact) {
                 let normalVec = impact.getNormal(true);
                 if (impact.pickedPoint && normalVec)
-                {   
+                {
                     pickedMesh.owner.onBallHit(this, impact);
                     //this.bounce(impact);
                 }
@@ -137,7 +137,7 @@ class Ball {
         }
     }
 
-    findRadialImpact() : PickingInfo | null {
+    findRadialImpact(collidedMesh : OwnedMesh) : PickingInfo | null {
         const radius = this.diameter / 2;
         let ray : Ray = new Ray(this.position, this.direction, radius + 1);
         const accuracy = 8;
@@ -157,7 +157,7 @@ class Ball {
             ray.direction = rayDirection;
             let hit = this.services.Scene!.pickWithRay(ray, (mesh) => mesh !== this.model && mesh.isPickable && !overlapping?.find(m => m === mesh));
         
-            if (hit && hit.pickedMesh && hit.distance < shortestDist) {
+            if (hit && hit.pickedMesh && hit.pickedMesh === collidedMesh && hit.distance < shortestDist) {
                 shortestDist = hit.distance; 
                 impact = pickingInfoClone(hit);
             }

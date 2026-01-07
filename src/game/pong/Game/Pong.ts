@@ -67,8 +67,8 @@ class Pong extends Game {
 
     drawScene() : void {
 
-        this.player1 = new Player(this.services, undefined);
-        this.player2 = new Player(this.services, undefined);
+        this.player1 = new Player(this.services, this.p1Id);
+        this.player2 = new Player(this.services, this.p2Id);
         this.walls = [new Wall(this.services), new Wall(this.services)];
         this.walls.forEach(wall => this.services.Scene!.addMesh(wall.model));
         this.ball = new Ball(this.services);
