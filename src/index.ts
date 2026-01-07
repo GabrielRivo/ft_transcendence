@@ -2,7 +2,7 @@
 
 export { createElement, createComponent, Fragment, FragmentComponent } from './core/component';
 export { render } from './core/render';
-export { useState, useEffect, useContext, createContext, useRef } from './core/hooks/index';
+export { useState, useEffect, useContext, createContext, useRef, useCallback } from './core/hooks/index';
 export { createPortal } from './core/portal';
 
 
@@ -10,7 +10,7 @@ import './core/fiber/workLoop';
 
 import { createElement, createComponent, Fragment, FragmentComponent } from './core/component';
 import { render } from './core/render';
-import { useState, useEffect, useContext, createContext, useRef } from './core/hooks/index';
+import { useState, useEffect, useContext, createContext, useRef, useCallback } from './core/hooks/index';
 import { createPortal } from './core/portal';
 
 
@@ -27,6 +27,7 @@ const myReact = {
   useContext,
   createContext,
   useRef,
+  useCallback,
   createPortal,
 };
 
