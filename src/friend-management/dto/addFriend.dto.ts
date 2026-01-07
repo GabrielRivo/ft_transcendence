@@ -1,14 +1,13 @@
-import { AdditionalProperties, generateSchema, IsEmail, IsInt, IsRequired } from "my-class-validator";
-
+import { AdditionalProperties, generateSchema, IsInt, IsRequired } from "my-class-validator";
 
 
 @AdditionalProperties(false)
 export class AddFriendDto {
-	@IsRequired()
+	@IsRequired({message : "Needed the id"})
 	@IsInt()
 	userId : number;
 
-	@IsRequired({message : "C requit encullleeeee!"})
+	@IsRequired({message : "Needed the other id"})
 	@IsInt()
 	otherId : number;
 }

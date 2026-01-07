@@ -1,6 +1,7 @@
 import Database, { Statement } from 'better-sqlite3';
 import { InjectPlugin, Service } from 'my-fastify-decorators';
 
+
 @Service()
 export class GeneralChatService {
 	@InjectPlugin('db')
