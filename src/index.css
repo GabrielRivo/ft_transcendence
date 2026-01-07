@@ -21,10 +21,12 @@
 }
 
 @theme {
-	--color-primary: #030712;
+	--color-primary: #343b65;
+	--color-primary-transparent: #343b65a1;
+	--color-primary-dark: #252132;
 	--color-secondary: #ffffff;
 
-	--color-neon-blue: #00f3ff;
+	--color-neon-blue: #01dae4;
 	--color-neon-pink: #ff00ff;
 
 	--font-display: 'Oswald', sans-serif;
@@ -44,8 +46,55 @@
 	}
 }
 
+@utility bg-radial-primary {
+	background: radial-gradient(circle, var(--color-primary) 0%, var(--color-primary-dark) 142%);
+}
+
 @utility grid-area-button {
 	grid-area: button;
+}
+
+@layer components {
+	/* Chamfer est une class pour avoir des coins cut droit, non obtenable avec border-radius  --cut modifiable via [--cut:<value>px]*/
+	.chamfer {
+		--cut: 20px;
+
+		clip-path: polygon(
+			var(--cut) 0,
+			100% 0,
+			100% var(--cut),
+			100% calc(100% - var(--cut)),
+			calc(100% - var(--cut)) 100%,
+			var(--cut) 100%,
+			0 calc(100% - var(--cut)),
+			0 var(--cut)
+		);
+
+		transform: translateZ(0);
+		/* Améliore la netteté des bords coupés */
+		-webkit-font-smoothing: antialiased;
+		/* Évite que le fond ne "bave" */
+		background-clip: padding-box;
+		perspective: 1000px;
+	}
+
+	.chamfer-full {
+		--cut: 20px;
+		clip-path: polygon(
+			var(--cut) 0,
+			calc(100% - var(--cut)) 0,
+			100% var(--cut),
+			100% calc(100% - var(--cut)),
+			calc(100% - var(--cut)) 100%,
+			var(--cut) 100%,
+			0 calc(100% - var(--cut)),
+			0 var(--cut)
+		);
+		transform: translateZ(0);
+		-webkit-font-smoothing: antialiased;
+		background-clip: padding-box;
+		perspective: 1000px;
+	}
 }
 
 *,

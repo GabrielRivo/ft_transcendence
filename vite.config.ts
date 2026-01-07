@@ -11,7 +11,11 @@ export default defineConfig({
 	esbuild: {
 		jsx: 'transform',
 		jsxFactory: 'createElement',
-		jsxFragment: 'Fragment',
+		jsxFragment: 'FragmentComponent',
 	},
 	plugins: [tailwindcss()],
+	server: {
+		port: 5173,
+		host: true,
+	},
 });

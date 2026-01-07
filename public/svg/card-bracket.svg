@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+	<!-- Left Bottom Corner -->
+	<symbol id="corner-left" viewBox="0 0 454 454">
+		<path
+			d="M454 412.5 L278.5 412.5 L41 175.5 V2.5"
+			stroke="white"
+			stroke-width="49"
+			fill="none"
+			stroke-linecap="butt"
+		/>
+		<path
+			d="M454 439.5 L259 439.5 L14 194.5 V34.5"
+			stroke="#01dae4"
+			stroke-width="28"
+			fill="none"
+			stroke-linecap="butt"
+		/>
+	</symbol>
+
+	<!-- Right Bottom Corner (Mirrored) -->
+	<symbol id="corner-right" viewBox="0 0 454 454">
+		<g transform="scale(-1, 1) translate(-454, 0)">
+			<path
+				d="M454 412.5 L278.5 412.5 L41 175.5 V2.5"
+				stroke="white"
+				stroke-width="49"
+				fill="none"
+				stroke-linecap="butt"
+			/>
+			<path
+				d="M454 439.5 L259 439.5 L14 194.5 V34.5"
+				stroke="#01dae4"
+				stroke-width="28"
+				fill="none"
+				stroke-linecap="butt"
+			/>
+		</g>
+	</symbol>
+
+	<!-- Middle Bar -->
+</svg>

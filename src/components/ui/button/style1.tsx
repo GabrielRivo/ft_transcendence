@@ -37,7 +37,10 @@ export function ButtonStyle1({ children, onClick, duration = 400, resetKey }: Bu
 	const moveDelay = textDuration;
 
 	return (
-		<div className="group grid-area-button relative flex h-36 w-fit justify-center justify-self-center px-8 select-none">
+		<div
+			className={`group grid-area-button relative flex h-36 w-fit justify-center justify-self-center px-8 transition-all duration-${moveDuration} select-none`}
+			style={isAnimating ? `rotate: 180deg;` : undefined}
+		>
 			<svg
 				aria-hidden="true"
 				xmlns="http://www.w3.org/2000/svg"
