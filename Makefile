@@ -182,7 +182,7 @@ _clean-base:
 # Order: Prerequisites -> Base -> Vault -> Infrastructure -> ELK -> Monitoring
 # Note: Now includes Vault Initialization and Secrets Population, and ESO.
 .PHONY: up
-up: _check-prerequisites base-up vault-up vault-init vault-secrets eso-up infra-up elk-up monitoring-up
+up: _check-prerequisites base-up vault-up vault-init vault-secrets eso-up eso-config infra-up elk-up monitoring-up
 	@echo -e "\n$(SUCCESS) $(BOLD)Infrastructure successfully deployed!$(RESET)"
 	@echo -e "You can check the status with: $(BOLD)make status$(RESET)"
 
@@ -205,6 +205,8 @@ clean: down _clean-pvcs _clean-base
 	@rm -f $(INFRASTRUCTURE_DIR)/../.vault-keys
 	@echo -e "$(WARN) Cleaning up released PersistentVolumes..."
 	@kubectl get pv | grep Released | awk '{print $$1}' | xargs -r kubectl delete pv || true
+	@# Ensure CRDs are gone if clean is full (optional, but cleaner)
+	@kubectl delete crd secretstores.external-secrets.io externalsecrets.external-secrets.io clustersecretstores.external-secrets.io clusterexternalsecrets.external-secrets.io pushsecrets.external-secrets.io || true
 	@echo -e "\n$(SUCCESS) $(BOLD)Infrastructure completely cleaned (Data destroyed).$(RESET)"
 
 # ==============================================================================
@@ -320,11 +322,23 @@ eso-up: base-up _add-helm-repos
 		--wait --timeout $(TIMEOUT_READY)
 	@echo -e "$(SUCCESS) External Secrets Operator installed."
 
+# Target: eso-config
+# Description: Applies ESO specific configurations like SecretStore.
+# Must be run AFTER eso-up so that CRDs are present.
+.PHONY: eso-config
+eso-config:
+	@echo -e "$(INFO) Configuring External Secrets Operator (SecretStore, etc.)..."
+	@kubectl apply -f $(K8S_BASE_DIR)/external-secrets/secretstore.yaml
+	@echo -e "$(SUCCESS) External Secrets Operator configured."
+
 # Target: eso-down
 # Description: Uninstalls External Secrets Operator.
 .PHONY: eso-down
 eso-down:
 	@echo -e "$(INFO) Uninstalling External Secrets Operator..."
+	@# First delete the SecretStore configuration
+	@kubectl delete -f $(K8S_BASE_DIR)/external-secrets/secretstore.yaml --ignore-not-found || true
+	@# Then uninstall the chart (which removes CRDs if configured to do so, causing errors if we delete CRs after)
 	@helm uninstall external-secrets --namespace $(NS_EXTERNAL_SECRETS) --ignore-not-found
 	@echo -e "$(SUCCESS) External Secrets Operator uninstalled."
 
@@ -498,6 +512,7 @@ help:
 	@echo -e "  $(CYAN)vault-secrets$(RESET) Populate initial secrets"
 	@echo -e "  $(CYAN)vault-status$(RESET)  Show detailed Vault status"
 	@echo -e "  $(CYAN)eso-up/down$(RESET)   Manage External Secrets Operator"
+	@echo -e "  $(CYAN)eso-config$(RESET)    Configure ESO (SecretStore)"
 	@echo -e "  $(CYAN)elk-up/down$(RESET)   Manage ELK Stack"
 	@echo -e "  $(CYAN)infra-up/down$(RESET) Manage Redis/RabbitMQ"
 	@echo -e "  $(CYAN)monitoring-up/down$(RESET) Manage Monitoring"
