@@ -1,0 +1,172 @@
+# Elasticsearch Helm Values
+# Context: ft-transcendence DevOps Module
+# Chart: elastic/elasticsearch
+#
+# This configuration secures Elasticsearch with TLS and authentication,
+# optimized for a K3s environment.
+#
+# IMPROVEMENT: We leverage the chart's native SSL handling.
+# By creating a Kubernetes Secret named 'elasticsearch-master-certs' (via script)
+# containing standard keys (tls.key, tls.crt, ca.crt), the chart automatically
+# mounts it and configures SSL environment variables, avoiding duplicate definitions
+# and warnings.
+
+# ------------------------------------------------------------------------------
+# 1. Cluster Configuration
+# ------------------------------------------------------------------------------
+clusterName: "elasticsearch"
+nodeGroup: "master"
+
+# Use a single-node cluster for dev/test efficiency.
+# In production, we would use at least 3 replicas.
+replicas: 1
+minimumMasterNodes: 1
+
+# ------------------------------------------------------------------------------
+# 2. Image Configuration
+# ------------------------------------------------------------------------------
+image: "docker.elastic.co/elasticsearch/elasticsearch"
+imageTag: "8.5.1"
+imagePullPolicy: "IfNotPresent"
+
+# ------------------------------------------------------------------------------
+# 3. Resource Management
+# ------------------------------------------------------------------------------
+# Resources adapted for K3s. Java heap size is set via ES_JAVA_OPTS below.
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1Gi"
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+
+# JVM Heap Size (should be ~50% of container memory limit)
+# Enable native access and preview features to suppress Java 19+ warnings
+esJavaOpts: "-Xmx1g -Xms1g --enable-native-access=ALL-UNNAMED --enable-preview"
+
+# ------------------------------------------------------------------------------
+# 4. Security & Authentication
+# ------------------------------------------------------------------------------
+# Protocol for readiness/liveness probes.
+# Setting this to https triggers the chart to:
+# 1. Enable xpack.security
+# 2. Enable xpack.security.transport.ssl and xpack.security.http.ssl
+# 3. Inject standard SSL paths (/usr/share/elasticsearch/config/certs/...)
+protocol: https
+
+# Authentication Credentials
+# We use the secret created by External Secrets Operator.
+# By disabling the built-in secret creation, we avoid the warning about hiding ELASTIC_PASSWORD
+# and prevent the chart from generating a random password.
+secret:
+  enabled: false
+  password: ""
+
+# Inject the secret name containing the 'elastic' user password
+extraEnvs:
+  - name: ELASTIC_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: elasticsearch-credentials
+        key: password
+
+# We do NOT manually define SSL paths in extraEnvs anymore.
+# The chart defaults align with our manually created secret 'elasticsearch-master-certs'.
+
+# Additional configuration for elasticsearch.yml
+esConfig:
+  elasticsearch.yml: |
+    # Explicitly enable security features (though chart does most of it)
+    xpack.security.enabled: true
+    # Verification mode for certificates
+    xpack.security.transport.ssl.verification_mode: certificate
+    # Note: paths are auto-configured by the chart because protocol is https
+
+    # Disable GeoIP downloader to prevent startup errors (shards not ready)
+    ingest.geoip.downloader.enabled: false
+
+  # Custom Log4j2 configuration to suppress "single-node" discovery warnings
+  # while keeping the cluster in multi-node mode (as required by Chart constraints).
+  log4j2.properties: |
+    status = error
+
+    appender.console.type = Console
+    appender.console.name = console
+    appender.console.layout.type = PatternLayout
+    appender.console.layout.pattern = [%d{ISO8601}][%-5p][%-25c{1.}] [%node_name]%marker %m%n
+
+    rootLogger.level = info
+    rootLogger.appenderRef.console.ref = console
+
+    # Suppress warnings about single-node discovery configuration
+    logger.coordinator.name = org.elasticsearch.cluster.coordination.Coordinator
+    logger.coordinator.level = error
+
+    # Suppress warnings about initial_master_nodes when cluster is already bootstrapped
+    logger.bootstrap.name = org.elasticsearch.cluster.coordination.ClusterBootstrapService
+    logger.bootstrap.level = error
+
+    # Attempt to suppress Lucene info logs on stderr (if routed through log4j)
+    logger.lucene.name = org.apache.lucene.store
+    logger.lucene.level = error
+
+# ------------------------------------------------------------------------------
+# 5. TLS Certificates
+# ------------------------------------------------------------------------------
+# We do not need explicit secretMounts. The chart automatically mounts
+# the secret 'elasticsearch-master-certs' to /usr/share/elasticsearch/config/certs
+# because that is the default convention.
+
+# ------------------------------------------------------------------------------
+# 6. Storage & Persistence
+# ------------------------------------------------------------------------------
+persistence:
+  enabled: true
+  labels:
+    enabled: false
+  annotations: {}
+  # Use our local-path storage class
+  storageClass: "ft-local-path"
+  accessMode: ReadWriteOnce
+  size: "2Gi"
+
+# ------------------------------------------------------------------------------
+# 7. Service Configuration
+# ------------------------------------------------------------------------------
+service:
+  type: ClusterIP
+  port: 9200
+
+# ------------------------------------------------------------------------------
+# 8. Pod Security Context
+# ------------------------------------------------------------------------------
+# Ensure the pod runs with appropriate permissions.
+# Elasticsearch image typically runs as uid 1000.
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
+
+# ------------------------------------------------------------------------------
+# 9. Anti-Affinity (Soft)
+# ------------------------------------------------------------------------------
+antiAffinity: "soft"
+
+# ------------------------------------------------------------------------------
+# 10. System Configuration
+# ------------------------------------------------------------------------------
+# Disable sysctl init container as the host is already configured with
+# sufficient vm.max_map_count (verified > 262144).
+# This avoids the need for privileged containers.
+sysctlInitContainer:
+  enabled: false
