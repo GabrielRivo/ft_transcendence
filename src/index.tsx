@@ -52,7 +52,7 @@ export interface Route {
 
 export interface RouteGroup {
   layout?: (props: any) => Element;
-  routes: Route[];
+  routes: (Route | RouteGroup)[];
 }
 
 export function Link({ to, children, ...props }: { to: string; children?: any; [key: string]: any }) : Element {
@@ -87,29 +87,32 @@ export function Router({ groups, NoFound }: { groups: RouteGroup[], NoFound?: El
   };
 
   const matchResult = useMemo(() => {
-      let routeFound: Route | null = null;
-      let paramsFound: Record<string, string> = {};
-      let LayoutFound: any = null;
-
-      for (const group of groups) {
-        for (const route of group.routes) {
-          const match = matchPath(route.path, currentPath);
-          if (match.matches) {
-            routeFound = route;
-            paramsFound = match.params;
-            LayoutFound = group.layout;
-            break;
+      function findMatch(items: (Route | RouteGroup)[], layouts: any[]): { matchedRoute: Route, matchedParams: Record<string, string>, layouts: any[] } | null {
+        for (const item of items) {
+          if ('routes' in item) {
+             // It's a RouteGroup
+             const nextLayouts = item.layout ? [...layouts, item.layout] : layouts;
+             const match = findMatch(item.routes, nextLayouts);
+             if (match) return match;
+          } else {
+             // It's a Route
+             const match = matchPath(item.path, currentPath);
+             if (match.matches) {
+               return { matchedRoute: item, matchedParams: match.params, layouts };
+             }
           }
         }
-        if (routeFound) break;
+        return null;
       }
 
-      console.log("Matched Route :", routeFound ? routeFound.path : "None");
+      const result = findMatch(groups, []);
 
-      return { matchedRoute: routeFound, matchedParams: paramsFound, Layout: LayoutFound };
+      console.log("Matched Route :", result?.matchedRoute ? result.matchedRoute.path : "None");
+
+      return result || { matchedRoute: null, matchedParams: {}, layouts: [] };
   }, [currentPath, groups]);
 
-  const { matchedRoute, matchedParams, Layout } = matchResult;
+  const { matchedRoute, matchedParams, layouts } = matchResult;
 
   const routerContextValue = {
     push,
@@ -122,8 +125,14 @@ export function Router({ groups, NoFound }: { groups: RouteGroup[], NoFound?: El
     ? (
         (() => {
             const Page = matchedRoute.component;
-            const page = <Page {...matchedRoute.data} key={currentPath} />;
-            return Layout ? <Layout>{page}</Layout> : page;
+            let page = <Page {...matchedRoute.data} key={currentPath} />;
+
+            if (layouts && layouts.length > 0) {
+               page = layouts.reduceRight((acc: any, Layout: any) => {
+                   return <Layout>{acc}</Layout>;
+               }, page);
+            }
+            return page;
         })()
       )
     : (NoFound ? NoFound : <div>404</div>);
@@ -137,7 +146,7 @@ export function Router({ groups, NoFound }: { groups: RouteGroup[], NoFound?: El
 
 function matchPath(pattern: string, pathname: string): { matches: boolean; params: Record<string, string> } {
   if (pattern === '*') return { matches: true, params: {} };
-  
+
   const patternParts = pattern.split('/').filter(Boolean);
   const pathParts = pathname.split('/').filter(Boolean);
 
