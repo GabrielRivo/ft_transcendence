@@ -1,0 +1,145 @@
+# Kibana Helm Values
+# Context: ft-transcendence DevOps Module
+# Chart: elastic/kibana
+#
+# This configuration secures Kibana with TLS (HTTPS) and connects it
+# securely to the TLS-enabled Elasticsearch cluster.
+
+# ------------------------------------------------------------------------------
+# 1. Image Configuration
+# ------------------------------------------------------------------------------
+image: "docker.elastic.co/kibana/kibana"
+imageTag: "8.5.1"
+imagePullPolicy: "IfNotPresent"
+
+# ------------------------------------------------------------------------------
+# 2. Resource Management
+# ------------------------------------------------------------------------------
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "500m"
+    memory: "1Gi"
+
+# ------------------------------------------------------------------------------
+# 3. Connectivity & Security
+# ------------------------------------------------------------------------------
+# Elasticsearch Connection
+elasticsearchHosts: "https://elasticsearch-master:9200"
+
+# Service Account Configuration
+# We use "default".
+serviceAccount: "default"
+
+# Kibana Configuration (kibana.yml)
+kibanaConfig:
+  kibana.yml: |
+    # Server SSL (Kibana -> Client)
+    server.ssl.enabled: true
+    server.ssl.certificate: /usr/share/kibana/config/custom-certs/tls.crt
+    server.ssl.key: /usr/share/kibana/config/custom-certs/tls.key
+    server.name: kibana
+    server.host: "0.0.0.0"
+
+    # Elasticsearch SSL (Kibana -> Elasticsearch)
+    elasticsearch.ssl.certificateAuthorities: [ "/usr/share/kibana/config/custom-certs/ca.crt" ]
+    elasticsearch.ssl.verificationMode: certificate
+
+    # Security & Encryption
+    # xpack.security.enabled is true by default in 8.x
+    xpack.security.encryptionKey: ${XPACK_SECURITY_ENCRYPTIONKEY}
+    xpack.encryptedSavedObjects.encryptionKey: ${XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY}
+    xpack.reporting.encryptionKey: ${XPACK_REPORTING_ENCRYPTIONKEY}
+
+    # Suppress Reporting warnings
+    xpack.reporting.roles.enabled: false
+    xpack.reporting.kibanaServer.hostname: "localhost"
+
+# ------------------------------------------------------------------------------
+# 4. Secrets & Credentials
+# ------------------------------------------------------------------------------
+# Inject sensitive environment variables from Kubernetes Secrets
+extraEnvs:
+  # Explicitly inject the token since the chart seems to miss it
+  # when certain conditions aren't met or due to version quirks.
+  - name: ELASTICSEARCH_SERVICEACCOUNTTOKEN
+    valueFrom:
+      secretKeyRef:
+        name: kibana-kibana-es-token
+        key: token
+
+  # Reuse the same key for all encryption requirements for simplicity
+  # Reading from the same secret 'kibana-kibana-es-token'
+  - name: XPACK_SECURITY_ENCRYPTIONKEY
+    valueFrom:
+      secretKeyRef:
+        name: kibana-kibana-es-token
+        key: encryption-key
+  - name: XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY
+    valueFrom:
+      secretKeyRef:
+        name: kibana-kibana-es-token
+        key: encryption-key
+  - name: XPACK_REPORTING_ENCRYPTIONKEY
+    valueFrom:
+      secretKeyRef:
+        name: kibana-kibana-es-token
+        key: encryption-key
+
+# ------------------------------------------------------------------------------
+# 5. TLS Certificates Mounting
+# ------------------------------------------------------------------------------
+# Mount the 'kibana-certs' secret which contains tls.crt, tls.key, and ca.crt
+secretMounts:
+  - name: kibana-certs
+    secretName: kibana-certs
+    path: /usr/share/kibana/config/custom-certs
+    defaultMode: 0400
+
+# ------------------------------------------------------------------------------
+# 6. Service Configuration
+# ------------------------------------------------------------------------------
+service:
+  type: ClusterIP
+  port: 5601
+
+# ------------------------------------------------------------------------------
+# 7. Security Context
+# ------------------------------------------------------------------------------
+# Follow best practices for Pod Security
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
+
+# ------------------------------------------------------------------------------
+# 8. Probes
+# ------------------------------------------------------------------------------
+# Update health checks to use HTTPS
+protocol: https
+httpPort: 5601
+
+readinessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  successThreshold: 3
+  timeoutSeconds: 5
+
+livenessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  successThreshold: 3
+  timeoutSeconds: 5
