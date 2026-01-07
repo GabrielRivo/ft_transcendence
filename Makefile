@@ -323,12 +323,15 @@ eso-up: base-up _add-helm-repos
 	@echo -e "$(SUCCESS) External Secrets Operator installed."
 
 # Target: eso-config
-# Description: Applies ESO specific configurations like SecretStore.
+# Description: Applies ESO specific configurations like SecretStore and ExternalSecrets.
 # Must be run AFTER eso-up so that CRDs are present.
 .PHONY: eso-config
 eso-config:
 	@echo -e "$(INFO) Configuring External Secrets Operator (SecretStore, etc.)..."
 	@kubectl apply -f $(K8S_BASE_DIR)/external-secrets/secretstore.yaml
+	@kubectl apply -f $(K8S_BASE_DIR)/external-secrets/elasticsearch-es.yaml
+	@kubectl apply -f $(K8S_BASE_DIR)/external-secrets/kibana-es.yaml
+	@kubectl apply -f $(K8S_BASE_DIR)/external-secrets/logstash-es.yaml
 	@echo -e "$(SUCCESS) External Secrets Operator configured."
 
 # Target: eso-down
@@ -336,7 +339,10 @@ eso-config:
 .PHONY: eso-down
 eso-down:
 	@echo -e "$(INFO) Uninstalling External Secrets Operator..."
-	@# First delete the SecretStore configuration
+	@# First delete the SecretStore configuration and ExternalSecrets
+	@kubectl delete -f $(K8S_BASE_DIR)/external-secrets/logstash-es.yaml --ignore-not-found || true
+	@kubectl delete -f $(K8S_BASE_DIR)/external-secrets/kibana-es.yaml --ignore-not-found || true
+	@kubectl delete -f $(K8S_BASE_DIR)/external-secrets/elasticsearch-es.yaml --ignore-not-found || true
 	@kubectl delete -f $(K8S_BASE_DIR)/external-secrets/secretstore.yaml --ignore-not-found || true
 	@# Then uninstall the chart (which removes CRDs if configured to do so, causing errors if we delete CRs after)
 	@helm uninstall external-secrets --namespace $(NS_EXTERNAL_SECRETS) --ignore-not-found

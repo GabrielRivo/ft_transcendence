@@ -1,0 +1,27 @@
+# ExternalSecret for Logstash
+# Context: ft-transcendence DevOps Module
+# Component: ELK Stack / External Secrets Operator
+#
+# This ExternalSecret fetches the password for the 'logstash_internal' user
+# which Logstash uses to write data into Elasticsearch.
+
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: logstash-credentials
+  namespace: logging
+spec:
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+
+  target:
+    name: logstash-credentials
+    creationPolicy: Owner
+
+  data:
+    # 1. Logstash Internal User Password
+    - secretKey: logstash-password
+      remoteRef:
+        key: secret/shared/logstash
+        property: password

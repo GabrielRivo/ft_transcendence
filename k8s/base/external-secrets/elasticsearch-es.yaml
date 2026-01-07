@@ -1,0 +1,40 @@
+# ExternalSecret for Elasticsearch
+# Context: ft-transcendence DevOps Module
+# Component: ELK Stack / External Secrets Operator
+#
+# This ExternalSecret defines how to fetch Elasticsearch credentials from Vault
+# and create a Kubernetes Secret that the Elasticsearch Helm chart can use.
+
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: elasticsearch-credentials
+  namespace: logging
+spec:
+  # Reference to the SecretStore we created earlier
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+
+  # The target Kubernetes Secret to create
+  target:
+    name: elasticsearch-credentials
+    creationPolicy: Owner
+
+  # Data to fetch from Vault
+  data:
+    # 1. Fetch the 'password' field from 'secret/data/shared/elasticsearch'
+    #    and map it to the 'password' key in the Kubernetes Secret.
+    #    This is used for the 'elastic' superuser.
+    - secretKey: password
+      remoteRef:
+        key: secret/shared/elasticsearch
+        property: password
+
+    # 2. Fetch the 'keystore_password' field from 'secret/data/shared/elasticsearch'
+    #    and map it to the 'keystore-password' key in the Kubernetes Secret.
+    #    This is used to unlock the secure keystore (if configured).
+    - secretKey: keystore-password
+      remoteRef:
+        key: secret/shared/elasticsearch
+        property: keystore_password

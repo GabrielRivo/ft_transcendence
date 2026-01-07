@@ -1,0 +1,37 @@
+# ExternalSecret for Kibana
+# Context: ft-transcendence DevOps Module
+# Component: ELK Stack / External Secrets Operator
+#
+# This ExternalSecret fetches the encryption key for Kibana security
+# and the password for the 'kibana_system' user (if we were using built-in users,
+# but here we might reuse the elastic user or a dedicated one).
+# For simplicity in this setup, we'll fetch the encryption key and reuse the elastic password
+# (though best practice is a dedicated user, we'll start simple).
+
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: kibana-credentials
+  namespace: logging
+spec:
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+
+  target:
+    name: kibana-credentials
+    creationPolicy: Owner
+
+  data:
+    # 1. Encryption Key for Saved Objects
+    - secretKey: encryption-key
+      remoteRef:
+        key: secret/shared/kibana
+        property: encryption_key
+
+    # 2. Elasticsearch Password (reusing the one from shared/elasticsearch for now)
+    #    Kibana needs to authenticate to Elasticsearch.
+    - secretKey: elasticsearch-password
+      remoteRef:
+        key: secret/shared/elasticsearch
+        property: password
