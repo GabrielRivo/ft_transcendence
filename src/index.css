@@ -20,6 +20,55 @@
 	font-style: normal;
 }
 
+@font-face {
+	font-family: 'Orbitron';
+	src: url('/font/orbitron/Orbitron-Regular.ttf') format('truetype');
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Orbitron';
+	src: url('/font/orbitron/Orbitron-Bold.ttf') format('truetype');
+	font-weight: 700;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Orbitron';
+	src: url('/font/orbitron/Orbitron-Medium.ttf') format('truetype');
+	font-weight: 500;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'RubikPixels';
+	src: url('/font/rubikpixels/RubikPixels-Regular.ttf') format('truetype');
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Aquire';
+	src: url('/font/aquire/Aquire.ttf') format('truetype');
+	font-weight: 400;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Aquire';
+	src: url('/font/aquire/Aquire-Bold.ttf') format('truetype');
+	font-weight: 700;
+	font-style: normal;
+}
+
+@font-face {
+	font-family: 'Aquire';
+	src: url('/font/aquire/Aquire-Light.ttf') format('truetype');
+	font-weight: 300;
+	font-style: normal;
+}
+
 @theme {
 	/* --color-primary: #343b65; */
 	--color-primary: #000000;
@@ -27,7 +76,7 @@
 	/* --color-primary-dark: #252132; */
 	--color-primary-dark: #000000;
 	/* --color-secondary: #ffffff; */
-	--color-secondary: #000000;
+	--color-secondary: #ffffff;
 
 	--color-neon-blue: #2cc1c1;
 	--color-neon-pink: #ff00ff;
@@ -35,8 +84,15 @@
 	--font-display: 'Oswald', sans-serif;
 	--font-mono: 'IBM Plex Mono', monospace;
 	--font-pirulen: 'Pirulen', sans-serif;
+	--font-aquire: 'Aquire', sans-serif;
+	--font-orbitron: 'Orbitron', sans-serif;
+	--font-rubikpixels: 'RubikPixels', sans-serif;
 
 	--animate-float: float 3s ease-in-out infinite;
+
+	/* Background Image background.png */
+
+	--background-image: url('./background.png') no-repeat center center fixed;
 
 	@keyframes float {
 		0%,
@@ -51,6 +107,11 @@
 
 @utility bg-radial-primary {
 	background: radial-gradient(circle, var(--color-primary) 0%, var(--color-primary-dark) 142%);
+}
+
+@utility bg-background-image {
+	background: var(--background-image);
+	background-size: cover;
 }
 
 @utility grid-area-button {
