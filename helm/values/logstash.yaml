@@ -1,0 +1,161 @@
+# Logstash Helm Values
+# Context: ft-transcendence DevOps Module
+# Chart: elastic/logstash
+#
+# This configuration deploys Logstash as a log aggregator and processor.
+# It receives logs from Beats or other sources, processes them, and
+# securely forwards them to Elasticsearch via TLS and Authentication.
+
+# ------------------------------------------------------------------------------
+# 1. Image Configuration
+# ------------------------------------------------------------------------------
+image: "docker.elastic.co/logstash/logstash"
+imageTag: "8.5.1"
+imagePullPolicy: "IfNotPresent"
+
+# ------------------------------------------------------------------------------
+# 2. Resource Management
+# ------------------------------------------------------------------------------
+resources:
+  requests:
+    cpu: "250m"
+    memory: "512Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+# ------------------------------------------------------------------------------
+# 3. Persistence
+# ------------------------------------------------------------------------------
+# Enable persistence to prevent data loss if Logstash restarts.
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 5Gi
+
+# ------------------------------------------------------------------------------
+# 4. Logstash Configuration (logstash.yml)
+# ------------------------------------------------------------------------------
+logstashConfig:
+  logstash.yml: |
+    http.host: "0.0.0.0"
+    # Disable X-Pack monitoring by default to reduce noise/load
+    # unless we explicitly set up monitoring cluster.
+    xpack.monitoring.enabled: false
+
+    # Pipeline configuration
+    pipeline.workers: 2
+    pipeline.batch.size: 125
+
+    # Dead Letter Queue for failed events
+    dead_letter_queue.enable: true
+
+# ------------------------------------------------------------------------------
+# 5. Pipeline Configuration (logstash.conf)
+# ------------------------------------------------------------------------------
+logstashPipeline:
+  logstash.conf: |
+    input {
+      # Beats Input (Filebeat, Metricbeat, etc.)
+      beats {
+        port => 5044
+        # Optional: Enable TLS for Beats input
+        # ssl => false
+      }
+      
+      # TCP Input for generic JSON logs
+      tcp {
+        port => 5000
+        codec => json_lines
+      }
+    }
+
+    filter {
+      # Add filters here (e.g., parsing, mutating, enriching)
+      if [kubernetes] {
+        mutate {
+          add_field => { "source_type" => "kubernetes" }
+        }
+      }
+    }
+
+    output {
+      elasticsearch {
+        hosts => ["https://elasticsearch-master:9200"]
+        # Authentication credentials injected via environment variables
+        user => "${ELASTICSEARCH_USERNAME}"
+        password => "${ELASTICSEARCH_PASSWORD}"
+        
+        # TLS Configuration
+        cacert => "/usr/share/logstash/config/certs/ca.crt"
+        ssl => true
+        ssl_certificate_verification => true
+        
+        # Index naming strategy
+        index => "logstash-%{+YYYY.MM.dd}"
+      }
+      
+      # Debug output (enabled only if needed via ENV var)
+      # stdout { codec => rubydebug }
+    }
+
+# ------------------------------------------------------------------------------
+# 6. Secrets & Credentials
+# ------------------------------------------------------------------------------
+extraEnvs:
+  # Elasticsearch credentials
+  # We use a specific user 'logstash_internal' for writing logs.
+  # This user must be created in Elasticsearch (via API or script).
+  - name: ELASTICSEARCH_USERNAME
+    value: "logstash_internal"
+
+  - name: ELASTICSEARCH_PASSWORD
+    valueFrom:
+      secretKeyRef:
+        name: logstash-credentials
+        key: logstash-password
+
+# ------------------------------------------------------------------------------
+# 7. TLS Certificates Mounting
+# ------------------------------------------------------------------------------
+secretMounts:
+  - name: logstash-certs
+    secretName: logstash-certs
+    path: /usr/share/logstash/config/certs
+    defaultMode: 0400
+
+# ------------------------------------------------------------------------------
+# 8. Service Configuration
+# ------------------------------------------------------------------------------
+service:
+  type: ClusterIP
+  ports:
+    - name: beats
+      port: 5044
+      protocol: TCP
+      targetPort: 5044
+    - name: http
+      port: 8080
+      protocol: TCP
+      targetPort: 9600
+    - name: tcp-input
+      port: 5000
+      protocol: TCP
+      targetPort: 5000
+
+# ------------------------------------------------------------------------------
+# 9. Security Context
+# ------------------------------------------------------------------------------
+podSecurityContext:
+  fsGroup: 1000
+  runAsUser: 1000
+
+securityContext:
+  capabilities:
+    drop:
+      - ALL
+  runAsNonRoot: true
+  runAsUser: 1000
+  allowPrivilegeEscalation: false
+  seccompProfile:
+    type: RuntimeDefault
