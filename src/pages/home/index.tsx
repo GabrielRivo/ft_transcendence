@@ -1,8 +1,8 @@
 import { createElement } from 'my-react';
-import { Link, useNavigate } from 'my-react-router';
+import { useNavigate } from 'my-react-router';
 import { ButtonStyle1 } from '../../components/ui/button/style1';
 
-import { useToast } from '../../components/ui/toaster';
+import { useToast } from '../../hook/useToast';
 
 export function Home() {
 	const navigate = useNavigate();

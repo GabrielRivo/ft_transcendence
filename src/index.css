@@ -89,7 +89,7 @@
 	--font-rubikpixels: 'RubikPixels', sans-serif;
 
 	--animate-float: float 3s ease-in-out infinite;
-
+	--animate-toast-slide-up: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 	/* Background Image background.png */
 
 	--background-image: url('./background.png') no-repeat center center fixed;
@@ -101,6 +101,17 @@
 		}
 		50% {
 			transform: translateY(-10px);
+		}
+	}
+
+	@keyframes toastSlideUp {
+		from {
+			opacity: 0;
+			transform: translateY(100%);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
 }

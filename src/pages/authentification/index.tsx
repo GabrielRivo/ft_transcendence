@@ -1,9 +1,5 @@
 import { createElement, useState } from 'my-react';
-import { ButtonStyle1 } from '../../components/ui/button/style1';
-import { ButtonStyle2 } from '../../components/ui/button/style2';
-import { ButtonStyle3 } from '../../components/ui/button/style3';
 import { ButtonStyle4 } from '../../components/ui/button/style4';
-import { CardStyle1 } from '../../components/ui/card/style1';
 import { Discord } from '../../components/ui/logo/discord';
 import { Github } from '../../components/ui/logo/github';
 import { useNavigate } from 'my-react-router';

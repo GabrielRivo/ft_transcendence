@@ -1,36 +1,5 @@
-import {
-	createElement,
-	createContext,
-	useState,
-	useContext,
-	useEffect,
-	createPortal,
-	FragmentComponent,
-	Element,
-} from 'my-react';
-
-export type ToastType = 'success' | 'error' | 'info' | 'warning';
-
-export interface Toast {
-	id: number;
-	message: string;
-	type: ToastType;
-	duration?: number;
-}
-
-export interface ToastContextType {
-	toast: (message: string, type?: ToastType, duration?: number) => void;
-}
-
-const ToastContext = createContext<ToastContextType | null>(null);
-
-export const useToast = (): ToastContextType => {
-	const context = useContext(ToastContext);
-	if (!context) {
-		throw new Error('useToast must be used within a ToastProvider');
-	}
-	return context as ToastContextType;
-};
+import { createElement, useState, useEffect, createPortal, FragmentComponent, Element } from 'my-react';
+import { Toast, ToastContext, ToastType } from './toasterContext';
 
 const ToastItem = ({ toast, onClose }: { toast: Toast; onClose: (id: number) => void; key?: number | string }) => {
 	useEffect(() => {
@@ -80,22 +49,6 @@ export const ToastProvider = ({ children }: { children?: Element }) => {
 			{children}
 			{createPortal(
 				<FragmentComponent>
-					<style>{`
-            @keyframes toastSlideUp {
-              from {
-                opacity: 0;
-                transform: translateY(100%);
-              }
-              to {
-                opacity: 1;
-                transform: translateY(0);
-              }
-            }
-            .animate-toast-slide-up {
-              animation: toastSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            }
-          `}</style>
-					{/* Conteneur fixé en bas à droite */}
 					<div className="pointer-events-none fixed right-5 bottom-5 z-50 flex flex-col gap-3">
 						{toasts.map((t) => (
 							<ToastItem key={t.id} toast={t} onClose={removeToast} />
