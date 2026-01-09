@@ -34,21 +34,30 @@ export class ChatGateway {
 		@JWTBody() user: any) 
 	{
 
-		user = {
+		user = { // faire la gestion des rooms? 
 			id : 1,
-			username : "michel"
+			username : "michel",
+			roomId : "hub"
 		};
-		console.log("test", body);
+
+		// user2 = {
+		// 	id = 2,
+		// 	username : "P"
+		// };
+
+
+		// console.log("test", body);
 		//client.to("hub").emit("message", body);
 
-		if (!user) return;
+		//if (!user) return;
 
 		this.chatService.saveGeneralMessage(user.id, body.content);
 
-		client.to("hub").emit("message", {
+		client.to(user.roomId).emit("message", { 
 			userId: user.id,
 			username: user.username,
 			msgContent: body.content,
+			roomId : user.roomId,
 			created_at: new Date().toISOString()
 		});
 	}
@@ -78,6 +87,9 @@ export class ChatGateway {
 
 // tournois : id specifique si doublons ? != historique OK
 
+
+// pour les group chat : limiter a 16 users : taille max des tournois + stockage 
+// plus facile 
 
 
 // regarder socket.io

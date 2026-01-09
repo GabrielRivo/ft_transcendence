@@ -24,4 +24,6 @@ export class GeneralChatService {
 	getGeneralHistory() {
 		return this.statementGetGeneralHistory.all();
 	}
+	// faire un clear history a + de 100 messages
+	// faire un afficher history pour quand les users rejoignent le chat 
 }
