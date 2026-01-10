@@ -1,0 +1,518 @@
+# ==============================================================================
+# RabbitMQ Helm Chart Configuration
+# ==============================================================================
+#
+# Context: ft_transcendence DevOps Module
+# Chart: bitnami/rabbitmq
+# Documentation: https://github.com/bitnami/charts/tree/main/bitnami/rabbitmq
+#
+# Purpose:
+#   This configuration deploys RabbitMQ as the message broker for the
+#   ft_transcendence microservices architecture. RabbitMQ is used for:
+#   - Asynchronous inter-service communication (event bus)
+#   - Game events (match start, score updates, game end)
+#   - User notifications (friend requests, tournament invites)
+#   - Decoupling services for better scalability and resilience
+#
+# Message Patterns:
+#   - Pub/Sub: Broadcasting events to multiple consumers
+#   - Work Queues: Distributing tasks among workers
+#   - RPC: Request-response patterns between services
+#
+# Security:
+#   - Authentication is enabled and managed via External Secrets Operator
+#   - Password is stored in HashiCorp Vault at: secret/shared/rabbitmq
+#   - Erlang cookie (cluster secret) is also managed via Vault
+#   - Pod Security Standards: restricted (non-root, read-only filesystem)
+#
+# Usage:
+#   helm upgrade --install rabbitmq bitnami/rabbitmq \
+#     --namespace production \
+#     --values rabbitmq.yaml
+#
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. Global Configuration
+# ------------------------------------------------------------------------------
+# Global settings that apply to all components of the RabbitMQ deployment.
+
+global:
+  # Use our custom StorageClass for persistent volumes
+  # This ensures data persists across pod restarts with 'Retain' reclaim policy
+  storageClass: "ft-local-path"
+
+# ------------------------------------------------------------------------------
+# 2. Cluster Configuration
+# ------------------------------------------------------------------------------
+# RabbitMQ cluster settings.
+#
+# Decision: Single-node deployment (replicaCount: 1)
+# Justification:
+#   - ft_transcendence is a project-scale application
+#   - Avoids complexity of cluster management and quorum queues
+#   - Reduces resource consumption
+#   - Sufficient for the expected message throughput
+#   - Can be scaled to a cluster later if needed
+#
+# Note: Even with single node, we still need the Erlang cookie for
+# potential future clustering and for tools like rabbitmqctl.
+
+replicaCount: 1
+
+# ------------------------------------------------------------------------------
+# 3. Authentication
+# ------------------------------------------------------------------------------
+# RabbitMQ authentication and authorization configuration.
+#
+# SECURITY: Strong authentication is MANDATORY in production.
+# We use existing Kubernetes Secrets created by External Secrets Operator,
+# which syncs credentials from HashiCorp Vault.
+#
+# Vault Path: secret/shared/rabbitmq
+# Secret Keys: password, erlang_cookie
+# K8s Secret: rabbitmq-credentials (created by ESO)
+
+auth:
+  # --------------------------------------------------------------------------
+  # 3.1 Admin User Credentials
+  # --------------------------------------------------------------------------
+  # The default admin user for RabbitMQ management and AMQP connections.
+
+  # Username for the default admin user
+  # This will be used by microservices to connect to RabbitMQ
+  username: "admin"
+
+  # Reference to existing Kubernetes Secret containing the password
+  # This secret is created by ExternalSecret 'rabbitmq-credentials'
+  existingPasswordSecret: "rabbitmq-credentials"
+
+  # Key within the secret that contains the password value
+  existingSecretPasswordKey: "password"
+
+  # --------------------------------------------------------------------------
+  # 3.2 Erlang Cookie
+  # --------------------------------------------------------------------------
+  # The Erlang cookie is a shared secret used for:
+  #   - Node-to-node authentication in a RabbitMQ cluster
+  #   - CLI tools (rabbitmqctl) to connect to the node
+  #
+  # SECURITY: The Erlang cookie must be kept secret and consistent
+  # across all nodes in a cluster. We manage it via Vault for security.
+
+  # Reference to existing Kubernetes Secret containing the Erlang cookie
+  existingErlangSecret: "rabbitmq-credentials"
+
+  # Key within the secret that contains the Erlang cookie value
+  existingSecretErlangKey: "erlang_cookie"
+
+  # --------------------------------------------------------------------------
+  # 3.3 TLS Configuration (Disabled)
+  # --------------------------------------------------------------------------
+  # TLS for AMQP connections is disabled for now.
+  # Internal cluster communication is already on a private network.
+  # TLS termination happens at the Ingress level for external access.
+  #
+  # TODO: Enable TLS for production hardening if required by security audit
+
+  tls:
+    enabled: false
+
+# ------------------------------------------------------------------------------
+# 4. Resource Management
+# ------------------------------------------------------------------------------
+# Define CPU and memory requests/limits for the RabbitMQ container.
+#
+# These values are tuned for the production namespace LimitRange:
+#   - min: cpu=100m, memory=128Mi
+#   - max: cpu=4, memory=8Gi
+#   - default: cpu=1, memory=1Gi
+#
+# RabbitMQ is more resource-intensive than Redis due to:
+#   - Erlang VM overhead
+#   - Message persistence
+#   - Management plugin
+#
+# 1Gi memory limit provides headroom for typical messaging workloads.
+
+resources:
+  requests:
+    # Guaranteed minimum CPU allocation
+    cpu: "200m"
+    # Guaranteed minimum memory
+    # RabbitMQ needs more memory than Redis for Erlang VM
+    memory: "256Mi"
+  limits:
+    # Maximum CPU burst capacity
+    cpu: "1000m"
+    # Maximum memory (OOM kill if exceeded)
+    # 1Gi allows for message buffering during traffic spikes
+    memory: "1Gi"
+
+# ------------------------------------------------------------------------------
+# 5. Persistence
+# ------------------------------------------------------------------------------
+# Configure persistent storage for RabbitMQ data.
+#
+# RabbitMQ stores:
+#   - Message queues (if persistent messages are used)
+#   - Exchange and queue definitions
+#   - User and permission data
+#   - Virtual host configurations
+#
+# Why persistence?
+#   - Survives pod restarts without losing messages
+#   - Required for durable queues and persistent messages
+#   - Maintains broker state across deployments
+
+persistence:
+  # Enable persistent volume for data durability
+  enabled: true
+
+  # Use our custom StorageClass with 'Retain' reclaim policy
+  storageClass: "ft-local-path"
+
+  # Access mode: ReadWriteOnce (single node access)
+  accessModes:
+    - ReadWriteOnce
+
+  # Storage size for RabbitMQ data
+  # 2Gi provides space for:
+  #   - Message queues during traffic spikes
+  #   - Dead letter queues for failed messages
+  #   - Broker metadata and logs
+  size: "2Gi"
+
+# ------------------------------------------------------------------------------
+# 6. Service Configuration
+# ------------------------------------------------------------------------------
+# Kubernetes Service configuration for RabbitMQ.
+
+service:
+  # Service type: ClusterIP (internal access only)
+  # RabbitMQ should NOT be exposed externally without proper security
+  type: ClusterIP
+
+  # --------------------------------------------------------------------------
+  # 6.1 Port Configuration
+  # --------------------------------------------------------------------------
+  # RabbitMQ exposes multiple ports for different protocols:
+
+  ports:
+    # AMQP 0-9-1 and AMQP 1.0 (main messaging protocol)
+    # Used by microservices for publishing and consuming messages
+    amqp: 5672
+
+    # AMQP over TLS (disabled, but port defined for future use)
+    amqpTls: 5671
+
+    # HTTP API and Management UI
+    # Used for monitoring, management, and health checks
+    manager: 15672
+
+    # Prometheus metrics endpoint
+    # Scraped by Prometheus for monitoring
+    metrics: 9419
+
+    # Erlang distribution (inter-node communication)
+    # Used for clustering and CLI tools
+    epmd: 4369
+
+# ------------------------------------------------------------------------------
+# 7. Management Plugin
+# ------------------------------------------------------------------------------
+# RabbitMQ Management Plugin provides:
+#   - Web-based UI for monitoring and management
+#   - HTTP API for automation and monitoring tools
+#   - Queue/exchange/binding management
+#   - User and permission management
+#   - Message rate and connection statistics
+
+# The management plugin is enabled by default in Bitnami chart
+# Additional configuration for the management UI:
+
+# Load additional plugins beyond the default management plugin
+# extraPlugins: "rabbitmq_shovel rabbitmq_shovel_management"
+
+# --------------------------------------------------------------------------
+# 7.1 Community Plugins (Optional)
+# --------------------------------------------------------------------------
+# Additional plugins can be enabled if needed:
+#   - rabbitmq_delayed_message_exchange: For delayed/scheduled messages
+#   - rabbitmq_consistent_hash_exchange: For load balancing consumers
+#   - rabbitmq_shovel: For moving messages between brokers
+
+communityPlugins: ""
+
+# ------------------------------------------------------------------------------
+# 8. Pod Security Context
+# ------------------------------------------------------------------------------
+# Security settings at the pod level.
+# These comply with Kubernetes Pod Security Standards (PSS) 'restricted' profile.
+#
+# Note: The 'production' namespace enforces 'restricted' PSS, so these
+# settings are mandatory for pods to be scheduled.
+
+podSecurityContext:
+  # Run all containers as non-root user
+  # Bitnami RabbitMQ image runs as UID 1001 by default
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+
+  # Set filesystem group for volume mounts
+  # Ensures the RabbitMQ process can write to persistent volumes
+  fsGroup: 1001
+
+  # Use seccomp profile for additional syscall filtering
+  seccompProfile:
+    type: RuntimeDefault
+
+# ------------------------------------------------------------------------------
+# 9. Container Security Context
+# ------------------------------------------------------------------------------
+# Security settings at the container level.
+# Implements defense-in-depth security principles.
+
+containerSecurityContext:
+  # Run as non-root (redundant with pod level, but explicit)
+  runAsNonRoot: true
+  runAsUser: 1001
+
+  # Prevent privilege escalation via setuid/setgid binaries
+  allowPrivilegeEscalation: false
+
+  # Use read-only root filesystem
+  # RabbitMQ writes to /opt/bitnami/rabbitmq/var which is a volume mount
+  readOnlyRootFilesystem: true
+
+  # Drop all Linux capabilities
+  # RabbitMQ doesn't need any special kernel capabilities
+  capabilities:
+    drop:
+      - ALL
+
+  # Seccomp profile for syscall filtering
+  seccompProfile:
+    type: RuntimeDefault
+
+# ------------------------------------------------------------------------------
+# 10. Metrics & Monitoring
+# ------------------------------------------------------------------------------
+# Prometheus metrics configuration.
+#
+# RabbitMQ exposes metrics via the rabbitmq_prometheus plugin (included
+# in management plugin). Metrics include:
+#   - rabbitmq_connections_total
+#   - rabbitmq_channels_total
+#   - rabbitmq_queues_messages
+#   - rabbitmq_queue_messages_ready
+#   - rabbitmq_queue_messages_unacked
+#   - rabbitmq_message_publish_total
+#   - rabbitmq_message_deliver_total
+#   - And many more...
+
+metrics:
+  # Enable Prometheus metrics endpoint
+  enabled: true
+
+  # --------------------------------------------------------------------------
+  # 10.1 ServiceMonitor
+  # --------------------------------------------------------------------------
+  # Prometheus Operator ServiceMonitor for automatic scrape discovery.
+  # The kube-prometheus-stack will automatically discover and scrape this.
+
+  serviceMonitor:
+    # Enable ServiceMonitor creation
+    enabled: true
+
+    # Namespace where the ServiceMonitor will be created
+    namespace: "production"
+
+    # Scrape interval (how often Prometheus collects metrics)
+    interval: "30s"
+
+    # Scrape timeout (must be less than interval)
+    scrapeTimeout: "10s"
+
+    # Labels to add to the ServiceMonitor
+    labels:
+      app.kubernetes.io/part-of: ft-transcendence
+      monitoring: prometheus
+
+# ------------------------------------------------------------------------------
+# 11. RabbitMQ Configuration
+# ------------------------------------------------------------------------------
+# Custom RabbitMQ server configuration.
+# These settings are applied via rabbitmq.conf format.
+
+# Extra configuration to append to rabbitmq.conf
+extraConfiguration: |-
+  # --------------------------------------------------------------------------
+  # Memory Management
+  # --------------------------------------------------------------------------
+  # High watermark: percentage of available RAM before flow control kicks in
+  # When memory usage exceeds this, RabbitMQ blocks publishing connections
+  # 0.6 = 60% of container memory limit (600Mi out of 1Gi)
+  vm_memory_high_watermark.relative = 0.6
+
+  # Paging threshold: when to start paging messages to disk
+  # 0.5 = start paging when memory is at 50% of high watermark
+  vm_memory_high_watermark_paging_ratio = 0.5
+
+  # --------------------------------------------------------------------------
+  # Disk Management
+  # --------------------------------------------------------------------------
+  # Disk free limit: minimum free disk space before alarms trigger
+  # When disk falls below this, RabbitMQ blocks publishers
+  disk_free_limit.absolute = 500MB
+
+  # --------------------------------------------------------------------------
+  # Connection Settings
+  # --------------------------------------------------------------------------
+  # Heartbeat timeout: detect dead connections
+  # 60 seconds is a good balance between detection speed and overhead
+  heartbeat = 60
+
+  # Maximum number of channels per connection
+  # Limits resource usage per client
+  channel_max = 128
+
+  # --------------------------------------------------------------------------
+  # Queue Settings
+  # --------------------------------------------------------------------------
+  # Default queue type for new queues
+  # classic: Traditional queues (good for single-node)
+  # quorum: Replicated queues (for clustering, more durable)
+  # Note: quorum queues require a cluster, so we use classic
+  default_queue_type = classic
+
+  # Consumer timeout: how long before idle consumers are disconnected
+  # 30 minutes of inactivity
+  consumer_timeout = 1800000
+
+  # --------------------------------------------------------------------------
+  # Logging
+  # --------------------------------------------------------------------------
+  # Log level: debug, info, warning, error, critical, none
+  log.console.level = info
+
+  # Log to console (captured by Kubernetes logging)
+  log.console = true
+
+# ------------------------------------------------------------------------------
+# 12. Network Policy
+# ------------------------------------------------------------------------------
+# Kubernetes NetworkPolicy to restrict traffic to/from RabbitMQ.
+#
+# RabbitMQ should only be accessible from:
+#   - Pods in the same namespace (microservices)
+#   - Prometheus (for metrics scraping)
+
+networkPolicy:
+  # Enable NetworkPolicy creation
+  enabled: true
+
+  # Allow ingress from pods in the same namespace only
+  allowExternal: false
+
+  # Extra ingress rules for Prometheus metrics scraping
+  additionalRules:
+    - ports:
+        - port: 9419
+          protocol: TCP
+        - port: 15692
+          protocol: TCP
+      from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+
+# ------------------------------------------------------------------------------
+# 13. Pod Disruption Budget
+# ------------------------------------------------------------------------------
+# PDB ensures a minimum number of pods remain available during
+# voluntary disruptions (node upgrades, deployments, etc.).
+
+pdb:
+  # Enable PodDisruptionBudget
+  create: true
+
+  # Minimum available pods during disruption
+  # For single node: 0 means the pod can be evicted
+  minAvailable: 0
+
+# ------------------------------------------------------------------------------
+# 14. Liveness and Readiness Probes
+# ------------------------------------------------------------------------------
+# Health check configuration for Kubernetes.
+#
+# These probes ensure:
+#   - Liveness: Container is alive and should not be restarted
+#   - Readiness: Container is ready to accept traffic
+
+livenessProbe:
+  # Enable liveness probe
+  enabled: true
+  # Initial delay before first probe (RabbitMQ takes time to start)
+  initialDelaySeconds: 120
+  # Period between probes
+  periodSeconds: 30
+  # Timeout for each probe
+  timeoutSeconds: 20
+  # Number of failures before container is restarted
+  failureThreshold: 6
+  # Number of successes to be considered healthy
+  successThreshold: 1
+
+readinessProbe:
+  # Enable readiness probe
+  enabled: true
+  # Initial delay before first probe
+  initialDelaySeconds: 10
+  # Period between probes
+  periodSeconds: 30
+  # Timeout for each probe
+  timeoutSeconds: 20
+  # Number of failures before pod is marked unready
+  failureThreshold: 3
+  # Number of successes to be considered ready
+  successThreshold: 1
+
+# ------------------------------------------------------------------------------
+# 15. Labels and Annotations
+# ------------------------------------------------------------------------------
+# Common labels applied to all resources.
+# These help with resource identification, filtering, and Grafana dashboards.
+
+commonLabels:
+  app.kubernetes.io/part-of: ft-transcendence
+  app.kubernetes.io/component: message-broker
+  environment: production
+
+# ------------------------------------------------------------------------------
+# 16. Extra Environment Variables
+# ------------------------------------------------------------------------------
+# Additional environment variables for the RabbitMQ container.
+
+extraEnvVars:
+  []
+  # Example: Set timezone
+  # - name: TZ
+  #   value: "UTC"
+
+# ------------------------------------------------------------------------------
+# 17. Init Containers
+# ------------------------------------------------------------------------------
+# Initialization containers that run before the main RabbitMQ container.
+# Useful for permission fixes or pre-configuration.
+
+initContainers: []
+
+# ------------------------------------------------------------------------------
+# 18. Sidecars
+# ------------------------------------------------------------------------------
+# Additional containers to run alongside RabbitMQ.
+# Useful for log shippers, agents, or custom exporters.
+
+sidecars: []
