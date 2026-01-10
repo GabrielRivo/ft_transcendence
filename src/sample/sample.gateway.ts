@@ -1,17 +1,15 @@
 import {
-	Inject,
 	SubscribeConnection,
 	SubscribeDisconnection,
 	WebSocketGateway,
 	JWTBody,
 } from 'my-fastify-decorators';
 import type { Socket } from 'socket.io';
-import { SampleService } from './sample.service.js';
 
 @WebSocketGateway()
 export class SampleGateway {
-	@Inject(SampleService)
-	private sampleService!: SampleService;
+	// @Inject(SampleService)
+	// private sampleService!: SampleService;
 
 
 	@SubscribeConnection()

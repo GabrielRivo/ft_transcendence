@@ -220,9 +220,9 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 
     if (this.server) {
       const payload = {
-        matchId: match.matchId,
-        player1: match.player1.userId,
-        player2: match.player2.userId,
+        gameId: match.matchId,
+        player1Id: match.player1.userId,
+        player2Id: match.player2.userId,
       };
 
       // Notification de succès

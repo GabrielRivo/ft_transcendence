@@ -37,7 +37,7 @@ export class MatchmakingController {
 		const stats = this.matchmakingService.getQueueStats();
 
 		console.debug(
-      `[MatchmakingController] [getQueueStatsHandler] Returning stats | Size: ${stats.size} | MaxWait: ${stats.oldestRequestWaitTimeMs}ms`
+      `[MatchmakingController] [getQueueStatsHandler] Returning stats | Size: ${stats.size} | Pending: ${stats.pending}`
     );
 
 		return stats;

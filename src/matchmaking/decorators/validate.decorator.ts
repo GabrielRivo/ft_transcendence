@@ -1,4 +1,4 @@
-import { z, ZodSchema } from 'zod';
+import { ZodSchema } from 'zod';
 
 /**
  * Décorateur pour valider automatiquement le résultat d'une méthode asynchrone

@@ -1,4 +1,4 @@
-import { InjectPlugin, Service, OnModuleInit, OnModuleDestroy } from 'my-fastify-decorators';
+import { InjectPlugin, Service } from 'my-fastify-decorators';
 import { Server } from 'socket.io'
 
 @Service()

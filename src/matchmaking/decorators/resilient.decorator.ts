@@ -35,7 +35,7 @@ export interface ResilientOptions<T = any> {
  */
 export function Resilient<T>(options: ResilientOptions) {
   return function (
-    target: any,
+    _target: any,
     propertyKey: string,
     descriptor: PropertyDescriptor
   ) {
