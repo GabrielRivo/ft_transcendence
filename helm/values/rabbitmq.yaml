@@ -326,8 +326,8 @@ metrics:
     # Enable ServiceMonitor creation
     enabled: true
 
-    # Namespace where the ServiceMonitor will be created
-    namespace: "production"
+    # Namespace: Not specified, so it will be created in the same namespace
+    # as the RabbitMQ deployment (dev or production depending on where deployed)
 
     # Scrape interval (how often Prometheus collects metrics)
     interval: "30s"
@@ -484,11 +484,14 @@ readinessProbe:
 # ------------------------------------------------------------------------------
 # Common labels applied to all resources.
 # These help with resource identification, filtering, and Grafana dashboards.
+#
+# Note: The 'environment' label is set dynamically via Helm --set flag
+# during deployment (e.g., --set commonLabels.environment=dev)
 
 commonLabels:
   app.kubernetes.io/part-of: ft-transcendence
   app.kubernetes.io/component: message-broker
-  environment: production
+  # environment: Set via --set commonLabels.environment=<env> during deployment
 
 # ------------------------------------------------------------------------------
 # 16. Extra Environment Variables
