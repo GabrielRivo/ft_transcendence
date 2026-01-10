@@ -76,7 +76,7 @@ apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: redis-credentials
-  namespace: { { NAMESPACE } }
+  namespace: "{{NAMESPACE}}"
   labels:
     app.kubernetes.io/name: redis-credentials
     app.kubernetes.io/component: external-secrets

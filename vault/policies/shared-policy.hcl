@@ -11,14 +11,14 @@
 # - RabbitMQ credentials (connection string, user, pass)
 # - Database public connection info
 #
-# Path format: secret/data/<environment>/shared/<resource>
-# The '+' wildcard matches the environment (e.g., 'dev').
+# Path format: secret/data/shared/<resource>
 # The '*' wildcard matches any sub-path (e.g., 'redis', 'rabbitmq').
-path "secret/data/+/shared/*" {
+# All environments (dev, production) share the same secrets for infrastructure services.
+path "secret/data/shared/*" {
   capabilities = ["read"]
 }
 
 # Allow listing metadata for shared secrets.
-path "secret/metadata/+/shared/*" {
+path "secret/metadata/shared/*" {
   capabilities = ["list"]
 }

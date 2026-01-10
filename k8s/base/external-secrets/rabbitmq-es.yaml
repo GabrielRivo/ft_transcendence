@@ -81,7 +81,7 @@ apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
   name: rabbitmq-credentials
-  namespace: { { NAMESPACE } }
+  namespace: "{{NAMESPACE}}"
   labels:
     app.kubernetes.io/name: rabbitmq-credentials
     app.kubernetes.io/component: external-secrets

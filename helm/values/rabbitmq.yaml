@@ -42,6 +42,32 @@ global:
   # This ensures data persists across pod restarts with 'Retain' reclaim policy
   storageClass: "ft-local-path"
 
+  # Allow using alternative registries for Bitnami images
+  # Since August 2025, some Bitnami images are no longer freely available on docker.io
+  # We use registry-1.docker.io as an alternative
+  security:
+    allowInsecureImages: true
+
+# ------------------------------------------------------------------------------
+# 1.1 Image Configuration
+# ------------------------------------------------------------------------------
+# Use the latest tag instead of specific version tags that may not be available.
+# This ensures the image can always be pulled from the registry.
+#
+# WARNING: Using 'latest' is not recommended for production environments.
+# For production, pin to a specific version that has been tested.
+
+image:
+  # Since August 2025, Bitnami images have been migrated to 'bitnamilegacy' repository
+  # The main bitnami/rabbitmq images are no longer freely available
+  # See: https://github.com/bitnami/containers/issues/83267
+  registry: docker.io
+  repository: bitnamilegacy/rabbitmq
+  # Use a stable version tag from the legacy repository
+  tag: "4.0.5"
+  # Always pull to ensure we have the latest security patches
+  pullPolicy: IfNotPresent
+
 # ------------------------------------------------------------------------------
 # 2. Cluster Configuration
 # ------------------------------------------------------------------------------

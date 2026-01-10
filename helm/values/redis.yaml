@@ -344,12 +344,20 @@ commonConfiguration: |-
   # --------------------------------------------------------------------------
   # Security Hardening
   # --------------------------------------------------------------------------
-  # Disable dangerous commands that could be exploited
-  # These commands are renamed to empty string (effectively disabled)
-  # Note: Some of these may already be disabled by Bitnami image
-  rename-command FLUSHDB ""
-  rename-command FLUSHALL ""
-  rename-command DEBUG ""
+  # Note: In Redis 8.x, the 'rename-command' directive is no longer supported.
+  # Command restrictions should be implemented via Redis ACL (Access Control Lists).
+  #
+  # The default ACL in Redis 8.x already provides good security:
+  # - The 'default' user requires authentication (password from secrets)
+  # - Dangerous commands like DEBUG are restricted by default
+  #
+  # To further restrict commands, configure ACL users:
+  #   user myuser on >password ~keys:* +@all -@dangerous
+  #
+  # For production, consider:
+  # - Creating application-specific users with minimal permissions
+  # - Using 'ACL GENPASS' for secure password generation
+  # - Enabling 'acllog-max-len' for security auditing
 
 # ------------------------------------------------------------------------------
 # 8. Network Policy
