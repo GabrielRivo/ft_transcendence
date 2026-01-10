@@ -154,8 +154,9 @@ class Pong extends Game {
         }
         if (this.gameState === "waiting" || this.gameState === null) {
             this.gameState = "playing";
-            this.nsp!.to(this.id).emit('gameStarted', { gameId: this.id, message: message || `Game ${this.id} is now running.` });
-            
+            this.nsp!.to(this.id).emit('gameStarted', { timestamp: this.services.TimeService!.getTimestamp(), gameId: this.id, message: message || `Game ${this.id} is now running.` });
+            console.log("Game started with timestamp:", this.services.TimeService!.getTimestamp());
+
             this.services.TimeService!.update();
             this.lastFrameTime = this.services.TimeService!.getTimestamp();
 
