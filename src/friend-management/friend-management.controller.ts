@@ -13,45 +13,52 @@ export class FriendManagementController {
 	private blockService!: BlockManagementService
 
 
-	@Post('/friend')
+	@Post('/invite')
 	@BodySchema(AddFriendSchema)
-	add_friend(@Body() data: AddFriendDto) {
+	async send_invitation(@Body() data: AddFriendDto) {
 		try {
-			const blocked1 = this.blockService.is_blocked(data.userId, data.otherId);
-			const blocked2 = this.blockService.is_blocked(data.otherId, data.userId);
+			const blocked1 = await this.blockService.is_blocked(data.userId, data.otherId);
+			const blocked2 = await this.blockService.is_blocked(data.otherId, data.userId);		
 			if (blocked1 || blocked2) {
 				return { 
 					success: false, 
 					message: "User blocked, can't add to friendlist" 
 				};
 			}
-		return this.friend_managementService.add_friend(data.userId, data.otherId);
+		return await this.friend_managementService.sendInvitation(data.userId, data.otherId);
 		} 
 		catch (error: any) {
 			return { success: false, message: error.message };
 		}
 	}
 
+	@Post('/accept')
+	@BodySchema(AddFriendSchema)
+	async accept_invitation(@Body() data: AddFriendDto) {
+		return this.friend_managementService.acceptInvitation(data.userId, data.otherId);
+	}
+
 	@Delete('/friend')
 	@BodySchema(AddFriendSchema)
-	delete_friend(@Body() data: AddFriendDto) {
-		return this.friend_managementService.delete_friend(data.userId, data.otherId)
+	async delete_friend(@Body() data: AddFriendDto) {
+		return this.friend_managementService.deleteFromFriendlist(data.userId, data.otherId)
 	}
 
 
 	@Post('/block')
 	@BodySchema(AddFriendSchema)
-	block_user(@Body() data: AddFriendDto) {
+	async block_user(@Body() data: AddFriendDto) {
+		await this.friend_managementService.deleteFromFriendlist(data.userId, data.otherId);
 		return this.blockService.block_user(data.userId, data.otherId)
 	}
 
 	@Delete('/block')
 	@BodySchema(AddFriendSchema)
-	unblock_user(@Body() data: AddFriendDto) {
+	async unblock_user(@Body() data: AddFriendDto) {
 		return this.blockService.unblock_user(data.userId, data.otherId)
 	}
 }
- 
+
 	// @Get('/friend/:id')
 	// get_friend(@Param("id") id : number){
 	// 	return { 

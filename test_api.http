@@ -1,4 +1,4 @@
-### Tester l'ajout d'un match
+### Add match to history
 POST http://localhost:3000/match-history
 Content-Type: application/json
 
@@ -9,7 +9,7 @@ Content-Type: application/json
   "scoreUser2": 8
 }
 
-### Tester la sécurité (jouer contre soi-même) -> Doit renvoyer une erreur
+### Selfmatch
 POST http://localhost:3000/match-history
 Content-Type: application/json
 
@@ -20,16 +20,16 @@ Content-Type: application/json
   "scoreUser2": 8
 }
 
-### Tester la récupération de l'historique
+### Get history
 GET http://localhost:3000/match-history/1
 ### Variables
 @baseUrl = http://localhost:3000/friend-management
 ### -----------------------------------------------------------
-### GESTION DES AMIS
+### FRIENDS
 ### -----------------------------------------------------------
 
-### 1. Ajouter un ami (Utilisateur 1 ajoute l'utilisateur 2)
-POST {{baseUrl}}/friend
+### Send invit
+POST {{baseUrl}}/invite
 Content-Type: application/json
 
 {
@@ -37,7 +37,16 @@ Content-Type: application/json
   "otherId": 2
 }
 
-### 2. Supprimer un ami
+### Accept invit
+POST {{baseUrl}}/accept
+Content-Type: application/json
+
+{
+  "userId": 2,
+  "otherId": 1
+}
+
+### Delete friend
 DELETE {{baseUrl}}/friend
 Content-Type: application/json
 
@@ -48,10 +57,10 @@ Content-Type: application/json
 
 
 ### -----------------------------------------------------------
-### GESTION DES BLOCAGES
+### Block
 ### -----------------------------------------------------------
 
-### 3. Bloquer un utilisateur (Utilisateur 1 bloque l'utilisateur 3)
+### Bloc user
 POST {{baseUrl}}/block
 Content-Type: application/json
 
@@ -61,7 +70,7 @@ Content-Type: application/json
 }
 
 
-### 3. Bloquer un friend
+### Bloc friend
 POST {{baseUrl}}/block
 Content-Type: application/json
 
@@ -70,7 +79,7 @@ Content-Type: application/json
   "otherId": 2
 }
 
-### 3. delete le blocked
+### Remove block
 DELETE  {{baseUrl}}/block
 Content-Type: application/json
 
@@ -79,7 +88,7 @@ Content-Type: application/json
   "otherId": 2
 }
 
-### 3. Bloquer soi meme 
+### Self block
 POST {{baseUrl}}/block
 Content-Type: application/json
 
@@ -88,7 +97,7 @@ Content-Type: application/json
   "otherId": 1
 }
 
-### 4. Débloquer un utilisateur
+### Unblock
 DELETE {{baseUrl}}/block
 Content-Type: application/json
 
@@ -96,3 +105,16 @@ Content-Type: application/json
   "userId": 1,
   "otherId": 3
 }
+
+
+### -----------------------------------------------------------
+### Send message (general)
+### -----------------------------------------------------------
+
+
+### Get history
+GET http://localhost:3000/chat/general/history
+Content-Type: application/json
+
+
+

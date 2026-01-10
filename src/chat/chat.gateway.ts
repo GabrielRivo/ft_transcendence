@@ -12,6 +12,7 @@ import {
 } from 'my-fastify-decorators';
 import { Socket } from 'socket.io';
 import { GeneralChatService } from './general-chat/general-chat.service.js';
+import { BlockManagementService } from '../friend-management/block-management.service.js';
 import {ChatSchema, ChatDto }  from './dto/chat.dto.js'
 
 
@@ -20,25 +21,29 @@ export class ChatGateway {
 	@Inject(GeneralChatService)
 	private chatService!: GeneralChatService;
 
+	@Inject(BlockManagementService)
+	private blockService!: BlockManagementService;
+
+
 	@SubscribeConnection()
 	handleConnection(@ConnectedSocket() client: Socket) {
 		console.log(`Client connected: ${client.id}`);
-		client.join("hub");
+		//client.join("hub");
 	}
 
 	@SubscribeMessage("message")
 	@SocketSchema(ChatSchema)
-	handleMessage(
+	async handleMessage(
 		@ConnectedSocket() client: Socket, 
 		@MessageBody() body: ChatDto,    
 		@JWTBody() user: any) 
 	{
 
-		user = { // faire la gestion des rooms? 
-			id : 1,
-			username : "michel",
-			roomId : "hub"
-		};
+		// user = { // faire la gestion des rooms? 
+		// 	id : 1,
+		// 	username : "michel",
+		// 	roomId : "hub"
+		// };
 
 		// user2 = {
 		// 	id = 2,
@@ -50,16 +55,45 @@ export class ChatGateway {
 		//client.to("hub").emit("message", body);
 
 		//if (!user) return;
+		const sender = user || { id: 1, username: "michel" };
+		const { content, roomId } = body;
+		const targetRoom = roomId || "hub";
+		const sockets = await client.nsp.in(targetRoom).fetchSockets();
 
-		this.chatService.saveGeneralMessage(user.id, body.content);
+		if (targetRoom === "hub") {
+			await this.chatService.saveGeneralMessage(sender.id, content);
+		} else {
+			// register in other room later
+		}
+		for (const socket of sockets) {
+			const recipientId = socket.data.userId;
+		
+			if (recipientId) {
+				const isBlocked = await this.blockService.is_blocked(recipientId, sender.id);
+				if (isBlocked) continue;
+			}
+			this.chatService.saveGeneralMessage(user.id, body.content);
+			socket.emit("message", { 
+				userId: user.id,
+				username: user.username,
+				msgContent: body.content,
+				roomId : user.roomId,
+				created_at: new Date().toISOString()
+			});
+		}
+	}
 
-		client.to(user.roomId).emit("message", { 
-			userId: user.id,
-			username: user.username,
-			msgContent: body.content,
-			roomId : user.roomId,
-			created_at: new Date().toISOString()
-		});
+		// client.to(user.roomId).emit("message", { // test
+		// 	userId: user.id,
+		// 	username: user.username,
+		// 	msgContent: body.content,
+		// 	roomId : user.roomId,
+		// 	created_at: new Date().toISOString()
+		// });
+
+	@SubscribeMessage("join_room")
+	handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() data: { roomId: string }) {
+		client.join(data.roomId);
 	}
 
 	@SubscribeDisconnection()

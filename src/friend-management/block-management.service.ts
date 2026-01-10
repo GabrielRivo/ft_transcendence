@@ -29,8 +29,8 @@ export class BlockManagementService {
 			return { success: false, message: "You cannot block yourself" };
 		}
 		try {
-			this.friendService.delete_friend(userId, otherId)
-			this.friendService.delete_friend(otherId, userId);
+			this.friendService.deleteFromFriendlist(userId, otherId)
+			this.friendService.deleteFromFriendlist(otherId, userId);
 			this.statementBlock.run({ userId, otherId });
 			return { success: true, message: "Block user" };
 		} catch (e) {
@@ -47,7 +47,7 @@ export class BlockManagementService {
 		}
 	}
 
-	is_blocked(userId: number, otherId: number): boolean {
+	async is_blocked(userId: number, otherId: number): Promise <boolean> {
 		return !!this.statementIsBlocked.get({ userId, otherId });
 	}
 }

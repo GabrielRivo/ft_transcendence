@@ -6,22 +6,25 @@ import { InjectPlugin, Service } from 'my-fastify-decorators';
 export class PrivateChatService {
 	@InjectPlugin('db')
 	private db !: Database.Database;
-	private statementSavePrivate !: Statement<{ userId: number, msgContent: string }>;
-	private statementGetPrivateHistory !: Statement<[]>;
+	private statementSavePrivate !: Statement<{ userId1: number, userId2 : number,  msgContent: string }>;
+	private statementGetPrivateHistory !: Statement<{userId1 : number, userId2 : number}>;
 
 	onModuleInit() {
 		this.statementSavePrivate = this.db.prepare(
-		`INSERT INTO privateChatHistory (userId, msgContent) VALUES (@userId, @msgContent)`
+		`INSERT INTO privateChatHistory (userId1, userId2, msgContent) VALUES (@userId1, @userId2, @msgContent)`
 		);
 		this.statementGetPrivateHistory = this.db.prepare(
-			`SELECT * FROM privateChatHistory ORDER BY created_at DESC LIMIT 50`
+			`SELECT * FROM privateChatHistory WHERE (userId1 = @userId1 AND userId2 = @userId2)
+				OR (userId2 = @userId2 AND userId1 = @userId1)
+					ORDER BY created_at DESC LIMIT 50`
 		);
 	}
-	savePrivateMessage(userId: number, content: string) {
-		return this.statementSavePrivate.run({ userId, msgContent: content });
+	savePrivateMessage(userId1 : number, userId2 : number, content: string) {
+		return this.statementSavePrivate.run({userId1, userId2, msgContent: content });
 	}
 
-	getPrivateHistory() {
-		return this.statementGetPrivateHistory.all();
+	getPrivateHistory(user1 : number, user2 : number) {
+		const history = this.statementGetPrivateHistory.all({userId1 : user1, userId2 : user2})
+		return history.reverse();
 	}
 }

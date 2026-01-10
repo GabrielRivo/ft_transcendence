@@ -1,5 +1,6 @@
 import Database, { Statement } from 'better-sqlite3';
-import { InjectPlugin, Service } from 'my-fastify-decorators';
+import { InjectPlugin, Service, Inject } from 'my-fastify-decorators';
+import { BlockManagementService } from '../../friend-management/block-management.service.js';
 
 
 @Service()
@@ -9,6 +10,9 @@ export class GeneralChatService {
 	private statementSaveGeneral !: Statement<{ userId: number, msgContent: string }>;
 	private statementGetGeneralHistory !: Statement<[]>;
 
+	@Inject(BlockManagementService)
+	private blockService!: BlockManagementService;
+
 	onModuleInit() {
 		this.statementSaveGeneral = this.db.prepare(
 		`INSERT INTO generalChatHistory (userId, msgContent) VALUES (@userId, @msgContent)`
@@ -17,13 +21,23 @@ export class GeneralChatService {
 			`SELECT * FROM generalChatHistory ORDER BY created_at DESC LIMIT 50`
 		);
 	}
-	saveGeneralMessage(userId: number, content: string) {
+	async saveGeneralMessage(userId: number, content: string) {
 		return this.statementSaveGeneral.run({ userId, msgContent: content });
 	}
 
-	getGeneralHistory() {
-		return this.statementGetGeneralHistory.all();
+	async getGeneralHistory(currentUserId: number) {
+		const rows = this.statementGetGeneralHistory.all() as any[];
+		const filteredHistory = []; 
+		for (const msg of rows) {
+			const blocked = await this.blockService.is_blocked(currentUserId, msg.userId);
+			if (!blocked) {
+				filteredHistory.push(msg);
+			}
+		}
+		return filteredHistory;
 	}
-	// faire un clear history a + de 100 messages
-	// faire un afficher history pour quand les users rejoignent le chat 
 }
+// return this.statementGetGeneralHistory.all();
+
+// faire un clear history a + de 100 messages
+// faire un afficher history pour quand les users rejoignent le chat 
