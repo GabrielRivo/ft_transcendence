@@ -1,0 +1,213 @@
+# ==============================================================================
+# External Secret Configuration for RabbitMQ
+# ==============================================================================
+#
+# Context: ft_transcendence DevOps Module
+# Component: External Secrets Operator / RabbitMQ Integration
+#
+# Purpose:
+#   This manifest configures the External Secrets Operator (ESO) to synchronize
+#   RabbitMQ authentication credentials from HashiCorp Vault to a Kubernetes
+#   Secret. The Secret is then consumed by the RabbitMQ Helm chart.
+#
+# Multi-Environment Support:
+#   This file is a TEMPLATE designed to be applied to multiple namespaces.
+#   The placeholder {{NAMESPACE}} must be replaced before applying.
+#
+#   Usage:
+#     # For dev namespace
+#     sed 's/{{NAMESPACE}}/dev/g' rabbitmq-es.yaml | kubectl apply -f -
+#
+#     # For production namespace
+#     sed 's/{{NAMESPACE}}/production/g' rabbitmq-es.yaml | kubectl apply -f -
+#
+# Prerequisites:
+#   1. Vault must be running and unsealed
+#   2. Secret must exist at: secret/shared/rabbitmq (created by init-secrets.sh)
+#   3. SecretStore 'vault-backend' must be configured in the target namespace
+#      (created by infra-secretstore.yaml)
+#   4. Vault role 'infra-role' must allow access from the target namespace
+#      (configured in kubernetes-auth.sh)
+#
+# Vault Secret Structure:
+#   Path: secret/shared/rabbitmq
+#   Keys:
+#     - password: RabbitMQ admin user password (32 alphanumeric chars)
+#     - erlang_cookie: Erlang cluster authentication cookie (64 hex chars)
+#
+# Target Kubernetes Secret:
+#   Name: rabbitmq-credentials
+#   Keys:
+#     - password: Used by RabbitMQ Helm chart (auth.existingSecretPasswordKey)
+#     - erlang_cookie: Used by RabbitMQ Helm chart (auth.existingSecretErlangKey)
+#
+# See:
+#   - https://external-secrets.io/latest/api/externalsecret/
+#   - https://www.rabbitmq.com/clustering.html#erlang-cookie
+#   - infrastructure/scripts/init-secrets.sh (secret generation)
+#   - infrastructure/helm/values/rabbitmq.yaml (secret consumption)
+#
+# ==============================================================================
+
+---
+# ==============================================================================
+# ExternalSecret for RabbitMQ Credentials
+# ==============================================================================
+# An ExternalSecret defines WHAT secrets to fetch from the external provider
+# and how to map them to a Kubernetes Secret.
+#
+# This ExternalSecret fetches RabbitMQ authentication credentials from Vault
+# and creates a Kubernetes Secret that the Bitnami RabbitMQ Helm chart will use.
+#
+# RabbitMQ requires TWO secrets:
+#   1. password: Admin user password for AMQP connections and Management UI
+#   2. erlang_cookie: Shared secret for Erlang node-to-node authentication
+#
+# Lifecycle:
+#   1. ESO controller detects this ExternalSecret
+#   2. ESO authenticates to Vault using the referenced SecretStore
+#   3. ESO fetches the secret data from Vault path 'secret/shared/rabbitmq'
+#   4. ESO creates/updates Kubernetes Secret 'rabbitmq-credentials'
+#   5. RabbitMQ pods mount the secret for authentication
+#   6. ESO periodically refreshes the secret (every 15 minutes)
+#
+# Secret Rotation Considerations:
+#   - Password rotation: Requires updating client connection strings
+#   - Erlang cookie rotation: Requires cluster restart (all nodes must share
+#     the same cookie). DO NOT rotate unless absolutely necessary.
+#
+# ==============================================================================
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: rabbitmq-credentials
+  namespace: { { NAMESPACE } }
+  labels:
+    app.kubernetes.io/name: rabbitmq-credentials
+    app.kubernetes.io/component: external-secrets
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/managed-by: kubectl
+    # Label to identify this as a RabbitMQ-related resource
+    app.kubernetes.io/instance: rabbitmq
+spec:
+  # ---------------------------------------------------------------------------
+  # SecretStore Reference
+  # ---------------------------------------------------------------------------
+  # Reference to the SecretStore that defines how to connect to Vault.
+  # The SecretStore must exist in the same namespace as this ExternalSecret.
+  # Created by: infra-secretstore.yaml
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+
+  # ---------------------------------------------------------------------------
+  # Refresh Interval
+  # ---------------------------------------------------------------------------
+  # How often ESO checks for secret updates in Vault.
+  #
+  # 15 minutes is appropriate for RabbitMQ credentials because:
+  #   - Password changes are infrequent
+  #   - Erlang cookie should almost never change
+  #   - Reduces load on Vault API
+  refreshInterval: "15m"
+
+  # ---------------------------------------------------------------------------
+  # Target Kubernetes Secret Configuration
+  # ---------------------------------------------------------------------------
+  target:
+    # Name of the Kubernetes Secret to create.
+    # This must match the values in rabbitmq.yaml:
+    #   auth.existingPasswordSecret: "rabbitmq-credentials"
+    #   auth.existingErlangSecret: "rabbitmq-credentials"
+    name: rabbitmq-credentials
+
+    # CreationPolicy: ESO owns the Secret, deletes it when ExternalSecret is deleted
+    creationPolicy: Owner
+
+    # Template to customize the Secret metadata
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/name: rabbitmq-credentials
+          app.kubernetes.io/component: message-broker
+          app.kubernetes.io/part-of: ft-transcendence
+        annotations:
+          # Annotation to track the secret source
+          external-secrets.io/source: "vault:secret/shared/rabbitmq"
+          # Warning about Erlang cookie sensitivity
+          rabbitmq.com/erlang-cookie-warning: "Do not rotate unless cluster is being rebuilt"
+
+  # ---------------------------------------------------------------------------
+  # Data Mapping: Vault -> Kubernetes Secret
+  # ---------------------------------------------------------------------------
+  # Each entry maps a Vault secret field to a Kubernetes Secret key.
+  #
+  # RabbitMQ requires two secrets:
+  #   1. password - For admin user authentication
+  #   2. erlang_cookie - For Erlang distribution protocol authentication
+  # ---------------------------------------------------------------------------
+  data:
+    # -------------------------------------------------------------------------
+    # RabbitMQ Admin Password
+    # -------------------------------------------------------------------------
+    # The authentication password for the RabbitMQ admin user.
+    #
+    # Vault Path: secret/shared/rabbitmq
+    # Vault Key: password
+    # K8s Secret Key: password
+    #
+    # This password is used by:
+    #   - RabbitMQ server for client authentication
+    #   - Microservices connecting via AMQP protocol
+    #   - Management UI login (user: admin, password: <this value>)
+    #   - rabbitmqctl commands for administration
+    #
+    # AMQP Connection String Format:
+    #   amqp://admin:PASSWORD@rabbitmq.{{NAMESPACE}}.svc.cluster.local:5672
+    #
+    # Security Notes:
+    #   - Password is 32 alphanumeric characters (generated by init-secrets.sh)
+    #   - Provides ~190 bits of entropy
+    #   - Rotate via: vault kv patch secret/shared/rabbitmq password=NEW
+    # -------------------------------------------------------------------------
+    - secretKey: password
+      remoteRef:
+        key: secret/shared/rabbitmq
+        property: password
+
+    # -------------------------------------------------------------------------
+    # Erlang Cookie
+    # -------------------------------------------------------------------------
+    # The Erlang cookie is a shared secret used for node-to-node authentication
+    # in the Erlang distribution protocol.
+    #
+    # Vault Path: secret/shared/rabbitmq
+    # Vault Key: erlang_cookie
+    # K8s Secret Key: erlang_cookie
+    #
+    # Purpose:
+    #   - Authenticates Erlang nodes in a RabbitMQ cluster
+    #   - Required for rabbitmqctl CLI to communicate with the server
+    #   - Must be identical across all nodes in a cluster
+    #
+    # Security Notes:
+    #   - Cookie is 64 hex characters (32 bytes, generated by init-secrets.sh)
+    #   - Provides 256 bits of entropy
+    #   - DO NOT rotate unless rebuilding the entire cluster
+    #   - Changing the cookie requires stopping all nodes simultaneously
+    #
+    # Technical Details:
+    #   - Stored in /var/lib/rabbitmq/.erlang.cookie inside the container
+    #   - Used by Erlang Port Mapper Daemon (epmd) for node discovery
+    #   - See: https://www.rabbitmq.com/clustering.html#erlang-cookie
+    #
+    # WARNING:
+    #   Rotating the Erlang cookie on a running cluster will cause:
+    #   - All inter-node communication to fail
+    #   - CLI tools (rabbitmqctl) to fail
+    #   - Cluster partitioning and potential data loss
+    # -------------------------------------------------------------------------
+    - secretKey: erlang_cookie
+      remoteRef:
+        key: secret/shared/rabbitmq
+        property: erlang_cookie
