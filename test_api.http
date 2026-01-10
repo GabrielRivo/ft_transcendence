@@ -37,6 +37,15 @@ Content-Type: application/json
   "otherId": 2
 }
 
+### Send invit (bloc)
+POST {{baseUrl}}/invite
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "otherId": 3
+}
+
 ### Accept invit
 POST {{baseUrl}}/accept
 Content-Type: application/json
@@ -55,6 +64,14 @@ Content-Type: application/json
   "otherId": 2
 }
 
+### Add someone who blocked you
+POST {{baseUrl}}/invite
+Content-Type: application/json
+
+{
+  "userId": 3,
+  "otherId" : 1
+}
 
 ### -----------------------------------------------------------
 ### Block
@@ -113,7 +130,7 @@ Content-Type: application/json
 
 
 ### Get history
-GET http://localhost:3000/chat/general/history
+GET http://localhost:3000/chat/general/history/all
 Content-Type: application/json
 
 

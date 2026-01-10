@@ -15,7 +15,7 @@ ORDER BY created_at DESC;
 `;
 
 @Service()
-export class MatchHistoryService { // m?
+export class MatchHistoryService {
 	@InjectPlugin('db')
 	private db !: Database.Database;
 
@@ -51,12 +51,12 @@ export class MatchHistoryService { // m?
 
 	get_user_matches(userId: number) {
 		try {
-        return this.statementGet.all(userId, userId);
-    } catch (error) {
-        console.error("ERREUR SQLITE :", error); // Regarde ton terminal après avoir lancé la requête
-        throw error;
+		return this.statementGet.all(userId, userId);
+	} catch (error) {
+		console.error("ERREUR SQLITE :", error);
+		throw error;
 	}
-        // return this.statementGet.all(userId, userId);
+		// return this.statementGet.all(userId, userId);
 	}
 	
 	// delete_match_from_history(userId1 : number, userId2	: number, 

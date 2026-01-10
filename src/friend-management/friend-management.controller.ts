@@ -17,15 +17,22 @@ export class FriendManagementController {
 	@BodySchema(AddFriendSchema)
 	async send_invitation(@Body() data: AddFriendDto) {
 		try {
-			const blocked1 = await this.blockService.is_blocked(data.userId, data.otherId);
-			const blocked2 = await this.blockService.is_blocked(data.otherId, data.userId);		
-			if (blocked1 || blocked2) {
+			let blocked1Promise = this.blockService.is_blocked(data.userId, data.otherId);
+			let blocked2Promise = this.blockService.is_blocked(data.otherId, data.userId);		
+			const [blocked1, blocked2] = await Promise.all([blocked1Promise, blocked2Promise]);
+			if (blocked1) {
 				return { 
 					success: false, 
 					message: "User blocked, can't add to friendlist" 
 				};
 			}
-		return await this.friend_managementService.sendInvitation(data.userId, data.otherId);
+			else if (blocked2) {
+				return {
+					success: false, 
+					message: "You can't add this user" 
+				};
+			}
+		return this.friend_managementService.sendInvitation(data.userId, data.otherId);
 		} 
 		catch (error: any) {
 			return { success: false, message: error.message };
@@ -48,7 +55,7 @@ export class FriendManagementController {
 	@Post('/block')
 	@BodySchema(AddFriendSchema)
 	async block_user(@Body() data: AddFriendDto) {
-		await this.friend_managementService.deleteFromFriendlist(data.userId, data.otherId);
+		this.friend_managementService.deleteFromFriendlist(data.userId, data.otherId);
 		return this.blockService.block_user(data.userId, data.otherId)
 	}
 

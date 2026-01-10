@@ -13,7 +13,6 @@ export class BlockManagementService {
 
 	@Inject(FriendManagementService)
 	private friendService!: FriendManagementService;
-
 	private statementBlock !: Statement<{ userId: number, otherId: number }>;
 	private statementUnblock !: Statement<{ userId: number, otherId: number }>;
 	private statementIsBlocked !: Statement<{ userId: number, otherId: number }>;
@@ -38,7 +37,7 @@ export class BlockManagementService {
 		}
 	}
 
-	unblock_user(userId: number, otherId: number) {
+	unblock_user(userId: number, otherId: number) { // mettre une exception : error 300 ? 
 		const result = this.statementUnblock.run({ userId, otherId });
 		if (result.changes > 0) {
 			return { success: true, message: "Unblocked user" };

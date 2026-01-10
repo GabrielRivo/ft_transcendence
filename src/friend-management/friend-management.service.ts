@@ -22,20 +22,10 @@ export class FriendManagementService {
 	@InjectPlugin('db')
 	private db !: Database.Database;
 
-	private statementInvit : Statement<{
-		userId : number, 
-		otherId : number,
-	}>
-
-	private statementAcceptInvit : Statement<{
-		userId : number, 
-		otherId : number,
-	}>
-
-	private statementDeleteFromFriendList : Statement<{
-		userId : number, 
-		otherId : number
-	}>
+	private statementInvit : Statement<{userId : number, otherId : number,}>
+	private statementAcceptInvit : Statement<{userId : number, otherId : number,}>
+	private statementDeleteFromFriendList : Statement<{userId : number, otherId : number}>
+	private statementIsFriend!: Statement<{ userId: number, otherId: number }>;
 
 	onModuleInit(){
 		this.statementInvit = this.db.prepare(Invit);
@@ -43,7 +33,7 @@ export class FriendManagementService {
 		this.statementDeleteFromFriendList = this.db.prepare(DeleteFromFriendList);
 	}
 
-	async sendInvitation(userId: number, otherId: number) {
+	sendInvitation(userId: number, otherId: number) {
 		if (userId === otherId)
 			throw new Error("Self-friendship");
 		try {
@@ -55,7 +45,7 @@ export class FriendManagementService {
 		}
 	}
 
-	async acceptInvitation(myId: number, senderId: number) {
+	acceptInvitation(myId: number, senderId: number) {
 		const result = this.statementAcceptInvit.run({ userId: myId, otherId: senderId });
 		if (result.changes === 0) {
 			return { success: false, message: "No invitation pending" };
@@ -63,7 +53,12 @@ export class FriendManagementService {
 		return { success: true, message: "Friend added" };
 	}
 
-	async deleteFromFriendlist(userId: number, otherId: number) {
+	async is_friend(userId: number, otherId: number): Promise <boolean> {
+		return !!this.statementIsFriend.get({ userId, otherId });
+	}
+
+
+	deleteFromFriendlist(userId: number, otherId: number) {
 		const result = this.statementDeleteFromFriendList.run({ userId, otherId });
 		if (result.changes > 0 ) {
 			return { success: true, message: "Deleted relationship" }

@@ -1,4 +1,4 @@
-import { Controller, Get, Inject } from 'my-fastify-decorators';
+import { Controller, Get, Inject, Param } from 'my-fastify-decorators';
 import { PrivateChatService } from './private-chat.service.js';
 
 @Controller('/chat/private')
@@ -8,8 +8,9 @@ export class PrivateChatController {
 	private chatService!: PrivateChatService;
 
 	@Get('/private_history')
-	async get_history() {
-		const history = this.chatService.getPrivateHistory();
-		return history.reverse();
+	async get_history(@Param('userId1') userId1: string , 
+		@Param('userId2') userId2: string) {
+			const history = this.chatService.getPrivateHistory(Number(userId1), Number(userId2));
+			return history.reverse();
 	}
 }

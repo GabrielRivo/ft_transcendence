@@ -10,26 +10,62 @@ import {
 	SocketSchema,
 	
 } from 'my-fastify-decorators';
+
 import { Socket } from 'socket.io';
 import { GeneralChatService } from './general-chat/general-chat.service.js';
+import { PrivateChatService } from './private-chat/private-chat.service.js';
 import { BlockManagementService } from '../friend-management/block-management.service.js';
 import {ChatSchema, ChatDto }  from './dto/chat.dto.js'
 
 
+
 @WebSocketGateway('/chat')
 export class ChatGateway {
+	// @InjectPlugin('io')
+	// private server!: Server;
+
 	@Inject(GeneralChatService)
-	private chatService!: GeneralChatService;
+	private generalChatService!: GeneralChatService;
+
+	@Inject(PrivateChatService)
+	private privateChatService!: PrivateChatService;
 
 	@Inject(BlockManagementService)
 	private blockService!: BlockManagementService;
 
-
 	@SubscribeConnection()
 	handleConnection(@ConnectedSocket() client: Socket) {
 		console.log(`Client connected: ${client.id}`);
-		//client.join("hub");
+		client.join("hub");
 	}
+
+	@SubscribeMessage("join_private_room")
+	async handleJoinPrivateRoom(@ConnectedSocket() client: Socket, @MessageBody() data: { friendId: number })
+	{
+		const userId = client.data.id;
+		const friendId = client.data.friendId
+
+		const roomId = await this.privateChatService.createPrivateRoom(userId, friendId)
+		if (typeof(roomId) != 'string')
+			return { message : "Failed to create the mp between users"} // voir si client -> emit
+		client.join(roomId);
+
+		const history = await this.privateChatService.getPrivateHistory(userId, friendId);
+		client.emit('private_history', history);
+	}
+	
+	@SubscribeMessage("send_private_message")
+	async handleSendPrivateMessage(@ConnectedSocket() client: Socket, @MessageBody() data: { friendId : number, content : string})
+	{
+		const fromId = client.data.userId
+		const { friendId, content } = data
+		this.privateChatService.savePrivateMessage(fromId, friendId, content) // await?
+		const roomId = `room_${Math.min(fromId, friendId)}_${Math.max(fromId, friendId)}`;
+
+		client.to(roomId).emit('new_private_message', { fromId, content, timestamp: new Date() });
+
+	}
+
 
 	@SubscribeMessage("message")
 	@SocketSchema(ChatSchema)
@@ -38,59 +74,25 @@ export class ChatGateway {
 		@MessageBody() body: ChatDto,    
 		@JWTBody() user: any) 
 	{
-
-		// user = { // faire la gestion des rooms? 
-		// 	id : 1,
-		// 	username : "michel",
-		// 	roomId : "hub"
-		// };
-
-		// user2 = {
-		// 	id = 2,
-		// 	username : "P"
-		// };
-
-
-		// console.log("test", body);
-		//client.to("hub").emit("message", body);
-
-		//if (!user) return;
 		const sender = user || { id: 1, username: "michel" };
 		const { content, roomId } = body;
 		const targetRoom = roomId || "hub";
-		const sockets = await client.nsp.in(targetRoom).fetchSockets();
+		// const sockets = await client.nsp.in(targetRoom).fetchSockets();
 
 		if (targetRoom === "hub") {
-			await this.chatService.saveGeneralMessage(sender.id, content);
+			console.log(sender)
 		} else {
 			// register in other room later
 		}
-		for (const socket of sockets) {
-			const recipientId = socket.data.userId;
-		
-			if (recipientId) {
-				const isBlocked = await this.blockService.is_blocked(recipientId, sender.id);
-				if (isBlocked) continue;
-			}
-			this.chatService.saveGeneralMessage(user.id, body.content);
-			socket.emit("message", { 
-				userId: user.id,
-				username: user.username,
-				msgContent: body.content,
-				roomId : user.roomId,
+			client.broadcast.in(targetRoom).emit("message", { 
+				userId: sender.id,
+				username: sender.username,
+				msgContent: content,
+				roomId : roomId,
 				created_at: new Date().toISOString()
 			});
-		}
+		// }
 	}
-
-		// client.to(user.roomId).emit("message", { // test
-		// 	userId: user.id,
-		// 	username: user.username,
-		// 	msgContent: body.content,
-		// 	roomId : user.roomId,
-		// 	created_at: new Date().toISOString()
-		// });
-
 	@SubscribeMessage("join_room")
 	handleJoinRoom(@ConnectedSocket() client: Socket, @MessageBody() data: { roomId: string }) {
 		client.join(data.roomId);
@@ -101,11 +103,6 @@ export class ChatGateway {
 		console.log(`Client disconnected: ${client.id}`);
 	}
 }
-
-
-
-// @ConnectedSocket() client: Socket, @MessageBody() message: string, @JWTBody() user : any
-
 
 // gestion des amis : par son username -> get l'id par le user managemement 
 // table de demande d'ami : rajouter pending : si accepter -> enable, sinon delete
@@ -124,37 +121,3 @@ export class ChatGateway {
 
 // pour les group chat : limiter a 16 users : taille max des tournois + stockage 
 // plus facile 
-
-
-// regarder socket.io
-
-
-
-
-// @WebSocketGateway()
-// export class ChatGateway {
-// 	@Inject(ChatService)
-// 	private chatService!: ChatService;
-	
-// 	@SubscribeConnection()
-// 	handleConnection(@ConnectedSocket() client: Socket) {
-// 		console.log(`Client connected: ${client.id}`);
-// 		client.join("hub");
-// 	}
-	
-// 	@SubscribeMessage("message")
-// 	handleMessage(@ConnectedSocket() client: Socket, @MessageBody() body : any) {
-		
-		
-// 		client.broadcast.emit("message", 
-// 			`${client.id}: a envoyer un message`
-// 		)
-// 		client.broadcast.to("hub").emit()
-// 	}
-	
-	
-// 	@SubscribeDisconnection()
-// 	handleDisconnect(@ConnectedSocket() client: Socket) {
-// 		console.log(`Client disconnected: ${client.id}`);
-// 	}
-// }

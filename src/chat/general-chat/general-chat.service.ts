@@ -9,6 +9,8 @@ export class GeneralChatService {
 	private db !: Database.Database;
 	private statementSaveGeneral !: Statement<{ userId: number, msgContent: string }>;
 	private statementGetGeneralHistory !: Statement<[]>;
+	private statementGetAllGeneralHistory !: Statement<[]>;
+
 
 	@Inject(BlockManagementService)
 	private blockService!: BlockManagementService;
@@ -20,9 +22,17 @@ export class GeneralChatService {
 		this.statementGetGeneralHistory = this.db.prepare(
 			`SELECT * FROM generalChatHistory ORDER BY created_at DESC LIMIT 50`
 		);
+		this.statementGetAllGeneralHistory = this.db.prepare(
+			`SELECT * FROM generalChatHistory ORDER BY created_at DESC LIMIT 100`);
 	}
 	async saveGeneralMessage(userId: number, content: string) {
+		try {
 		return this.statementSaveGeneral.run({ userId, msgContent: content });
+		}
+		catch(e) {
+			console.log(e)
+			return null;
+		}
 	}
 
 	async getGeneralHistory(currentUserId: number) {
@@ -35,6 +45,10 @@ export class GeneralChatService {
 			}
 		}
 		return filteredHistory;
+	}
+
+	getAllGeneralHistory(){
+		return this.statementGetAllGeneralHistory.all();
 	}
 }
 // return this.statementGetGeneralHistory.all();
