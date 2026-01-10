@@ -1,26 +1,13 @@
-import { Body, BodySchema, Controller, Get, Inject, Post } from 'my-fastify-decorators';
-import { GestionService } from './gestion.service.js';
+import { Body, BodySchema, Controller, Inject, Post } from 'my-fastify-decorators';
 import { GameService } from '@/game/game.service.js';
-import { CreateGameSchema } from './gestion.dto.js';
+import { CreateGameSchema } from './game.dto.js';
 
 @Controller('/game/pong')
 export class GestionController {
-	@Inject(GestionService)
-	private gestionService!: GestionService;
 
 	@Inject(GameService)
 	private gameService!: GameService;
 
-
-	@Get('/sessions')
-	async getActiveSessions() {
-		return this.gestionService.getActiveSessions();
-	}
-
-	@Get('/count')
-	async getActiveGamesCount() {
-		return this.gameService.getActiveGamesCount();
-	}
 
 	@Post('/createGame')
 	@BodySchema(CreateGameSchema)

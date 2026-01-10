@@ -56,4 +56,9 @@ export class GameGateway {
 		// this.gameService.processGameUpdate(data);
 		this.gameService.processPlayerInput(client, data);
 	}
+
+	@SubscribeMessage('ping')
+	handlePing(client: Socket) {
+		client.emit('pong');
+	}
 }
