@@ -26,3 +26,15 @@
 	path = infrastructure
 	url = git@github.com:thetranscendence/infrastructure.git
 	branch = main
+[submodule "apps/frontend"]
+	path = apps/frontend
+	url = git@github.com:thetranscendence/front.git
+[submodule "apps/chat"]
+	path = apps/chat
+	url = git@github.com:thetranscendence/rgolfett_chat.git
+[submodule "apps/game"]
+	path = apps/game
+	url = git@github.com:thetranscendence/game_backend.git
+[submodule "apps/user"]
+	path = apps/user
+	url = git@github.com:thetranscendence/profile.git

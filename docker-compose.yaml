@@ -1,0 +1,320 @@
+# =============================================================================
+# Docker Compose - ft_transcendence Development Environment
+# =============================================================================
+#
+# This configuration provides a complete development environment with:
+# - All microservices with hot-reload enabled
+# - NGINX reverse proxy for unified access
+# - RabbitMQ message broker for async communication
+# - Persistent volumes for SQLite databases and node_modules
+#
+# Usage:
+#   docker compose up        # Start all services
+#   docker compose up -d     # Start in detached mode
+#   docker compose logs -f   # Follow logs
+#   docker compose down      # Stop all services
+#   docker compose down -v   # Stop and remove volumes
+#
+# Access:
+#   Application:        http://localhost
+#   RabbitMQ Management: http://localhost:15672 (guest/guest)
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Services Definition
+# -----------------------------------------------------------------------------
+services:
+  
+  # ---------------------------------------------------------------------------
+  # NGINX - Reverse Proxy
+  # ---------------------------------------------------------------------------
+  # Entry point for all HTTP/WebSocket traffic
+  # Routes requests to appropriate backend services
+  nginx:
+    image: nginx:alpine
+    container_name: transcendence-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      # Mount custom NGINX configuration
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - transcendence-network
+    depends_on:
+      auth:
+        condition: service_started
+      user:
+        condition: service_started
+      game:
+        condition: service_started
+      chat:
+        condition: service_started
+      matchmaking:
+        condition: service_started
+      frontend:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ---------------------------------------------------------------------------
+  # RabbitMQ - Message Broker
+  # ---------------------------------------------------------------------------
+  # Async communication between microservices
+  # Management UI available at http://localhost:15672
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: transcendence-rabbitmq
+    restart: unless-stopped
+    ports:
+      # AMQP protocol port (internal communication)
+      - "5672:5672"
+      # Management UI
+      - "15672:15672"
+    environment:
+      # Default credentials for development
+      # In production, use secrets management (Vault)
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+    volumes:
+      # Persist RabbitMQ data (queues, messages, etc.)
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - transcendence-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
+  # Auth Service - Authentication & Authorization
+  # ---------------------------------------------------------------------------
+  # Handles: JWT tokens, OAuth (GitHub/Discord), user registration, login
+  auth:
+    build:
+      context: .
+      dockerfile: apps/auth/Dockerfile.dev
+    container_name: transcendence-auth
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      # JWT Configuration
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
+      # OAuth - GitHub
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      # OAuth - Discord
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:-}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      # Crypto
+      PEPPER: ${PEPPER:-dev-pepper-change-in-production}
+      # RabbitMQ
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+    volumes:
+      # Monorepo workspace files (required for pnpm)
+      - ./package.json:/app/package.json:ro
+      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml:ro
+      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
+      # Application source code (hot-reload)
+      - ./apps/auth:/app/apps/auth
+      # Shared workspace packages (hot-reload)
+      - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
+      - ./packages/my-class-validator:/app/packages/my-class-validator
+      # Named volume for node_modules (avoids host/container conflicts)
+      - auth-node-modules:/app/node_modules
+      # Persist SQLite database (mounted to db/ subfolder to not overwrite data/init.sql)
+      - auth-data:/app/apps/auth/db
+    networks:
+      - transcendence-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # User Service - User Management
+  # ---------------------------------------------------------------------------
+  # Handles: Profiles, avatars, friends, stats, match history
+  user:
+    build:
+      context: .
+      dockerfile: apps/user/Dockerfile.dev
+    container_name: transcendence-user
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+    volumes:
+      - ./package.json:/app/package.json:ro
+      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml:ro
+      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
+      - ./apps/user:/app/apps/user
+      - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
+      - ./packages/my-class-validator:/app/packages/my-class-validator
+      - user-node-modules:/app/node_modules
+      - user-data:/app/apps/user/db
+    networks:
+      - transcendence-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Game Service - Pong Game Server
+  # ---------------------------------------------------------------------------
+  # Handles: Game logic, real-time multiplayer, WebSocket connections
+  game:
+    build:
+      context: .
+      dockerfile: apps/game/Dockerfile.dev
+    container_name: transcendence-game
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+    volumes:
+      - ./package.json:/app/package.json:ro
+      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml:ro
+      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
+      - ./apps/game:/app/apps/game
+      - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
+      - ./packages/my-class-validator:/app/packages/my-class-validator
+      - game-node-modules:/app/node_modules
+      - game-data:/app/apps/game/db
+    networks:
+      - transcendence-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Chat Service - Real-time Messaging
+  # ---------------------------------------------------------------------------
+  # Handles: Private messages, group chats, friend management, blocking
+  chat:
+    build:
+      context: .
+      dockerfile: apps/chat/Dockerfile.dev
+    container_name: transcendence-chat
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+    volumes:
+      - ./package.json:/app/package.json:ro
+      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml:ro
+      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
+      - ./apps/chat:/app/apps/chat
+      - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
+      - ./packages/my-class-validator:/app/packages/my-class-validator
+      - chat-node-modules:/app/node_modules
+      - chat-data:/app/apps/chat/db
+    networks:
+      - transcendence-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Matchmaking Service - ELO Matchmaking & Tournaments
+  # ---------------------------------------------------------------------------
+  # Handles: Player queues, ELO-based matching, tournament brackets
+  matchmaking:
+    build:
+      context: .
+      dockerfile: apps/matchmaking/Dockerfile.dev
+    container_name: transcendence-matchmaking
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+    volumes:
+      - ./package.json:/app/package.json:ro
+      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml:ro
+      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
+      - ./apps/matchmaking:/app/apps/matchmaking
+      - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
+      - ./packages/my-class-validator:/app/packages/my-class-validator
+      - matchmaking-node-modules:/app/node_modules
+      - matchmaking-data:/app/apps/matchmaking/db
+    networks:
+      - transcendence-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------------------
+  # Frontend - Vite Development Server
+  # ---------------------------------------------------------------------------
+  # Handles: SPA with custom React, Babylon.js 3D Pong, Tailwind CSS
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile.dev
+    container_name: transcendence-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      # Vite environment variables (must be prefixed with VITE_)
+      VITE_API_URL: http://localhost
+    volumes:
+      - ./package.json:/app/package.json:ro
+      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml:ro
+      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
+      - ./apps/frontend:/app/apps/frontend
+      # Frontend uses my-react and my-react-router packages
+      - ./packages/my-react:/app/packages/my-react
+      - ./packages/my-react-router:/app/packages/my-react-router
+      - frontend-node-modules:/app/node_modules
+    networks:
+      - transcendence-network
+
+# -----------------------------------------------------------------------------
+# Networks Definition
+# -----------------------------------------------------------------------------
+networks:
+  transcendence-network:
+    name: transcendence-network
+    driver: bridge
+
+# -----------------------------------------------------------------------------
+# Volumes Definition
+# -----------------------------------------------------------------------------
+# Named volumes for data persistence and node_modules isolation
+volumes:
+  # RabbitMQ persistent data
+  rabbitmq-data:
+    name: transcendence-rabbitmq-data
+  
+  # Node modules volumes (one per service to avoid conflicts)
+  # These prevent issues with native addons compiled for different OS
+  auth-node-modules:
+    name: transcendence-auth-node-modules
+  user-node-modules:
+    name: transcendence-user-node-modules
+  game-node-modules:
+    name: transcendence-game-node-modules
+  chat-node-modules:
+    name: transcendence-chat-node-modules
+  matchmaking-node-modules:
+    name: transcendence-matchmaking-node-modules
+  frontend-node-modules:
+    name: transcendence-frontend-node-modules
+  
+  # SQLite database volumes (persistent data)
+  auth-data:
+    name: transcendence-auth-data
+  user-data:
+    name: transcendence-user-data
+  game-data:
+    name: transcendence-game-data
+  chat-data:
+    name: transcendence-chat-data
+  matchmaking-data:
+    name: transcendence-matchmaking-data
