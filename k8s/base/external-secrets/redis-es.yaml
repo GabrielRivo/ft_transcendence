@@ -1,0 +1,191 @@
+# ==============================================================================
+# External Secret Configuration for Redis
+# ==============================================================================
+#
+# Context: ft_transcendence DevOps Module
+# Component: External Secrets Operator / Redis Integration
+#
+# Purpose:
+#   This manifest configures the External Secrets Operator (ESO) to synchronize
+#   Redis authentication credentials from HashiCorp Vault to a Kubernetes Secret.
+#   The Secret is then consumed by the Redis Helm chart for authentication.
+#
+# Multi-Environment Support:
+#   This file is a TEMPLATE designed to be applied to multiple namespaces.
+#   The placeholder {{NAMESPACE}} must be replaced before applying.
+#
+#   Usage:
+#     # For dev namespace
+#     sed 's/{{NAMESPACE}}/dev/g' redis-es.yaml | kubectl apply -f -
+#
+#     # For production namespace
+#     sed 's/{{NAMESPACE}}/production/g' redis-es.yaml | kubectl apply -f -
+#
+# Prerequisites:
+#   1. Vault must be running and unsealed
+#   2. Secret must exist at: secret/shared/redis (created by init-secrets.sh)
+#   3. SecretStore 'vault-backend' must be configured in the target namespace
+#      (created by infra-secretstore.yaml)
+#   4. Vault role 'infra-role' must allow access from the target namespace
+#      (configured in kubernetes-auth.sh)
+#
+# Vault Secret Structure:
+#   Path: secret/shared/redis
+#   Keys:
+#     - password: Redis authentication password (32 alphanumeric chars)
+#
+# Target Kubernetes Secret:
+#   Name: redis-credentials
+#   Keys:
+#     - password: Used by Redis Helm chart (auth.existingSecretPasswordKey)
+#
+# See:
+#   - https://external-secrets.io/latest/api/externalsecret/
+#   - infrastructure/scripts/init-secrets.sh (secret generation)
+#   - infrastructure/helm/values/redis.yaml (secret consumption)
+#
+# ==============================================================================
+
+---
+# ==============================================================================
+# ExternalSecret for Redis Credentials
+# ==============================================================================
+# An ExternalSecret defines WHAT secrets to fetch from the external provider
+# and how to map them to a Kubernetes Secret.
+#
+# This ExternalSecret fetches Redis authentication credentials from Vault
+# and creates a Kubernetes Secret that the Bitnami Redis Helm chart will use.
+#
+# Lifecycle:
+#   1. ESO controller detects this ExternalSecret
+#   2. ESO authenticates to Vault using the referenced SecretStore
+#   3. ESO fetches the secret data from Vault path 'secret/shared/redis'
+#   4. ESO creates/updates Kubernetes Secret 'redis-credentials'
+#   5. Redis pods mount the secret for authentication
+#   6. ESO periodically refreshes the secret (every 15 minutes)
+#
+# Secret Rotation:
+#   When the password is rotated in Vault:
+#   1. ESO detects the change during the next refresh cycle (max 15 min)
+#   2. ESO updates the Kubernetes Secret
+#   3. Redis pods need to be restarted to pick up the new password
+#      (or use a sidecar like Reloader for automatic restarts)
+#
+# ==============================================================================
+apiVersion: external-secrets.io/v1
+kind: ExternalSecret
+metadata:
+  name: redis-credentials
+  namespace: { { NAMESPACE } }
+  labels:
+    app.kubernetes.io/name: redis-credentials
+    app.kubernetes.io/component: external-secrets
+    app.kubernetes.io/part-of: ft-transcendence
+    app.kubernetes.io/managed-by: kubectl
+    # Label to identify this as a Redis-related resource
+    app.kubernetes.io/instance: redis
+spec:
+  # ---------------------------------------------------------------------------
+  # SecretStore Reference
+  # ---------------------------------------------------------------------------
+  # Reference to the SecretStore that defines how to connect to Vault.
+  # The SecretStore must exist in the same namespace as this ExternalSecret.
+  # Created by: infra-secretstore.yaml
+  secretStoreRef:
+    name: vault-backend
+    kind: SecretStore
+
+  # ---------------------------------------------------------------------------
+  # Refresh Interval
+  # ---------------------------------------------------------------------------
+  # How often ESO checks for secret updates in Vault.
+  #
+  # Trade-offs:
+  #   - Shorter interval: Faster secret rotation, more Vault API calls
+  #   - Longer interval: Slower rotation, fewer API calls
+  #
+  # 15 minutes is a good balance for infrastructure secrets that don't
+  # change frequently. For more sensitive secrets (e.g., API keys),
+  # consider shorter intervals or event-driven refresh.
+  refreshInterval: "15m"
+
+  # ---------------------------------------------------------------------------
+  # Target Kubernetes Secret Configuration
+  # ---------------------------------------------------------------------------
+  target:
+    # Name of the Kubernetes Secret to create.
+    # This must match the value in redis.yaml:
+    #   auth.existingSecret: "redis-credentials"
+    name: redis-credentials
+
+    # CreationPolicy determines how ESO manages the target Secret:
+    #   - Owner: ESO owns the Secret, deletes it when ExternalSecret is deleted
+    #   - Orphan: Secret persists after ExternalSecret deletion
+    #   - Merge: Merge with existing Secret (if any)
+    #
+    # We use 'Owner' for clean resource management.
+    creationPolicy: Owner
+
+    # DeletionPolicy determines what happens to the Secret when ExternalSecret
+    # is deleted:
+    #   - Delete: Remove the Secret (default with Owner policy)
+    #   - Retain: Keep the Secret
+    #
+    # Default behavior with Owner policy is to delete.
+    # deletionPolicy: Delete
+
+    # Template allows customizing the Secret structure.
+    # We use a simple template to ensure correct metadata.
+    template:
+      metadata:
+        labels:
+          app.kubernetes.io/name: redis-credentials
+          app.kubernetes.io/component: cache
+          app.kubernetes.io/part-of: ft-transcendence
+        annotations:
+          # Annotation to track the secret source
+          external-secrets.io/source: "vault:secret/shared/redis"
+
+  # ---------------------------------------------------------------------------
+  # Data Mapping: Vault -> Kubernetes Secret
+  # ---------------------------------------------------------------------------
+  # Each entry maps a Vault secret field to a Kubernetes Secret key.
+  #
+  # Format:
+  #   - secretKey: Key name in the Kubernetes Secret (what consumers see)
+  #     remoteRef:
+  #       key: Path to the secret in Vault (for KV v2, without 'data/' prefix)
+  #       property: Specific field within the Vault secret
+  #
+  # Note on KV v2 paths:
+  #   - Vault KV v2 stores data at: secret/data/shared/redis
+  #   - ESO automatically handles the 'data/' prefix when version: "v2"
+  #   - We specify just: secret/shared/redis
+  # ---------------------------------------------------------------------------
+  data:
+    # -------------------------------------------------------------------------
+    # Redis Password
+    # -------------------------------------------------------------------------
+    # The authentication password for Redis connections.
+    #
+    # Vault Path: secret/shared/redis
+    # Vault Key: password
+    # K8s Secret Key: password
+    #
+    # This password is used by:
+    #   - Redis server for client authentication
+    #   - Microservices connecting to Redis (via connection string)
+    #   - Redis CLI for administrative access
+    #
+    # Connection String Format:
+    #   redis://:PASSWORD@redis-master.{{NAMESPACE}}.svc.cluster.local:6379
+    #
+    # Security Notes:
+    #   - Password is 32 alphanumeric characters (generated by init-secrets.sh)
+    #   - Provides ~190 bits of entropy
+    #   - Rotate periodically via: vault kv put secret/shared/redis password=NEW
+    # -------------------------------------------------------------------------
+    - secretKey: password
+      remoteRef:
+        key: secret/shared/redis
+        property: password
