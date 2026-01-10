@@ -37,6 +37,7 @@
     "typescript": "5.9.3"
   },
   "dependencies": {
+    "@fastify/cookie": "11.0.2",
     "@fastify/jwt": "10.0.0",
     "@jest/globals": "^30.2.0",
     "@types/supertest": "6.0.3",

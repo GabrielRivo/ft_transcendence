@@ -4,6 +4,7 @@ import Fastify from 'fastify';
 import { registerValidators } from 'my-class-validator';
 import 'reflect-metadata';
 import bootstrapPlugin from './plugins/bootstrap-plugin.js';
+import cookiePlugin from './plugins/cookie-plugin.js';
 import jwtPlugin from './plugins/jwt-plugin.js';
 import socketPlugin from './plugins/socket-plugin.js';
 import sqlitePlugin from './plugins/sqlite-plugin.js';
@@ -23,6 +24,7 @@ export function buildApp(options: { dbPath?: string } = {}) {
 
 	registerValidators(ajv);
 
+	app.register(cookiePlugin);
 	app.register(jwtPlugin);
 	app.register(sqlitePlugin, { dbPath: options.dbPath });
 	app.register(socketPlugin);

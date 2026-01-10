@@ -6,12 +6,22 @@ dotenv.config();
 
 // WARNING: Changer pour les providers
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 const config = {
 	jwt: {
 		secret: process.env.JWT_SECRET || 'supersecretkeychangeit',
 		expiresIn: '15m',
 		refreshTokenExpiresIn: '7d',
 		refreshTokenRotation: 7 * 24 * 60 * 60 * 1000,
+		accessTokenMaxAge: 15 * 60 * 1000, // 15 minutes in ms
+		refreshTokenMaxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
+	},
+	cookie: {
+		httpOnly: true,
+		secure: isProduction,
+		sameSite: 'strict' as const,
+		path: '/',
 	},
 	github: {
 		clientId: process.env.GITHUB_CLIENT_ID || '1234567890',
@@ -26,7 +36,7 @@ const config = {
 		keyLength: 64,
 		saltLength: 16,
 	},
-	redirectUri: 'http://localhost:3000',
+	redirectUri: 'http://localhost:8080',
 };
 
 export default config;

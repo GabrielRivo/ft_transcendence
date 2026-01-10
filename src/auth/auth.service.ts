@@ -14,6 +14,18 @@ import { RegisterDto } from './dto/register.dto.js';
 import type { JWT } from '@fastify/jwt';
 import { ProviderBasic, ProviderKeys, providers } from './providers.js';
 
+export type JwtPayload = {
+	sub: number;
+	email: string;
+	iat: number;
+	exp: number;
+};
+
+export type AuthTokens = {
+	accessToken: string;
+	refreshToken: string;
+};
+
 // WARNING a rajouter dans my-fastify-decorators
 class BadGatewayException extends HttpException {
 	constructor(message = 'Bad Gateway', payload?: unknown) {
@@ -48,7 +60,7 @@ export class AuthService {
 	@InjectPlugin('jwt')
 	private jwt!: JWT;
 
-	async register(dto: RegisterDto) {
+	async register(dto: RegisterDto): Promise<AuthTokens> {
 		const { email, password } = dto;
 		const existing = await this.dbExchange.existing(email);
 		if (existing) {
@@ -59,10 +71,10 @@ export class AuthService {
 
 		const info = await this.dbExchange.addUser(email, hashedPassword);
 
-		return { id: info.lastInsertRowid, email };
+		return this.generateTokens(Number(info.lastInsertRowid), email);
 	}
 
-	async login(dto: LoginDto) {
+	async login(dto: LoginDto): Promise<AuthTokens> {
 		const { email, password } = dto;
 
 		const user = await this.dbExchange.getUserByEmail(email);
@@ -78,14 +90,38 @@ export class AuthService {
 		return this.generateTokens(user.id, user.email);
 	}
 
+
+	verifyAccessToken(accessToken: string): JwtPayload {
+		try {
+			return this.jwt.verify<JwtPayload>(accessToken);
+		} catch {
+			throw new UnauthorizedException('Invalid or expired access token');
+		}
+	}
+
+
+	async getUserFromToken(accessToken: string) {
+		const payload = this.verifyAccessToken(accessToken);
+		const user = await this.dbExchange.getUserById(payload.sub);
+
+		if (!user) {
+			throw new UnauthorizedException('User not found');
+		}
+
+		return {
+			id: user.id,
+			email: user.email,
+		};
+	}
+
 	async getRefreshToken(refreshToken: string) {
 		return this.jwt.verify(refreshToken);
 	}
 
-	async refresh(refreshToken: string) {
+	async refresh(refreshToken: string): Promise<AuthTokens> {
 		try {
 			this.jwt.verify(refreshToken);
-		} catch (err) {
+		} catch {
 			throw new UnauthorizedException('Invalid refresh token signature');
 		}
 
@@ -110,7 +146,9 @@ export class AuthService {
 		return this.generateTokens(user.id, user.email);
 	}
 
-	async logout(refreshToken: string) {
+	async logout(refreshToken: string): Promise<void> {
+		if (!refreshToken) return;
+
 		const storedToken = await this.dbExchange.findRefreshToken(refreshToken);
 
 		if (storedToken) {
