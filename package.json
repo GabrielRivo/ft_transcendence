@@ -8,7 +8,9 @@
         "packages-build": "pnpm --filter \"./packages/*\" run build",
         "apps-build": "pnpm --filter \"./apps/*\" run build",
         "test": "pnpm -r run test",
-        "clean": "rm -rf node_modules **/*/node_modules"
+        "clean": "rm -rf node_modules **/*/node_modules",
+        "docker-start" : "docker compose up -d --build",
+        "docker-stop" : "docker compose down -v"
     },
     "engines": {
         "node": ">=24.11.1",
