@@ -10,18 +10,23 @@ import {
 	Query,
 	Req,
 	Res,
+	UseGuards,
 } from 'my-fastify-decorators';
 
 import config from '../config.js';
-import { AuthService, AuthTokens } from './auth.service.js';
+import { AuthService, AuthTokens, JwtPayload } from './auth.service.js';
 import { DbExchangeService } from './dbExchange.service.js';
 import { LoginDto, LoginSchema } from './dto/login.dto.js';
 import { RegisterDto, RegisterSchema } from './dto/register.dto.js';
+import { SetUsernameDto, SetUsernameSchema } from './dto/setUsername.dto.js';
+import { AuthGuard } from './guards/auth.guard.js';
 import type { ProviderKeys } from './providers.js';
 import { providers } from './providers.js';
 
-const ACCESS_TOKEN_COOKIE = 'access_token';
-const REFRESH_TOKEN_COOKIE = 'refresh_token';
+// Extend FastifyRequest to include user from AuthGuard
+interface AuthenticatedRequest extends FastifyRequest {
+	user: JwtPayload;
+}
 
 @Controller('/auth')
 export class AuthController {
@@ -33,12 +38,12 @@ export class AuthController {
 	private dbExchangeService!: DbExchangeService;
 
 	private setAuthCookies(res: FastifyReply, tokens: AuthTokens): void {
-		res.setCookie(ACCESS_TOKEN_COOKIE, tokens.accessToken, {
+		res.setCookie(config.accessTokenName, tokens.accessToken, {
 			...config.cookie,
 			maxAge: config.jwt.accessTokenMaxAge / 1000, // Convert to seconds
 		});
 
-		res.setCookie(REFRESH_TOKEN_COOKIE, tokens.refreshToken, {
+		res.setCookie(config.refreshTokenName, tokens.refreshToken, {
 			...config.cookie,
 			path: '/api/auth',
 			maxAge: config.jwt.refreshTokenMaxAge / 1000,
@@ -46,8 +51,8 @@ export class AuthController {
 	}
 
 	private clearAuthCookies(res: FastifyReply): void {
-		res.clearCookie(ACCESS_TOKEN_COOKIE, { path: '/' });
-		res.clearCookie(REFRESH_TOKEN_COOKIE, { path: '/api/auth' });
+		res.clearCookie(config.accessTokenName, { path: '/' });
+		res.clearCookie(config.refreshTokenName, { path: '/api/auth' });
 	}
 
 	@Post('/register')
@@ -73,7 +78,7 @@ export class AuthController {
 	 */
 	@Get('/verify')
 	async verify(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
-		const accessToken = (req.cookies as Record<string, string>)[ACCESS_TOKEN_COOKIE];
+		const accessToken = (req.cookies as Record<string, string>)[config.accessTokenName];
 
 		if (!accessToken) {
 			res.status(401).send({ error: 'No access token' });
@@ -83,7 +88,7 @@ export class AuthController {
 		const payload = this.authService.verifyAccessToken(accessToken);
 
 		// Set headers for upstream services
-		res.header('X-User-Id', String(payload.sub));
+		res.header('X-User-Id', String(payload.id));
 		res.header('X-User-Email', payload.email || '');
 
 		return { valid: true };
@@ -94,7 +99,7 @@ export class AuthController {
 	 */
 	@Get('/me')
 	async me(@Req() req: FastifyRequest) {
-		const accessToken = (req.cookies as Record<string, string>)[ACCESS_TOKEN_COOKIE];
+		const accessToken = (req.cookies as Record<string, string>)[config.accessTokenName];
 
 		if (!accessToken) {
 			return { authenticated: false, user: null };
@@ -113,7 +118,7 @@ export class AuthController {
 	 */
 	@Post('/refresh')
 	async refresh(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
-		const refreshToken = (req.cookies as Record<string, string>)[REFRESH_TOKEN_COOKIE];
+		const refreshToken = (req.cookies as Record<string, string>)[config.refreshTokenName];
 
 		if (!refreshToken) {
 			res.status(401).send({ error: 'No refresh token' });
@@ -130,7 +135,7 @@ export class AuthController {
 	 */
 	@Post('/logout')
 	async logout(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
-		const refreshToken = (req.cookies as Record<string, string | undefined>)[REFRESH_TOKEN_COOKIE];
+		const refreshToken = (req.cookies as Record<string, string | undefined>)[config.refreshTokenName];
 
 		if (refreshToken) {
 			await this.authService.logout(refreshToken);
@@ -138,6 +143,25 @@ export class AuthController {
 		this.clearAuthCookies(res);
 
 		return { success: true, message: 'Logged out' };
+	}
+
+	/**
+	 * Set username for authenticated user without one
+	 * Protected by AuthGuard - user payload available in req.user
+	 */
+	@Post('/username')
+	@UseGuards(AuthGuard)
+	@BodySchema(SetUsernameSchema)
+	async setUsername(
+		@Body() dto: SetUsernameDto,
+		@Req() req: AuthenticatedRequest,
+		@Res() res: FastifyReply,
+	) {
+		console.log(req.user);
+		const tokens = await this.authService.addUsername(req.user.id, dto.username);
+		this.setAuthCookies(res, tokens);
+
+		return { success: true, message: 'Username set successfully' };
 	}
 
 	//warning: dangereux faire attention

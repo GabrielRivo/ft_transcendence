@@ -37,6 +37,8 @@ const config = {
 		saltLength: 16,
 	},
 	redirectUri: 'http://localhost:8080',
+	accessTokenName: process.env.ACCESS_TOKEN_NAME || 'access_token',
+	refreshTokenName: process.env.REFRESH_TOKEN_NAME || 'refresh_token',
 };
 
 export default config;

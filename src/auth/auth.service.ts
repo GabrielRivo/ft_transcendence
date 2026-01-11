@@ -15,8 +15,12 @@ import type { JWT } from '@fastify/jwt';
 import { ProviderBasic, ProviderKeys, providers } from './providers.js';
 
 export type JwtPayload = {
-	sub: number;
+	id: number;
 	email: string;
+	username: string;
+	provider: string;
+	noUsername?: boolean;
+	suggestedUsername?: string;
 	iat: number;
 	exp: number;
 };
@@ -44,7 +48,8 @@ type UserData = {
 	id: number;
 	email: string;
 	avatar_url: string;
-	login: string;
+	login: string; // GitHub
+	username: string; // Discord
 	name: string;
 	provider: string;
 	provider_id: string;
@@ -71,7 +76,8 @@ export class AuthService {
 
 		const info = await this.dbExchange.addUser(email, hashedPassword);
 
-		return this.generateTokens(Number(info.lastInsertRowid), email);
+		// va demander un username plus tard
+		return this.generateTokens(Number(info.lastInsertRowid), email, '', 'email', { noUsername: true });
 	}
 
 	async login(dto: LoginDto): Promise<AuthTokens> {
@@ -87,7 +93,11 @@ export class AuthService {
 			throw new UnauthorizedException('Invalid credentials');
 		}
 
-		return this.generateTokens(user.id, user.email);
+		if (!user.username || user.username === '') {
+			// va demander un username plus tard
+			return this.generateTokens(user.id, user.email, '', 'email', { noUsername: true });
+		}
+		return this.generateTokens(user.id, user.email, user.username, 'email');
 	}
 
 
@@ -102,7 +112,7 @@ export class AuthService {
 
 	async getUserFromToken(accessToken: string) {
 		const payload = this.verifyAccessToken(accessToken);
-		const user = await this.dbExchange.getUserById(payload.sub);
+		const user = await this.dbExchange.getUserById(payload.id);
 
 		if (!user) {
 			throw new UnauthorizedException('User not found');
@@ -111,6 +121,9 @@ export class AuthService {
 		return {
 			id: user.id,
 			email: user.email,
+			username: payload.username || user.username || '',
+			noUsername: payload.noUsername || false,
+			suggestedUsername: payload.suggestedUsername || undefined,
 		};
 	}
 
@@ -143,7 +156,11 @@ export class AuthService {
 		if (!user) throw new UnauthorizedException('User not found');
 
 		await this.dbExchange.revokeRefreshToken(refreshToken);
-		return this.generateTokens(user.id, user.email);
+		if (!user.username || user.username === '') {
+			// va demander un username plus tard
+			return this.generateTokens(user.id, user.email, '', 'email', { noUsername: true });
+		}
+		return this.generateTokens(user.id, user.email, user.username, 'email');
 	}
 
 	async logout(refreshToken: string): Promise<void> {
@@ -200,22 +217,32 @@ export class AuthService {
 
 		console.log(userRes);
 		const userData: UserData = (await userRes.json()) as UserData;
-
 		let user = await this.dbExchange.getUserByProviderId(provider, String(userData.id));
+		console.log(user, userData, provider);
+
+		// Extraire le username suggéré du provider (login pour GitHub, username pour Discord)
+		const suggestedUsername = userData.login || userData.username || '';
 
 		if (!user) {
 			const info = await this.dbExchange.addUserByProviderId(provider, String(userData.id));
-			user = { id: Number(info.lastInsertRowid), email: userData.email, password_hash: '' };
+			user = { id: Number(info.lastInsertRowid), email: userData.email, password_hash: '', username: '' };
 		}
 
-		return this.generateTokens(user.id, userData.email || '');
+		if (!user?.username || user?.username === '') {
+			// va demander un username plus tard, avec suggestion du provider
+			return this.generateTokens(user?.id, user?.email, '', provider, { 
+				noUsername: true, 
+				suggestedUsername 
+			});
+		}
+		return this.generateTokens(user.id, userData.email || '', user.username, provider);
 	}
 
-	private async generateTokens(userId: number, email: string) {
-		const accessToken = this.jwt.sign({ sub: userId, email }, { expiresIn: config.jwt.expiresIn });
+	private async generateTokens(userId: number, email: string, username: string, provider: string, data : Record<string, any> = {}) {
+		const accessToken = this.jwt.sign({ id: userId, email, username, provider, ...data }, { expiresIn: config.jwt.expiresIn });
 
 		const refreshToken = this.jwt.sign(
-			{ sub: userId, type: 'refresh' },
+			{ id: userId, type: 'refresh' },
 			{ expiresIn: config.jwt.refreshTokenExpiresIn },
 		);
 
@@ -224,5 +251,21 @@ export class AuthService {
 		await this.dbExchange.storeRefreshToken(userId, refreshToken, expiresAt);
 
 		return { accessToken, refreshToken };
+	}
+
+
+	async addUsername(userId: number, username: string): Promise<AuthTokens> {
+		if (await this.dbExchange.getUserByUsername(username)) {
+			throw new UnauthorizedException('Username already exists');
+		}
+		await this.dbExchange.updateUsername(userId, username);
+
+		const user = await this.dbExchange.getUserById(userId);
+		if (!user) {
+			throw new UnauthorizedException('User not found');
+		}
+
+		// Générer de nouveaux tokens avec le username
+		return this.generateTokens(user.id, user.email || '', username, 'email');
 	}
 }
