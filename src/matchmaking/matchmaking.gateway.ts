@@ -1,3 +1,5 @@
+import Ajv from 'ajv';
+import ajvFormats from 'ajv-formats';
 import {
 	Inject,
 	WebSocketGateway,
@@ -9,25 +11,41 @@ import {
 	JWTBody,
 } from 'my-fastify-decorators';
 import { Server, Socket } from 'socket.io';
-import { z } from 'zod';
 import { MatchmakingService } from './matchmaking.service.js';
 import { UserService } from './user.service.js';
 import type { JwtPayload } from './types.js';
 
+// Instance AJV pour la validation des payloads WebSocket
+const ajv = new Ajv.default({ allErrors: true, coerceTypes: false });
+ajvFormats.default(ajv);
+
 /**
  * Schéma de validation pour la demande de rejoindre la file.
  */
-const JoinQueueSchema = z.object({
-	elo: z.number().int().min(0).optional(),
-});
+const JoinQueueSchema = {
+	type: 'object',
+	properties: {
+		elo: { type: 'integer', minimum: 0 },
+	},
+	additionalProperties: true,
+};
 
 /**
  * Schéma de validation pour la réponse à une proposition de match.
  * On attend simplement l'ID du match concerné.
  */
-const MatchDecisionSchema = z.object({
-	matchId: z.string().uuid(),
-});
+const MatchDecisionSchema = {
+	type: 'object',
+	properties: {
+		matchId: { type: 'string', format: 'uuid' },
+	},
+	required: ['matchId'],
+	additionalProperties: true,
+};
+
+// Compilation des schémas pour de meilleures performances
+const validateJoinQueue = ajv.compile<{ elo?: number }>(JoinQueueSchema);
+const validateMatchDecision = ajv.compile<{ matchId: string }>(MatchDecisionSchema);
 
 /**
  * Extension du type Socket pour inclure nos données de session.
@@ -172,19 +190,20 @@ export class MatchmakingGateway {
 			return;
 		}
 
-		const validation = JoinQueueSchema.safeParse(payload || {});
+		const payloadData = (payload || {}) as { elo?: number };
+		const isValid = validateJoinQueue(payloadData);
 
-		if (!validation.success) {
+		if (!isValid) {
 			console.warn(`[MatchmakingGateway] [JoinQueue] Invalid payload from User ${userId}`);
 			socket.emit('error', {
 				message: 'Invalid payload',
-				details: validation.error.issues,
+				details: validateJoinQueue.errors,
 			});
 			return;
 		}
 
 		try {
-			const effectiveElo = validation.data.elo ?? sessionElo;
+			const effectiveElo = payloadData.elo ?? sessionElo;
 
 			// Note: Le paramètre priority est false par défaut lors d'un join manuel
 			await this.matchmakingService.addPlayer(userId, socket.id, effectiveElo);
@@ -231,17 +250,17 @@ export class MatchmakingGateway {
 		const userId = socket.data.userId;
 		if (!userId) return;
 
-		const validation = MatchDecisionSchema.safeParse(payload || {});
-		if (!validation.success) {
+		const payloadData = (payload || {}) as { matchId: string };
+		if (!validateMatchDecision(payloadData)) {
 			socket.emit('error', { message: 'Invalid payload for accept_match' });
 			return;
 		}
 
 		try {
-			await this.matchmakingService.acceptMatch(userId, validation.data.matchId);
+			await this.matchmakingService.acceptMatch(userId, payloadData.matchId);
 			// Feedback immédiat au client qui a accepté (optionnel, l'event global suivra)
 			console.debug(
-				`[MatchmakingGateway] [AcceptMatch] Ack | UserId: ${userId} | MatchId: ${validation.data.matchId}`,
+				`[MatchmakingGateway] [AcceptMatch] Ack | UserId: ${userId} | MatchId: ${payloadData.matchId}`,
 			);
 		} catch (error: any) {
 			console.warn(
@@ -262,16 +281,16 @@ export class MatchmakingGateway {
 		const userId = socket.data.userId;
 		if (!userId) return;
 
-		const validation = MatchDecisionSchema.safeParse(payload || {});
-		if (!validation.success) {
+		const payloadData = (payload || {}) as { matchId: string };
+		if (!validateMatchDecision(payloadData)) {
 			socket.emit('error', { message: 'Invalid payload for decline_match' });
 			return;
 		}
 
 		try {
-			await this.matchmakingService.declineMatch(userId, validation.data.matchId);
+			await this.matchmakingService.declineMatch(userId, payloadData.matchId);
 			console.info(
-				`[MatchmakingGateway] [DeclineMatch] Processed | UserId: ${userId} | MatchId: ${validation.data.matchId}`,
+				`[MatchmakingGateway] [DeclineMatch] Processed | UserId: ${userId} | MatchId: ${payloadData.matchId}`,
 			);
 		} catch (error: any) {
 			console.warn(

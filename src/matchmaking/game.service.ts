@@ -1,5 +1,4 @@
 import { Service } from 'my-fastify-decorators';
-import { z } from 'zod';
 import { Resilient } from './decorators/resilient.decorator.js';
 import { ValidateResult } from './decorators/validate.decorator.js';
 
@@ -8,36 +7,70 @@ import { ValidateResult } from './decorators/validate.decorator.js';
 // =============================================================================
 
 /**
- * Zod schema for successful game creation response (HTTP 201).
- *
- * Returned by the Game Service when the game is successfully created.
- * The matchmaking service should proceed with notifying players.
+ * TypeScript type for successful game creation.
+ * Returned by the Game Service when the game is successfully created (HTTP 201).
  */
-const CreateGameSuccessSchema = z.object({
-	success: z.literal(true),
-	gameId: z.string().min(1),
-	message: z.string(),
-});
+export interface CreateGameSuccessDto {
+	success: true;
+	gameId: string;
+	message: string;
+}
 
 /**
- * Zod schema for failed game creation response (HTTP 409).
+ * TypeScript type for failed game creation.
+ * Returned by the Game Service when creation fails (HTTP 409).
  *
- * Returned by the Game Service when creation fails due to:
+ * Error codes:
  * - GAME_ALREADY_EXISTS: A game with this ID already exists
  * - PLAYER_ALREADY_IN_GAME: One of the players is already in an active game
  * - INVALID_PLAYERS: Invalid player IDs provided
  */
-const CreateGameErrorSchema = z.object({
-	success: z.literal(false),
-	error: z.enum(['GAME_ALREADY_EXISTS', 'PLAYER_ALREADY_IN_GAME', 'INVALID_PLAYERS']),
-	message: z.string(),
-});
+export interface CreateGameErrorDto {
+	success: false;
+	error: 'GAME_ALREADY_EXISTS' | 'PLAYER_ALREADY_IN_GAME' | 'INVALID_PLAYERS';
+	message: string;
+}
 
 /**
- * Combined schema for all possible Game Service responses.
- *
- * Uses Zod's discriminatedUnion for type-safe handling based on the `success` field.
- * This allows the consumer to narrow the type based on `response.success`.
+ * TypeScript union type for all possible responses.
+ * Use discriminated union pattern to narrow the type.
+ */
+export type CreateGameResponseDto = CreateGameSuccessDto | CreateGameErrorDto;
+
+/**
+ * JSON Schema for successful game creation response.
+ */
+const CreateGameSuccessSchema = {
+	type: 'object',
+	properties: {
+		success: { type: 'boolean', const: true },
+		gameId: { type: 'string', minLength: 1 },
+		message: { type: 'string' },
+	},
+	required: ['success', 'gameId', 'message'],
+	additionalProperties: true,
+};
+
+/**
+ * JSON Schema for failed game creation response.
+ */
+const CreateGameErrorSchema = {
+	type: 'object',
+	properties: {
+		success: { type: 'boolean', const: false },
+		error: {
+			type: 'string',
+			enum: ['GAME_ALREADY_EXISTS', 'PLAYER_ALREADY_IN_GAME', 'INVALID_PLAYERS'],
+		},
+		message: { type: 'string' },
+	},
+	required: ['success', 'error', 'message'],
+	additionalProperties: true,
+};
+
+/**
+ * Combined JSON Schema for all possible Game Service responses.
+ * Uses JSON Schema's oneOf for discriminated union based on the `success` field.
  *
  * @example
  * ```typescript
@@ -51,26 +84,9 @@ const CreateGameErrorSchema = z.object({
  * }
  * ```
  */
-const CreateGameResponseSchema = z.discriminatedUnion('success', [
-	CreateGameSuccessSchema,
-	CreateGameErrorSchema,
-]);
-
-/**
- * TypeScript type for successful game creation.
- */
-export type CreateGameSuccessDto = z.infer<typeof CreateGameSuccessSchema>;
-
-/**
- * TypeScript type for failed game creation.
- */
-export type CreateGameErrorDto = z.infer<typeof CreateGameErrorSchema>;
-
-/**
- * TypeScript union type for all possible responses.
- * Use discriminated union pattern to narrow the type.
- */
-export type CreateGameResponseDto = z.infer<typeof CreateGameResponseSchema>;
+const CreateGameResponseSchema = {
+	oneOf: [CreateGameSuccessSchema, CreateGameErrorSchema],
+};
 
 /**
  * Input DTO for creating a new game.
