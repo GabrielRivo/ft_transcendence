@@ -1,17 +1,16 @@
 import { createElement } from 'my-react';
 import { useChat } from '../../../hook/useChat';
 import { useFriends } from '../../../hook/useFriends';
-import { ChatSidebar } from './ChatSidebar';
-import { ChatMessages } from './ChatMessages';
-import { ChatRoomUsers } from './ChatRoomUsers';
+import { ChatSidebarPanel } from './ChatSidebarPanel';
+import { ChatMessagesPanel } from './ChatMessagesPanel';
+import { ChatRoomUsersPanel } from './ChatRoomUsersPanel';
 
 export function ChatSection() {
-	const { connected, currentRoom, messages, roomUsers, sendMessage, joinRoom, joinPrivateRoom } =
-		useChat();
+	const { connected, currentRoom, messages, roomUsers, sendMessage, joinRoom, joinPrivateRoom } = useChat();
 	const { friends, loading: friendsLoading } = useFriends();
 
-	const handleSelectRoom = (roomId: string) => {
-		joinRoom(roomId);
+	const handleSelectHub = () => {
+		joinRoom('hub');
 	};
 
 	const handleSelectFriend = (friendId: number) => {
@@ -19,21 +18,21 @@ export function ChatSection() {
 	};
 
 	return (
-		<div className="flex h-[500px] overflow-hidden rounded-lg border border-white/10">
-			{/* Module Gauche - Sidebar */}
-			<div className="w-56 flex-shrink-0">
-				<ChatSidebar
+		<div className="ff-dashboard-chat-safe grid h-full w-full origin-left -rotate-y-12 grid-cols-6 gap-4 p-4 transform-3d">
+			{/* Sidebar - Amis/Groupes */}
+			<div className="ff-dashboard-panel-enter ff-dashboard-panel-enter--delay-2 col-span-1 h-full min-h-0">
+				<ChatSidebarPanel
 					currentRoom={currentRoom}
 					friends={friends}
 					friendsLoading={friendsLoading}
-					onSelectRoom={handleSelectRoom}
+					onSelectHub={handleSelectHub}
 					onSelectFriend={handleSelectFriend}
 				/>
 			</div>
 
-			{/* Module Centre - Messages */}
-			<div className="flex-1">
-				<ChatMessages
+			{/* Messages */}
+			<div className="ff-dashboard-panel-enter ff-dashboard-panel-enter--delay-1 col-span-4 h-full min-h-0">
+				<ChatMessagesPanel
 					messages={messages}
 					currentRoom={currentRoom}
 					connected={connected}
@@ -41,11 +40,10 @@ export function ChatSection() {
 				/>
 			</div>
 
-			{/* Module Droite - Users connectés */}
-			<div className="w-48 flex-shrink-0">
-				<ChatRoomUsers roomUsers={roomUsers} currentRoom={currentRoom} />
+			{/* Room Users */}
+			<div className="ff-dashboard-panel-enter ff-dashboard-panel-enter--delay-0 col-span-1 h-full min-h-0">
+				<ChatRoomUsersPanel roomUsers={roomUsers} currentRoom={currentRoom} />
 			</div>
 		</div>
 	);
 }
-
