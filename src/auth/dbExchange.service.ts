@@ -136,7 +136,7 @@ export class DbExchangeService {
 
 	async getUserByUsername(username: string) {
 		return this.getUserByUsernamePrepare.get({ username }) as
-			| {  username: string }
+			| { id: number; username: string }
 			| undefined;
 	}
 }
