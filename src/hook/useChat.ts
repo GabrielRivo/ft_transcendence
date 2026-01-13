@@ -3,7 +3,7 @@ import { chatSocket } from '../libs/socket';
 import { useAuth } from './useAuth';
 
 export interface ChatMessage {
-	odId: number;
+	userId: number;
 	username: string;
 	msgContent: string;
 	roomId: string;
@@ -72,10 +72,21 @@ export function useChat() {
 
 		const handleHubHistory = (history: any[]) => {
 			const formattedHistory: ChatMessage[] = history.map((h) => ({
-				odId: h.userId,
+				userId: h.userId,
 				username: h.username || 'Unknown',
 				msgContent: h.msgContent,
-				roomId: 'hub',
+				roomId: h.roomId || 'hub',
+				created_at: h.created_at,
+			}));
+			setMessages(formattedHistory.reverse());
+		};
+
+		const handlePrivateHistory = (history: any[]) => {
+			const formattedHistory: ChatMessage[] = history.map((h) => ({
+				userId: h.userId,
+				username: h.username || 'Unknown',
+				msgContent: h.msgContent,
+				roomId: h.roomId,
 				created_at: h.created_at,
 			}));
 			setMessages(formattedHistory.reverse());
@@ -97,6 +108,7 @@ export function useChat() {
 		chatSocket.on('disconnect', handleDisconnect);
 		chatSocket.on('message', handleMessage);
 		chatSocket.on('hub_history', handleHubHistory);
+		chatSocket.on('private_history', handlePrivateHistory);
 		chatSocket.on('room_users_update', handleRoomUsersUpdate);
 		chatSocket.on('room_users', handleRoomUsers);
 
@@ -105,6 +117,7 @@ export function useChat() {
 			chatSocket.off('disconnect', handleDisconnect);
 			chatSocket.off('message', handleMessage);
 			chatSocket.off('hub_history', handleHubHistory);
+			chatSocket.off('private_history', handlePrivateHistory);
 			chatSocket.off('room_users_update', handleRoomUsersUpdate);
 			chatSocket.off('room_users', handleRoomUsers);
 		};
