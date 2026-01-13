@@ -162,26 +162,42 @@ export function updateDom(dom: any, prevProps: Props, nextProps: Props, isNotTex
     .forEach(name => {
       // console.log('TEST-A', name, nextProps[name]);
       
+      const value = nextProps[name];
+      
+      // Si la valeur est false, on supprime l'attribut (ex: disabled=false)
+      if (value === false) {
+        dom.removeAttribute(name);
+        if (!isSvg && name in dom) {
+          dom[name] = false;
+        }
+        return;
+      }
+      
       if (name === "className") {
         if (isSvg) {
-          dom.setAttribute("class", nextProps[name]);
+          dom.setAttribute("class", value);
         } else {
-          dom.className = nextProps[name];
+          dom.className = value;
         }
       } else {
         // Pour les propriétés standard
         if (!isSvg) {
-            dom[name] = nextProps[name];
+            dom[name] = value;
         } else {
             // Pour SVG, on privilégie setAttribute pour tout sauf style/dataset ?
             // Mais dom[name] = ... peut marcher pour 'id', etc.
             // On fait les deux ou juste setAttribute pour SVG.
             // setAttribute est plus sûr pour SVG.
-            dom.setAttribute(name, nextProps[name]);
+            dom.setAttribute(name, value);
         }
 
         if (isNotText && name !== "className" && !isSvg) {
-          dom.setAttribute(name, nextProps[name]);
+          // Pour les attributs booléens avec valeur true, on met juste le nom de l'attribut
+          if (value === true) {
+            dom.setAttribute(name, "");
+          } else {
+            dom.setAttribute(name, value);
+          }
         }
       }
     });
