@@ -304,6 +304,7 @@ export function Matchmaking() {
 
 	// Debug log pour diagnostiquer le problème du bouton désactivé
 	console.info('[Matchmaking] Render state - connected:', connected, 'status:', status, 'error:', error);
+	console.info('[Matchmaking] Queue stats:', queueStats);
 
 	// -------------------------------------------------------------------------
 	// Navigation Effect

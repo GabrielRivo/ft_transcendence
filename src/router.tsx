@@ -14,6 +14,7 @@ import { SetUsername } from './pages/set-username';
 import { DashboardLayout } from './layout/dashboardLayout';
 import { Dashboard } from './pages/dashboard';
 import { MatchmakingPage } from './pages/matchmaking';
+import { StatisticsPage } from './pages/statistics';
 import { GuestLayout } from './layout/GuestLayout';
 import { AuthenticatedLayout } from './layout/AuthenticatedLayout';
 import { SetUsernameLayout } from './layout/SetUsernameLayout';
@@ -74,6 +75,10 @@ const routes = [
 							{
 								path: '/dashboard',
 								component: Dashboard,
+							},
+							{
+								path: '/statistics/:statsId',
+								component: StatisticsPage,
 							},
 						],
 					},
