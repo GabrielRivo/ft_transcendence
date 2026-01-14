@@ -18,6 +18,7 @@ const updateUserGlobalStats: string = `UPDATE user_stats
 
 const isGameIdValid: string = `SELECT 1 FROM game_history WHERE game_id = ?`;
 const isUserExists: string = `SELECT 1 FROM user_stats WHERE user_id = ?`;
+const isTournamentExists: string = `SELECT 1 FROM tournament WHERE tournament_id = ?`;
 const updateTournamentWinner = `UPDATE tournament SET winner_id = ?, status = 'completed' WHERE tournament_id = ?;`;
 
 @Service()
@@ -41,6 +42,7 @@ export class UserHistoryService {
 	private statementGet!: Statement<[number, number]>;
 	private statementisGameIdValid!: Statement;
 	private statementIsUserExists!: Statement;
+	private statementIsTournamentExists!: Statement;
 	private runMatchTransaction!: (match: any, p1: any, p2: any, isFinal: any) => void;
 	private statementUpdateStats!: Statement;
 
@@ -49,6 +51,7 @@ export class UserHistoryService {
 		this.statementGet = this.db.prepare(getMatchHistory);
 		this.statementisGameIdValid = this.db.prepare(isGameIdValid);
 		this.statementIsUserExists = this.db.prepare(isUserExists);
+		this.statementIsTournamentExists = this.db.prepare(isTournamentExists);
 		this.statementUpdateStats = this.db.prepare(updateUserGlobalStats);
 
 		this.runMatchTransaction = this.db.transaction((match, p1, p2, isFinal) => {
@@ -107,6 +110,10 @@ export class UserHistoryService {
 		let is_new_T_p2 = 0;
 
 		if (safeTournamentId) {
+			const tournamentExists = this.statementIsTournamentExists.get(safeTournamentId);
+			if (!tournamentExists) {
+				throw new BadRequestException(`Tournament ${safeTournamentId} doesn't exist`);
+			}
 			const stmt = this.db.prepare(
 				`INSERT OR IGNORE INTO tournament_players (tournament_id, user_id) VALUES (?, ?)`,
 			);
