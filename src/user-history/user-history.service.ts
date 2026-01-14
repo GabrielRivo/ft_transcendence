@@ -36,7 +36,7 @@ export class UserHistoryService {
 		duration_seconds: number;
 		game_type: string;
 		tournament_id: number | null;
-		is_final: number;
+		is_final: boolean;
 	}>;
 
 	private statementGet!: Statement<[number, number]>;
@@ -98,6 +98,15 @@ export class UserHistoryService {
 		if (exists) {
 			throw new BadRequestException(`Match ${game_id} already exist`);
 		}
+		if (game_type === 'tournament' && (!tournament_id || tournament_id <= 0)) {
+			throw new BadRequestException("Tournament need a tournament id");
+		}
+		if (game_type === 'ranked' && tournament_id && tournament_id > 0) {
+			throw new BadRequestException("Ranked can't have tournament id");
+		}
+		if (game_type === 'ranked' && is_final) {
+			throw new BadRequestException("Ranked can't have final ");
+		}
 
 		const player1Exists = this.statementIsUserExists.get(player1_id);
 		if (!player1Exists) {
@@ -109,7 +118,7 @@ export class UserHistoryService {
 		}
 		// let is_new_T_p1 = 0;
 		// let is_new_T_p2 = 0;
-		
+		const finalStatus = game_type === 'ranked' ? false : is_final;
 		const safeTournamentId = (tournament_id && tournament_id > 0) ? tournament_id : null;
 
 		if (safeTournamentId) {
@@ -156,7 +165,7 @@ export class UserHistoryService {
 			duration_seconds,
 			game_type,
 			tournament_id,
-			is_final: is_final ? 1 : 0,
+			is_final: finalStatus ? 1 : 0,
 		};
 
 		return (

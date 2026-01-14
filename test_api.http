@@ -66,9 +66,7 @@ Content-Type: application/json
     "score_player2": 5,
     "winner_id" : 2,
     "duration_seconds" : 500,
-    "game_type" : "ranked",
-    "tournament_id": -1,
-    "is_final": false
+    "game_type" : "ranked"
 }
 
 ### Register a match (Long Duration / High Score)
@@ -110,7 +108,7 @@ POST http://localhost:3000/match-history/add
 Content-Type: application/json
 
 {
-    "game_id": 6005,
+    "game_id": 60,
     "player1_id": 1,
     "player2_id": 2,
     "score_player1": 11,
@@ -144,14 +142,13 @@ POST http://localhost:3000/match-history/add
 Content-Type: application/json
 
 {
-    "game_id": 2,
+    "game_id": 345,
     "player1_id": 1,
     "player2_id": 2,
     "score_player1": 1,
     "score_player2": 9,
     "winner_id": 1,
     "duration_seconds": 300,
-    "game_type": "tournament",
-    "tournament_id": 90,
-    "is_final": true
+    "game_type": "ranked"
+
 }
