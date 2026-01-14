@@ -20,6 +20,8 @@ class Pong extends Game {
     private p2Socket : Socket | null;
     private p1Id : string;
     private p2Id : string;
+    private p1Ready : boolean = false;
+    private p2Ready : boolean = false;
     private nsp : Namespace | null;
     public id : string;
 
@@ -102,14 +104,26 @@ class Pong extends Game {
             this.disconnectTimeout.delete(client.data.userId);
         }
         setTimeout(() => {
+            if (client.connected === false) {
+                console.log(`Client ${client.data.userId} disconnected before the start.`);
+                return;
+            }
             const playerNbr: number = this.p1Id === client.data.userId ? 1 : 2;
+            if (playerNbr === 1)
+                this.p1Ready = true;
+            else
+                this.p2Ready = true;
             client.emit("gameJoined", { gameId: this.id, message: `Joined game ${this.id} successfully!`, player: playerNbr });
-            this.run(`Player ${client.data.userId} has reconnected. Resuming game...`);
+            this.run(`Player ${client.data.userId} connected. Starting game...`);
         }, 500);
     }
 
     public playerDisconnected(client: Socket) {
         this.stop(`Player ${client.data.userId} has disconnected. Waiting for reconnection...`);
+        if (this.p1Id === client.data.userId)
+            this.p1Ready = false;
+        else
+            this.p2Ready = false;
 
         if (!this.disconnectTimeout.has(client.data.userId)) {
             this.disconnectTimeout.set(client.data.userId,
@@ -120,7 +134,7 @@ class Pong extends Game {
 					}
         		}, 15000)
 			);
-    }
+        }
     }
 
     private onDeathBarHit = (payload: DeathBarPayload) => {
@@ -161,6 +175,11 @@ class Pong extends Game {
             console.log("A player is still disconnected, cannot run the game.");
             return;
         }
+        if (!this.p1Ready || !this.p2Ready) {
+            console.log("Both players are not ready, cannot run the game.");
+            return;
+        }
+
         if (this.gameState === "waiting" || this.gameState === null) {
             this.gameState = "playing";
             this.services.TimeService!.update();
