@@ -74,7 +74,7 @@ POST http://localhost:3000/match-history/add
 Content-Type: application/json
 
 {
-    "game_id" : 13,
+    "game_id" : 16,
     "player1_id": 1,
     "player2_id": 2,
     "score_player1": 80,
@@ -82,7 +82,6 @@ Content-Type: application/json
     "winner_id" : 2,
     "duration_seconds" : 3600,
     "game_type" : "ranked",
-    "tournament_id": -1,
     "is_final": false
 }
 
@@ -142,13 +141,13 @@ POST http://localhost:3000/match-history/add
 Content-Type: application/json
 
 {
-    "game_id": 345,
+    "game_id": 3458555,
     "player1_id": 1,
     "player2_id": 2,
     "score_player1": 1,
-    "score_player2": 9,
-    "winner_id": 1,
-    "duration_seconds": 300,
+    "score_player2": 90,
+    "winner_id": 2,
+    "duration_seconds": 1,
     "game_type": "ranked"
 
 }

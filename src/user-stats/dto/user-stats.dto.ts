@@ -32,12 +32,5 @@ export class CreateGameStatDto {
 	@IsRequired({ message: 'ranked or tournament is requiered' })
 	@IsString()
 	game_type: string;
-
-	// @IsRequired({ message: "Send -1 if no tournament" })
-	// @IsNumber({ message : "need a number" })
-	// tournament_id: number
-
-	// @IsBoolean({ message : "need a boolean" })
-	// is_final?: boolean;
 }
 export const CreateGameStatSchema = generateSchema(CreateGameStatDto);

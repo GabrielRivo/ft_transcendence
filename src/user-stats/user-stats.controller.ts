@@ -8,10 +8,10 @@ import {
 	Param,
 	Post,
 } from 'my-fastify-decorators';
+
 import { UserHistoryService } from '../user-history/user-history.service.js';
 import { CreateGameStatDto, CreateGameStatSchema } from './dto/user-stats.dto.js';
 import { UserStatsService } from './user-stats.service.js';
-// import { CreateUserHistoryDto, CreateUserHistorySchema } from '../user-history/dto/user-history.dto.js'
 
 @Controller('/stats')
 export class UserStatsController {

@@ -116,8 +116,6 @@ export class UserHistoryService {
 		if (!player2Exists) {
 			throw new BadRequestException(`Player ${player2_id} doesn't exist`);
 		}
-		// let is_new_T_p1 = 0;
-		// let is_new_T_p2 = 0;
 		const finalStatus = game_type === 'ranked' ? false : is_final;
 		const safeTournamentId = (tournament_id && tournament_id > 0) ? tournament_id : null;
 
@@ -127,7 +125,6 @@ export class UserHistoryService {
 				throw new BadRequestException(`Tournament ${safeTournamentId} does not exist`);
 			}
 		}
-
 		let is_new_T_p1 = 0;
 		let is_new_T_p2 = 0;
 
@@ -172,8 +169,6 @@ export class UserHistoryService {
 			this.runMatchTransaction(matchData, p1Stats, p2Stats, is_final),
 			{ message: 'Match registered' }
 		);
-		// return this.statementAddMatchtoHistory.run({ game_id, player1_id, player2_id, score_player1,
-		// 				score_player2, winner_id, duration_seconds, game_type })
 	}
 
 	get_user_matches(userId: number) {
@@ -183,6 +178,5 @@ export class UserHistoryService {
 			console.error('ERREUR SQLITE :', error);
 			throw error;
 		}
-		// return this.statementGet.all(userId, userId);
 	}
 }
