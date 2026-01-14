@@ -35,16 +35,11 @@ export class CreateUserHistoryDto {
 	@IsString()
 	game_type : string;
 
-	// @IsRequired({ message: "Send -1 if no tournament" })
-	// @IsNumber({ message : "need a number" })
-	// tournament_id: number
-
-	// @IsRequired({ message: "0?" })
-	// @IsNumber({ message : "need a number" })
-	// tournament_won: number
+	@IsNumber({ message : "need a number" })
+	tournament_id?: number | null;
 	
-	// @IsBoolean({ message : "need a boolean" })
-	// is_final?: boolean;
+	@IsBoolean({ message : "need a boolean" })
+	is_final?: boolean;
 }
 
 export const CreateUserHistorySchema = generateSchema(CreateUserHistoryDto);
