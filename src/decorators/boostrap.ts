@@ -32,7 +32,7 @@ function extractTokenFromSocket(socket: Socket): string | undefined {
 }
 
 
-const DEFAULT_HTTP_CODES : Record<string, number> = {
+const DEFAULT_HTTP_CODES: Record<string, number> = {
     // 'get': 200,
     'post': 201,
     // 'put': 204,
@@ -192,7 +192,7 @@ async function runMiddlewares(handlers: ResolvedMiddleware[], req: FastifyReques
         if (typeof h === 'function') {
             await (h as MiddlewareHandler)(req, res);
         } else if ('use' in h && typeof h.use === 'function') {
-             await h.use(req, res);
+            await h.use(req, res);
         }
         if (res.sent) return;
     }
@@ -305,8 +305,8 @@ export async function bootstrap(app: FastifyInstance, rootModule: Type) {
 
             const methodMiddlewareCtors = Reflect.getOwnMetadata(METADATA_KEYS.middlewares, controller.prototype, route.methodName) || [];
             const methodMiddlewaresInstances = methodMiddlewareCtors.map((M: any) => {
-                    if (M.prototype && M.prototype.use) return container.resolve(M as MiddlewareClass);
-                    return M;
+                if (M.prototype && M.prototype.use) return container.resolve(M as MiddlewareClass);
+                return M;
             });
 
             const allGuards = [...classGuardsInstances, ...methodGuardsInstances];
@@ -449,7 +449,7 @@ export async function bootstrap(app: FastifyInstance, rootModule: Type) {
                 const bodySchema = schemaMeta?.body || schemaMeta;
                 let validate: ((data: any) => boolean) | undefined;
 
-                  // grosse opti !
+                // grosse opti !
                 if (bodySchema) {
                     validate = (app.validatorCompiler as any)({ schema: bodySchema });
                 }
@@ -464,8 +464,8 @@ export async function bootstrap(app: FastifyInstance, rootModule: Type) {
 
             app.io.of(namespace).on('connection', (socket: Socket) => {
                 // const connectionParams: ParamDefinition[] = connectionHandlerMethod
-                    // ? Reflect.getOwnMetadata(METADATA_KEYS.param, gateway.prototype, connectionHandlerMethod) || []
-                    // : [];
+                // ? Reflect.getOwnMetadata(METADATA_KEYS.param, gateway.prototype, connectionHandlerMethod) || []
+                // : [];
                 // const sortedConnectionParams = connectionParams.sort((a, b) => a.index - b.index);
 
                 // if (connectionHandlerMethod) {
@@ -616,6 +616,10 @@ export async function bootstrap(app: FastifyInstance, rootModule: Type) {
                 });
             });
             app.log.info(`WebSocket Gateway initialized for namespace: ${namespace}`);
+
+            if (typeof gatewayInstance.afterInit === 'function') {
+                gatewayInstance.afterInit(app.io);
+            }
         });
     }
 
