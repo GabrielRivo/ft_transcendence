@@ -15,6 +15,7 @@ import { DashboardLayout } from './layout/dashboardLayout';
 import { Dashboard } from './pages/dashboard';
 import { MatchmakingPage } from './pages/matchmaking';
 import { StatisticsPage } from './pages/statistics';
+import { Game } from './pages/game';
 import { GuestLayout } from './layout/GuestLayout';
 import { AuthenticatedLayout } from './layout/AuthenticatedLayout';
 import { SetUsernameLayout } from './layout/SetUsernameLayout';
@@ -85,6 +86,10 @@ const routes = [
 					{
 						path: '/matchmaking',
 						component: MatchmakingPage,
+					},
+					{
+						path: '/game',
+						component: Game,
 					},
 				],
 			},

@@ -8,9 +8,12 @@ import MathUtils from "./MathUtils";
 class Paddle {
     model: OwnedMesh<Paddle>;
     direction: Vector3 = new Vector3(0, 0, 0);
+    position: Vector3 = new Vector3(0, 0, 0);
     modelDirection: Vector3 = new Vector3(0, 1, 0).normalize();
-    speed : number = 9;
+    speed : number = 9; //9
     owner: any;
+
+    private visualOffset: Vector3 = new Vector3(0, 0, 0);
 
     constructor(owner?: any) {
         this.model = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15});
@@ -28,6 +31,9 @@ class Paddle {
         this.model.owner = this;
     }
 
+    getDirection(): Vector3 {
+        return this.direction.clone();
+    }
     setDirection(direction: Vector3) {
         this.direction = direction;
     }
@@ -35,13 +41,25 @@ class Paddle {
         this.modelDirection = modelDirection;
         this.model.setDirection(modelDirection);
     }
+
+    getPosition(): Vector3 {
+        return this.position.clone();
+    }
     setPosition(position: Vector3) {
+        this.position.copyFrom(position);
+    }
+    setFullPosition(position: Vector3) {
+        this.position.copyFrom(position);
         this.model.position.copyFrom(position);
     }
 
-    move() {
-        const basePos : Vector3 = this.model.position.clone();
-        const deltaT : number = Services.TimeService!.getDeltaTime() / 1000; //Services.Engine!.getDeltaTime() / 1000;
+    getSpeed(): number {
+        return this.speed;
+    }
+
+    move(deltaT: number) {
+        const basePos : Vector3 = this.position;//this.model.position.clone();
+        deltaT = deltaT / 1000;
         const distance : number = this.speed * deltaT;
         const displacement : Vector3 = this.direction.scale(distance);
         let newPos : Vector3 = basePos.add(displacement);
@@ -50,7 +68,8 @@ class Paddle {
         const maxX = Services.Dimensions!.x / 2 - playerBox.x;
         
         newPos.x = Math.min(Math.max(newPos.x, -maxX), maxX);
-        this.model.position.copyFrom(newPos);
+        //this.model.position.copyFrom(newPos);
+        this.position.copyFrom(newPos);
     }
 
     onBallHit(ball: Ball) {
@@ -79,8 +98,27 @@ class Paddle {
         ball.owner = this.owner;
     }
 
-    update() {
-        this.move();
+    public reconcile(serverPos: Vector3): void {
+        const previousPos = this.position.clone();
+
+        this.position.copyFrom(serverPos);
+        
+        const jump = previousPos.subtract(this.position);
+
+        //console.log("Paddle reconcile. Server pos: ", serverPos, " Previous pos: ", previousPos, " New pos: ", this.position, " Jump: ", jump);
+        
+        this.visualOffset.addInPlace(jump);
+
+        this.model.position.copyFrom(this.position).addInPlace(this.visualOffset);
+    }
+
+    update(deltaT: number) {
+        this.move(deltaT);
+        this.visualOffset = Vector3.Lerp(this.visualOffset, Vector3.Zero(), 0.05);
+        if (this.visualOffset.lengthSquared() < 0.001) {
+            this.visualOffset.setAll(0);
+        }
+        this.model.position.copyFrom(this.position).addInPlace(this.visualOffset);
     }
 
     dispose() {

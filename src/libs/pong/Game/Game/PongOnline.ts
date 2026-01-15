@@ -1,354 +1,378 @@
-import {
-	Engine,
-	Scene,
-	ImportMeshAsync,
-	SceneLoader,
-	MeshBuilder,
-	StandardMaterial,
-	SpotLight,
-	Color3,
-	ArcRotateCamera,
-	Vector2,
-	Vector3,
-	HemisphericLight,
-	GlowLayer,
-	PBRMaterial,
-} from '@babylonjs/core';
-import '@babylonjs/loaders/glTF';
-import Services from '../Services/Services';
-import { DeathBarPayload } from '../globalType';
-import Player from '../Player';
-import DeathBar from '../DeathBar';
-import Ball from '../Ball';
-import Wall from '../Wall';
-import InputManager from '../InputManager';
-import CollisionService from '../Services/CollisionService';
-import Game from './Game';
+import { Engine, Scene, ImportMeshAsync, MeshBuilder, StandardMaterial, SpotLight, Color3, ArcRotateCamera, Vector2, Vector3, HemisphericLight, GlowLayer, PBRMaterial } from "@babylonjs/core";
+import Services from "../Services/Services";
+import type { DeathBarPayload, GameState } from "../globalType";
+import Player from "../Player";
+import DeathBar from "../DeathBar";
+import Ball from "../Ball";
+import Wall from "../Wall";
+import PredictionManager from "./PredictionManager";
+import Game from "./Game";
 
-import { socket } from '../../../socket';
-
-interface GameUpdatePayload {
-	p1: {
-		pos: Vector3;
-		dir: Vector3;
-	};
-	p2: {
-		pos: Vector3;
-		dir: Vector3;
-	};
-	ball: {
-		pos: Vector3;
-		dir: Vector3;
-	};
-}
+import { socket } from "../../../socket";
+import InputManagerOnline from "../InputManagerOnline";
 
 class PongOnline extends Game {
-	inputManager?: InputManager;
-	player1?: Player;
-	player2?: Player;
-	ball?: Ball;
-	walls?: Wall[];
-	camera?: ArcRotateCamera;
-	width: number = 7;
-	height: number = 12;
 
-	private currentGameState: 'waiting' | 'playing' | null;
-	private gameState: 'waiting' | 'playing' | null;
-	private serverState: 'connected' | 'disconnected';
-	private gameJoined: boolean = false;
+    inputManager?: InputManagerOnline;
+    predictionManager?: PredictionManager;
+    player1?: Player;
+    player2?: Player;
+    clientPlayer?: Player;
+    ball?: Ball;
+    walls?: Wall[];
+    width: number = 7;
+    height: number = 12;
 
-	constructor() {
-		super();
-		this.currentGameState = null;
-		this.gameState = null;
-		this.serverState = 'disconnected';
-	}
+    private currentGameState: "waiting" | "playing" | null;
+    private gameState: "waiting" | "playing" | null;
+    private serverState: "connected" | "disconnected";
+    private gameJoined: boolean = false;
 
-	initialize(): void {
-		Services.Scene = new Scene(Services.Engine!);
-		Services.Dimensions = new Vector2(this.width, this.height);
-		window.addEventListener('keydown', this.showDebugLayer);
+    constructor() {
+        super();
+        this.currentGameState = null;
+        this.gameState = null;
+        this.serverState = "disconnected";
+    }
 
-		this.inputManager = new InputManager(this);
-		this.inputManager.listenToP1Online();
-		this.inputManager.listenToP1();
-		this.inputManager.listenToP2();
+    initialize(): void {
+        Services.Scene = new Scene(Services.Engine!);
+        Services.Dimensions = new Vector2(this.width, this.height);
+        window.addEventListener("keydown", this.showDebugLayer);
 
-		Services.EventBus!.on('DeathBarHit', this.onDeathBarHit);
+        this.inputManager = new InputManagerOnline(this);
+        this.predictionManager = new PredictionManager(this);
+        this.inputManager.listenToPlayer();
 
-		this.drawScene();
+        Services.EventBus!.on("DeathBarHit", this.onDeathBarHit);
 
-		Services.TimeService!.initialize();
-	}
+        this.drawScene();
 
-	async drawScene(): Promise<void> {
-		const gl = new GlowLayer('glow', Services.Scene, {
-			blurKernelSize: 32,
-			mainTextureRatio: 0.25,
-		});
-		gl.intensity = 0.3;
+        Services.TimeService!.initialize();
+    }
 
-		this.player1 = new Player(undefined);
-		this.player2 = new Player(undefined);
-		this.walls = [new Wall(), new Wall()];
-		this.walls.forEach((wall) => Services.Scene!.addMesh(wall.model));
-		this.ball = new Ball();
-		this.camera = new ArcRotateCamera('Camera', 0, Math.PI / 4, 15, Vector3.Zero(), Services.Scene);
-		this.camera.attachControl(Services.Canvas, true);
+    async drawScene(): Promise<void> {
 
-		//var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
-		//light2.intensity = 0;
+        let gl = new GlowLayer("glow", Services.Scene, {
+            blurKernelSize: 32,
+            mainTextureRatio: 0.25
+        });
+        gl.intensity = 0.3;
 
-		// const hemiLight = new HemisphericLight("hemiLight", new Vector3(0, 1, 0), Services.Scene);
+        this.player1 = new Player(undefined);
+        this.player2 = new Player(undefined);
+        this.ball = new Ball();
+        this.walls = [new Wall(), new Wall()];
+        this.walls.forEach(wall => Services.Scene!.addMesh(wall.model));
+        //this.ball = new Ball();
+        var camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, Math.PI / 4, 10, Vector3.Zero(), Services.Scene);
+        camera.attachControl(Services.Canvas, true);
 
-		// hemiLight.intensity = 0.30;
-		// //hemiLight.diffuse = new Color3(0.5, 0.6, 1);
-		// hemiLight.diffuse = new Color3(0.5, 0.5, 0.5);
-		// hemiLight.groundColor = new Color3(0, 0, 0);
+        //var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
+        //light2.intensity = 0;
 
-		// await ImportMeshAsync("./testsus.glb", Services.Scene);
-		// await ImportMeshAsync("./testsus.glb", Services.Scene);
-		// await ImportMeshAsync("./models/test.obj", Services.Scene);
+        // const hemiLight = new HemisphericLight("hemiLight", new Vector3(0, 1, 0), Services.Scene);
 
-		const ground = MeshBuilder.CreateBox(
-			'ground',
-			{ width: this.width, height: this.height, depth: 0.1 },
-			Services.Scene,
-		);
-		ground.position = new Vector3(0, -0.05, 0);
-		ground.rotate(Vector3.Right(), Math.PI / 2);
-		ground.isPickable = false;
+        // hemiLight.intensity = 0.30;
+        // //hemiLight.diffuse = new Color3(0.5, 0.6, 1);
+        // hemiLight.diffuse = new Color3(0.5, 0.5, 0.5);
+        // hemiLight.groundColor = new Color3(0, 0, 0);
 
-		const groundMaterial = new StandardMaterial('groundMat', Services.Scene);
-		groundMaterial.diffuseColor = new Color3(0.4, 0.4, 0.4);
-		ground.material = groundMaterial;
 
-		this.ball.setFullPos(new Vector3(0, 0.125, 0));
-		this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
-		this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
-		this.player1.paddle.setPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
-		this.player2.paddle.setPosition(new Vector3(0, 0.15, this.height / 2 - 2));
-		this.player1.deathBar.model.position = new Vector3(0, 0.125, -this.height / 2 + 1);
-		this.player2.deathBar.model.position = new Vector3(0, 0.125, this.height / 2 - 1);
-		this.walls[0].model.position = new Vector3(-this.width / 2 - 0.1, 0.25, 0);
-		this.walls[1].model.position = new Vector3(this.width / 2 + 0.1, 0.25, 0);
+        let ground = MeshBuilder.CreateBox("ground", { width: this.width, height: this.height, depth: 0.1 }, Services.Scene);
+        ground.position = new Vector3(0, -0.05, 0);
+        ground.rotate(Vector3.Right(), Math.PI / 2);
+        ground.isPickable = false;
 
-		try {
-			// Using SceneLoader.ImportMeshAsync instead of ImportMeshAsync directly to avoid strict signature issues
-			const background = await SceneLoader.ImportMeshAsync('', './models/', 'pong.glb', Services.Scene!);
-			background.meshes.forEach((mesh) => {
-				mesh.isPickable = false;
-			});
-		} catch (e) {
-			console.error('Failed to load pong.glb:', e);
-		}
-	}
+        let groundMaterial = new StandardMaterial("groundMat", Services.Scene);
+        groundMaterial.diffuseColor = new Color3(0.4, 0.4, 0.4);
+        ground.material = groundMaterial;
 
-	launch(): void {
-		this.stop();
-	}
+        this.ball.setFullPos(new Vector3(0, -100, 0));
+        this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
+        this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
+        this.player1.paddle.setFullPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
+        this.player2.paddle.setFullPosition(new Vector3(0, 0.15, this.height / 2 - 2));
+        this.player1.deathBar.model.position = new Vector3(0, 0.125, -this.height / 2 + 1);
+        this.player2.deathBar.model.position = new Vector3(0, 0.125, this.height / 2 - 1);
+        this.walls[0].model.position = new Vector3(-this.width / 2 - 0.1, 0.25, 0);
+        this.walls[1].model.position = new Vector3(this.width / 2 + 0.1, 0.25, 0);
 
-	start(): void {
-		this.joinServer();
-	}
+        const background = await ImportMeshAsync("./models/pong.glb", Services.Scene!);
+        background.meshes.forEach(mesh => {
+            mesh.isPickable = false;
 
-	joinServer(): void {
-		// Services.EventBus!.on("Server:ConnectionError", this.onServerLostConnection);
-		// Services.EventBus!.on("Server:Disconnected", this.onServerLostConnection);
-		socket.on('connect_error', this.onServerLostConnection);
-		socket.on('disconnect', this.onServerLostConnection);
-		socket.on('queueTimeout', this.onGameEnded);
-		socket.on('gameJoined', this.onGameJoined);
-		socket.on('gameStopped', this.onGameStopped);
-		socket.on('gameStarted', this.onGameStarted);
-		socket.on('gameEnded', this.onGameEnded);
-		socket.on('gameUpdate', this.onGameUpdate);
-		socket.onAny(this.onServerLog);
+            // const mat = mesh.material as PBRMaterial;
+            // if (mat) {
+            // 	if (mat.albedoColor.toLuminance() < 0.01) {
+            // 		mat.albedoColor = new Color3(0.02, 0.02, 0.05); // Gris bleuté très profond
+            // 	}
+            // }
+        });
+    }
 
-		// const unsubscribe = Services.EventBus!.once("Server:Connected", () => {
-		//     console.log("Connected to server, starting Pong game.");
-		//     this.renderStart();
-		// });
-		// setTimeout(() => {
-		//     unsubscribe();
-		// }, 10000);
+    launch(): void {
+        this.stop();
+    }
 
-		const unsubscribe = socket.once('connect', () => {
-			console.log('Connected to server, starting Pong game.');
-			this.serverState = 'connected';
-			this.processGameState();
-		});
+    start(): void {
+        this.joinServer();
+    }
 
-		// Services.SocketService!.connect();
-		socket.connect();
-	}
+    joinServer(): void {
+        socket.on("connect_error", this.onServerLostConnection);
+        socket.on("disconnect", this.onServerLostConnection);
+        socket.on("queueTimeout", this.onGameEnded);
+        socket.on("gameJoined", this.onGameJoined);
+        socket.on("gameStopped", this.onGameStopped);
+        socket.on("gameStarted", this.onGameStarted);
+        socket.on("gameEnded", this.onGameEnded);
+        socket.on("gameUpdate", this.onGameUpdate);
+        socket.on("generateBall", this.onGenerateBall);
+        socket.onAny(this.onServerLog);
 
-	private onServerLostConnection = (): void => {
-		// Services.EventBus!.off("Server:ConnectionError", this.onServerLostConnection);
-		// Services.EventBus!.off("Server:Disconnected", this.onServerLostConnection);
-		socket.off('connect_error', this.onServerLostConnection);
-		socket.off('disconnect', this.onServerLostConnection);
 
-		console.log('Lost connection to server, attempting to reconnect...');
-		this.serverState = 'disconnected';
-		this.processGameState();
+        socket.once("connect", () => {
+            console.log("Connected to server, starting Pong game.");
+            this.serverState = "connected";
+            this.processGameState();
+        });
 
-		const connectionTimeout = setTimeout(() => {
-			unsubscribe();
-			alert('Connection to server lost. The game will now stop.');
-			this.endGame();
-		}, 10000);
+        socket.connect();
+    }
 
-		const unsubscribe = Services.EventBus!.once('Server:Connected', () => {
-			console.log('Reconnected to server, resuming game.');
-			clearTimeout(connectionTimeout);
-			// Services.EventBus!.on("Server:ConnectionError", this.onServerLostConnection);
-			// Services.EventBus!.on("Server:Disconnected", this.onServerLostConnection);
-			socket.on('connect_error', this.onServerLostConnection);
-			socket.on('disconnect', this.onServerLostConnection);
-			console.log('Resuming game after reconnection.');
-			this.serverState = 'connected';
-			this.processGameState();
-		});
-	};
+    public pingServer(): Promise<number> {
+        return new Promise<number>((resolve, reject) => {
+            const time = performance.now();
 
-	private onGameJoined = (payload: unknown): void => {
-		this.gameJoined = true;
-		console.log('Game joined with payload:', payload);
-	};
+            socket.emit("ping");
+            const timeoutId = setTimeout(() => {
+                console.log("Ping timeout.");
+                socket.off("pong", onPong);
+                return reject("Ping timeout");
+            }, 2000);
+            const onPong = () => {
+                console.log(`Ping: ${performance.now() - time} ms`);
+                clearTimeout(timeoutId);
+                return resolve(performance.now() - time);
+            };
+            socket.once("pong", onPong);
+        });
+    }
 
-	private onGameStopped = (): void => {
-		this.gameState = 'waiting';
-		this.processGameState();
-	};
+    public async measureLatency(): Promise<number> {
+        const attempts = 5;
+        const validPings: number[] = [];
 
-	private onGameStarted = (): void => {
-		this.gameState = 'playing';
-		Services.TimeService!.update();
-		this.processGameState();
-	};
+        for (let i = 0; i < attempts; i++) {
+            try {
+                if (i > 0) await new Promise(r => setTimeout(r, 100));
 
-	private onGameEnded = (payload: unknown): void => {
-		console.log('Game ended by server:', payload);
-		this.endGame();
-	};
+                const p = await this.pingServer();
+                validPings.push(p);
 
-	private onServerLog = (event: string, ...args: unknown[]): void => {
-		//console.log(`LOG SOCKET FROM SERVER: ${event}`, ...args);
-	};
+            } catch (error) {
+                console.warn(`Ping number ${i + 1}/${attempts} failed.`);
+            }
+        }
 
-	private onGameUpdate = (payload: GameUpdatePayload): void => {
-		// Update player 1
-		this.player1?.paddle.setPosition(new Vector3(payload.p1.pos._x, payload.p1.pos._y, payload.p1.pos._z));
-		this.player1?.paddle.setDirection(new Vector3(payload.p1.dir._x, payload.p1.dir._y, payload.p1.dir._z));
-		// Update player 2
-		this.player2?.paddle.setPosition(new Vector3(payload.p2.pos._x, payload.p2.pos._y, payload.p2.pos._z));
-		this.player2?.paddle.setDirection(new Vector3(payload.p2.dir._x, payload.p2.dir._y, payload.p2.dir._z));
-		// Update ball
-		this.ball?.setFullPos(new Vector3(payload.ball.pos._x, payload.ball.pos._y, payload.ball.pos._z));
-		this.ball?.setDir(new Vector3(payload.ball.dir._x, payload.ball.dir._y, payload.ball.dir._z));
-	};
+        if (validPings.length === 0) {
+            throw new Error("Unable to measure latency: All pings failed.");
+        }
 
-	private onDeathBarHit = (payload: DeathBarPayload) => {
-		if (payload.deathBar.owner == this.player1) {
-			this.player2!.scoreUp();
-		} else if (payload.deathBar.owner == this.player2) {
-			this.player1!.scoreUp();
-		}
-		this.ball = new Ball();
-		this.ball.setFullPos(new Vector3(0, 0.125, 0));
-	};
+        const sum = validPings.reduce((a, b) => a + b, 0);
+        const average = Math.round(sum / validPings.length);
 
-	processGameState(): void {
-		if (this.serverState === 'connected' && this.gameState === 'playing' && this.currentGameState !== 'playing') {
-			Services.EventBus!.emit('UI:MenuStateChange', 'off');
-			this.currentGameState = 'playing';
-			this.run();
-		} else if (this.currentGameState !== 'waiting') {
-			if (this.gameJoined === false && this.serverState === 'connected') {
-				Services.EventBus!.emit('UI:MenuStateChange', 'matchmaking');
-			} else Services.EventBus!.emit('UI:MenuStateChange', 'loading');
-			this.currentGameState = 'waiting';
-			this.stop();
-		}
-	}
+        console.log(`Measured latency: ${average} ms (over ${validPings.length} successful attempts)`);
+        return average;
+    }
 
-	run() {
-		console.log('Game running.');
-		Services.Engine!.stopRenderLoop();
-		Services.Engine!.runRenderLoop(() => {
-			Services.TimeService!.update();
-			if (this.camera) {
-				this.camera.alpha += 0.0001 * Services.Engine!.getDeltaTime();
-			}
-			// this.player1!.update();
-			// this.player2!.update();
-			// this.ball!.update();
-			Services.Scene!.render();
-		});
-	}
+    public async synchronizeTimeWithServer(serverTimestamp: number): Promise<void> {
+        try {
+            let timeAheadOfServ = 50;
+            let measuringTime = performance.now();
+            const latency: number = await this.measureLatency();
+            measuringTime = performance.now() - measuringTime;
+            console.log(`Time taken to measure latency: ${measuringTime} ms`);
+            Services.TimeService!.initialize();
+            Services.TimeService!.setTimestamp(serverTimestamp + (latency / 2) + measuringTime + timeAheadOfServ);
+            console.log("Time synchronized to:", serverTimestamp, " ahead by ", timeAheadOfServ, " with latency compensation of", latency / 2, "ms. New timestamp:", Services.TimeService!.getTimestamp());
+        } catch (error) {
+            console.error("Error synchronizing time with server:", error);
+            this.onServerLostConnection();
+        }
+        socket.once("latencyTest", (payload: any) => {
+            Services.TimeService!.update();
+            const clienttime = Services.TimeService!.getTimestamp();
+            console.log("Latency test from server:", payload);
+            console.log("Current client timestamp:", clienttime, " with a real timestamp of ", Services.TimeService!.getRealTimestamp(), " difference : ", clienttime - payload.timestamp);
+        });
+    }
 
-	stop() {
-		console.log('Game stopped.');
-		Services.Engine!.stopRenderLoop();
-		Services.Engine!.runRenderLoop(() => {
-			if (this.camera) {
-				this.camera.alpha += 0.0001 * Services.Engine!.getDeltaTime();
-			}
-			Services.Scene!.render();
-		});
-	}
+    private onServerLostConnection = (): void => {
+        socket.off("connect_error", this.onServerLostConnection);
+        socket.off("disconnect", this.onServerLostConnection);
 
-	private endGame(): void {
-		Services.EventBus!.emit('UI:MenuStateChange', 'pongMenu');
-		Services.EventBus!.emit('Game:Ended', {
-			name: 'PongOnline',
-			winnerId: null,
-			score: { player1: this.player1!.score, player2: this.player2!.score },
-		});
-	}
+        console.log("Lost connection to server, attempting to reconnect...");
+        this.serverState = "disconnected";
+        this.gameJoined = false;
+        this.gameState = "waiting";
+        this.processGameState();
+        let connectionTimeout;
 
-	dispose(): void {
-		console.log('Disposing Pong game instance.');
-		Services.Engine!.stopRenderLoop();
-		// Services.SocketService!.disconnect();
+        connectionTimeout = setTimeout(() => {
+            alert("Connection to server lost. The game will now stop.");
+            this.endGame();
+        }, 10000);
+        socket.once("connect", () => {
+            console.log("Reconnected to server, resuming game.");
+            clearTimeout(connectionTimeout);
+            socket.on("connect_error", this.onServerLostConnection);
+            socket.on("disconnect", this.onServerLostConnection);
+            console.log("Resuming game after reconnection.");
+            this.serverState = "connected";
+            this.processGameState();
+        });
+    }
 
-		this.player1?.dispose();
-		this.player2?.dispose();
-		this.ball?.dispose();
-		this.walls?.forEach((wall) => wall.dispose());
-		this.inputManager?.dispose();
-		Services.EventBus!.off('DeathBarHit', this.onDeathBarHit);
-		// Services.EventBus!.off("Server:ConnectionError", this.onServerLostConnection);
-		// Services.EventBus!.off("Server:Disconnected", this.onServerLostConnection);
-		socket.off('connect_error', this.onServerLostConnection);
-		socket.off('disconnect', this.onServerLostConnection);
-		socket.off('queueTimeout', this.onGameEnded);
-		socket.off('gameJoined', this.onGameJoined);
-		socket.off('gameStopped', this.onGameStopped);
-		socket.off('gameStarted', this.onGameStarted);
-		socket.off('gameEnded', this.onGameEnded);
-		socket.off('gameUpdate', this.onGameUpdate);
-		socket.offAny(this.onServerLog);
-		socket.disconnect();
+    private onGameJoined = (payload: any): void => {
+        this.gameJoined = true;
+        console.log("Game joined with payload:", payload, " timestamp:", performance.now());
+        if (payload.player === 1) {
+            this.clientPlayer = this.player1;
+        } else if (payload.player === 2) {
+            this.clientPlayer = this.player2;
+        }
+    }
 
-		Services.Scene!.dispose();
+    private onGameStopped = (payload: any): void => {
+        this.gameState = "waiting";
+        this.processGameState();
+    }
 
-		Services.Scene = undefined;
-		Services.Dimensions = undefined;
+    private onGameStarted = (payload: any): void => {
+        this.gameState = "playing";
+        console.log("Game started by server with payload:", payload, " timestamp:", performance.now());
+        this.synchronizeTimeWithServer(payload.timestamp);
+        this.processGameState();
+    }
 
-		window.removeEventListener('keydown', this.showDebugLayer);
-	}
+    private onGameEnded = (payload: any): void => {
+        console.log("Game ended by server:", payload);
+        this.endGame();
+    }
 
-	showDebugLayer(ev: KeyboardEvent) {
-		if (ev.ctrlKey && ev.keyCode === 73) {
-			if (Services.Scene!.debugLayer.isVisible()) {
-				Services.Scene!.debugLayer.hide();
-			} else {
-				Services.Scene!.debugLayer.show();
-			}
-		}
-	}
+    private onServerLog = (event: string, ...args: any[]): void => {
+        //console.log(`LOG SOCKET FROM SERVER: ${event}`, ...args);
+    }
+
+    private onGameUpdate = (payload: any): void => {
+        this.predictionManager!.onServerGameStateReceived(payload);
+    }
+
+    private onGenerateBall = (payload: any): void => {
+        if (!this.ball) return;
+        const time = Services.TimeService!.getTimestamp();
+        const deltaT = time - payload.timestamp;
+        this.ball.generate(3000 - deltaT);
+    }
+
+    private onDeathBarHit = (payload: DeathBarPayload) => {
+        if (payload.deathBar.owner == this.player1) {
+            this.player2!.scoreUp();
+        }
+        else if (payload.deathBar.owner == this.player2) {
+            this.player1!.scoreUp();
+        }
+        this.ball!.setFullPos(new Vector3(0, -100, 0));
+        //this.ball = new Ball();
+        //this.ball.setFullPos(new Vector3(0, 0.125, 0));
+    }
+
+    processGameState(): void {
+        if (this.serverState === "connected" && this.gameState === "playing" && this.currentGameState !== "playing") {
+            Services.EventBus!.emit("UI:MenuStateChange", "off");
+            this.currentGameState = "playing";
+            if (this.gameJoined === false) {
+                console.log("Game state is playing but gameJoined is false. Setting clientPlayer to player1 by default.");
+                this.clientPlayer = this.player1;
+            }
+            this.run();
+        }
+        else if (this.currentGameState !== "waiting") {
+            if (this.gameJoined === false && this.serverState === "connected") {
+                Services.EventBus!.emit("UI:MenuStateChange", "matchmaking");
+            }
+            else
+                Services.EventBus!.emit("UI:MenuStateChange", "loading");
+            this.currentGameState = "waiting";
+            this.stop();
+        }
+    }
+
+    run() {
+        console.log("Game running.");
+        Services.Engine!.stopRenderLoop();
+        Services.Engine!.runRenderLoop(() => {
+            this.predictionManager!.predictionUpdate();
+            // this.player1!.update();
+            // this.player2!.update();
+            // this.ball!.update();
+            Services.Scene!.render();
+        });
+    }
+
+    stop() {
+        console.log("Game stopped.");
+        Services.Engine!.stopRenderLoop();
+        Services.Engine!.runRenderLoop(() => { Services.Scene!.render(); });
+    }
+
+    private endGame(): void {
+        Services.EventBus!.emit("UI:MenuStateChange", "pongMenu");
+        Services.EventBus!.emit("Game:Ended", { name: "PongOnline", winnerId: null, score: { player1: this.player1!.score, player2: this.player2!.score } });
+    }
+
+    dispose(): void {
+        console.log("Disposing Pong game instance.");
+        Services.Engine!.stopRenderLoop();
+
+        this.player1?.dispose();
+        this.player2?.dispose();
+        this.ball?.dispose();
+        this.walls?.forEach(wall => wall.dispose());
+        this.inputManager?.dispose();
+        Services.EventBus!.off("DeathBarHit", this.onDeathBarHit);
+        socket.off("connect");
+        socket.off("connect_error", this.onServerLostConnection);
+        socket.off("disconnect", this.onServerLostConnection);
+        socket.off("queueTimeout", this.onGameEnded);
+        socket.off("gameJoined", this.onGameJoined);
+        socket.off("gameStopped", this.onGameStopped);
+        socket.off("gameStarted", this.onGameStarted);
+        socket.off("gameEnded", this.onGameEnded);
+        socket.off("gameUpdate", this.onGameUpdate);
+        socket.off("generateBall", this.onGenerateBall);
+        socket.offAny(this.onServerLog);
+        socket.disconnect();
+
+        Services.Scene!.dispose();
+
+        Services.Scene = undefined;
+        Services.Dimensions = undefined;
+
+        window.removeEventListener("keydown", this.showDebugLayer);
+    }
+
+    showDebugLayer(ev: KeyboardEvent) {
+        if (ev.ctrlKey && ev.keyCode === 73) {
+            if (Services.Scene!.debugLayer.isVisible()) {
+                Services.Scene!.debugLayer.hide();
+            } else {
+                Services.Scene!.debugLayer.show();
+            }
+        }
+    }
 }
 
 export default PongOnline;

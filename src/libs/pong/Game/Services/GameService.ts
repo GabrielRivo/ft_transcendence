@@ -1,6 +1,7 @@
 
 import PongOnline from "../Game/PongOnline";
 import PongLocal from "../Game/PongLocal";
+import PongBackground from "../Game/PongBackground";
 
 import { GameEnded } from "../globalType";
 import Services from "./Services";
@@ -8,7 +9,7 @@ import Services from "./Services";
 class GameService {
     private static instance: GameService;
 
-    private gameInstance: PongLocal | PongOnline | null = null;
+    private gameInstance: PongLocal | PongOnline | PongBackground | null = null;
 
     private constructor() {
         Services.EventBus!.on("Game:Ended", this.onGameEnded);
@@ -33,8 +34,11 @@ class GameService {
             this.gameInstance.initialize();
             this.gameInstance.launch();
         }
-        else
-            console.error("GameService: Unsupported game : " + game);  //RM warning?
+        else if (game === 'PongBackground') {
+			// Create background game (AI vs AI, no gameId needed)
+			this.gameInstance = new PongBackground();
+			this.gameInstance.initialize();
+		}
     }
 
     public startGame(): void {

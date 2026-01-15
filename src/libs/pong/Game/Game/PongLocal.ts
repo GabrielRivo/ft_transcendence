@@ -1,74 +1,62 @@
-import {
-	Engine,
-	Scene,
-	ImportMeshAsync,
-	MeshBuilder,
-	StandardMaterial,
-	SpotLight,
-	Color3,
-	ArcRotateCamera,
-	Vector2,
-	Vector3,
-	HemisphericLight,
-	GlowLayer,
-} from '@babylonjs/core';
-import Services from '../Services/Services';
-import { DeathBarPayload } from '../globalType';
-import Player from '../Player';
-import DeathBar from '../DeathBar';
-import Ball from '../Ball';
-import Wall from '../Wall';
-import InputManager from '../InputManager';
-import Game from './Game';
+import { Engine, Scene, ImportMeshAsync, MeshBuilder, StandardMaterial, SpotLight, Color3, ArcRotateCamera, Vector2, Vector3, HemisphericLight, GlowLayer} from "@babylonjs/core";
+import Services from "../Services/Services";
+import { DeathBarPayload } from "../globalType";
+import Player from "../Player";
+import DeathBar from "../DeathBar";
+import Ball from "../Ball";
+import Wall from "../Wall";
+import InputManager from "../InputManagerLocal";
+import Game from "./Game";
 
-import { socket } from '../../../socket';
+import { socket } from "../../../socket";
 
 class PongLocal extends Game {
-	inputManager?: InputManager;
-	player1?: Player;
-	player2?: Player;
-	ball?: Ball;
-	walls?: Wall[];
-	width: number = 7;
-	height: number = 12;
 
-	constructor() {
-		super();
-	}
+    inputManager?: InputManager;
+    player1?: Player;
+    player2?: Player;
+    ball?: Ball;
+    walls?: Wall[];
+    width: number = 7;
+    height: number = 12;
 
-	initialize(): void {
-		Services.Scene = new Scene(Services.Engine!);
-		Services.Dimensions = new Vector2(this.width, this.height);
-		window.addEventListener('keydown', this.showDebugLayer);
+    constructor() {
+        super();
+    }
 
-		this.inputManager = new InputManager(this);
-		this.inputManager.listenToP1();
-		this.inputManager.listenToP2();
+    initialize(): void {
+        Services.Scene = new Scene(Services.Engine!);
+        Services.Dimensions = new Vector2(this.width, this.height);
+        window.addEventListener("keydown", this.showDebugLayer);
 
-		Services.EventBus!.on('DeathBarHit', this.onDeathBarHit);
+        this.inputManager = new InputManager(this);
+        this.inputManager.listenToP1();
+        this.inputManager.listenToP2();
+        
+        Services.EventBus!.on("DeathBarHit", this.onDeathBarHit);
 
-		this.drawScene();
+        this.drawScene();
 
-		Services.TimeService!.initialize();
-	}
+        Services.TimeService!.initialize();
+    }
 
-	async drawScene(): Promise<void> {
-		const gl = new GlowLayer('glow', Services.Scene, {
+    async drawScene() : Promise<void>  {
+        let gl = new GlowLayer("glow", Services.Scene, {
 			blurKernelSize: 32,
-			mainTextureRatio: 0.25,
+			mainTextureRatio: 0.25
 		});
 		gl.intensity = 0.3;
 
-		this.player1 = new Player(undefined);
-		this.player2 = new Player(undefined);
-		this.walls = [new Wall(), new Wall()];
-		this.walls.forEach((wall) => Services.Scene!.addMesh(wall.model));
-		this.ball = new Ball();
-		const camera: ArcRotateCamera = new ArcRotateCamera('Camera', 0, Math.PI / 4, 15, Vector3.Zero(), Services.Scene);
-		camera.attachControl(Services.Canvas, true);
+        this.player1 = new Player(undefined);
+        this.player2 = new Player(undefined);
+        this.walls = [new Wall(), new Wall()];
+        this.walls.forEach(wall => Services.Scene!.addMesh(wall.model));
+        //this.ball = new Ball();
+        var camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, Math.PI / 4, 10, Vector3.Zero(), Services.Scene);
+        camera.attachControl(Services.Canvas, true);
 
-		//var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
-		//light2.intensity = 0;
+        //var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
+        //light2.intensity = 0;
 
 		// const hemiLight = new HemisphericLight("hemiLight", new Vector3(0, 1, 0), Services.Scene);
 
@@ -77,31 +65,27 @@ class PongLocal extends Game {
 		// hemiLight.diffuse = new Color3(0.5, 0.5, 0.5);
 		// hemiLight.groundColor = new Color3(0, 0, 0);
 
-		const ground = MeshBuilder.CreateBox(
-			'ground',
-			{ width: this.width, height: this.height, depth: 0.1 },
-			Services.Scene,
-		);
-		ground.position = new Vector3(0, -0.05, 0);
-		ground.rotate(Vector3.Right(), Math.PI / 2);
-		ground.isPickable = false;
+        let ground = MeshBuilder.CreateBox("ground", {width: this.width, height: this.height, depth: 0.1}, Services.Scene);
+        ground.position = new Vector3(0, -0.05, 0);
+        ground.rotate(Vector3.Right(), Math.PI / 2);
+        ground.isPickable = false;
 
-		const groundMaterial = new StandardMaterial('groundMat', Services.Scene);
-		groundMaterial.diffuseColor = new Color3(0.4, 0.4, 0.4);
-		ground.material = groundMaterial;
+        let groundMaterial = new StandardMaterial("groundMat", Services.Scene);
+        groundMaterial.diffuseColor = new Color3(0.4, 0.4, 0.4);
+        ground.material = groundMaterial;
 
-		this.ball.setFullPos(new Vector3(0, 0.125, 0));
-		this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
-		this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
-		this.player1.paddle.setPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
-		this.player2.paddle.setPosition(new Vector3(0, 0.15, this.height / 2 - 2));
-		this.player1.deathBar.model.position = new Vector3(0, 0.125, -this.height / 2 + 1);
-		this.player2.deathBar.model.position = new Vector3(0, 0.125, this.height / 2 - 1);
-		this.walls[0].model.position = new Vector3(-this.width / 2 - 0.1, 0.25, 0);
-		this.walls[1].model.position = new Vector3(this.width / 2 + 0.1, 0.25, 0);
+        //this.ball.setFullPos(new Vector3(0, 0.125, 0));
+        this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
+        this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
+        this.player1.paddle.setPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
+        this.player2.paddle.setPosition(new Vector3(0, 0.15, this.height / 2 - 2));
+        this.player1.deathBar.model.position = new Vector3(0, 0.125, -this.height / 2 + 1);
+        this.player2.deathBar.model.position = new Vector3(0, 0.125, this.height / 2 - 1);
+        this.walls[0].model.position = new Vector3(-this.width / 2 - 0.1, 0.25, 0);
+        this.walls[1].model.position = new Vector3(this.width / 2 + 0.1, 0.25, 0);
 
-		const background = await ImportMeshAsync('./models/pong.glb', Services.Scene!);
-		background.meshes.forEach((mesh) => {
+		const background = await ImportMeshAsync("./models/pong.glb", Services.Scene!);
+		background.meshes.forEach(mesh => {
 			mesh.isPickable = false;
 
 			// const mat = mesh.material as PBRMaterial;
@@ -111,83 +95,86 @@ class PongLocal extends Game {
 			// 	}
 			// }
 		});
-	}
+    }
 
-	launch(): void {
-		this.stop();
-	}
+    launch() : void {
+        this.stop();
+    }
 
-	start(): void {
-		this.run();
-	}
+    start(): void {
+        this.run();
+    }
 
-	private onDeathBarHit = (payload: DeathBarPayload) => {
-		if (payload.deathBar.owner == this.player1) {
-			this.player2!.scoreUp();
-		} else if (payload.deathBar.owner == this.player2) {
-			this.player1!.scoreUp();
-		}
-		this.ball = new Ball();
-		this.ball.setFullPos(new Vector3(0, 0.125, 0));
-	};
+    private onDeathBarHit = (payload: DeathBarPayload) => {
+        if (payload.deathBar.owner == this.player1) {
+            this.player2!.scoreUp();
+        }
+        else if (payload.deathBar.owner == this.player2) {
+            this.player1!.scoreUp();
+        }
+        //this.ball = new Ball();
+        //this.ball.setFullPos(new Vector3(0, 0.125, 0));
+        this.ball!.generate(2000);
+    }
 
-	run() {
-		Services.EventBus!.emit('UI:MenuStateChange', 'off');
-		Services.Engine!.stopRenderLoop();
-		Services.Engine!.runRenderLoop(() => {
-			Services.TimeService!.update();
-			this.player1!.update();
-			this.player2!.update();
-			this.ball!.update();
-			Services.Scene!.render();
-		});
-	}
+    run() {
+        Services.EventBus!.emit("UI:MenuStateChange", "off");
+        Services.Engine!.stopRenderLoop();
 
-	stop() {
-		Services.EventBus!.emit('UI:MenuStateChange', 'loading');
-		Services.Engine!.stopRenderLoop();
-		Services.Engine!.runRenderLoop(() => {
-			Services.Scene!.render();
-		});
-	}
+        if (!this.ball) {
+            this.ball = new Ball();
+            this.ball.generate(2000);
+        }
+        Services.Engine!.runRenderLoop(() => {
+            Services.TimeService!.update();
+            const deltaT = Services.TimeService!.getDeltaTime();
+            this.ball!.update(Services.TimeService!.getTimestamp(), deltaT, this.player1!.paddle, this.player2!.paddle);// CHANGED
+            this.player1!.update(deltaT);
+            this.player2!.update(deltaT);
+            Services.Scene!.render();
+        });
+    }
 
-	private endGame(): void {
-		Services.EventBus!.emit('UI:MenuStateChange', 'pongMenu');
-		Services.EventBus!.emit('Game:Ended', {
-			name: 'Pong',
-			winnerId: null,
-			score: { player1: this.player1!.score, player2: this.player2!.score },
-		});
-	}
+    stop() {
+        Services.EventBus!.emit("UI:MenuStateChange", "loading");
+        Services.Engine!.stopRenderLoop();
+        Services.Engine!.runRenderLoop(() => {Services.Scene!.render();});
+    }
 
-	dispose(): void {
-		Services.Engine!.stopRenderLoop();
-		// Services.SocketService!.disconnect();
-		socket.disconnect();
+    private endGame() : void {
+        Services.EventBus!.emit("UI:MenuStateChange", "pongMenu");
+        Services.EventBus!.emit("Game:Ended", {name: "Pong", winnerId: null, score: {player1: this.player1!.score, player2: this.player2!.score}});
+    }
 
-		this.player1?.dispose();
-		this.player2?.dispose();
-		this.ball?.dispose();
-		this.walls?.forEach((wall) => wall.dispose());
-		this.inputManager?.dispose();
-		Services.EventBus!.off('DeathBarHit', this.onDeathBarHit);
-		Services.Scene!.dispose();
+    dispose(): void {
 
-		Services.Scene = undefined;
-		Services.Dimensions = undefined;
+        Services.Engine!.stopRenderLoop();
+        // Services.SocketService!.disconnect();
+        socket.disconnect();
 
-		window.removeEventListener('keydown', this.showDebugLayer);
-	}
+        this.player1?.dispose();
+        this.player2?.dispose();
+        this.ball?.dispose();
+        this.walls?.forEach(wall => wall.dispose());
+        this.inputManager?.dispose();
+        Services.EventBus!.off("DeathBarHit", this.onDeathBarHit);
+        Services.Scene!.dispose();
 
-	showDebugLayer(ev: KeyboardEvent) {
-		if (ev.ctrlKey && ev.keyCode === 73) {
-			if (Services.Scene!.debugLayer.isVisible()) {
-				Services.Scene!.debugLayer.hide();
-			} else {
-				Services.Scene!.debugLayer.show();
-			}
-		}
-	}
+        Services.Scene = undefined;
+        Services.Dimensions = undefined;
+
+        window.removeEventListener("keydown", this.showDebugLayer);
+    }
+
+    showDebugLayer(ev: KeyboardEvent) {
+        if (ev.ctrlKey && ev.keyCode === 73) {
+            if (Services.Scene!.debugLayer.isVisible()) {
+                Services.Scene!.debugLayer.hide();
+            } else {
+                Services.Scene!.debugLayer.show();
+            }
+        }
+    }
 }
 
 export default PongLocal;

@@ -1,16 +1,13 @@
 
 import { KeyboardEventTypes } from "@babylonjs/core";
-import Pong from "./Game/PongOnline";
 import PongLocal from "./Game/PongLocal";
-import { LEFT, RIGHT, UP, DOWN } from "./Player";
+import { LEFT, RIGHT } from "./Player";
 import Services from "./Services/Services";
 
-import { socket } from "../../socket";
-
 class InputManager {
-    private game: Pong | PongLocal;
+    private game: PongLocal;
 
-    constructor(game: Pong | PongLocal) {
+    constructor(game: PongLocal) {
         this.game = game;
     }
 
@@ -19,7 +16,6 @@ class InputManager {
         switch (kbInfo.type) {
             case KeyboardEventTypes.KEYDOWN:
             {
-                console.log("KEY DOWN P1: ", kbInfo.event.key);
                 switch (kbInfo.event.key) {
                     case "a":
                         this.game.player1!.setPaddleDirectionFromKeyboard(LEFT, true);
@@ -51,7 +47,6 @@ class InputManager {
         switch (kbInfo.type) {
             case KeyboardEventTypes.KEYDOWN:
             {
-                console.log("KEY DOWN P2: ", kbInfo.event.key);
                 switch (kbInfo.event.key) {
                     case "j":
                         this.game.player2!.setPaddleDirectionFromKeyboard(LEFT, true);
@@ -70,40 +65,6 @@ class InputManager {
                         break;
                     case "l":
                         this.game.player2!.setPaddleDirectionFromKeyboard(RIGHT, false);
-                        break;
-                }
-                break;
-            }
-        }
-        });
-    }
-
-    listenToP1Online() {
-        Services.Scene!.onKeyboardObservable.add((kbInfo) => {
-        if (!socket.connected)
-            return;
-        switch (kbInfo.type) {
-            case KeyboardEventTypes.KEYDOWN:
-            {
-                console.log("KEY DOWN P1: ", kbInfo.event.key);
-                switch (kbInfo.event.key) {
-                    case "a":
-                        socket.emit("playerInput", { direction: LEFT, isPressed: true });
-                        break;
-                    case "d":
-                        socket.emit("playerInput", { direction: RIGHT, isPressed: true });
-                        break;
-                }
-                break;
-            }
-            case KeyboardEventTypes.KEYUP:
-            {
-                switch (kbInfo.event.key) {
-                    case "a":
-                        socket.emit("playerInput", { direction: LEFT, isPressed: false });
-                        break;
-                    case "d":
-                        socket.emit("playerInput", { direction: RIGHT, isPressed: false });
                         break;
                 }
                 break;

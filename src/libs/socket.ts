@@ -15,7 +15,7 @@ const DEFAULT_SOCKET_OPTIONS = {
 
 export const gameSocket: Socket = io(SOCKET_BASE_URL, {
 	...DEFAULT_SOCKET_OPTIONS,
-	path: '/api/game/',
+	path: '/api/game/ws/',
 });
 
 export const chatSocket: Socket = io(SOCKET_BASE_URL, {
