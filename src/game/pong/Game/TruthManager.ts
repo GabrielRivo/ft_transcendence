@@ -130,9 +130,9 @@ class TruthManager {
             deltaT = nextEventTime - lastFrameTime;
             
             if (deltaT > 0) {
+                ball.update(deltaT, p1.paddle, p2.paddle);
                 p1.update(deltaT);
                 p2.update(deltaT);
-                ball.update(deltaT);
             }
 
             if (processP1) {
@@ -149,9 +149,9 @@ class TruthManager {
 
         deltaT = currentTime - lastFrameTime;
         if (deltaT > 0) {
+            ball.update(deltaT, p1.paddle, p2.paddle);
             p1.update(deltaT);
             p2.update(deltaT);
-            ball.update(deltaT);
         }
 
         //return this.getGameState(this.game);

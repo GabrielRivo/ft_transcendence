@@ -45,12 +45,16 @@ class Paddle {
 		return this.modelDirection;
 	}
 
+    getPosition() : Vector3 {
+		return this.model.position;
+	}
     setPosition(position: Vector3) {
         this.model.position.copyFrom(position);
     }
-	getPosition() : Vector3 {
-		return this.model.position;
-	}
+
+    getSpeed(): number {
+        return this.speed;
+    }
 
     move(deltaT: number) {
         deltaT = deltaT / 1000;
