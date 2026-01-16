@@ -307,29 +307,29 @@ services:
       - frontend-node-modules:/app/node_modules
     networks:
       - transcendence-network
-    socialManagement:
-      build:
-        context: .
-        dockerfile: apps/social_managemenent/Dockerfile.dev
-      container_name: transcendence-social_management
-      restart: unless-stopped
-      environment:
-        NODE_ENV: development
-        RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
-      volumes:
-        - ./package.json:/app/package.json:ro
-        - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml:ro
-        - ./pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
-        - ./apps/social_management:/app/apps/social_management
-        - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
-        - ./packages/my-class-validator:/app/packages/my-class-validator
-        - social_management-node-modules:/app/node_modules
-        - social_management-data:/app/apps/social_management/db
-      networks:
-        - transcendence-network
-      depends_on:
-        rabbitmq:
-          condition: service_healthy
+  socialManagement:
+    build:
+      context: .
+      dockerfile: apps/social_managemenent/Dockerfile.dev
+    container_name: transcendence-social_management
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+    volumes:
+      - ./package.json:/app/package.json:ro
+      - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml:ro
+      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml:ro
+      - ./apps/social_management:/app/apps/social_management
+      - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
+      - ./packages/my-class-validator:/app/packages/my-class-validator
+      - social_management-node-modules:/app/node_modules
+      - social_management-data:/app/apps/social_management/db
+    networks:
+      - transcendence-network
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
 
 # -----------------------------------------------------------------------------
 # Networks Definition
