@@ -8,7 +8,7 @@ import Wall from "../Wall";
 import PredictionManager from "./PredictionManager";
 import Game from "./Game";
 
-import { socket } from "../../../socket";
+import { gameSocket as socket } from "../../../socket";
 import InputManagerOnline from "../InputManagerOnline";
 
 class PongOnline extends Game {
@@ -28,6 +28,8 @@ class PongOnline extends Game {
     private serverState: "connected" | "disconnected";
     private gameJoined: boolean = false;
 
+    private isDisposed: boolean = false;
+
     constructor() {
         super();
         this.currentGameState = null;
@@ -36,6 +38,7 @@ class PongOnline extends Game {
     }
 
     initialize(): void {
+        Services.TimeService!.initialize();
         Services.Scene = new Scene(Services.Engine!);
         Services.Dimensions = new Vector2(this.width, this.height);
         window.addEventListener("keydown", this.showDebugLayer);
@@ -48,7 +51,6 @@ class PongOnline extends Game {
 
         this.drawScene();
 
-        Services.TimeService!.initialize();
     }
 
     async drawScene(): Promise<void> {
@@ -312,20 +314,29 @@ class PongOnline extends Game {
 
     run() {
         console.log("Game running.");
-        Services.Engine!.stopRenderLoop();
-        Services.Engine!.runRenderLoop(() => {
-            this.predictionManager!.predictionUpdate();
-            // this.player1!.update();
-            // this.player2!.update();
-            // this.ball!.update();
-            Services.Scene!.render();
-        });
+        this.isDisposed = false;
+        Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
+        Services.Engine!.runRenderLoop(this.renderLoop);
+    }
+
+    private renderLoop = () => {
+        if (this.isDisposed) return;
+        this.predictionManager!.predictionUpdate();
+        // this.player1!.update();
+        // this.player2!.update();
+        // this.ball!.update();
+        Services.Scene!.render();
     }
 
     stop() {
         console.log("Game stopped.");
-        Services.Engine!.stopRenderLoop();
-        Services.Engine!.runRenderLoop(() => { Services.Scene!.render(); });
+        Services.Engine!.stopRenderLoop(this.renderLoop);
+        Services.Engine!.runRenderLoop(this.stoppedRenderLoop);
+    }
+
+    stoppedRenderLoop = () => {
+        if (this.isDisposed) return;
+        Services.Scene!.render();
     }
 
     private endGame(): void {
@@ -335,7 +346,11 @@ class PongOnline extends Game {
 
     dispose(): void {
         console.log("Disposing Pong game instance.");
+        Services.Engine!.stopRenderLoop(this.renderLoop);
+        Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
         Services.Engine!.stopRenderLoop();
+
+        this.isDisposed = true;
 
         this.player1?.dispose();
         this.player2?.dispose();

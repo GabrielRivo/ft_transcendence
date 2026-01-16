@@ -20,11 +20,14 @@ class PongLocal extends Game {
     width: number = 7;
     height: number = 12;
 
+    isDisposed: boolean = false;
+
     constructor() {
         super();
     }
 
     initialize(): void {
+        Services.TimeService!.initialize();
         Services.Scene = new Scene(Services.Engine!);
         Services.Dimensions = new Vector2(this.width, this.height);
         window.addEventListener("keydown", this.showDebugLayer);
@@ -36,8 +39,6 @@ class PongLocal extends Game {
         Services.EventBus!.on("DeathBarHit", this.onDeathBarHit);
 
         this.drawScene();
-
-        Services.TimeService!.initialize();
     }
 
     async drawScene() : Promise<void>  {
@@ -119,26 +120,36 @@ class PongLocal extends Game {
 
     run() {
         Services.EventBus!.emit("UI:MenuStateChange", "off");
-        Services.Engine!.stopRenderLoop();
+        Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
+        Services.Engine!.stopRenderLoop(this.renderLoop);
 
         if (!this.ball) {
             this.ball = new Ball();
             this.ball.generate(2000);
         }
-        Services.Engine!.runRenderLoop(() => {
-            Services.TimeService!.update();
-            const deltaT = Services.TimeService!.getDeltaTime();
-            this.ball!.update(Services.TimeService!.getTimestamp(), deltaT, this.player1!.paddle, this.player2!.paddle);// CHANGED
-            this.player1!.update(deltaT);
-            this.player2!.update(deltaT);
-            Services.Scene!.render();
-        });
+        Services.Engine!.runRenderLoop(this.renderLoop);
+    }
+
+    private renderLoop = () => {
+        if (this.isDisposed) return;
+
+        Services.TimeService!.update();
+        const deltaT = Services.TimeService!.getDeltaTime();
+        this.ball!.update(Services.TimeService!.getTimestamp(), deltaT, this.player1!.paddle, this.player2!.paddle);
+        this.player1!.update(deltaT);
+        this.player2!.update(deltaT);
+        Services.Scene!.render();
     }
 
     stop() {
         Services.EventBus!.emit("UI:MenuStateChange", "loading");
-        Services.Engine!.stopRenderLoop();
-        Services.Engine!.runRenderLoop(() => {Services.Scene!.render();});
+        Services.Engine!.stopRenderLoop(this.renderLoop);
+        Services.Engine!.runRenderLoop(this.stoppedRenderLoop);
+    }
+
+    stoppedRenderLoop() : void {
+        if (this.isDisposed) return;
+        Services.Scene!.render();
     }
 
     private endGame() : void {
@@ -148,7 +159,12 @@ class PongLocal extends Game {
 
     dispose(): void {
 
+        Services.Engine!.stopRenderLoop(this.renderLoop);
+        Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
         Services.Engine!.stopRenderLoop();
+        
+        this.isDisposed = true;
+
         // Services.SocketService!.disconnect();
         socket.disconnect();
 

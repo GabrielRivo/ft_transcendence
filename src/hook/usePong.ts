@@ -297,15 +297,15 @@ export const usePong = (config?: UsePongConfig): UsePongReturn => {
 		// Launch the game
 		try {
 			// For background mode, we don't need callbacks
-			const launchConfig = mode === 'background'
+			/*const launchConfig = mode === 'background'
 				? {}
 				: {
 					gameId: gameId ?? undefined,
 					onGameEnd: stableOnGameEnd,
 					onConnectionError: stableOnConnectionError,
-				};
+				};*/
 
-			Game.Services.GameService!.launchGame(gameType, launchConfig);
+			Game.Services.GameService!.launchGame(gameType, /*launchConfig*/);
 
 			// Start the game (connects to server for online games)
 			Game.Services.GameService!.startGame();

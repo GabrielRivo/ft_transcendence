@@ -1,6 +1,6 @@
 import { io, Socket } from 'socket.io-client';
 
-const SOCKET_BASE_URL: string = 'http://localhost:8080';
+const SOCKET_BASE_URL: string = window.location.origin;
 
 const DEFAULT_SOCKET_OPTIONS = {
 	transports: ['websocket'] as string[],
