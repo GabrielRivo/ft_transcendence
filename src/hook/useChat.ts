@@ -101,6 +101,17 @@ export function useChat() {
 			setMessages(formattedHistory.reverse());
 		};
 
+		const handleGroupHistory = (history: HistoryMessage[]) => {
+			const formattedHistory: ChatMessage[] = history.map((h) => ({
+				userId: h.userId,
+				username: h.username || 'Unknown',
+				msgContent: h.msgContent,
+				roomId: h.roomId || '',
+				created_at: h.created_at,
+			}));
+			setMessages(formattedHistory.reverse());
+		};
+
 		const handleRoomUsersUpdate = (data: { roomId: string; users: RoomUser[] }) => {
 			if (data.roomId === currentRoom) {
 				setRoomUsers(data.users);
@@ -118,6 +129,7 @@ export function useChat() {
 		chatSocket.on('message', handleMessage);
 		chatSocket.on('hub_history', handleHubHistory);
 		chatSocket.on('private_history', handlePrivateHistory);
+		chatSocket.on('group_history', handleGroupHistory);
 		chatSocket.on('room_users_update', handleRoomUsersUpdate);
 		chatSocket.on('room_users', handleRoomUsers);
 
@@ -132,6 +144,7 @@ export function useChat() {
 			chatSocket.off('message', handleMessage);
 			chatSocket.off('hub_history', handleHubHistory);
 			chatSocket.off('private_history', handlePrivateHistory);
+			chatSocket.off('group_history', handleGroupHistory);
 			chatSocket.off('room_users_update', handleRoomUsersUpdate);
 			chatSocket.off('room_users', handleRoomUsers);
 		};
