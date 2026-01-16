@@ -5,9 +5,8 @@ import History from "../Utils/History";
 import type { GameState, PlayerDirectionData } from "../globalType";
 import PongOnline from "./PongOnline";
 import Player, { NONE } from "../Player";
-import { BooleanLineComponent } from "@babylonjs/inspector/lines/booleanLineComponent";
 import InputManager from "../InputManagerOnline";
-import { socket } from "../../lib/socket";
+
 
 class PredictionManager {
     private game: PongOnline;
@@ -91,7 +90,7 @@ class PredictionManager {
 
         if (posDiffP1 > 0.1) {
             console.log(`Player 1 position prediction error: ${posDiffP1}`);
-            console.log("Truth pos:", truth.p1.pos, " Predicted pos:", prediction.p1.pos);
+            //console.log("Truth pos:", truth.p1.pos, " Predicted pos:", prediction.p1.pos);
             this.game.player1!.paddle.reconcile(truth.p1.pos);
         }
         if (posDiffP2 > 0.1) {
@@ -99,7 +98,7 @@ class PredictionManager {
             console.log(`Player 2 position prediction error: ${posDiffP2}`);
         }
         if (posDiffBall > 0.1 || dirDiffBall > 0.1 || speedDiffBall > 0.1) {
-            //this.game.ball!.reconcile(truth.ball.pos, truth.ball.dir, truth.ball.speed);
+            this.game.ball!.reconcile(truth.ball.pos, truth.ball.dir, truth.ball.speed);
             console.log(`Ball position prediction error: ${posDiffBall}`);
         }
     }
@@ -198,7 +197,6 @@ class PredictionManager {
 
         // if (this.test === true)
         //     return;
-
         if (this.deltaT >= this.frameDuration) {
             
             // if (this.test === false && time > 5000) {
@@ -209,7 +207,6 @@ class PredictionManager {
             //     this.test = true;
             // }
 
-            
             this.inputManager.processLastInputs(this.game.clientPlayer!);
             const latestPlayerDirection = this.playerInputBuffer.getLatestState();
             if (latestPlayerDirection && latestPlayerDirection.timestamp > this.lastFrameTime && latestPlayerDirection.timestamp <= time) {
@@ -221,7 +218,7 @@ class PredictionManager {
             game.ball!.update(time, Services.TimeService!.getDeltaTime(), game.player1!.paddle, game.player2!.paddle);
             game.player1!.update(Services.TimeService!.getDeltaTime());
             game.player2!.update(Services.TimeService!.getDeltaTime());
-            
+
             //console.log("After update Ball pos:", game.ball!.getPosition());
             let predictionState = this.getGameState(game);
 
@@ -237,8 +234,10 @@ class PredictionManager {
 
             //this.setGameState(game, predictionState);
 
-            /*if (latestServerState)
-                this.setGameState(game, latestServerState);*/
+            // if (latestServerState)
+            // {
+            //     this.setGameState(game, latestServerState);
+            // }
 
             this.clientGameStateHistory.addState(this.getGameState(game));
 

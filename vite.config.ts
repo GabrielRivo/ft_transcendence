@@ -35,7 +35,10 @@ export default defineConfig({
 	server: {
 		port: 5173,
 		host: true,
+		allowedHosts: true
+		
 	},
+	
 	// Enable SPA fallback: return index.html for unknown routes
 	// This allows the client-side router (my-react-router) to handle all routes
 	appType: 'spa',

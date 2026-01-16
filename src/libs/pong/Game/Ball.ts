@@ -18,7 +18,7 @@ class Ball {
 
     direction!: Vector3;
     position!: Vector3;
-    speed: number = 0;
+    speed: number = 3;
     maxSpeed: number = 150;
     acceleration: number = 1.1;
     diameter: number = 0.25;
@@ -142,7 +142,7 @@ class Ball {
         while (remainingDeltaT > Ball.EPSILON && this.moving) {
             loopCount++;
             if (loopCount > 50) {
-                console.log("Ball move loop exceeded 50 iterations, breaking to avoid infinite loop.");
+                //console.log("Ball move loop exceeded 50 iterations, breaking to avoid infinite loop.");
                 break;
             }
 
@@ -308,6 +308,7 @@ class Ball {
         const name : string = pickedMesh.name;
 
         if (name === "deathBar" || name === "paddle" || name === "wall") {
+            console.log("Ball hit mesh: " + name);
             let impact = this.findRadialImpact(pickedMesh);
             if (impact) {
                 let normalVec = impact.getNormal(true);
@@ -514,7 +515,7 @@ class Ball {
     update(currentTime: number, deltaT: number, paddle1: Paddle, paddle2: Paddle) {
         deltaT = this.getStartingDeltaT(currentTime, deltaT);
         this.move(deltaT, paddle1, paddle2);
-        this.visualOffset = Vector3.Lerp(this.visualOffset, Vector3.Zero(), 0.1);
+        this.visualOffset = Vector3.Lerp(this.visualOffset, Vector3.Zero(), 0.01);
         if (this.visualOffset.lengthSquared() < 0.001) {
             this.visualOffset.setAll(0);
         }

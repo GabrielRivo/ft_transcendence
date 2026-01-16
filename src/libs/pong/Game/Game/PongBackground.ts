@@ -101,6 +101,8 @@ class PongBackground extends Game {
 	/** Game field height */
 	height: number = 12;
 
+	isDisposed: boolean = false;
+
 	// -------------------------------------------------------------------------
 	// Constructor
 	// -------------------------------------------------------------------------
@@ -273,43 +275,46 @@ class PongBackground extends Game {
 	 * Starts the render loop with AI control and camera rotation.
 	 */
 	run(): void {
-		Services.Engine!.stopRenderLoop();
-		Services.Engine!.runRenderLoop(() => {
-			Services.TimeService!.update();
-
-			// Update AI for both players
-			if (this.ball && this.player1 && this.player2) {
-				const ballPos = this.ball.position;
-				this.updateAI(this.player1, ballPos.x);
-				this.updateAI(this.player2, ballPos.x);
-
-				// Update game objects
-				this.player1.update(Services.TimeService!.getDeltaTime());
-				this.player2.update(Services.TimeService!.getDeltaTime());
-				this.ball.update(Services.TimeService!.getTimestamp(), Services.TimeService!.getDeltaTime(), this.player1!.paddle, this.player2!.paddle);
-			}
-
-			// Rotate camera slowly for ambient effect
-			if (this.camera) {
-				this.camera.alpha += CAMERA_ROTATION_SPEED;
-			}
-
-			Services.Scene!.render();
-		});
+		this.isDisposed = false;
+		Services.Engine!.stopRenderLoop(this.renderLoop);
+		Services.Engine!.runRenderLoop(this.renderLoop);
 	}
+
+	private renderLoop = () => {
+		if (this.isDisposed) return;
+
+		Services.TimeService!.update();
+
+		// Update AI for both players
+		if (this.ball && this.player1 && this.player2) {
+			const ballPos = this.ball.position;
+			this.updateAI(this.player1, ballPos.x);
+			this.updateAI(this.player2, ballPos.x);
+
+			// Update game objects
+			this.player1.update(Services.TimeService!.getDeltaTime());
+			this.player2.update(Services.TimeService!.getDeltaTime());
+			
+			// Note: Assure-toi que player1.paddle existe avant d'y accéder !
+			if (this.player1.paddle && this.player2.paddle) {
+				this.ball.update(Services.TimeService!.getTimestamp(), Services.TimeService!.getDeltaTime(), this.player1.paddle, this.player2.paddle);
+				// console.log("Ball speed : ", this.ball.speed); // Décommente pour debug
+			}
+		}
+
+		// Rotate camera
+		if (this.camera) {
+			this.camera.alpha += CAMERA_ROTATION_SPEED;
+		}
+
+		Services.Scene!.render();
+    };
 
 	/**
 	 * Stops the game (continues rendering but no game logic).
 	 */
 	stop(): void {
-		Services.Engine!.stopRenderLoop();
-		Services.Engine!.runRenderLoop(() => {
-			// Just rotate camera, no game updates
-			if (this.camera) {
-				this.camera.alpha += CAMERA_ROTATION_SPEED;
-			}
-			Services.Scene!.render();
-		});
+		Services.Engine!.stopRenderLoop(this.renderLoop);
 	}
 
 	// -------------------------------------------------------------------------
@@ -320,6 +325,7 @@ class PongBackground extends Game {
 	 * Disposes of all game resources.
 	 */
 	dispose(): void {
+		this.isDisposed = true;
 		console.log('[PongBackground] Disposing background game');
 
 		// Stop render loop
