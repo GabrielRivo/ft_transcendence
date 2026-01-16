@@ -1,117 +1,98 @@
 # Intégration Événementielle et RabbitMQ
 
-### 1. Stratégie de Découplage
+### 1. Stratégie de Découplage et Prérequis
 
-* **Philosophie :** Le Service Tournoi ne doit pas savoir *comment* une partie se joue, il doit seulement savoir *quand* elle se termine et *qui* a gagné.
-* **Pattern :** Utilisation de **RabbitMQ** en mode Pub/Sub.
-* Le service agit principalement comme **Consommateur** (Subscriber) pour les résultats de matchs.
-* Il agit comme **Producteur** (Publisher) pour les statistiques de fin de tournoi.
+Le système repose sur une architecture événementielle pour isoler le cycle de vie du tournoi de la logique de jeu.
 
+> **⚠️ IMPORTANT - Prérequis Techniques**
+> L'intégration de cette couche dépend de la disponibilité des packages transverses de l'équipe "Common" :
+> *   `@common/rabbitmq-client` : Pour l'abstraction Pub/Sub.
+> *   `@common/vault-client` : Pour la récupération sécurisée des credentials AMQP.
+> *   `@common/elk-client` : Pour le traçage distribué des événements.
+>
+> En attendant ces modules, le développement se fera avec des **Mocks locaux**.
 
+*   **Pattern :** RabbitMQ en mode Pub/Sub (Topic Exchange).
+*   **Rôle :**
+    *   **Consommateur :** Écoute `game.finished` pour faire avancer l'arbre.
+    *   **Producteur :** Émet `tournament.ended` pour l'historique et les succès.
 
 ### 2. Configuration de l'Infrastructure
 
-* **Connexion :** Injection de l'URI RabbitMQ via **Vault** au démarrage du module.
-* **Échange (Exchange) :**
-* Utilisation d'un `Topic Exchange` global (ex: `pong.events`) pour écouter les événements venant de plusieurs sources.
+*   **Exchange Global :** `transcendence.events` (Topic).
+*   **Queue du Service :** `tournament.service.queue`.
+*   **Routing Keys écoutées :**
+    *   `game.finished` (Résultats de matchs).
+    *   `user.updated` (Changement d'avatar/pseudo).
+*   **Durabilité :** Queue durable (`durable: true`) pour ne perdre aucun résultat en cas de redémarrage du service Tournoi.
 
-
-* **File (Queue) :**
-* Nom : `tournament_service_queue`.
-* Durabilité : `true` (Pour ne pas perdre les résultats de match si le service redémarre).
-
-
-
-### 3. Événements Souscrits (Incoming - Ce qu'on écoute)
-
-C'est ici que la magie de l'avancement automatique de l'arbre opère.
+### 3. Événements Souscrits (Consommation)
 
 #### 3.1 Résultat de Partie (`game.finished`)
+C'est le "battement de cœur" qui fait avancer le tournoi.
 
-* **Source :** *Game Service*.
-* **Routing Key :** `game.finished`.
-* **Pourquoi :** C'est le déclencheur principal pour faire passer un tournoi de l'état "Round 1 en cours" à "Round 1 terminé" ou "Round 2 prêt".
-* **Payload Attendu :**
-```json
-{
-  "gameId": "uuid-game-123",
-  "tournamentId": "uuid-tour-999", // Important pour filtrer !
-  "winnerId": "user-A",
-  "loserId": "user-B",
-  "score": "11-4",
-  "reason": "score_limit" | "disconnect" | "forfeit"
-}
+*   **Source :** Game Service.
+*   **Payload Contractuel :**
+    ```typescript
+    interface GameFinishedEvent {
+      gameId: string;       // UUID de la partie
+      tournamentId?: string;// UUID du tournoi (Absent si partie "Ladder")
+      winnerId: string;     // UUID du joueur gagnant
+      score: {
+        p1: number;
+        p2: number;
+      };
+      reason: 'score' | 'forfeit' | 'disconnect';
+      endedAt: string;      // ISO Date
+    }
+    ```
+*   **Logique de Traitement :**
+    1.  Vérifier si `tournamentId` est présent (sinon `ACK` immédiat et ignore).
+    2.  Charger l'arbre du tournoi.
+    3.  Appliquer le résultat via `BracketService`.
+    4.  Si tout est OK -> `ACK`.
+    5.  Si erreur technique (DB down) -> `NACK` + Requeue.
 
-```
-
-
-* **Logique de Traitement (Handler) :**
-1. Vérifier si `tournamentId` est présent (sinon ignorer, c'est une partie hors tournoi).
-2. Charger l'arbre du tournoi depuis SQLite.
-3. Identifier le nœud correspondant au `gameId`.
-4. Mettre à jour le vainqueur et déclencher la transition vers le match suivant (cf. *Workflows*).
-5. `ACK` le message RabbitMQ.
-
-
-
-#### 3.2 Mise à jour Utilisateur (`user.updated`)
-
-* **Source :** *User Management Service*.
-* **Routing Key :** `user.profile.updated`.
-* **Pourquoi :** Si un joueur change d'avatar ou de pseudo pendant un tournoi, l'arbre visuel doit être mis à jour.
-* **Action :** Mettre à jour le cache local des participants dans la table `TournamentParticipants`.
-
-### 4. Événements Publiés (Outgoing - Ce qu'on émet)
+### 4. Événements Publiés (Production)
 
 #### 4.1 Fin de Tournoi (`tournament.ended`)
+*   **Destinataires :** User Service (Stats), Achievement Service (Trophées).
+*   **Routing Key :** `tournament.ended`.
+*   **Payload Contractuel :**
+    ```typescript
+    interface TournamentEndedEvent {
+      id: string;
+      name: string;
+      winner: { id: string; alias: string };
+      rankings: Array<{
+        userId: string;
+        rank: number; // 1, 2, 3...
+      }>;
+      startedAt: string;
+      endedAt: string;
+    }
+    ```
 
-* **Destinataire :** *User Management Service* (pour l'historique/stats), *Achievement Service*.
-* **Routing Key :** `tournament.ended`.
-* **Payload :**
-```json
-{
-  "tournamentId": "uuid",
-  "winnerId": "user-A",
-  "rankings": [
-    { "userId": "user-A", "rank": 1 },
-    { "userId": "user-B", "rank": 2 },
-    { "userId": "user-C", "rank": 3 } // Demi-finaliste
-  ],
-  "startedAt": "timestamp",
-  "endedAt": "timestamp"
-}
+### 5. Diagramme de Séquence Asynchrone
 
+```mermaid
+sequenceDiagram
+    participant Game as Game Service
+    participant Bus as RabbitMQ
+    participant Tour as Tournament Service
+    participant DB as SQLite
+
+    Note over Game: Match terminé (Score 11-9)
+    Game->>Bus: Publish "game.finished"
+    
+    Bus->>Tour: Push Message
+    
+    Tour->>DB: Load Tournament Context
+    Tour->>Tour: Update Bracket (Logic)
+    Tour->>DB: Save New State
+    
+    Tour->>Bus: ACK Message
+    
+    Note over Tour: Si Tournoi Fini :
+    Tour->>Bus: Publish "tournament.ended"
 ```
-
-
-
-#### 4.2 Audit Log (`tournament.created`, `tournament.cancelled`)
-
-* **Destinataire :** *Log/Monitoring Service* (ELK).
-* **Utilité :** Traçabilité administrative.
-
-### 5. Idempotence et Robustesse
-
-Comment gérer les problèmes de réseau ou de duplication de messages.
-
-* **Problème de la double livraison :** Si RabbitMQ envoie deux fois le message `game.finished` pour la même partie.
-* **Solution :** Vérifier dans la DB si le match a déjà un vainqueur. Si oui, ignorer le second message (Idempotency).
-
-
-* **Gestion des erreurs (NACK) :**
-* Si la base de données est verrouillée ou inaccessible lors de la réception d'un résultat :
-* Renvoyer un `NACK` (Negative Acknowledgement) avec `requeue=true` pour réessayer plus tard.
-
-
-* **Dead Letter Queue (DLQ) :**
-* Si le payload est invalide (JSON corrompu), envoyer vers une DLQ pour analyse manuelle sans bloquer la file principale.
-
-
-
-### 6. Diagramme de Séquence Asynchrone
-
-Un schéma montrant :
-
-1. GameService publie `game.finished`.
-2. RabbitMQ route vers `tournament_service_queue`.
-3. TournamentService consomme, traite, et ACK.
