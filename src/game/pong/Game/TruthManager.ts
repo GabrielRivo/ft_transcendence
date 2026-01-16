@@ -173,6 +173,11 @@ class TruthManager {
             // this.computePlayerInputs(this.game.player2!, p2Inputs, this.lastFrameTime, time);
 
             this.computeState(this.lastFrameTime, time);
+            
+            //game.player1!.update(this.deltaT);
+            //game.player2!.update(this.deltaT);
+            //game.ball!.update(this.deltaT, game.player1!.paddle, game.player2!.paddle);
+
 
             //this.game.ball!.update(this.deltaT);
 

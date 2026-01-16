@@ -154,7 +154,7 @@ export class GameService {
 
     public async onPlayerInput(client: Socket, data: any): Promise<void> {
 		const game = this.gamesByPlayer.get(client.data.userId);
-
+		console.log(`[GameService] Received input from player ${client.data.userId} : `, data);
 		if (game && game.inputManager) {
 			game.inputManager.recordInput(client, data);
 		}

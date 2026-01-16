@@ -245,7 +245,7 @@ export class GameGateway {
 	 * @param client - The client sending input
 	 * @param data - Input payload (movement direction, actions, etc.)
 	 */
-	@SubscribeMessage('playerInput')
+	@SubscribeMessage('playerDirection')
 	handlePlayerInput(@ConnectedSocket() client: GameSocket, @MessageBody() data: any): void {
 		// Forward input to game service
 		this.gameService.onPlayerInput(client, data);

@@ -56,6 +56,7 @@ class Pong extends Game {
     }
 
     initialize(): void {
+        this.services.TimeService!.initialize();
         this.services.Scene = new Scene(this.services.Engine!);
         this.services.Dimensions = new Vector2(this.width, this.height);
 
