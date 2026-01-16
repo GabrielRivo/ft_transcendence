@@ -1,6 +1,6 @@
 import Database, { Statement } from 'better-sqlite3';
 import { InjectPlugin, Service, Inject } from 'my-fastify-decorators';
-import { FriendManagementService } from '../../friend-management/friend-management.service.js'
+// import { FriendManagementService } from '../../friend-management/friend-management.service.js'
 
 // `
 // <action>     => SELECT
@@ -15,8 +15,8 @@ export class GroupChatService {
 	@InjectPlugin('db')
 	private db !: Database.Database;
 
-	@Inject(FriendManagementService)
-	private friendService!: FriendManagementService;
+	// @Inject(FriendManagementService)
+	// private friendService!: FriendManagementService;
 
 	private statementSaveGroup !: Statement<{groupId: number,  userId: number, msgContent: string }>;
 	private statementGetGroupHistory !: Statement<{groupId: number}>;
@@ -57,8 +57,8 @@ export class GroupChatService {
 	}
 
 	addUserToGroup(senderId : number, userId : number, groupId : number){ // rajouter is_group et is_user
-		if (this.friendService.is_friend(senderId, userId) == null)
-			return {message : "You aren't friend with this user, can't add to private group"}
+		// if (this.friendService.is_friend(senderId, userId) == null) // AJOUTER LA REQUETE
+		// 	return {message : "You aren't friend with this user, can't add to private group"}
 		return this.statementAddUserToGroup.run({groupId, userId}) // verifier si on get le group
 	}
 }

@@ -14,7 +14,7 @@ import { Socket } from 'socket.io';
 import { GeneralChatService } from './general-chat/general-chat.service.js';
 import { PrivateChatService } from './private-chat/private-chat.service.js';
 import { GroupChatService } from './group-chat/group-chat.service.js'
-import { BlockManagementService } from '../friend-management/block-management.service.js';
+// import { BlockManagementService } from '../friend-management/block-management.service.js';
 import { ChatSchema, ChatDto } from './dto/chat.dto.js';
 import { group } from 'console';
 
@@ -26,8 +26,8 @@ export class ChatGateway {
 	@Inject(PrivateChatService)
 	private privateChatService!: PrivateChatService;
 
-	@Inject(BlockManagementService)
-	private blockService!: BlockManagementService;
+	// @Inject(BlockManagementService)
+	// private blockService!: BlockManagementService;
 
 	@Inject(GroupChatService)
 	private groupChatServie!: GroupChatService;

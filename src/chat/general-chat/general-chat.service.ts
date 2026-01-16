@@ -1,6 +1,6 @@
 import Database, { Statement } from 'better-sqlite3';
 import { InjectPlugin, Service, Inject } from 'my-fastify-decorators';
-import { BlockManagementService } from '../../friend-management/block-management.service.js';
+// import { BlockManagementService } from '../../friend-management/block-management.service.js';
 
 
 @Service()
@@ -12,8 +12,8 @@ export class GeneralChatService {
 	private statementGetAllGeneralHistory !: Statement<[]>;
 
 
-	@Inject(BlockManagementService)
-	private blockService!: BlockManagementService;
+	// @Inject(BlockManagementService)
+	// private blockService!: BlockManagementService;
 
 	onModuleInit() {
 		this.statementSaveGeneral = this.db.prepare(
@@ -39,10 +39,10 @@ export class GeneralChatService {
 		const rows = this.statementGetGeneralHistory.all() as any[];
 		const filteredHistory = []; 
 		for (const msg of rows) {
-			const blocked = await this.blockService.is_blocked(currentUserId, msg.userId);
-			if (!blocked) {
+			//const blocked = await this.blockService.is_blocked(currentUserId, msg.userId); // FAIRE LA REQUETE 
+			//if (!blocked) {
 				filteredHistory.push(msg);
-			}
+			//}
 		}
 		return filteredHistory;
 	}

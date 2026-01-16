@@ -1,7 +1,7 @@
 
 import Database, { Statement } from 'better-sqlite3';
 import { Inject, InjectPlugin, Service } from 'my-fastify-decorators';
-import { FriendManagementService } from '../../friend-management/friend-management.service.js';
+// import { FriendManagementService } from '../../friend-management/friend-management.service.js';
 
 
 @Service()
@@ -13,8 +13,8 @@ export class PrivateChatService {
 	private statementDeleteConversation!: Statement<{ user1: number; user2: number }>;
 	//private statementCheckBlock!: Statement<{ sender: number; receiver: number }>;
 
-	@Inject(FriendManagementService)
-	private friendService!: FriendManagementService;
+	// @Inject(FriendManagementService)
+	// private friendService!: FriendManagementService;
 
 	onModuleInit() {
 		this.statementSavePrivate = this.db.prepare(
@@ -33,10 +33,10 @@ export class PrivateChatService {
 	}
 
 	async createPrivateRoom(userId1 : number, userId2 : number) {
-		const isfriend = await this.friendService.is_friend(userId1, userId2);
-		if (isfriend == false) {
-			return { message: "You are not friend with this user" } 
-		}
+		// const isfriend = await this.friendService.is_friend(userId1, userId2); // ADD LA REQUETE
+		// if (isfriend == false) {
+		// 	return { message: "You are not friend with this user" } 
+		// }
 
 		const min = Math.min(userId1, userId2)
 		const max = Math.max(userId1, userId2)
