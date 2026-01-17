@@ -266,6 +266,9 @@ services:
     environment:
       NODE_ENV: development
       RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
+      GAME_SERVICE_URL: http://game:3000
+      ACCESS_TOKEN_NAME: ${ACCESS_TOKEN_NAME:-accessToken}
     volumes:
       - ./package.json:/app/package.json:ro
       - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml:ro
