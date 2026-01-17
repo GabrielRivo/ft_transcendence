@@ -51,8 +51,8 @@ class GameService {
      */
     public launchGame(game: string): void {
         // Don't relaunch if same game type
-        if (this.currentGameType === game && this.gameInstance) {
-            console.log(`[GameService] Game ${game} already running, skipping launch`);
+        if (this.currentGameType === game && game === 'PongBackground') {
+            console.log(`[GameService] Game ${game} already in background mode, skipping launch`);
             return;
         }
 

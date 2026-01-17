@@ -31,6 +31,7 @@ import {
 	Vector2,
 	Vector3,
 	GlowLayer,
+	ImportMeshAsync,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import Services from '../Services/Services';
@@ -123,6 +124,8 @@ class PongBackground extends Game {
 	 */
 	initialize(): void {
 		console.log('[PongBackground] Initializing background game');
+		// Initialize time service for delta time calculations
+		Services.TimeService!.initialize();
 
 		// Create the Babylon.js scene
 		Services.Scene = new Scene(Services.Engine!);
@@ -133,9 +136,6 @@ class PongBackground extends Game {
 
 		// Draw the 3D scene
 		this.drawScene();
-
-		// Initialize time service for delta time calculations
-		Services.TimeService!.initialize();
 	}
 
 	/**
@@ -288,7 +288,6 @@ class PongBackground extends Game {
 	}
 
 	private renderLoop = () => {
-		console.log("renderLoop background");
 		if (this.isDisposed) return;
 		Services.TimeService!.update();
 
