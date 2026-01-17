@@ -1,6 +1,13 @@
 import { InjectPlugin, Service } from 'my-fastify-decorators';
 import { type Database, Statement } from 'better-sqlite3';
-import { BracketData, TournamentStatus } from './types.js';
+import {
+    BracketData,
+    TournamentStatus,
+    TournamentRow,
+    Tournament,
+    TournamentInsertData,
+    mapRowToTournament,
+} from '../types.js';
 
 const createTournamentStatement = `
 INSERT INTO tournaments (id, name, status, size, current_round, start_mode, start_date, bracket_data, created_by, admin_secret, version)
@@ -55,29 +62,27 @@ export class TournamentRepository {
         };
     }
 
-    createTournament(tournament: any): void {
-        this.statements.create.run({
-            ...tournament,
-            bracket_data: JSON.stringify(tournament.bracketData),
-            version: 0
-        });
+    create(data: TournamentInsertData): void {
+        this.statements.create.run(data);
     }
 
-    findTournamentById(id: string): any {
-        const row = this.statements.findById.get(id) as any;
+    findById(id: string): Tournament | null {
+        const row = this.statements.findById.get(id) as TournamentRow | undefined;
         if (!row) return null;
-        return {
-            ...row,
-            bracketData: JSON.parse(row.bracket_data),
-        };
+        return mapRowToTournament(row);
     }
 
-    updateBracket(id: string, bracket: BracketData, currentRound: number, version: number): boolean {
+    updateBracket(
+        id: string,
+        bracket: BracketData,
+        currentRound: number,
+        version: number
+    ): boolean {
         const result = this.statements.updateBracket.run({
             id,
             bracket_data: JSON.stringify(bracket),
             current_round: currentRound,
-            version
+            version,
         });
         return result.changes > 0;
     }
@@ -86,15 +91,13 @@ export class TournamentRepository {
         const result = this.statements.updateStatus.run({
             id,
             status,
-            version
+            version,
         });
         return result.changes > 0;
     }
 
-    listByStatus(status: TournamentStatus): any[] {
-        return this.statements.listByStatus.all(status).map((row: any) => ({
-            ...row,
-            bracketData: JSON.parse(row.bracket_data),
-        }));
+    listByStatus(status: TournamentStatus): Tournament[] {
+        const rows = this.statements.listByStatus.all(status) as TournamentRow[];
+        return rows.map(mapRowToTournament);
     }
 }
