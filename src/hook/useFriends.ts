@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'my-react';
 import { useAuth } from './useAuth';
-import { chatSocket } from '../libs/socket';
+import { socialSocket } from '../libs/socket';
 import { fetchWithAuth } from '../libs/fetchWithAuth';
 
-const API_BASE = '/api/chat/friend-management';
+const API_BASE = '/api/social/friend-management';
 
 export interface Friend {
 	id: number;
@@ -102,12 +102,12 @@ export function useFriends() {
 			});
 		};
 
-		chatSocket.on('friend_request', handleFriendRequest);
-		chatSocket.on('friend_accepted', handleFriendAccepted);
+		socialSocket.on('friend_request', handleFriendRequest);
+		socialSocket.on('friend_accepted', handleFriendAccepted);
 
 		return () => {
-			chatSocket.off('friend_request', handleFriendRequest);
-			chatSocket.off('friend_accepted', handleFriendAccepted);
+			socialSocket.off('friend_request', handleFriendRequest);
+			socialSocket.off('friend_accepted', handleFriendAccepted);
 		};
 	}, [isAuthenticated, user?.id]);
 

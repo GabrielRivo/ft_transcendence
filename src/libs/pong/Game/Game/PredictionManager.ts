@@ -89,17 +89,17 @@ class PredictionManager {
         const speedDiffBall = Math.abs(prediction.ball.speed - truth.ball.speed);
 
         if (posDiffP1 > 0.1) {
-            console.log(`Player 1 position prediction error: ${posDiffP1}`);
+            //console.log(`Player 1 position prediction error: ${posDiffP1}`);
             //console.log("Truth pos:", truth.p1.pos, " Predicted pos:", prediction.p1.pos);
             this.game.player1!.paddle.reconcile(truth.p1.pos);
         }
         if (posDiffP2 > 0.1) {
             this.game.player2!.paddle.reconcile(truth.p2.pos);
-            console.log(`Player 2 position prediction error: ${posDiffP2}`);
+            //console.log(`Player 2 position prediction error: ${posDiffP2}`);
         }
         if (posDiffBall > 0.1 || dirDiffBall > 0.1 || speedDiffBall > 0.1) {
             this.game.ball!.reconcile(truth.ball.pos, truth.ball.dir, truth.ball.speed);
-            console.log(`Ball position prediction error: ${posDiffBall}`);
+            //console.log(`Ball position prediction error: ${posDiffBall}`);
         }
     }
 

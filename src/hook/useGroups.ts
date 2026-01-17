@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'my-react';
 import { useAuth } from './useAuth';
 import { fetchWithAuth } from '../libs/fetchWithAuth';
 
-const API_BASE = '/api/chat/group-management';
+const API_BASE = '/api/social/group-management';
 
 export interface Group {
 	groupId: number;

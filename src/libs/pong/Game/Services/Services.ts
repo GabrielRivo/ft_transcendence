@@ -28,13 +28,21 @@ class ServicesSingleton {
         return ServicesSingleton.instance;
     }
 
-    init(canvas? : HTMLCanvasElement) {
-        this.Canvas = canvas ?? (() => {let c = document.createElement("canvas");
-            c.style.width = "100%";
-            c.style.height = "100%";
-            c.id = "gameCanvas";
-            document.body.appendChild(c);
-        return c;})();
+    private initNbr = 0;
+    init(canvas : HTMLCanvasElement) {
+        if (this.GameService?.isRunning()) {
+            console.warn("[Services] Game is running. Disposing it before re-initializing services.");
+            this.GameService.stopGame();
+        }
+
+        if (this.Engine) {
+            console.warn("[Services] Engine already exists. Disposing old one first.");
+            this.Canvas?.remove();
+            this.Engine.dispose();
+        }
+        
+        console.log('[Services] Initializing services...' + this.initNbr++);
+        this.Canvas = canvas;
 
         this.Engine = new Engine(this.Canvas, true);
         const pixelRatio = window.devicePixelRatio || 1;
@@ -45,13 +53,14 @@ class ServicesSingleton {
         this.TimeService = TimeService.getInstance();
         
         window.addEventListener("resize", () => {
-            Services.Engine!.setHardwareScalingLevel(1 / window.devicePixelRatio);
-            Services.Engine!.resize();
+            if (!this.Engine) return;
+            this.Engine!.setHardwareScalingLevel(1 / window.devicePixelRatio);
+            this.Engine!.resize();
         });
-
     }
 
     disposeServices() {
+        console.log('[Services] Disposing services...');
         this.Scene?.dispose();
         this.Engine?.dispose();
         this.EventBus?.clear();

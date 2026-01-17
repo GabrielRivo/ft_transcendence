@@ -184,7 +184,7 @@ class Ball {
                 //this.test = false;
                 if (this.test)
                 {
-                    console.log("Collision at : ", currentTime , " + ", deltaT);
+                    //console.log("Collision at : ", currentTime , " + ", deltaT);
                     this.test = false;
                 }
             }
@@ -308,7 +308,6 @@ class Ball {
         const name : string = pickedMesh.name;
 
         if (name === "deathBar" || name === "paddle" || name === "wall") {
-            console.log("Ball hit mesh: " + name);
             let impact = this.findRadialImpact(pickedMesh);
             if (impact) {
                 let normalVec = impact.getNormal(true);

@@ -25,6 +25,13 @@ class GameService {
         return GameService.instance;
     }
 
+    public isRunning(): boolean {
+        if (this.gameInstance) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Get the current game type.
      */

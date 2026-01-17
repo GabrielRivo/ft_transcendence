@@ -324,6 +324,7 @@ class PongOnline extends Game {
     }
 
     private renderLoop = () => {
+        //console.log("renderLoop online");
         if (this.isDisposed) return;
         this.predictionManager!.predictionUpdate();
         // this.player1!.update();

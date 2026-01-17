@@ -281,8 +281,8 @@ class PongBackground extends Game {
 	}
 
 	private renderLoop = () => {
+		console.log("renderLoop background");
 		if (this.isDisposed) return;
-
 		Services.TimeService!.update();
 
 		// Update AI for both players
@@ -329,7 +329,7 @@ class PongBackground extends Game {
 		console.log('[PongBackground] Disposing background game');
 
 		// Stop render loop
-		Services.Engine!.stopRenderLoop();
+		Services.Engine!.stopRenderLoop(this.renderLoop);
 
 		// Dispose game objects
 		this.player1?.dispose();

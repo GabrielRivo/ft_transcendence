@@ -149,6 +149,7 @@ class PongLocal extends Game {
 
     stoppedRenderLoop() : void {
         if (this.isDisposed) return;
+        console.log("ds");
         Services.Scene!.render();
     }
 
