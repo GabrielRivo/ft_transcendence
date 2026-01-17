@@ -145,9 +145,23 @@ class Pong extends Game {
         else if (payload.deathBar.owner == this.player2) {
             this.player1!.scoreUp();
         }
+        this.nsp!.to(this.id).emit('score', {player1Score: this.player1!.score, player2Score: this.player2!.score});
+
+        this.ball!.setFullPos(new Vector3(0, -100, 0));
+
+        if (this.player1!.score >= 5 || this.player2!.score >= 5) {
+
+            setTimeout(() => {
+                this.dispose();
+            }, 8000);
+
+            return;
+        }
+
         //this.ball = new Ball(this.services);
         //this.ball.setFullPos(new Vector3(0, 0.125, 0));
         this.ball!.generate(3000);
+        
         this.nsp!.to(this.id).emit('generateBall', { timestamp: this.services.TimeService!.getTimestamp() });
     }
 
@@ -172,7 +186,7 @@ class Pong extends Game {
     }
 
     run(message?: string) {
-        if (this.p1Socket!.connected === false || this.p2Socket!.connected === false) {
+        if (this.p1Socket?.connected === false || this.p2Socket?.connected === false) {
             console.log("A player is still disconnected, cannot run the game.");
             return;
         }

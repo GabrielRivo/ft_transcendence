@@ -26,7 +26,6 @@ export class GameService {
     private gameCount = 0;
     private gamesByPlayer: Map<string, Pong> = new Map();
     private games: Map<string, Pong> = new Map();
-    private queue: Socket[] = [];
 
     public connectPlayer(client: Socket): ConnectPlayerResult {
 		const userId = client.data.userId;
