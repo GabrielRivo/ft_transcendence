@@ -26,7 +26,7 @@ export type Providers = Record<ProviderKeys, Provider>;
 
 export const providers = {
 	github: {
-		authorizationUrl: `https://github.com/login/oauth/authorize?client_id=${config.github.clientId}&redirect_uri=${config.redirectUri}/auth/github/callback`,
+		authorizationUrl: `https://github.com/login/oauth/authorize?client_id=${config.github.clientId}&redirect_uri=${encodeURIComponent(config.redirectUri + '/api/auth/github/callback')}`,
 		accessTokenUrl: 'https://github.com/login/oauth/access_token',
 		userInfoUrl: 'https://api.github.com/user',
 		contentType: 'application/json',
@@ -38,9 +38,9 @@ export const providers = {
 		id: 'github',
 	},
 	discord: {
-		authorizationUrl: `https://discord.com/oauth2/authorize?client_id=${config.discord.clientId}&response_type=code&scope=&redirect_uri=${encodeURIComponent(config.redirectUri + '/auth/discord/callback')}&scope=identify+email`,
+		authorizationUrl: `https://discord.com/oauth2/authorize?client_id=${config.discord.clientId}&response_type=code&redirect_uri=${encodeURIComponent(config.redirectUri + '/api/auth/discord/callback')}&scope=identify+email`,
 		accessTokenUrl: 'https://discord.com/api/oauth2/token',
-		userInfoUrl: 'https://discord.com/api/users/@me?scope=identify%20email',
+		userInfoUrl: 'https://discord.com/api/users/@me',
 		contentType: 'application/x-www-form-urlencoded',
 		basic:
 			'Basic ' +

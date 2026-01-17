@@ -180,7 +180,11 @@ export class AuthService {
 			tokenRes = await fetch(providers[provider].accessTokenUrl, {
 				method: 'POST',
 				headers: { 'Content-Type': providers[provider].contentType, Accept: 'application/json' },
-				body: JSON.stringify({ ...providers[provider].body, code }),
+				body: JSON.stringify({ 
+					...providers[provider].body, 
+					code,
+					redirect_uri: config.redirectUri + '/api/auth/' + provider + '/callback',
+				}),
 			});
 		} else {
 			tokenRes = await fetch(providers[provider].accessTokenUrl, {
@@ -192,7 +196,7 @@ export class AuthService {
 				body: new URLSearchParams({
 					...providers[provider].body,
 					code,
-					redirect_uri: config.redirectUri + '/auth/' + provider + '/callback',
+					redirect_uri: config.redirectUri + '/api/auth/' + provider + '/callback',
 				}).toString(),
 			});
 		}
