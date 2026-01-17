@@ -44,8 +44,8 @@ function Menu() {
 			{/* <span>|</span> */}
 			<NavLink path="/statistics" label="Stats" />
 			{/* <span>|</span> */}
-			<Link className="font-pirulen text-cyan-500 hover:text-white/80" to="/deconnexion" onClick={handleLogout}>
-				Deconnexion
+			<Link className="font-pirulen text-cyan-500 hover:text-white/80" to="/logout" onClick={handleLogout}>
+				Logout
 			</Link>
 			{/* <NavLink path="/deconnexion" label="Deconnexion" className="text-cyan-500" /> */}
 		</nav>

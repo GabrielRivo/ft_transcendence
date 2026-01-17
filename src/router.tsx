@@ -14,11 +14,14 @@ import { DashboardLayout } from './layout/dashboardLayout';
 import { Dashboard } from './pages/dashboard';
 import { MatchmakingPage } from './pages/matchmaking';
 import { StatisticsPage } from './pages/statistics';
+import { StatisticsPageSlug } from './pages/statistics/slug';
 import { Game } from './pages/game';
 import { GuestLayout } from './layout/GuestLayout';
 import { AuthenticatedLayout } from './layout/AuthenticatedLayout';
 import { SetUsernameLayout } from './layout/SetUsernameLayout';
 import { GameProvider } from './context/GameProvider';
+import { ProfilePage } from './pages/profile';
+import { LogoutPage } from './pages/logout';
 
 function GameLayout({ children }: { children: any }) {
 	return (
@@ -87,7 +90,15 @@ const routes = [
 							},
 							{
 								path: '/statistics/:statsId',
+								component: StatisticsPageSlug,
+							},
+							{
+								path: '/statistics',
 								component: StatisticsPage,
+							},
+							{
+								path: '/profile',
+								component: ProfilePage,
 							},
 						],
 					},
@@ -100,6 +111,10 @@ const routes = [
 						component: Game,
 					},
 				],
+			},
+			{
+				path: '/logout',
+				component: LogoutPage,
 			},
 			// {
 			// 	path: '/game',
