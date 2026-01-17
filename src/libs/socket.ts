@@ -20,7 +20,7 @@ export const gameSocket: Socket = io(SOCKET_BASE_URL, {
 
 export const chatSocket: Socket = io(SOCKET_BASE_URL, {
 	...DEFAULT_SOCKET_OPTIONS,
-	path: '/api/chat/',
+	path: '/api/chat/ws',
 });
 
 export const matchmakingSocket: Socket = io(SOCKET_BASE_URL, {
