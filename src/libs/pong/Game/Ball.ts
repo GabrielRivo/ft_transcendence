@@ -8,12 +8,14 @@ import Services from "./Services/Services";
 import {OwnedMesh} from "./globalType";
 import DeathBar from "./DeathBar";
 import Paddle from "./Paddle";
+import GenerateEffect from "./Effects/GenerateEffect";
 
 class Ball {
     model: OwnedMesh;
 
     hitEffect: HitEffect;
     shockwaveEffect: ShockwaveEffect;
+    generateEffect: GenerateEffect;
     displayEffect: boolean = true;
 
     direction!: Vector3;
@@ -46,6 +48,7 @@ class Ball {
 
         this.hitEffect = new HitEffect();
         this.shockwaveEffect = new ShockwaveEffect();
+        this.generateEffect = new GenerateEffect();
     }
 
     getPosition(): Vector3 {
@@ -109,6 +112,8 @@ class Ball {
         this.setSpeed(3);
         this.setFullPos(new Vector3(0, 0.125, 0));
         this.moving = false;
+
+        this.generateEffect.play(this.model);    
 
         const currentTime = Services.TimeService!.getTimestamp();
         
@@ -202,7 +207,7 @@ class Ball {
                 this.setPos(newPos);
                 break;
             }
-
+            //console.log("Collision happened near the center of the paddle of : ", hit.pickedMesh.position.subtract(hit.pickedPoint!));
             //console.log("DeltaT : ", deltaT, " RemainingDeltaT : ", remainingDeltaT, " Distance : ", distance, " Hit mesh : ", hit.pickedMesh.name);
             //console.log("Paddle1Time: ", paddle1CollisionTime, " Paddle2Time: ", paddle2CollisionTime, " OtherTime: ", otherCollisionTime);
 
@@ -210,33 +215,14 @@ class Ball {
             this.setPos(this.direction.scale(traveledDistance).add(this.position));
 
             this.hit(hit);
-            /*let i = 0
-            this.moving = false;
-            this.setFullPos(this.position);
-            this.hit(hit);
-            while (i < 100)
-            {
-                await MathUtils.wait(500);
-                //this.hit(hit);
-                i++;
-            }*/
-
-            distance = distance - traveledDistance;
-            deltaT = (distance) / this.speed;
-
-            displacement = this.direction.scale(distance);
-            newPos = this.position.add(displacement);
 
             remainingDeltaT -= deltaT;
             if (Math.abs(remainingDeltaT) < Ball.EPSILON) {
                 remainingDeltaT = 0;
             }
 
-            /*ray.origin = this.position, ray.direction = this.direction, ray.length = distance + (this.diameter / 2);
-            hit = this.hitRay(ray);*/
         }
-        //this.model.setDirection(this.direction);
-        //this.setFullPos(newPos);
+       
         paddle1.setPosition(initPaddlePos1);
         paddle2.setPosition(initPaddlePos2);
         if (!this.moving)
@@ -520,6 +506,7 @@ class Ball {
         }
         this.model.setDirection(this.direction);
         this.model.position.copyFrom(this.position).addInPlace(this.visualOffset);
+        this.model.computeWorldMatrix(true);
     }
 
     dispose() {

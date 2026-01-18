@@ -89,17 +89,20 @@ class PredictionManager {
         const speedDiffBall = Math.abs(prediction.ball.speed - truth.ball.speed);
 
         if (posDiffP1 > 0.1) {
-            //console.log(`Player 1 position prediction error: ${posDiffP1}`);
+            console.log(`Player 1 position prediction error: ${posDiffP1}`);
             //console.log("Truth pos:", truth.p1.pos, " Predicted pos:", prediction.p1.pos);
             this.game.player1!.paddle.reconcile(truth.p1.pos);
         }
         if (posDiffP2 > 0.1) {
             this.game.player2!.paddle.reconcile(truth.p2.pos);
-            //console.log(`Player 2 position prediction error: ${posDiffP2}`);
+            console.log(`Player 2 position prediction error: ${posDiffP2}`);
         }
         if (posDiffBall > 0.1 || dirDiffBall > 0.1 || speedDiffBall > 0.1) {
+            console.warn(`⚠️ RECONCILIATION BALL ⚠️`);
+            console.log(`- Pos Diff: ${posDiffBall.toFixed(4)} ${posDiffBall > 0.1 ? '❌' : '✅'}`);
+            console.log(`- Dir Diff: ${dirDiffBall.toFixed(4)} ${dirDiffBall > 0.1 ? '❌' : '✅'}`);
+            console.log(`- Spd Diff: ${speedDiffBall.toFixed(4)} ${speedDiffBall > 0.1 ? '❌' : '✅'}`);
             this.game.ball!.reconcile(truth.ball.pos, truth.ball.dir, truth.ball.speed);
-            //console.log(`Ball position prediction error: ${posDiffBall}`);
         }
     }
 
@@ -111,7 +114,7 @@ class PredictionManager {
         let p1Inputs = this.playerInputBuffer.getStatesInRange(lastFrameTime, currentTime);
         let p1Index = 0;
 
-        let deltaT : number;
+        let deltaT: number;
 
         let firstInput = this.playerInputBuffer.getClosestState(lastFrameTime, 2000);
         if (firstInput) {
@@ -125,7 +128,7 @@ class PredictionManager {
 
         let ballEventPending = (ballStartTime > lastFrameTime && ballStartTime <= currentTime);
         while (p1Index < p1Inputs.length || ballEventPending) {
-            
+
             const p1NextInput = p1Inputs[p1Index];
 
             let nextEventTime = currentTime;
@@ -153,7 +156,7 @@ class PredictionManager {
             }
 
             deltaT = nextEventTime - lastFrameTime;
-            
+
             if (deltaT > 0) {
                 ball.update(nextEventTime, deltaT, this.game.player1!.paddle, this.game.player2!.paddle);
                 player.update(deltaT);
@@ -192,13 +195,13 @@ class PredictionManager {
         Services.TimeService!.update();
         const game = this.game;
         const time = Services.TimeService!.getTimestamp();
-        
+
         this.deltaT = time - this.lastFrameTime;
 
         // if (this.test === true)
         //     return;
         if (this.deltaT >= this.frameDuration) {
-            
+
             // if (this.test === false && time > 5000) {
             //     console.warn("Resetting positions for testing");
             //     // game.player1!.paddle.reconcile(new Vector3(0, 0.15, -Services.Dimensions!.y / 2 + 2));
@@ -239,12 +242,11 @@ class PredictionManager {
             //     this.setGameState(game, latestServerState);
             // }
 
-            this.clientGameStateHistory.addState(this.getGameState(game));
+            //this.clientGameStateHistory.addState(this.getGameState(game));
 
             this.lastFrameTime = time;
         }
-        else
-        {
+        else {
             game.ball!.update(time, Services.TimeService!.getDeltaTime(), game.player1!.paddle, game.player2!.paddle);
             game.player1!.update(Services.TimeService!.getDeltaTime());
             game.player2!.update(Services.TimeService!.getDeltaTime());

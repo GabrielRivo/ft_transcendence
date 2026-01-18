@@ -96,6 +96,7 @@ class Paddle {
         //ball.bounce(hitInfo);
         ball.speedUp();
         ball.owner = this.owner;
+        console.log("Ball hit by paddle, new direction : ", newDir, " angle : ", angle);
     }
 
     public reconcile(serverPos: Vector3): void {
@@ -119,6 +120,7 @@ class Paddle {
             this.visualOffset.setAll(0);
         }
         this.model.position.copyFrom(this.position).addInPlace(this.visualOffset);
+        this.model.computeWorldMatrix(true);
     }
 
     dispose() {

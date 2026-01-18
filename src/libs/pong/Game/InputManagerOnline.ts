@@ -56,7 +56,7 @@ class InputManager {
         }
 
         if (sendToServer) {
-            console.log("EMITTING playerDirection:", data);
+            //console.log("EMITTING playerDirection:", data);
             socket.emit("playerDirection", data);
         }
     }
@@ -94,7 +94,8 @@ class InputManager {
         this.rawInputBuffer.addStateStrict(data);
     }
 
-    listenToPlayer() {
+    listenToPlayer1() {
+        Services.Scene!.onKeyboardObservable.clear();
         Services.Scene!.onKeyboardObservable.add((kbInfo) => {
             if (!socket.connected)
                 return;
@@ -121,6 +122,44 @@ class InputManager {
                             //socket.emit("playerInput", { timestamp: Services.TimeService!.getTimestamp(), direction: LEFT, isPressed: false });
                             break;
                         case "d":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: false, isResolved: false });
+                            //socket.emit("playerInput", { timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: false });
+                            break;
+                    }
+                    break;
+                }
+            }
+        });
+    }
+
+    listenToPlayer2() {
+        Services.Scene!.onKeyboardObservable.clear();
+        Services.Scene!.onKeyboardObservable.add((kbInfo) => {
+            if (!socket.connected)
+                return;
+            switch (kbInfo.type) {
+                case KeyboardEventTypes.KEYDOWN:
+                {
+                    switch (kbInfo.event.key) {
+                        case "d":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: LEFT, isPressed: true, isResolved: false });
+                            //socket.emit("playerInput", { timestamp: Services.TimeService!.getTimestamp(), direction: LEFT, isPressed: true });
+                            break;
+                        case "a":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: true, isResolved: false });
+                            //socket.emit("playerInput", { timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: true });
+                            break;
+                    }
+                    break;
+                }
+                case KeyboardEventTypes.KEYUP:
+                {
+                    switch (kbInfo.event.key) {
+                        case "d":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: LEFT, isPressed: false, isResolved: false });
+                            //socket.emit("playerInput", { timestamp: Services.TimeService!.getTimestamp(), direction: LEFT, isPressed: false });
+                            break;
+                        case "a":
                             this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: false, isResolved: false });
                             //socket.emit("playerInput", { timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: false });
                             break;

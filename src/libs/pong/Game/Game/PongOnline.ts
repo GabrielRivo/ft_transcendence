@@ -46,7 +46,6 @@ class PongOnline extends Game {
 
         this.inputManager = new InputManagerOnline(this);
         this.predictionManager = new PredictionManager(this);
-        this.inputManager.listenToPlayer();
 
         Services.EventBus!.on("DeathBarHit", this.onDeathBarHit);
 
@@ -154,7 +153,7 @@ class PongOnline extends Game {
 
             socket.emit("ping");
             const timeoutId = setTimeout(() => {
-                console.log("Ping timeout.");
+                console.log("Ping timeout");
                 socket.off("pong", onPong);
                 return reject("Ping timeout");
             }, 2000);
@@ -228,7 +227,6 @@ class PongOnline extends Game {
         let connectionTimeout;
 
         connectionTimeout = setTimeout(() => {
-            alert("Connection to server lost. The game will now stop.");
             this.endGame();
         }, 10000);
         socket.once("connect", () => {
@@ -247,8 +245,10 @@ class PongOnline extends Game {
         console.log("Game joined with payload:", payload, " timestamp:", performance.now());
         if (payload.player === 1) {
             this.clientPlayer = this.player1;
+            this.inputManager!.listenToPlayer1();
         } else if (payload.player === 2) {
             this.clientPlayer = this.player2;
+            this.inputManager!.listenToPlayer2();
         }
     }
 
@@ -281,7 +281,7 @@ class PongOnline extends Game {
         if (!this.ball) return;
         const time = Services.TimeService!.getTimestamp();
         const deltaT = time - payload.timestamp;
-        this.ball.generate(3000 - deltaT);
+        this.ball.generate(1000 - deltaT);
     }
 
     private onScore = (payload: any): void => {
