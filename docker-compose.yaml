@@ -335,6 +335,17 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: transcendence-tunnel
+    restart: unless-stopped
+    command: tunnel run
+    # Le token est lu depuis le fichier .env
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}
+    networks:
+      - transcendence-network
+
 # -----------------------------------------------------------------------------
 # Networks Definition
 # -----------------------------------------------------------------------------
