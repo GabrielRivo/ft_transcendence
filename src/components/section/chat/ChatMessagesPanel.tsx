@@ -45,7 +45,7 @@ export function ChatMessagesPanel({
 	return (
 		<div
 			onWheel={handleWheel}
-			className="group shadow-neon-purple-low hover:shadow-neon-purple flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-purple-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-purple-400"
+			className="group shadow-neon-purple-low hover:shadow-neon-purple flex h-full min-h-0 flex-col overflow-hidden border border-purple-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-purple-400"
 		>
 			{/* Header */}
 			<div className="flex shrink-0 justify-between border-b border-purple-500/20 bg-purple-500/10 p-4 text-sm font-bold tracking-widest text-purple-500">

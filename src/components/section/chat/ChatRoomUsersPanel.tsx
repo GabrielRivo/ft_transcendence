@@ -11,7 +11,7 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 	};
 
 	return (
-		<div className="group shadow-neon-orange-low hover:shadow-neon-orange h-full min-h-0 overflow-hidden rounded-xl border border-orange-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-orange-400">
+		<div className="group shadow-neon-orange-low hover:shadow-neon-orange h-full min-h-0 overflow-hidden rounded-e-lg border border-orange-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-orange-400">
 			<div className="border-b border-orange-500/20 bg-orange-500/10 p-3 text-right text-sm font-bold tracking-widest text-orange-500">
 				{getTitle()}
 			</div>

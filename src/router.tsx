@@ -22,6 +22,8 @@ import { SetUsernameLayout } from './layout/SetUsernameLayout';
 import { GameProvider } from './context/GameProvider';
 import { ProfilePage } from './pages/profile';
 import { LogoutPage } from './pages/logout';
+import { PlayPage } from './pages/play';
+import { OnlinePlayPage } from './pages/play/online';
 
 function GameLayout({ children }: { children: any }) {
 	return (
@@ -99,6 +101,14 @@ const routes = [
 							{
 								path: '/profile',
 								component: ProfilePage,
+							},
+							{
+								path: '/play',
+								component: PlayPage,
+							},
+							{
+								path: '/online',
+								component: OnlinePlayPage,
 							},
 						],
 					},
