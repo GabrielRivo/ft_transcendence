@@ -54,32 +54,35 @@ export function GameProvider({ children }: GameProviderProps) {
 		console.log('[GameProvider] Initializing game services...');
 		isInitializedRef.current = true;
 
-		try {
-			Game.Services.init(canvasRef.current);
-			setIsInitialized(true);
-			setError(null);
+		const timeoutId = setTimeout(() => {
+			try {
+				Game.Services.init(canvasRef.current!);
+				
+				Services.EventBus?.on('Game:ScoreUpdated', (event: GameScores) => {
+					handleScoreUpdateRef.current(event);
+				});
 
-			Services.EventBus?.on('Game:ScoreUpdated', (event: GameScores) => {
-				handleScoreUpdateRef.current(event);
-			});
+				Services.EventBus?.on('Game:Ended', () => {
+					setMode('background');
+					toast('Game ended', 'warning');
+				});
 
-			Services.EventBus?.on('Game:Ended', () => {
-				setModeState('background');
-				toast('Game ended', 'warning');
-			});
+				Game.Services.GameService!.launchGame('PongBackground');
+				Game.Services.GameService!.startGame();
 
-			Game.Services.GameService!.launchGame('PongBackground');
-			Game.Services.GameService!.startGame();
-
-			setIsLoading(false);
-			console.log('[GameProvider] Services initialized, background game started');
-		} catch (err) {
-			console.error('[GameProvider] Failed to initialize services:', err);
-			setError(err instanceof Error ? err.message : 'Failed to initialize game engine');
-			setIsLoading(false);
-			isInitializedRef.current = false;
-		}
-
+				setIsInitialized(true);
+				setError(null);
+				setIsLoading(false);
+				console.log('[GameProvider] Services initialized, background game started');
+			} catch (err) {
+				console.error('[GameProvider] Failed to initialize services:', err);
+				setError(err instanceof Error ? err.message : 'Failed to initialize game engine');
+				setIsLoading(false);
+				isInitializedRef.current = false;
+			}
+		}, 500);
+		
+		return () => clearTimeout(timeoutId);
 	}, []);
 
 	const setMode = useCallback((newMode: GameMode, newGameId?: string | null) => {

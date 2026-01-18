@@ -3,8 +3,15 @@ import { ButtonStyle4 } from '../../components/ui/button/style4';
 import { Discord } from '@icon/discord';
 import { Github } from '@icon/github';
 import { useNavigate } from 'my-react-router';
+
+const API_BASE = '/api/auth';
+
 export function Authentification() {
 	const navigate = useNavigate();
+
+	const handleOAuthLogin = (provider: 'github' | 'discord') => {
+		window.location.href = `${API_BASE}/${provider}/redirect/uri`;
+	};
 
 	return (
 		<div className="flex flex-col items-center gap-8 text-white">
@@ -20,12 +27,12 @@ export function Authentification() {
 				<hr className="w-full" />
 			</div>
 			<div className="flex min-w-2/3 flex-col gap-2">
-				<ButtonStyle4 onClick={() => navigate('/auth/github')}>
+				<ButtonStyle4 onClick={() => handleOAuthLogin('github')}>
 					<div className="flex w-full items-center gap-2">
 						<Github size={20} className="text-white" /> <span>Github</span>
 					</div>
 				</ButtonStyle4>
-				<ButtonStyle4 onClick={() => navigate('/auth/discord')}>
+				<ButtonStyle4 onClick={() => handleOAuthLogin('discord')}>
 					<div className="flex w-full items-center gap-2">
 						<Discord size={20} className="text-white" /> <span>Discord</span>
 					</div>

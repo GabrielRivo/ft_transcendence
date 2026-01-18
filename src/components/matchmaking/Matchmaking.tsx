@@ -355,7 +355,7 @@ export function Matchmaking() {
 				return (
 					<div className="flex flex-col items-center gap-6">
 						<SearchingAnimation />
-						<div className="text-center">
+						<div className="text-center pointer-events-none">
 							<h2 className="font-pirulen text-lg tracking-widest text-cyan-400">SEARCHING</h2>
 							<p className="mt-2 text-sm text-gray-400">
 								Looking for an opponent
@@ -364,7 +364,7 @@ export function Matchmaking() {
 						</div>
 						<button
 							onClick={leaveQueue}
-							className="rounded border border-gray-500/50 bg-gray-500/10 px-6 py-2 text-sm text-gray-400 transition-all hover:bg-gray-500/20 hover:text-white"
+							className="rounded z-10 border border-gray-500/50 bg-gray-500/10 px-6 py-2 text-sm text-gray-400 transition-all hover:bg-gray-500/20 hover:text-white"
 						>
 							Cancel
 						</button>
