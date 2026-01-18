@@ -21,7 +21,17 @@ sudo apt-get update
 
 # 2. Install dependencies
 echo -e "${GREEN}[2/6] Installing dependencies...${NC}"
-sudo apt-get install -y git make curl nginx
+sudo apt-get install -y git make curl nginx build-essential
+
+# 2.5 Install Node.js
+echo -e "${GREEN}[2.5/6] Installing Node.js...${NC}"
+if ! command -v node &> /dev/null || [[ $(node -v) != v24* ]]; then
+    echo "Installing Node.js 24..."
+    curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+    sudo apt-get install -y nodejs
+else
+    echo -e "${GREEN}Node.js 24 already installed.${NC}"
+fi
 
 # 3. Install Docker
 if ! command -v docker &> /dev/null; then
