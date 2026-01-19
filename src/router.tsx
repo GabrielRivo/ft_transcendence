@@ -25,6 +25,9 @@ import { LogoutPage } from './pages/logout';
 import { PlayPage } from './pages/play';
 import { OnlinePlayPage } from './pages/play/online';
 import { LocalGame } from './pages/play/local';
+import { TournamentPage } from './pages/play/tournament';
+import { TournamentTypePage } from './pages/play/tournamentType';
+import { TournamentPlayersPage } from './pages/play/tournamentPlayers';
 
 function GameLayout({ children }: { children: any }) {
 	return (
@@ -110,6 +113,18 @@ const routes = [
 							{
 								path: '/online',
 								component: OnlinePlayPage,
+							},
+							{
+								path: '/play/tournament',
+								component: TournamentPage,
+							},
+							{
+								path: '/play/tournament/:tournamentType',
+								component: TournamentTypePage,
+							},
+							{
+								path: '/play/tournament/:tournamentType/:playersCount',
+								component: TournamentPlayersPage,
 							},
 						],
 					},
