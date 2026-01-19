@@ -5,7 +5,6 @@ import { Home } from './pages/home';
 
 import { NotFoundPage } from './pages/errors/notFoundPage';
 import { MainLayout } from './layout/mainLayout';
-// import { Game } from './pages/game';
 import { ConnexionLayout } from './layout/connexionLayout';
 import { Login } from './pages/login';
 import { Register } from './pages/register';
@@ -15,14 +14,29 @@ import { DashboardLayout } from './layout/dashboardLayout';
 import { Dashboard } from './pages/dashboard';
 import { MatchmakingPage } from './pages/matchmaking';
 import { StatisticsPage } from './pages/statistics';
+import { StatisticsPageSlug } from './pages/statistics/slug';
 import { Game } from './pages/game';
 import { GuestLayout } from './layout/GuestLayout';
 import { AuthenticatedLayout } from './layout/AuthenticatedLayout';
 import { SetUsernameLayout } from './layout/SetUsernameLayout';
+import { GameProvider } from './context/GameProvider';
+import { ProfilePage } from './pages/profile';
+import { LogoutPage } from './pages/logout';
+import { PlayPage } from './pages/play';
+import { OnlinePlayPage } from './pages/play/online';
+import { LocalGame } from './pages/play/local';
+
+function GameLayout({ children }: { children: any }) {
+	return (
+		<GameProvider>
+			<MainLayout>{children}</MainLayout>
+		</GameProvider>
+	);
+}
 
 const routes = [
 	{
-		layout: MainLayout,
+		layout: GameLayout,
 		routes: [
 			{
 				path: '/',
@@ -79,7 +93,23 @@ const routes = [
 							},
 							{
 								path: '/statistics/:statsId',
+								component: StatisticsPageSlug,
+							},
+							{
+								path: '/statistics',
 								component: StatisticsPage,
+							},
+							{
+								path: '/profile',
+								component: ProfilePage,
+							},
+							{
+								path: '/play',
+								component: PlayPage,
+							},
+							{
+								path: '/online',
+								component: OnlinePlayPage,
 							},
 						],
 					},
@@ -91,7 +121,15 @@ const routes = [
 						path: '/game',
 						component: Game,
 					},
+					{
+						path: '/local',
+						component: LocalGame,
+					},
 				],
+			},
+			{
+				path: '/logout',
+				component: LogoutPage,
 			},
 			// {
 			// 	path: '/game',

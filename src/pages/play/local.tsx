@@ -1,7 +1,6 @@
-
 import { createElement, useEffect } from 'my-react';
-import { useNavigate, useQuery } from 'my-react-router';
-import { useGame } from '../../hook/useGame';	
+import { useNavigate } from 'my-react-router';
+import { useGame } from '../../hook/useGame';
 
 function LoadingOverlay() {
 	return (
@@ -12,7 +11,7 @@ function LoadingOverlay() {
 					<div className="absolute inset-2 animate-spin rounded-full border-2 border-cyan-500 border-t-transparent" />
 				</div>
 				<p className="font-pirulen text-lg tracking-widest text-cyan-400">LOADING</p>
-				<p className="text-sm text-gray-400">Connecting to game server...</p>
+				<p className="text-sm text-gray-400">Initializing local game...</p>
 			</div>
 		</div>
 	);
@@ -34,7 +33,7 @@ function ScoreOverlay({
 				<div className="flex items-center gap-6 rounded-lg border border-cyan-500/40 bg-slate-950/80 px-8 py-3 backdrop-blur-md">
 					{/* Player 1 score */}
 					<div className="flex flex-col items-center">
-						<span className="font-mono text-xs text-gray-400">P1</span>
+						<span className="font-mono text-xs text-gray-400">P1 (A/D)</span>
 						<span className="font-pirulen text-3xl text-cyan-400">{player1Score}</span>
 					</div>
 
@@ -45,7 +44,7 @@ function ScoreOverlay({
 
 					{/* Player 2 score */}
 					<div className="flex flex-col items-center">
-						<span className="font-mono text-xs text-gray-400">P2</span>
+						<span className="font-mono text-xs text-gray-400">P2 (J/L)</span>
 						<span className="font-pirulen text-3xl text-pink-400">{player2Score}</span>
 					</div>
 				</div>
@@ -57,9 +56,31 @@ function ScoreOverlay({
 	);
 }
 
+function ControlsOverlay() {
+	return (
+		<div className="pointer-events-none absolute bottom-4 left-1/2 z-30 -translate-x-1/2">
+			<div className="rounded-lg border border-gray-500/30 bg-slate-950/60 px-6 py-3 backdrop-blur-sm">
+				<div className="flex items-center gap-8 text-xs text-gray-400">
+					<div className="flex items-center gap-2">
+						<span className="font-bold text-cyan-400">Player 1:</span>
+						<kbd className="rounded border border-gray-600 bg-gray-800 px-2 py-0.5">A</kbd>
+						<kbd className="rounded border border-gray-600 bg-gray-800 px-2 py-0.5">D</kbd>
+					</div>
+					<div className="h-4 w-px bg-gray-600" />
+					<div className="flex items-center gap-2">
+						<span className="font-bold text-pink-400">Player 2:</span>
+						<kbd className="rounded border border-gray-600 bg-gray-800 px-2 py-0.5">J</kbd>
+						<kbd className="rounded border border-gray-600 bg-gray-800 px-2 py-0.5">L</kbd>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
+}
+
 /**
  * Error overlay component.
- * Displayed when game initialization or connection fails.
+ * Displayed when game initialization fails.
  */
 function ErrorOverlay({ message, onRetry }: { message: string; onRetry: () => void }) {
 	return (
@@ -78,7 +99,7 @@ function ErrorOverlay({ message, onRetry }: { message: string; onRetry: () => vo
 				</div>
 
 				{/* Error title */}
-				<h2 className="font-pirulen text-xl tracking-widest text-red-400">CONNECTION ERROR</h2>
+				<h2 className="font-pirulen text-xl tracking-widest text-red-400">GAME ERROR</h2>
 
 				{/* Error message */}
 				<p className="text-center text-sm text-gray-400">{message}</p>
@@ -89,59 +110,51 @@ function ErrorOverlay({ message, onRetry }: { message: string; onRetry: () => vo
 					className="group relative overflow-hidden rounded-lg border-2 border-cyan-500 bg-cyan-500/10 px-8 py-3 font-bold text-cyan-400 transition-all duration-300 hover:bg-cyan-500/30 hover:text-white hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]"
 				>
 					<span className="relative z-10">TRY AGAIN</span>
-					<div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+					<div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-cyan-500/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
 				</button>
-
-				{/* Additional info */}
-				<p className="text-xs text-gray-500">Redirecting to matchmaking in a few seconds...</p>
 			</div>
 		</div>
 	);
 }
 
 // =============================================================================
-// Main Game Page Component
+// Main Local Game Page Component
 // =============================================================================
 
 /**
- * Game page component.
+ * Local game page component.
  * 
- * This page switches the game to online mode and displays the game overlays.
+ * This page switches the game to local mode and displays the game overlays.
  * The actual game canvas is rendered in MainLayout via GameProvider.
  */
-export const Game = () => {
+export const LocalGame = () => {
 	const navigate = useNavigate();
-	const query = useQuery();
-	const { setMode, mode, error, isLoading, gameId, scores } = useGame();
+	const { setMode, mode, error, isLoading, scores } = useGame();
 
-	// Get gameId from URL query
-	const urlGameId = query.get('id');
-
-	// Switch to online mode on mount, back to background on unmount
+	// Switch to local mode on mount, back to background on unmount
 	useEffect(() => {
-		console.log('[GamePage] Mounting - switching to online mode with gameId:', urlGameId);
-		setMode('online', urlGameId);
+		console.log('[LocalGamePage] Mounting - switching to local mode');
+		setMode('local');
 
 		return () => {
-			console.log("A");
-			console.log('[GamePage] Unmounting - switching back to background mode');
+			console.log('[LocalGamePage] Unmounting - switching back to background mode');
 			setMode('background');
 		};
-	}, [setMode, urlGameId]);
+	}, [setMode]);
 
 	/**
-	 * Handles retry action - navigates back to matchmaking.
+	 * Handles retry action - resets the local game.
 	 */
 	const handleRetry = () => {
 		setMode('background');
-		navigate('/matchmaking');
+		setTimeout(() => setMode('local'), 100);
 	};
 
 	/**
-	 * Handles exit action - switches back to background mode and navigates to dashboard.
+	 * Handles exit action - switches back to background mode and navigates to play menu.
 	 */
 	const handleExit = () => {
-		console.log('[GamePage] Exit clicked - switching to background mode');
+		console.log('[LocalGamePage] Exit clicked - switching to background mode');
 		setMode('background');
 		navigate('/play');
 	};
@@ -155,7 +168,7 @@ export const Game = () => {
 			{error && <ErrorOverlay message={error} onRetry={handleRetry} />}
 
 			{/* Score overlay (shown during gameplay) */}
-			{!isLoading && !error && mode === 'online' && (
+			{!isLoading && !error && mode === 'local' && (
 				<ScoreOverlay
 					player1Score={scores.player1Score}
 					player2Score={scores.player2Score}
@@ -163,12 +176,15 @@ export const Game = () => {
 				/>
 			)}
 
-			{/* Game info overlay (shown during gameplay for online mode) */}
-			{!isLoading && !error && gameId && (
+			{/* Controls overlay (shown during gameplay) */}
+			{!isLoading && !error && mode === 'local' && <ControlsOverlay />}
+
+			{/* Game mode indicator */}
+			{!isLoading && !error && (
 				<div className="pointer-events-none absolute top-4 left-4 z-30">
 					<div className="rounded border border-cyan-500/30 bg-slate-950/60 px-3 py-1.5 backdrop-blur-sm">
 						<p className="font-mono text-xs text-cyan-400">
-							Game: <span className="text-white">{gameId.slice(0, 8)}...</span>
+							Mode: <span className="text-white">Local Multiplayer</span>
 						</p>
 					</div>
 				</div>
@@ -187,4 +203,4 @@ export const Game = () => {
 	);
 };
 
-export default Game;
+export default LocalGame;

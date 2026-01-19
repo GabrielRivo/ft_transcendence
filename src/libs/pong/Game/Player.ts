@@ -87,6 +87,12 @@ class Player {
         this.score = 0;
         //console.log("Player " + this.id + " score: " + this.score);
     }
+    getScore() : number {
+        return this.score;
+    }
+    setScore(value : number) {
+        this.score = value;
+    }
 
     update(deltaT: number) {
         this.paddle.update(deltaT);

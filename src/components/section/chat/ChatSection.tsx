@@ -25,7 +25,7 @@ export function ChatSection() {
 	};
 
 	return (
-		<div className="ff-dashboard-chat-safe grid h-full w-full origin-left -rotate-y-12 grid-cols-6 gap-4 p-4 transform-3d">
+		<div className="ff-dashboard-chat-safe grid h-full w-full origin-left -rotate-y-12 grid-cols-6 gap-1 p-4 transform-3d">
 			{/* Sidebar - Amis/Groupes */}
 			<div className="ff-dashboard-panel-enter ff-dashboard-panel-enter--delay-2 col-span-1 h-full min-h-0">
 				<ChatSidebarPanel

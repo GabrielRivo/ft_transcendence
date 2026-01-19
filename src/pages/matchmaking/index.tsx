@@ -31,7 +31,7 @@ export function MatchmakingPage() {
 	const navigate = useNavigate();
 
 	const handleBack = () => {
-		navigate('/dashboard');
+		navigate('/play');
 	};
 
 	return (

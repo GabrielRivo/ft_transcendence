@@ -39,7 +39,7 @@ export function Login() {
 
 			if (success) {
 				toast('Connexion réussie!', 'success');
-				navigate('/dashboard');
+				navigate('/play');
 			} else {
 				toast('Email ou mot de passe incorrect', 'error');
 			}

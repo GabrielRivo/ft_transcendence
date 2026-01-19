@@ -1,4 +1,4 @@
-import { Engine, Scene, ImportMeshAsync, MeshBuilder, StandardMaterial, SpotLight, Color3, ArcRotateCamera, Vector2, Vector3, HemisphericLight, GlowLayer} from "@babylonjs/core";
+import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer } from "@babylonjs/core";
 import Services from "../Services/Services";
 import { DeathBarPayload } from "../globalType";
 import Player from "../Player";
@@ -21,6 +21,7 @@ class PongLocal extends Game {
     height: number = 12;
 
     isDisposed: boolean = false;
+    private glowLayer?: GlowLayer;
 
     constructor() {
         super();
@@ -42,18 +43,20 @@ class PongLocal extends Game {
     }
 
     async drawScene() : Promise<void>  {
-        let gl = new GlowLayer("glow", Services.Scene, {
+        if (this.isDisposed || !Services.Scene) return;
+
+        this.glowLayer = new GlowLayer("glow", Services.Scene, {
 			blurKernelSize: 32,
 			mainTextureRatio: 0.25
 		});
-		gl.intensity = 0.3;
+		this.glowLayer.intensity = 0.3;
 
         this.player1 = new Player(undefined);
         this.player2 = new Player(undefined);
         this.walls = [new Wall(), new Wall()];
         this.walls.forEach(wall => Services.Scene!.addMesh(wall.model));
         //this.ball = new Ball();
-        var camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, Math.PI / 4, 10, Vector3.Zero(), Services.Scene);
+        const camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, Math.PI / 4, 10, Vector3.Zero(), Services.Scene);
         camera.attachControl(Services.Canvas, true);
 
         //var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
@@ -66,12 +69,12 @@ class PongLocal extends Game {
 		// hemiLight.diffuse = new Color3(0.5, 0.5, 0.5);
 		// hemiLight.groundColor = new Color3(0, 0, 0);
 
-        let ground = MeshBuilder.CreateBox("ground", {width: this.width, height: this.height, depth: 0.1}, Services.Scene);
+        const ground = MeshBuilder.CreateBox("ground", {width: this.width, height: this.height, depth: 0.1}, Services.Scene);
         ground.position = new Vector3(0, -0.05, 0);
         ground.rotate(Vector3.Right(), Math.PI / 2);
         ground.isPickable = false;
 
-        let groundMaterial = new StandardMaterial("groundMat", Services.Scene);
+        const groundMaterial = new StandardMaterial("groundMat", Services.Scene);
         groundMaterial.diffuseColor = new Color3(0.4, 0.4, 0.4);
         ground.material = groundMaterial;
 
@@ -85,17 +88,19 @@ class PongLocal extends Game {
         this.walls[0].model.position = new Vector3(-this.width / 2 - 0.1, 0.25, 0);
         this.walls[1].model.position = new Vector3(this.width / 2 + 0.1, 0.25, 0);
 
-		const background = await ImportMeshAsync("./models/pong.glb", Services.Scene!);
-		background.meshes.forEach(mesh => {
-			mesh.isPickable = false;
-
-			// const mat = mesh.material as PBRMaterial;
-			// if (mat) {
-			// 	if (mat.albedoColor.toLuminance() < 0.01) {
-			// 		mat.albedoColor = new Color3(0.02, 0.02, 0.05); // Gris bleuté très profond
-			// 	}
-			// }
-		});
+		// Load 3D background model from cache
+		if (this.isDisposed || !Services.Scene) return;
+		try {
+			const meshes = await Services.AssetCache.loadModel('pong-background', './models/pong.glb', Services.Scene);
+			if (this.isDisposed) return; // Check again after async operation
+			meshes.forEach(mesh => {
+				mesh.isPickable = false;
+			});
+		} catch (e) {
+			if (!this.isDisposed) {
+				console.error('[PongLocal] Failed to load pong.glb:', e);
+			}
+		}
     }
 
     launch() : void {
@@ -113,8 +118,20 @@ class PongLocal extends Game {
         else if (payload.deathBar.owner == this.player2) {
             this.player1!.scoreUp();
         }
-        //this.ball = new Ball();
-        //this.ball.setFullPos(new Vector3(0, 0.125, 0));
+        
+        // Emit score update event
+        Services.EventBus!.emit("Game:ScoreUpdated", {
+            player1Score: this.player1!.score,
+            player2Score: this.player2!.score,
+            scoreToWin: 5
+        });
+
+        // Check for game end
+        if (this.player1!.score >= 5 || this.player2!.score >= 5) {
+            this.endGame();
+            return;
+        }
+
         this.ball!.generate(2000);
     }
 
@@ -149,6 +166,7 @@ class PongLocal extends Game {
 
     stoppedRenderLoop() : void {
         if (this.isDisposed) return;
+        console.log("ds");
         Services.Scene!.render();
     }
 
@@ -158,12 +176,15 @@ class PongLocal extends Game {
     }
 
     dispose(): void {
+        this.isDisposed = true;
 
         Services.Engine!.stopRenderLoop(this.renderLoop);
         Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
         Services.Engine!.stopRenderLoop();
-        
-        this.isDisposed = true;
+
+        // Dispose glow layer first to avoid postProcessManager errors
+        this.glowLayer?.dispose();
+        this.glowLayer = undefined;
 
         // Services.SocketService!.disconnect();
         socket.disconnect();

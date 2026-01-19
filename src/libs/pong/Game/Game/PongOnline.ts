@@ -1,4 +1,4 @@
-import { Engine, Scene, ImportMeshAsync, MeshBuilder, StandardMaterial, SpotLight, Color3, ArcRotateCamera, Vector2, Vector3, HemisphericLight, GlowLayer, PBRMaterial } from "@babylonjs/core";
+import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer } from "@babylonjs/core";
 import Services from "../Services/Services";
 import type { DeathBarPayload, GameState } from "../globalType";
 import Player from "../Player";
@@ -29,6 +29,7 @@ class PongOnline extends Game {
     private gameJoined: boolean = false;
 
     private isDisposed: boolean = false;
+    private glowLayer?: GlowLayer;
 
     constructor() {
         super();
@@ -45,7 +46,6 @@ class PongOnline extends Game {
 
         this.inputManager = new InputManagerOnline(this);
         this.predictionManager = new PredictionManager(this);
-        this.inputManager.listenToPlayer();
 
         Services.EventBus!.on("DeathBarHit", this.onDeathBarHit);
 
@@ -54,12 +54,13 @@ class PongOnline extends Game {
     }
 
     async drawScene(): Promise<void> {
+        if (this.isDisposed || !Services.Scene) return;
 
-        let gl = new GlowLayer("glow", Services.Scene, {
+        this.glowLayer = new GlowLayer("glow", Services.Scene, {
             blurKernelSize: 32,
             mainTextureRatio: 0.25
         });
-        gl.intensity = 0.3;
+        this.glowLayer.intensity = 0.3;
 
         this.player1 = new Player(undefined);
         this.player2 = new Player(undefined);
@@ -67,7 +68,7 @@ class PongOnline extends Game {
         this.walls = [new Wall(), new Wall()];
         this.walls.forEach(wall => Services.Scene!.addMesh(wall.model));
         //this.ball = new Ball();
-        var camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, Math.PI / 4, 10, Vector3.Zero(), Services.Scene);
+        const camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, Math.PI / 4, 10, Vector3.Zero(), Services.Scene);
         camera.attachControl(Services.Canvas, true);
 
         //var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
@@ -81,12 +82,12 @@ class PongOnline extends Game {
         // hemiLight.groundColor = new Color3(0, 0, 0);
 
 
-        let ground = MeshBuilder.CreateBox("ground", { width: this.width, height: this.height, depth: 0.1 }, Services.Scene);
+        const ground = MeshBuilder.CreateBox("ground", { width: this.width, height: this.height, depth: 0.1 }, Services.Scene);
         ground.position = new Vector3(0, -0.05, 0);
         ground.rotate(Vector3.Right(), Math.PI / 2);
         ground.isPickable = false;
 
-        let groundMaterial = new StandardMaterial("groundMat", Services.Scene);
+        const groundMaterial = new StandardMaterial("groundMat", Services.Scene);
         groundMaterial.diffuseColor = new Color3(0.4, 0.4, 0.4);
         ground.material = groundMaterial;
 
@@ -100,17 +101,19 @@ class PongOnline extends Game {
         this.walls[0].model.position = new Vector3(-this.width / 2 - 0.1, 0.25, 0);
         this.walls[1].model.position = new Vector3(this.width / 2 + 0.1, 0.25, 0);
 
-        const background = await ImportMeshAsync("./models/pong.glb", Services.Scene!);
-        background.meshes.forEach(mesh => {
-            mesh.isPickable = false;
-
-            // const mat = mesh.material as PBRMaterial;
-            // if (mat) {
-            // 	if (mat.albedoColor.toLuminance() < 0.01) {
-            // 		mat.albedoColor = new Color3(0.02, 0.02, 0.05); // Gris bleuté très profond
-            // 	}
-            // }
-        });
+        // Load 3D background model from cache
+        if (this.isDisposed || !Services.Scene) return;
+        try {
+            const meshes = await Services.AssetCache.loadModel('pong-background', './models/pong.glb', Services.Scene);
+            if (this.isDisposed) return; // Check again after async operation
+            meshes.forEach(mesh => {
+                mesh.isPickable = false;
+            });
+        } catch (e) {
+            if (!this.isDisposed) {
+                console.error('[PongOnline] Failed to load pong.glb:', e);
+            }
+        }
     }
 
     launch(): void {
@@ -131,6 +134,7 @@ class PongOnline extends Game {
         socket.on("gameEnded", this.onGameEnded);
         socket.on("gameUpdate", this.onGameUpdate);
         socket.on("generateBall", this.onGenerateBall);
+        socket.on("score", this.onScore);
         socket.onAny(this.onServerLog);
 
 
@@ -149,7 +153,7 @@ class PongOnline extends Game {
 
             socket.emit("ping");
             const timeoutId = setTimeout(() => {
-                console.log("Ping timeout.");
+                console.log("Ping timeout");
                 socket.off("pong", onPong);
                 return reject("Ping timeout");
             }, 2000);
@@ -191,7 +195,7 @@ class PongOnline extends Game {
 
     public async synchronizeTimeWithServer(serverTimestamp: number): Promise<void> {
         try {
-            let timeAheadOfServ = 50;
+            const timeAheadOfServ = 50;
             let measuringTime = performance.now();
             const latency: number = await this.measureLatency();
             measuringTime = performance.now() - measuringTime;
@@ -223,7 +227,6 @@ class PongOnline extends Game {
         let connectionTimeout;
 
         connectionTimeout = setTimeout(() => {
-            alert("Connection to server lost. The game will now stop.");
             this.endGame();
         }, 10000);
         socket.once("connect", () => {
@@ -242,8 +245,10 @@ class PongOnline extends Game {
         console.log("Game joined with payload:", payload, " timestamp:", performance.now());
         if (payload.player === 1) {
             this.clientPlayer = this.player1;
+            this.inputManager!.listenToPlayer1();
         } else if (payload.player === 2) {
             this.clientPlayer = this.player2;
+            this.inputManager!.listenToPlayer2();
         }
     }
 
@@ -276,16 +281,31 @@ class PongOnline extends Game {
         if (!this.ball) return;
         const time = Services.TimeService!.getTimestamp();
         const deltaT = time - payload.timestamp;
-        this.ball.generate(3000 - deltaT);
+        this.ball.generate(1000 - deltaT);
+    }
+
+    private onScore = (payload: any): void => {
+        console.log("Score update from server:", payload);
+        this.player1!.setScore(payload.player1Score);
+        this.player2!.setScore(payload.player2Score);
+        Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: this.player1!.score, player2Score: this.player2!.score, scoreToWin: 5 });
+
+        if (this.player1!.score >= 5 || this.player2!.score >= 5) {
+            console.log("Game over detected from score update.");
+        }
     }
 
     private onDeathBarHit = (payload: DeathBarPayload) => {
-        if (payload.deathBar.owner == this.player1) {
+        /*if (payload.deathBar.owner == this.player1) {
             this.player2!.scoreUp();
+            Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: this.player1!.score, player2Score: this.player2!.score, scoreToWin: 5 });
+            console.log("Player 2 score :", this.player2!.score);
         }
         else if (payload.deathBar.owner == this.player2) {
             this.player1!.scoreUp();
-        }
+            Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: this.player1!.score, player2Score: this.player2!.score, scoreToWin: 5 });
+            console.log("Player 1 score :", this.player1!.score);
+        }*/
         this.ball!.setFullPos(new Vector3(0, -100, 0));
         //this.ball = new Ball();
         //this.ball.setFullPos(new Vector3(0, 0.125, 0));
@@ -320,6 +340,7 @@ class PongOnline extends Game {
     }
 
     private renderLoop = () => {
+        //console.log("renderLoop online");
         if (this.isDisposed) return;
         this.predictionManager!.predictionUpdate();
         // this.player1!.update();
@@ -340,17 +361,22 @@ class PongOnline extends Game {
     }
 
     private endGame(): void {
-        Services.EventBus!.emit("UI:MenuStateChange", "pongMenu");
+        //Services.EventBus!.emit("UI:MenuStateChange", "pongMenu");
         Services.EventBus!.emit("Game:Ended", { name: "PongOnline", winnerId: null, score: { player1: this.player1!.score, player2: this.player2!.score } });
+        //this.dispose();
     }
 
     dispose(): void {
         console.log("Disposing Pong game instance.");
+        this.isDisposed = true;
+
         Services.Engine!.stopRenderLoop(this.renderLoop);
         Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
         Services.Engine!.stopRenderLoop();
 
-        this.isDisposed = true;
+        // Dispose glow layer first to avoid postProcessManager errors
+        this.glowLayer?.dispose();
+        this.glowLayer = undefined;
 
         this.player1?.dispose();
         this.player2?.dispose();
@@ -368,6 +394,7 @@ class PongOnline extends Game {
         socket.off("gameEnded", this.onGameEnded);
         socket.off("gameUpdate", this.onGameUpdate);
         socket.off("generateBall", this.onGenerateBall);
+        socket.off("score", this.onScore);
         socket.offAny(this.onServerLog);
         socket.disconnect();
 
