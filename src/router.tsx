@@ -24,6 +24,7 @@ import { ProfilePage } from './pages/profile';
 import { LogoutPage } from './pages/logout';
 import { PlayPage } from './pages/play';
 import { OnlinePlayPage } from './pages/play/online';
+import { LocalGame } from './pages/play/local';
 
 function GameLayout({ children }: { children: any }) {
 	return (
@@ -119,6 +120,10 @@ const routes = [
 					{
 						path: '/game',
 						component: Game,
+					},
+					{
+						path: '/local',
+						component: LocalGame,
 					},
 				],
 			},

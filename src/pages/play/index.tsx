@@ -19,6 +19,6 @@ export function PlayPage() {
 			<div className="flex gap-24">
 				<ButtonStyle2  className="text-white bg-red-500/50" onClick={handleClickLocal}>Local</ButtonStyle2>
 				<ButtonStyle2  className="text-white bg-emerald-500/50" onClick={handleClickOnline}>Online</ButtonStyle2>
-			</div> 
-		</div>); 
+			</div>
+		</div>);
 }

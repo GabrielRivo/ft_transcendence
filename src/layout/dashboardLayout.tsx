@@ -38,7 +38,7 @@ function Menu() {
 
 	return (
 		<nav className="flex h-14 w-full shrink-0 items-center justify-center gap-8 pb-12">
-			<NavLink path="/dashboard" label="Dashboard" />
+			<NavLink path="/play" label="Play" />
 			{/* <span>|</span> */}
 			<NavLink path="/profile" label="Profile" />
 			{/* <span>|</span> */}

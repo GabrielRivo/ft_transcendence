@@ -44,7 +44,7 @@ export function SetUsername() {
 
 			if (success) {
 				toast('Pseudo défini avec succès!', 'success');
-				navigate('/dashboard');
+				navigate('/play');
 			} else {
 				toast('Ce pseudo est déjà utilisé ou invalide', 'error');
 			}

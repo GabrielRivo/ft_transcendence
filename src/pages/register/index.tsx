@@ -47,7 +47,7 @@ export function Register() {
 
 			if (success) {
 				toast('Inscription réussie!', 'success');
-				navigate('/dashboard');
+				navigate('/play');
 			} else {
 				toast("L'inscription a échoué. Cet email est peut-être déjà utilisé.", 'error');
 			}

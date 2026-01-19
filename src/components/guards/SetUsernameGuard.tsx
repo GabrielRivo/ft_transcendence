@@ -10,7 +10,7 @@ interface SetUsernameGuardProps {
 /**
  * Guard pour la page set-username
  * - Redirige vers /login si non authentifié
- * - Redirige vers /dashboard si l'utilisateur a déjà un username
+ * - Redirige vers /play si l'utilisateur a déjà un username
  */
 export function SetUsernameGuard({ children }: SetUsernameGuardProps) {
 	const { isAuthenticated, user, loading } = useAuth();
@@ -28,7 +28,7 @@ export function SetUsernameGuard({ children }: SetUsernameGuardProps) {
 			// Si l'utilisateur a déjà un username, rediriger vers dashboard
 			if (!user?.noUsername) {
 				toast(`Tu as déjà un pseudo !`, 'error', 3000);
-				navigate('/dashboard');
+				navigate('/play');
 			}
 		}
 	}, [loading, isAuthenticated, user?.noUsername, navigate]);

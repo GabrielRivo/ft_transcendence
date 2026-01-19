@@ -118,8 +118,20 @@ class PongLocal extends Game {
         else if (payload.deathBar.owner == this.player2) {
             this.player1!.scoreUp();
         }
-        //this.ball = new Ball();
-        //this.ball.setFullPos(new Vector3(0, 0.125, 0));
+        
+        // Emit score update event
+        Services.EventBus!.emit("Game:ScoreUpdated", {
+            player1Score: this.player1!.score,
+            player2Score: this.player2!.score,
+            scoreToWin: 5
+        });
+
+        // Check for game end
+        if (this.player1!.score >= 5 || this.player2!.score >= 5) {
+            this.endGame();
+            return;
+        }
+
         this.ball!.generate(2000);
     }
 
