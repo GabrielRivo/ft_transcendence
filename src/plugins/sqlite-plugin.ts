@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
 import fs from 'fs';
 import path from 'path';
+import config from '../config.js';
 
 // Extension du type FastifyInstance pour inclure la propriété db
 declare module 'fastify' {
@@ -17,9 +18,9 @@ async function dbConnector(fastify: FastifyInstance) {
 	// Définition des chemins: Utilisation de process.cwd() pour la racine de l'exécution
 	// Dans Docker avec pnpm --filter, le cwd est /app/apps/matchmaking
 	// Database file is stored in ./db/ directory (mounted as Docker volume for persistence)
-	const dbPath = process.env.DB_PATH || path.join(process.cwd(), 'db', 'db.sqlite');
+	const dbPath = config.db.path;
 	// Schema SQL file is in ./data/ directory (part of the source code, not overwritten by volume)
-	const initSqlPath = process.env.INIT_SQL_PATH || path.join(process.cwd(), 'data', 'init.sql');
+	const initSqlPath = config.db.initSqlPath;
 	const dbDir = path.dirname(dbPath);
 
 	fastify.log.debug({ dbPath, initSqlPath }, 'Resolved database paths');

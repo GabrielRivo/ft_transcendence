@@ -10,25 +10,29 @@ export interface GuestInfo {
 
 @Service()
 export class ParticipantService {
-    createParticipant(user: JwtPayload | null, guestInfo?: GuestInfo): Participant {
-        if (user) {
-            return {
-                id: String(user.id),
-                alias: user.username,
-                type: 'user' as ParticipantType,
-                userId: String(user.id),
-            };
-        }
-        if (guestInfo?.alias) {
-            return {
-                id: guestInfo.sessionId || uuidv4(),
-                alias: guestInfo.alias,
-                type: 'guest' as ParticipantType,
-                userId: null,
-            };
-        }
-        throw new Error('Alias requis pour les participants invités');
-    }
+	createParticipant(user: JwtPayload | null, guestInfo?: GuestInfo): Participant {
+		if (user) {
+			return {
+				id: String(user.id),
+				alias: user.username,
+				type: 'user' as ParticipantType,
+				userId: String(user.id),
+			};
+		}
+		if (guestInfo?.alias) {
+			const validation = this.validateGuestAlias(guestInfo.alias);
+			if (!validation.valid) {
+				throw new Error(validation.error ?? 'Alias invité invalide');
+			}
+			return {
+				id: guestInfo.sessionId || uuidv4(),
+				alias: guestInfo.alias,
+				type: 'guest' as ParticipantType,
+				userId: null,
+			};
+		}
+		throw new Error('Alias requis pour les participants invités');
+	}
 
     validateGuestAlias(alias: string): { valid: boolean; error?: string } {
         if (!alias || alias.trim().length === 0) {

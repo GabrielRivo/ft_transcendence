@@ -6,10 +6,6 @@
 export const TOURNAMENT_STATUS = ['PENDING', 'IN_PROGRESS', 'FINISHED', 'CANCELLED'] as const;
 export type TournamentStatus = (typeof TOURNAMENT_STATUS)[number];
 
-/** Mode de démarrage - CHECK (start_mode IN ('MANUAL', 'AUTO_FULL', 'AUTO_TIMER')) */
-export const START_MODES = ['MANUAL', 'AUTO_FULL', 'AUTO_TIMER'] as const;
-export type StartMode = (typeof START_MODES)[number];
-
 /** Tailles autorisées - CHECK (size IN (4, 8, 16)) */
 export const TOURNAMENT_SIZES = [4, 8, 16] as const;
 export type TournamentSize = (typeof TOURNAMENT_SIZES)[number];
@@ -36,7 +32,6 @@ export interface TournamentRow {
     status: TournamentStatus;
     size: TournamentSize;
     current_round: number;
-    start_mode: StartMode;
     start_date: string | null;
     bracket_data: string; // JSON stringifié
     created_by: string | null;
@@ -115,7 +110,6 @@ export interface Tournament {
     status: TournamentStatus;
     size: TournamentSize;
     currentRound: number;
-    startMode: StartMode;
     startDate: string | null;
     bracketData: BracketData;
     createdBy: string | null;
@@ -135,7 +129,6 @@ export interface Tournament {
 export interface CreateTournamentData {
     name: string;
     size: TournamentSize;
-    startMode: StartMode;
     startDate?: string | null;
 }
 
@@ -148,7 +141,6 @@ export interface TournamentInsertData {
     status: TournamentStatus;
     size: TournamentSize;
     current_round: number;
-    start_mode: StartMode;
     start_date: string | null;
     bracket_data: string;
     created_by: string | null;
@@ -182,7 +174,6 @@ export function mapRowToTournament(row: TournamentRow): Tournament {
         status: row.status,
         size: row.size,
         currentRound: row.current_round,
-        startMode: row.start_mode,
         startDate: row.start_date,
         bracketData: JSON.parse(row.bracket_data) as BracketData,
         createdBy: row.created_by,
@@ -230,23 +221,26 @@ export function mapParticipantToInsertData(
 
 /** Codes d'erreur pour les opérations sur les tournois */
 export const TOURNAMENT_ERROR_CODES = [
-    'TOURNAMENT_NOT_FOUND',
-    'TOURNAMENT_FULL',
-    'TOURNAMENT_ALREADY_STARTED',
-    'TOURNAMENT_NOT_PENDING',
-    'TOURNAMENT_NOT_IN_PROGRESS',
-    'PARTICIPANT_ALREADY_JOINED',
-    'PARTICIPANT_NOT_FOUND',
-    'ALIAS_REQUIRED_FOR_GUEST',
-    'ALIAS_ALREADY_TAKEN',
-    'NOT_ENOUGH_PARTICIPANTS',
-    'MATCH_NOT_FOUND',
-    'MATCH_NOT_READY',
-    'MATCH_ALREADY_STARTED',
-    'MATCH_ALREADY_COMPLETED',
-    'INVALID_WINNER',
-    'UNAUTHORIZED',
-    'OPTIMISTIC_LOCK_ERROR',
+	'TOURNAMENT_NOT_FOUND',
+	'TOURNAMENT_CANCELLED',
+	'TOURNAMENT_FULL',
+	'TOURNAMENT_ALREADY_STARTED',
+	'TOURNAMENT_NOT_PENDING',
+	'TOURNAMENT_NOT_IN_PROGRESS',
+	'PARTICIPANT_ALREADY_JOINED',
+	'PARTICIPANT_NOT_FOUND',
+	'ALIAS_REQUIRED_FOR_GUEST',
+	'ALIAS_INVALID',
+	'ALIAS_ALREADY_TAKEN',
+	'NOT_ENOUGH_PARTICIPANTS',
+	'MATCH_NOT_FOUND',
+	'MATCH_NOT_READY',
+	'MATCH_ALREADY_STARTED',
+	'MATCH_ALREADY_COMPLETED',
+	'INVALID_WINNER',
+	'UNAUTHORIZED',
+	'OPTIMISTIC_LOCK_ERROR',
+	'GAME_SERVICE_UNAVAILABLE',
 ] as const;
 export type TournamentErrorCode = (typeof TOURNAMENT_ERROR_CODES)[number];
 

@@ -1,6 +1,6 @@
 import { IsString, IsRequired, IsEnum, IsInt, MinLength, MaxLength, generateSchema } from 'my-class-validator';
-import { START_MODES, TOURNAMENT_SIZES } from '../../types.js';
-import type { StartMode, TournamentSize } from '../../types.js';
+import { TOURNAMENT_SIZES } from '../../types.js';
+import type { TournamentSize } from '../../types.js';
 
 export class CreateTournamentDto {
     @IsRequired()
@@ -13,10 +13,6 @@ export class CreateTournamentDto {
     @IsInt()
     @IsEnum(TOURNAMENT_SIZES)
     size!: TournamentSize;
-
-    @IsRequired()
-    @IsEnum(START_MODES)
-    startMode!: StartMode;
 }
 
 export const CreateTournamentSchema = generateSchema(CreateTournamentDto);

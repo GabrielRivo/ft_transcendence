@@ -3,6 +3,7 @@ import * as ajvErrors from 'ajv-errors';
 import Fastify from 'fastify';
 import { registerValidators } from 'my-class-validator';
 import bootstrapPlugin from './plugins/bootstrap-plugin.js';
+import jwtPlugin from './plugins/jwt-plugin.js';
 import socketPlugin from './plugins/socket-plugin.js';
 import sqlitePlugin from './plugins/sqlite-plugin.js';
 
@@ -16,6 +17,7 @@ addAjvErrors(ajv);
 registerValidators(ajv);
 
 app.register(sqlitePlugin);
+app.register(jwtPlugin);
 app.register(socketPlugin);
 app.register(bootstrapPlugin);
 
