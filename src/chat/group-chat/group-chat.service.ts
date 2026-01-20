@@ -92,7 +92,7 @@ export class GroupChatService {
 	}
 
 	addMember(groupId: number, userId: number, otherId: number): { success: boolean; message: string } {
-		const canInvite = this.isMember(groupId, otherId);
+		const canInvite = this.isMember(groupId, userId);
 		if (!canInvite) {
 			return { success: false, message: "You are not a member of this group" }; //A CHANGER
 		}
@@ -103,30 +103,37 @@ export class GroupChatService {
 		}
 		
 		try {
-			this.statementAddMember.run({ groupId, userId });
+			this.statementAddMember.run({ groupId, userId : otherId });
 		} catch (error: any) {
 			console.log(error);
 			return { success: false, message: "User is already a member" };
 		}
 		this.emitToUser(userId, 'group_invite', { groupId });
+		// USER EXIST
 		return { success: true, message: "Member added" };
 	}
 
-	removeMember(groupId: number, userId: number, removerId: number): { success: boolean; message: string } {
+	removeMember(groupId: number, userId: number, otherId: number): { success: boolean; message: string } {
 		const group = this.getGroupById(groupId);
 		if (!group) {
 			return { success: false, message: "Group not found" };
 		}
 		
-		if (group.ownerId !== removerId && userId !== removerId) {
+		// if (group.ownerId !== userId) {
+		// 	console.log("owner : ", group.ownerId, "remover :")
+		// 	return { success: false, message: "You don't have permission to remove this member" };
+		// }
+
+		if (otherId != userId) {
+			console.log("user : ", userId, "leave")
 			return { success: false, message: "You don't have permission to remove this member" };
 		}
 		
-		if (userId === group.ownerId) {
-			return { success: false, message: "Owner cannot leave. Delete the group instead." };
-		}
+		// if (otherId === group.ownerId) {
+		// 	return { success: false, message: "Owner cannot leave. Delete the group instead." };
+		// }
 		
-		const result = this.statementRemoveMember.run({ groupId, userId });
+		const result = this.statementRemoveMember.run({ groupId, userId: otherId });
 		if (result.changes === 0) {
 			return { success: false, message: "User is not a member" };
 		}
@@ -148,9 +155,10 @@ export class GroupChatService {
 	}
 
 	isMember(groupId: number, userId: number): boolean {
-		
-		console.log("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAH", this.statementGetGroupById.get({groupId}), this.statementIsMember.get({ groupId, userId }));
-		return true; 
+		if (!!this.statementGetGroupById.get({groupId})){
+			return !!this.statementIsMember.get({ groupId, userId });
+		}
+		return false;
 	}
 
 	deleteGroup(groupId: number, ownerId: number): { success: boolean; message: string } {

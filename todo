@@ -16,7 +16,7 @@ group =>
 recoit message des blocked user
 	- effect spoil
 
--supprimer conversation personne block
+-supprimer conversation personne block OK 
 
 - Backend
 
@@ -28,5 +28,3 @@ reception message group OK
 
 
 ! pour les parties perso
-
--supprimer conversation personne block

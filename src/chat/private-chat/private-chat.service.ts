@@ -26,10 +26,18 @@ export class PrivateChatService {
 			`SELECT * FROM privateChatHistory WHERE (userId1 = @userId1 AND userId2 = @userId2)
 					ORDER BY created_at DESC LIMIT 50`
 		);
+
+		
+		// this.statementDeleteConversation = this.db.prepare(`
+		// 	DELETE FROM privateChatHistory 
+		// 	WHERE (userId1 = @user1 AND userId2 = @user2) 
+		// 		OR (userId2 = @user2 AND userId1 = @user1)
+		// `);
+
 		this.statementDeleteConversation = this.db.prepare(`
 			DELETE FROM privateChatHistory 
 			WHERE (userId1 = @user1 AND userId2 = @user2) 
-				OR (userId2 = @user2 AND userId1 = @user1)
+				OR (userId2 = @user1 AND userId1 = @user2)
 		`);
 	}
 
@@ -54,7 +62,8 @@ export class PrivateChatService {
 		const history = this.statementGetPrivateHistory.all({userId1: min, userId2: max})
 		return history;
 	}
-	removePrivateChat(userId1: number, userId2: number): void {
-		this.statementDeleteConversation.run({ user1: userId1, user2: userId2 });
+	async removePrivateChat(userId1: number, userId2: number): Promise<void> {
+		const test = this.statementDeleteConversation.run({ user1: userId1, user2: userId2 }); 
+		console.log(test);
 	}
 }

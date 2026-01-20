@@ -25,8 +25,7 @@ export class GroupMemberDto {
 	@IsInt()
 	userId: number;
 
-
-	@IsRequired({ message: "Invited ID is required" })
+	@IsRequired({ message: "Other ID is required" })
 	@IsInt()
 	otherId: number;
 }

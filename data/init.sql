@@ -18,17 +18,6 @@ CREATE TABLE IF NOT EXISTS blocklist (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_block_unique ON blocklist (userId, otherId);
 
-
---- Creer les salons prives
--- Methode pour add un user au salon 
--- methode pour delete un user du salon / le faire quitter
-
--- CREATE TABLE IF NOT EXISTS privateChatRoom(
---     roomId INTEGER PRIMARY KEY AUTOINCREMENT,
-
--- );
-
-
 CREATE TABLE IF NOT EXISTS matchHistory (
     gameId INTEGER PRIMARY KEY,
     userId1 INTEGER NOT NULL, 

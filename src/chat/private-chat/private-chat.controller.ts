@@ -8,9 +8,9 @@ interface DeleteChatPayload {
 }
 
 
-const BLOCK_URL = 'http://auth:3000';
+const BLOCK_URL = 'http://social:3000';
 
-@Controller('/chat/private')
+@Controller('/private')
 export class PrivateChatController {
 
 	@Inject(PrivateChatService)
@@ -19,7 +19,7 @@ export class PrivateChatController {
 	@Get('/private_history')
 	async get_history(@Param('userId1') userId1: string , @Param('userId2') userId2: string)
 	{	
-		const res = await fetch(`${BLOCK_URL}/social/friend-management/block`, 
+		const res = await fetch(`${BLOCK_URL}/friend-management/block`, 
 			{
 				method: 'GET',
 				headers : {
@@ -45,9 +45,17 @@ export class PrivateChatController {
 
 	@Delete('/private_history')
 	async delete_history(@Body()payload: DeleteChatPayload) {
-		await this.chatService.removePrivateChat(
-			Number(payload.userId), 
-			Number(payload.otherId)
-		);
+		console.log("B");
+		try {
+			await this.chatService.removePrivateChat(
+				Number(payload.userId), 
+				Number(payload.otherId)
+			);
+		}
+		catch(e) {
+			console.log(e);
+		}
+		console.log("D")
+		return { ok : true};
 	}
 }

@@ -29,13 +29,13 @@ export class GroupController {
 		return { ...group, members };
 	}
 
-	@Get('/group_history')
-	async get_history(groupId: number) {
-		const history = this.groupService.getGroupHistory(groupId);
-		return history.reverse();
-		// const history = this.chatService.getGroupHistory();
-		// return history.reverse();
-	}
+	// @Get('/group_history')
+	// async get_history(groupId: number) {
+	// 	const history = this.groupService.getGroupHistory(groupId);
+	// 	return history.reverse();
+	// 	// const history = this.chatService.getGroupHistory();
+	// 	// return history.reverse();
+	// }
 
 	@Post('/add_user')
 	@BodySchema(GroupMemberSchema)
@@ -55,10 +55,11 @@ export class GroupController {
 		}
 	}
 
-	@Post('/remove-member')
+	@Post('/remove_member')
 	@BodySchema(GroupMemberSchema)
 	async remove_member(@Body() data: GroupMemberDto & { removerId: number }) {
-		return this.groupService.removeMember(data.groupId, data.userId, data.removerId);
+		console.log("remove user id :", data.otherId)
+		return this.groupService.removeMember(data.groupId, data.userId, data.otherId);
 	}
 
 	@Delete('/group')
