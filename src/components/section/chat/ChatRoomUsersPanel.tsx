@@ -1,6 +1,7 @@
 import { createElement } from 'my-react';
 import { RoomUser } from '../../../hook/useChat';
 import { useAuth } from '../../../hook/useAuth';
+import { UserItem } from './UserItem';
 
 export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: RoomUser[]; currentRoom: string }) {
 	const { user } = useAuth();
@@ -21,28 +22,36 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 				) : (
 					roomUsers.map((roomUser) => {
 						const isCurrentUser = roomUser.userId === user?.id;
+						if (isCurrentUser) {
+							return (
+								<UserItem
+									key={roomUser.userId}
+									name={roomUser.username}
+									isOnline={true}
+									isSelected={false}
+									isRightPanel={true}
+									onClick={() => {}}
+								/>
+							);
+						}
 						return (
-							<div
+							<UserItem
 								key={roomUser.userId}
-								className={`flex cursor-pointer flex-col items-center gap-2 transition-colors hover:text-orange-500 ${
-									isCurrentUser ? 'text-orange-400' : 'text-orange-300'
-								}`}
-							>
-								<div className="relative">
-									<div
-										className={`flex size-12 items-center justify-center rounded-full text-lg font-bold ${
-											isCurrentUser ? 'bg-orange-500/30' : 'bg-slate-800'
-										}`}
-									>
-										{roomUser.username.charAt(0).toUpperCase()}
-									</div>
-									<div className="absolute right-0 bottom-0 size-3 rounded-full bg-green-500" />
-								</div>
-								<span className="max-w-16 truncate text-center font-bold">
-									{roomUser.username}
-									{isCurrentUser && <span className="text-gray-500"> (vous)</span>}
-								</span>
-							</div>
+								name={roomUser.username}
+								isOnline={true}
+								isSelected={false}
+								isRightPanel={true}
+								isFriend={false}
+								onClick={() => {}}
+								contextMenuCallbacks={{
+									onChallenge: () => console.log('Défier', roomUser.username),
+									onInviteTournament: () => console.log('Inviter au tournoi', roomUser.username),
+									onStatistics: () => console.log('Statistiques', roomUser.username),
+									onProfile: () => console.log('Profil', roomUser.username),
+									onToggleFriend: () => console.log('Ajouter en ami', roomUser.username),
+									onBlock: () => console.log('Bloquer', roomUser.username),
+								}}
+							/>
 						);
 					})
 				)}

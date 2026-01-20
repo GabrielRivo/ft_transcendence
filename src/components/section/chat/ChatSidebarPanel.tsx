@@ -90,8 +90,17 @@ export function ChatSidebarPanel({
 									key={friend.id}
 									name={friend.username}
 									isOnline={true}
+									isFriend={true}
 									isSelected={currentRoom.includes(String(friend.id))}
 									onClick={() => onSelectFriend(friend.id)}
+									contextMenuCallbacks={{
+										onChallenge: () => console.log('Défier', friend.username),
+										onInviteTournament: () => console.log('Inviter au tournoi', friend.username),
+										onStatistics: () => console.log('Statistiques', friend.username),
+										onProfile: () => console.log('Profil', friend.username),
+										onToggleFriend: () => console.log('Retirer des amis', friend.username),
+										onBlock: () => console.log('Bloquer', friend.username),
+									}}
 								/>
 							))}
 						</div>
