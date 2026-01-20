@@ -7,7 +7,7 @@ import { AddFriendModal } from './modals/AddFriendModal';
 import { CreateGroupModal } from './modals/CreateGroupModal';
 import { AddModal } from './modals/AddModal';
 import { Add } from '@/components/ui/icon/add';
-
+import { useNavigate } from 'my-react-router';
 interface ChatSidebarPanelProps {
 	currentRoom: string;
 	friends: Friend[];
@@ -32,7 +32,7 @@ export function ChatSidebarPanel({
 	const [showMenu, setShowMenu] = useState(false);
 	const [showAddFriendModal, setShowAddFriendModal] = useState(false);
 	const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
-
+	const navigate = useNavigate();
 	const handleAddFriend = () => {
 		setShowMenu(false);
 		setShowAddFriendModal(true);
@@ -96,7 +96,7 @@ export function ChatSidebarPanel({
 									contextMenuCallbacks={{
 										onChallenge: () => console.log('Défier', friend.username),
 										onInviteTournament: () => console.log('Inviter au tournoi', friend.username),
-										onStatistics: () => console.log('Statistiques', friend.username),
+										onStatistics: () => navigate(`/statistics/${friend.id}`),
 										onProfile: () => console.log('Profil', friend.username),
 										onToggleFriend: () => console.log('Retirer des amis', friend.username),
 										onBlock: () => console.log('Bloquer', friend.username),

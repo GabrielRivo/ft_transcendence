@@ -1,21 +1,33 @@
 import { createElement, useState, useRef } from 'my-react';
 import { ChatMessage } from '../../../hook/useChat';
 import { useAuth } from '../../../hook/useAuth';
+import { useFriends } from '../../../hook/useFriends';
+import { Modal } from '../../ui/modal';
+import { Users } from '../../ui/icon/users';
+
+interface ChatMessagesPanelProps {
+	messages: ChatMessage[];
+	currentRoom: string;
+	connected: boolean;
+	onSendMessage: (content: string) => void;
+	isGroup?: boolean;
+	onInviteUser?: (userId: number) => void;
+}
 
 export function ChatMessagesPanel({
 	messages,
 	currentRoom,
 	connected,
 	onSendMessage,
-}: {
-	messages: ChatMessage[];
-	currentRoom: string;
-	connected: boolean;
-	onSendMessage: (content: string) => void;
-}) {
+	isGroup = false,
+	onInviteUser
+}: ChatMessagesPanelProps) {
 	const { user } = useAuth();
+	const { friends } = useFriends();
 	const scrollRef = useRef<HTMLDivElement | null>(null);
 	const [inputValue, setInputValue] = useState('');
+	const [showInviteModal, setShowInviteModal] = useState(false);
+	const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
 
 	const handleWheel = (e: WheelEvent) => {
 		if (scrollRef.current) {
@@ -50,9 +62,20 @@ export function ChatMessagesPanel({
 			{/* Header */}
 			<div className="flex shrink-0 justify-between border-b border-purple-500/20 bg-purple-500/10 p-4 text-sm font-bold tracking-widest text-purple-500">
 				<span>{getRoomTitle()}</span>
-				<span className={`${connected ? 'animate-pulse text-green-500' : 'text-red-500'}`}>
-					● {connected ? 'LIVE' : 'OFFLINE'}
-				</span>
+				<div className="flex items-center gap-3">
+					{isGroup && (
+						<button
+							onClick={() => setShowInviteModal(true)}
+							className="rounded p-1 text-purple-400 transition-colors hover:bg-purple-500/20 hover:text-white"
+							title="Inviter des amis"
+						>
+							<Users size={18} />
+						</button>
+					)}
+					<span className={`${connected ? 'animate-pulse text-green-500' : 'text-red-500'}`}>
+						● {connected ? 'LIVE' : 'OFFLINE'}
+					</span>
+				</div>
 			</div>
 
 			{/* Messages */}
@@ -106,6 +129,85 @@ export function ChatMessagesPanel({
 					ENVOYER
 				</button>
 			</form>
+
+			{/* Invite Modal */}
+			{showInviteModal && (
+				<Modal
+					title="Inviter des amis"
+					variant="purple"
+					onClose={() => {
+						setShowInviteModal(false);
+						setSelectedUserIds([]);
+					}}
+				>
+					<div className="flex flex-col gap-4">
+						{friends.length === 0 ? (
+							<p className="text-center text-gray-400">Aucun ami à inviter</p>
+						) : (
+							<div className="max-h-64 overflow-y-auto flex flex-col gap-1">
+								{friends.map((friend) => {
+									const isSelected = selectedUserIds.includes(friend.id);
+									return (
+										<label
+											key={friend.id}
+											className={`group flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all duration-200 ${
+												isSelected
+													? 'border-purple-500 bg-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.3)]'
+													: 'border-purple-500/20 bg-slate-900/50 hover:border-purple-500/50 hover:bg-purple-500/10'
+											}`}
+										>
+											<div
+												className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all duration-200 ${
+													isSelected
+														? 'border-purple-400 bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]'
+														: 'border-purple-500/50 bg-slate-900 group-hover:border-purple-400'
+												}`}
+											>
+												{isSelected && (
+													<svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+														<path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+													</svg>
+												)}
+											</div>
+											<input
+												type="checkbox"
+												checked={isSelected}
+												onChange={(e: Event) => {
+													const checked = (e.target as HTMLInputElement).checked;
+													if (checked) {
+														setSelectedUserIds((prev) => [...prev, friend.id]);
+													} else {
+														setSelectedUserIds((prev) => prev.filter((id) => id !== friend.id));
+													}
+												}}
+												className="sr-only"
+											/>
+											<span className={`font-medium transition-colors ${isSelected ? 'text-purple-300' : 'text-gray-300 group-hover:text-white'}`}>
+												{friend.username}
+											</span>
+										</label>
+									);
+								})}
+							</div>
+						)}
+						<button
+							onClick={() => {
+								selectedUserIds.forEach((userId) => {
+									if (onInviteUser) {
+										onInviteUser(userId);
+									}
+								});
+								setShowInviteModal(false);
+								setSelectedUserIds([]);
+							}}
+							disabled={selectedUserIds.length === 0}
+							className="w-full rounded bg-purple-500/20 px-4 py-2 text-sm font-bold text-purple-400 transition-colors hover:bg-purple-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+						>
+							Envoyer
+						</button>
+					</div>
+				</Modal>
+			)}
 		</div>
 	);
 }

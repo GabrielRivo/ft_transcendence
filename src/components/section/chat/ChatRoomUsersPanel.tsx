@@ -2,10 +2,11 @@ import { createElement } from 'my-react';
 import { RoomUser } from '../../../hook/useChat';
 import { useAuth } from '../../../hook/useAuth';
 import { UserItem } from './UserItem';
+import { useNavigate } from 'my-react-router';
 
 export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: RoomUser[]; currentRoom: string }) {
 	const { user } = useAuth();
-
+	const navigate = useNavigate();
 	const getTitle = () => {
 		if (currentRoom === 'hub') return 'Users';
 		return 'EN LIGNE';
@@ -46,7 +47,7 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 								contextMenuCallbacks={{
 									onChallenge: () => console.log('Défier', roomUser.username),
 									onInviteTournament: () => console.log('Inviter au tournoi', roomUser.username),
-									onStatistics: () => console.log('Statistiques', roomUser.username),
+									onStatistics: () => navigate(`/statistics/${roomUser.userId}`),
 									onProfile: () => console.log('Profil', roomUser.username),
 									onToggleFriend: () => console.log('Ajouter en ami', roomUser.username),
 									onBlock: () => console.log('Bloquer', roomUser.username),

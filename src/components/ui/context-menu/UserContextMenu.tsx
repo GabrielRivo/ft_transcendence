@@ -25,13 +25,13 @@ export interface UserContextMenuProps {
 }
 
 interface MenuItemProps {
-	icon: string;
+	// icon: string;
 	label: string;
 	onClick?: () => void;
 	variant?: 'default' | 'danger';
 }
 
-function MenuItem({ icon, label, onClick, variant = 'default' }: MenuItemProps) {
+function MenuItem({  label, onClick, variant = 'default' }: MenuItemProps) {
 	const handleClick = (e: MouseEvent) => {
 		e.stopPropagation();
 		if (onClick) onClick();
@@ -47,7 +47,7 @@ function MenuItem({ icon, label, onClick, variant = 'default' }: MenuItemProps) 
 			onClick={handleClick}
 			className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-all duration-150 ${variantClasses}`}
 		>
-			<span className="text-base">{icon}</span>
+			{/* <span className="text-base">{icon}</span> */}
 			<span className="font-medium">{label}</span>
 		</button>
 	);
@@ -59,7 +59,7 @@ function Divider() {
 
 export function UserContextMenu({ isOpen, position, onClose, isFriend = false, callbacks }: UserContextMenuProps) {
 	const [adjustedPosition, setAdjustedPosition] = useState(position);
-	const menuIdRef = useRef(Math.random().toString(36).substr(2, 9));
+	// const menuIdRef = useRef(Math.random().toString(36).substr(2, 9));
 
 	useEffect(() => {
 		if (!isOpen) return;
@@ -143,18 +143,17 @@ export function UserContextMenu({ isOpen, position, onClose, isFriend = false, c
 			style={`left: ${adjustedPosition.x}px; top: ${adjustedPosition.y}px;`}
 		>
 			<div className="py-1">
-				<MenuItem icon="⚔️" label="Défier" onClick={() => handleAction(callbacks.onChallenge)} />
-				<MenuItem icon="🏆" label="Inviter au tournoi" onClick={() => handleAction(callbacks.onInviteTournament)} />
+				<MenuItem label="Défier" onClick={() => handleAction(callbacks.onChallenge)} />
+				<MenuItem label="Inviter au tournoi" onClick={() => handleAction(callbacks.onInviteTournament)} />
 				<Divider />
-				<MenuItem icon="📊" label="Statistiques" onClick={() => handleAction(callbacks.onStatistics)} />
-				<MenuItem icon="👤" label="Profil" onClick={() => handleAction(callbacks.onProfile)} />
+				<MenuItem label="Statistiques" onClick={() => handleAction(callbacks.onStatistics)} />
+				<MenuItem label="Profil" onClick={() => handleAction(callbacks.onProfile)} />
 				<Divider />
 				<MenuItem
-					icon={isFriend ? '💔' : '❤️'}
 					label={isFriend ? 'Retirer des amis' : 'Ajouter en ami'}
 					onClick={() => handleAction(callbacks.onToggleFriend)}
 				/>
-				<MenuItem icon="🚫" label="Bloquer" onClick={() => handleAction(callbacks.onBlock)} variant="danger" />
+				<MenuItem label="Bloquer" onClick={() => handleAction(callbacks.onBlock)} variant="danger" />
 			</div>
 		</div>,
 		document.body,

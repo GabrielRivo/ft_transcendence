@@ -47,6 +47,11 @@ export function ChatSection() {
 					currentRoom={currentRoom}
 					connected={connected}
 					onSendMessage={sendMessage}
+					isGroup={currentRoom.startsWith('group_')}
+					onInviteUser={(userId) => {
+						// TODO: Implémenter l'invitation au groupe
+						console.log('Invite user:', userId);
+					}}
 				/>
 			</div>
 
