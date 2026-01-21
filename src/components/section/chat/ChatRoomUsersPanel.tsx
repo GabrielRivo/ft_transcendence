@@ -3,10 +3,13 @@ import { RoomUser } from '../../../hook/useChat';
 import { useAuth } from '../../../hook/useAuth';
 import { UserItem } from './UserItem';
 import { useNavigate } from 'my-react-router';
+import { fetchWithAuth } from '@libs/fetchWithAuth';
+import { useToast } from '@hook/useToast';
 
 export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: RoomUser[]; currentRoom: string }) {
 	const { user } = useAuth();
 	const navigate = useNavigate();
+	const { toast } = useToast();
 	const getTitle = () => {
 		if (currentRoom === 'hub') return 'Users';
 		return 'EN LIGNE';
@@ -45,12 +48,52 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 								isFriend={false}
 								onClick={() => {}}
 								contextMenuCallbacks={{
-									onChallenge: () => console.log('Défier', roomUser.username),
-									onInviteTournament: () => console.log('Inviter au tournoi', roomUser.username),
-									onStatistics: () => navigate(`/statistics/${roomUser.userId}`),
-									onProfile: () => console.log('Profil', roomUser.username),
-									onToggleFriend: () => console.log('Ajouter en ami', roomUser.username),
-									onBlock: () => console.log('Bloquer', roomUser.username),
+									onChallenge: () => {
+										
+										console.log('Défier', roomUser.username)
+									},
+									onInviteTournament: () => {
+										console.log('Inviter au tournoi', roomUser.username)
+									},
+									onStatistics: () => {
+										navigate(`/statistics/${roomUser.userId}`)
+									},
+									onProfile: () => {
+										navigate(`/profil/${roomUser.userId}`)
+										console.log('Profil', roomUser.username)
+									},
+									onToggleFriend: () => {
+										fetchWithAuth(`/api/social/friend-management/invite`, {
+											method: 'POST',
+											headers: {
+												'Content-Type': 'application/json',
+											},
+											body: JSON.stringify({
+												otherId: roomUser.userId
+											}),
+										}).then(data => data.json()).then(data => {
+											toast(data.message, data.success ? 'success' : 'error')
+										}).catch(e => {
+											toast('Network error', 'error')
+										})
+										console.log('Ajouter en ami', roomUser.username)
+									},
+									onBlock: () => {
+										fetchWithAuth(`/api/social/friend-management/block`, {
+											method: 'POST',
+											headers: {
+												'Content-Type': 'application/json',
+											},
+											body: JSON.stringify({
+												otherId: roomUser.userId
+											}),
+										}).then(data => data.json()).then(data => {
+											toast(data.message, data.success ? 'success' : 'error')
+										}).catch(e => {
+											toast('Network error', 'error')
+										})
+										console.log('Bloquer', roomUser.username)
+									},
 								}}
 							/>
 						);
