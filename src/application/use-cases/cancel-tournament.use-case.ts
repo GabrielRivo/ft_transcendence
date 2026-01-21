@@ -1,5 +1,5 @@
 import { Inject, Service, NotFoundException, ForbiddenException } from 'my-fastify-decorators';
-import { type TournamentRepository } from '../../domain/ports/tournament-repository.js';
+import { type TournamentRepository } from '../../domain/ports/tournament.repository.js';
 import { type TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
 
 @Service()

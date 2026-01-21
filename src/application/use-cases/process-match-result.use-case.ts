@@ -1,5 +1,5 @@
 import { Inject, Service, NotFoundException } from 'my-fastify-decorators';
-import { type TournamentRepository } from '../../domain/ports/tournament-repository.js';
+import { type TournamentRepository } from '../../domain/ports/tournament.repository.js';
 import { type TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
 import { UpdateMatchScoreDto } from '../dtos/update-match-score.dto.js';
 

@@ -10,6 +10,19 @@ import {
 export type MatchStatus = 'PENDING' | 'IN_PROGRESS' | 'FINISHED';
 export type WinReason = 'SCORE' | 'WALKOVER';
 
+export interface MatchData {
+    id: string;
+    round: number;
+    position: number;
+    playerA: Participant | null;
+    playerB: Participant | null;
+    scoreA: number;
+    scoreB: number;
+    winner: Participant | null;
+    status: MatchStatus;
+    winReason: WinReason | null;
+}
+
 export class Match {
     private _scoreA: number = 0;
     private _scoreB: number = 0;
@@ -39,6 +52,23 @@ export class Match {
     get winReason(): WinReason | null { return this._winReason; }
     get playerA(): Participant | null { return this._playerA; }
     get playerB(): Participant | null { return this._playerB; }
+
+    public static reconstitute(data: MatchData): Match {
+        const match = new Match(
+            data.id,
+            data.round,
+            data.position,
+            data.playerA,
+            data.playerB
+        );
+
+        match._scoreA = data.scoreA;
+        match._scoreB = data.scoreB;
+        match._winner = data.winner;
+        match._status = data.status;
+        match._winReason = data.winReason;
+        return match;
+    }
 
     public assignParticipant(position: 1 | 2, participant: Participant): void {
         if (this._status !== 'PENDING') {

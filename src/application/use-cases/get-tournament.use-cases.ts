@@ -1,6 +1,6 @@
 import { Inject, Service, NotFoundException } from 'my-fastify-decorators';
 import { Tournament } from '../../domain/entities/tournament.js';
-import { type TournamentRepository } from '../../domain/ports/tournament-repository.js';
+import { type TournamentRepository } from '../../domain/ports/tournament.repository.js';
 
 @Service()
 export class GetTournamentUseCase {

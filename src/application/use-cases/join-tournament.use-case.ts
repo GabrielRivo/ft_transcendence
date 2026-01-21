@@ -1,6 +1,6 @@
 import { Inject, Service, NotFoundException } from 'my-fastify-decorators';
 import { PlayerAlreadyInActiveTournamentException } from '../../domain/exceptions.js';
-import { type TournamentRepository } from '../../domain/ports/tournament-repository.js';
+import { type TournamentRepository } from '../../domain/ports/tournament.repository.js';
 import { type TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
 import { Participant } from '../../domain/value-objects/participant.js';
 import { JoinTournamentDto } from '../dtos/join-tournament.dto.js';
