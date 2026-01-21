@@ -5,7 +5,7 @@ import History from "../Utils/History.js";
 import type { GameState, PlayerDirectionData } from "../globalType.js";
 import Pong from "./Pong.js";
 import InputManager from "../InputManager.js";
-import Player, { LEFT } from "../Player.js";
+import Player, { NONE } from "../Player.js";
 
 class TruthManager {
     private game: Pong;
@@ -94,6 +94,21 @@ class TruthManager {
 
         let deltaT : number;
 
+        /*let firstInputP1 = this.p1InputBuffer.getClosestState(lastFrameTime, 3000);
+            if (firstInputP1) {
+                this.inputManager.setPlayerDirection(p1, firstInputP1);
+            }
+            else {
+                this.inputManager.setPlayerDirection(p1, { timestamp: lastFrameTime, direction: NONE });
+            }
+            let firstInputP2 = this.p2InputBuffer.getClosestState(lastFrameTime, 3000);
+            if (firstInputP2) {
+                this.inputManager.setPlayerDirection(p2, firstInputP2);
+            }
+            else {
+                this.inputManager.setPlayerDirection(p2, { timestamp: lastFrameTime, direction: NONE });
+        }*/ //NOT NEEDED BECAUSE ALREADY SET IN PREVIOUS FRAME ON SERVER
+
         while (p1Index < p1Inputs.length || p2Index < p2Inputs.length) {
             const p1NextInput = p1Inputs[p1Index];
             const p2NextInput = p2Inputs[p2Index];
@@ -129,7 +144,7 @@ class TruthManager {
             deltaT = nextEventTime - lastFrameTime;
             
             if (deltaT > 0) {
-                ball.update(nextEventTime, deltaT, p1.paddle, p2.paddle);
+                ball.update(nextEventTime, deltaT, p1.paddle, p2.paddle, lastFrameTime);
                 p1.update(deltaT);
                 p2.update(deltaT);
             }
@@ -148,7 +163,7 @@ class TruthManager {
 
         deltaT = currentTime - lastFrameTime;
         if (deltaT > 0) {
-            ball.update(currentTime, deltaT, p1.paddle, p2.paddle);
+            ball.update(currentTime, deltaT, p1.paddle, p2.paddle, lastFrameTime);
             p1.update(deltaT);
             p2.update(deltaT);
         }

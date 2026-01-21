@@ -9,18 +9,23 @@ class Paddle {
     private services: Services;
 
     model: OwnedMesh<Paddle>;
+    trigger: OwnedMesh<Paddle>;
     direction: Vector3 = new Vector3(0, 0, 0);
     modelDirection: Vector3 = new Vector3(0, 1, 0).normalize();
-    speed : number = 9;
+    speed : number = 4;
     owner: any;
 
     constructor(services: Services, owner?: any) {
         this.services = services;
         this.model = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15});
+        this.trigger = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
+
 		// this.model = MeshBuilder.CreateBox("paddle", {size: 0.30, width: 5.0 , height: 0.30});
         let material = new StandardMaterial("playerMat", this.services.Scene);
         material.emissiveColor = new Color3(0.8, 0, 0.2);
         this.model.material = material;
+        this.trigger.material = material;
+        this.trigger.visibility = 0.2;
 
         this.model.isPickable = true;
         this.services.Collision!.add(this.model);
@@ -29,6 +34,7 @@ class Paddle {
 
         this.owner = owner;
         this.model.owner = this;
+        this.trigger.owner = this;
     }
 
     setDirection(direction: Vector3) {
@@ -51,6 +57,10 @@ class Paddle {
     setPosition(position: Vector3) {
         this.model.position.copyFrom(position);
     }
+    setTriggerPosition(position: Vector3) {
+        this.trigger.position.copyFrom(position);
+        this.trigger.computeWorldMatrix(true);
+    }
 
     getSpeed(): number {
         return this.speed;
@@ -69,7 +79,7 @@ class Paddle {
         newPos.x = Math.min(Math.max(newPos.x, -maxX), maxX);
         this.model.position.copyFrom(newPos);
     }
-
+    
     onBallHit(ball: Ball) {
         let abstractPaddlePos : Vector3 = new Vector3(this.model.position.x, 0, this.model.position.z).add(this.modelDirection.scale(-0.225));
         let abstractBallPos : Vector3 = new Vector3(ball.position.x, 0, ball.position.z);
@@ -94,7 +104,6 @@ class Paddle {
         //ball.bounce(hitInfo);
         ball.speedUp();
         ball.owner = this.owner;
-        console.log("Ball hit by paddle, new direction : ", newDir, " angle : ", angle);
     }
 
     update(deltaT: number) {
@@ -104,6 +113,7 @@ class Paddle {
 
     dispose() {
         this.model.dispose();
+        this.trigger.dispose();
     }
 }
 

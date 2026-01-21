@@ -69,7 +69,7 @@ class EventBus {
         if (this.events.has(event)) {
             let listeners = this.events.get(event) as Set<Function>;
     
-            console.log("Emitting event : " + event + " to " + listeners.size + " listeners.");
+            //console.log("Emitting event : " + event + " to " + listeners.size + " listeners.");
             listeners.forEach((listener) => {
                 try {
                     listener(payload)
