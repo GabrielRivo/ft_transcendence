@@ -42,7 +42,7 @@ function Menu() {
 			{/* <span>|</span> */}
 			<NavLink path="/profile" label="Profile" />
 			{/* <span>|</span> */}
-			<NavLink path="/statistics" label="Stats" />
+			<NavLink path="/statistics/general" label="Stats" />
 			{/* <span>|</span> */}
 			<Link className="font-pirulen text-cyan-500 hover:text-white/80" to="/logout" onClick={handleLogout}>
 				Logout

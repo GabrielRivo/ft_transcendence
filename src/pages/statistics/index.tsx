@@ -1,5 +1,11 @@
-import { createElement } from 'my-react';
+import { createElement, useEffect } from 'my-react';
+import { useNavigate } from 'my-react-router';
 
 export function StatisticsPage() {
-	return <div>coucou </div>;
+	const navigate = useNavigate();
+	// navigate('/statistics/general');
+	useEffect(() => {
+		navigate('/statistics/general');
+	}, [navigate]);
+	return null;
 }

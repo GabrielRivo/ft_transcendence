@@ -1,7 +1,7 @@
 import { createElement, FragmentComponent, useEffect } from 'my-react';
 import { useParams } from 'my-react-router';
 
-export function StatisticsPageSlug() {
+export function StatisticsHistoricPageSlug() {
 	const params = useParams();
 
 	useEffect(() => {

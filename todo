@@ -1,0 +1,26 @@
+users management :
+
+Mettre a jours leurs informations
+
+- Peut telecharger un avatar (par default a mettre...)
+- bio
+--- modification mail
+--- modification mot de passe (if mail et mdp inscrit)
+
+--- bouton supprimer mon compte
+
+-- afficher demande de 2fa (qr code et etc...)
+
+---
+
+------
+
+profile des users montre les statistique (victoire / defaite...)
+
+
+--------
+
+backend
+2fa
+
+rabbitMQ mail (forget...)

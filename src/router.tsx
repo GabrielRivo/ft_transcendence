@@ -14,7 +14,12 @@ import { DashboardLayout } from './layout/dashboardLayout';
 import { Dashboard } from './pages/dashboard';
 import { MatchmakingPage } from './pages/matchmaking';
 import { StatisticsPage } from './pages/statistics';
-import { StatisticsPageSlug } from './pages/statistics/slug';
+// import { StatisticsPageSlug } from './pages/statistics/slug';
+import { StatisticsGeneralPage } from './pages/statistics/general';
+import { StatisticsGeneralPageSlug } from './pages/statistics/general/slug';
+import { StatisticsHistoricPage } from './pages/statistics/historic';
+import { StatisticsHistoricPageSlug } from './pages/statistics/historic/slug';
+
 import { Game } from './pages/game';
 import { GuestLayout } from './layout/GuestLayout';
 import { AuthenticatedLayout } from './layout/AuthenticatedLayout';
@@ -28,6 +33,8 @@ import { LocalGame } from './pages/play/local';
 import { TournamentPage } from './pages/play/tournament';
 import { TournamentTypePage } from './pages/play/tournamentType';
 import { TournamentPlayersPage } from './pages/play/tournamentPlayers';
+import { StatisticsLayout } from './layout/StatisticsLayout';
+import { StatisticsHistoricLayout } from './layout/StatisticsHistoricLayout';
 
 function GameLayout({ children }: { children: any }) {
 	return (
@@ -95,12 +102,34 @@ const routes = [
 								component: Dashboard,
 							},
 							{
-								path: '/statistics/:statsId',
-								component: StatisticsPageSlug,
-							},
-							{
-								path: '/statistics',
-								component: StatisticsPage,
+								layout: StatisticsLayout,
+								routes: [
+									{
+										path: '/statistics',
+										component: StatisticsPage,
+									},
+									{
+										path: '/statistics/general/:statsId',
+										component: StatisticsGeneralPageSlug,
+									},
+									{
+										path: '/statistics/general',
+										component: StatisticsGeneralPage,
+									},
+									{
+										layout: StatisticsHistoricLayout,
+										routes: [
+											{
+												path: '/statistics/historic/:statsId',
+												component: StatisticsHistoricPageSlug,
+											},
+											{
+												path: '/statistics/historic',
+												component: StatisticsHistoricPage,
+											},
+										],
+									},
+								],
 							},
 							{
 								path: '/profile',

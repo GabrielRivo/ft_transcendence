@@ -28,10 +28,10 @@
 	},
 	"dependencies": {
 		"@babylonjs/core": "8.33.2",
+		"@babylonjs/inspector": "8.33.2",
 		"@babylonjs/loaders": "8.33.2",
 		"@babylonjs/materials": "8.33.2",
-    	"@babylonjs/serializers": "8.33.2",
-		"@babylonjs/inspector": "8.33.2",
+		"@babylonjs/serializers": "8.33.2",
 		"@tailwindcss/vite": "^4.1.18",
 		"ajv": "8.17.1",
 		"ajv-errors": "3.0.0",
