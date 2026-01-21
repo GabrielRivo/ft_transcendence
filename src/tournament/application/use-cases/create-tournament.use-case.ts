@@ -19,6 +19,7 @@ export class CreateTournamentUseCase {
             command.name,
             command.size,
             ownerId,
+            command.visibility,
         );
         await this.repository.save(tournament);
         await this.publisher.publishAll(tournament.getRecordedEvents());

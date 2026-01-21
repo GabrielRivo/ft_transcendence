@@ -135,3 +135,11 @@ export class MatchAlreadyStartedException extends DomainException {
         super(`Match ${matchId} is already started. Cannot assign participants.`);
     }
 }
+
+export class ConcurrencyException extends DomainException {
+    override readonly code = 'CONCURRENCY_ERROR';
+
+    constructor(aggregateId: string, version: number) {
+        super(`Concurrency conflict on aggregate ${aggregateId} (version ${version}). Please retry.`);
+    }
+}

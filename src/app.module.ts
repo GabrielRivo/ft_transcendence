@@ -1,8 +1,9 @@
 import { Module } from 'my-fastify-decorators';
 import { HealthController } from './health.controller.js';
+import { TournamentModule } from './tournament/tournament.module.js';
 
 @Module({
-	imports: [],
+	providers: [TournamentModule],
 	controllers: [HealthController],
 })
 export class AppModule {}

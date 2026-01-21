@@ -1,20 +1,30 @@
 import { RecordedEvent } from "./base-event.js";
-import { TournamentSize } from "../entities/tournament.js";
+import { TournamentSize, TournamentVisibility } from "../entities/tournament.js";
+
+export enum TournamentEventType {
+    CREATED = 'TournamentCreated',
+    PLAYER_JOINED = 'PlayerJoined',
+    STARTED = 'TournamentStarted',
+    CANCELLED = 'TournamentCancelled',
+    MATCH_FINISHED = 'MatchFinished',
+    FINISHED = 'TournamentFinished',
+}
 
 export class TournamentCreatedEvent implements RecordedEvent {
-    public readonly eventName = 'TournamentCreated';
+    public readonly eventName = TournamentEventType.CREATED;
     public readonly occurredAt = new Date();
 
     constructor(
         public readonly aggregateId: string,
         public readonly name: string,
         public readonly size: TournamentSize,
-        public readonly ownerId: string
+        public readonly ownerId: string,
+        public readonly visibility: TournamentVisibility
     ) {}
 }
 
 export class PlayerJoinedEvent implements RecordedEvent {
-    public readonly eventName = 'PlayerJoined';
+    public readonly eventName = TournamentEventType.PLAYER_JOINED;
     public readonly occurredAt = new Date();
 
     constructor(
@@ -25,21 +35,21 @@ export class PlayerJoinedEvent implements RecordedEvent {
 }
 
 export class TournamentStartedEvent implements RecordedEvent {
-    public readonly eventName = 'TournamentStarted';
+    public readonly eventName = TournamentEventType.STARTED;
     public readonly occurredAt = new Date();
 
     constructor(public readonly aggregateId: string) {}
 }
 
 export class TournamentCancelledEvent implements RecordedEvent {
-    public readonly eventName = 'TournamentCancelled';
+    public readonly eventName = TournamentEventType.CANCELLED;
     public readonly occurredAt = new Date();
 
     constructor(public readonly aggregateId: string) {}
 }
 
 export class MatchFinishedEvent implements RecordedEvent {
-    public readonly eventName = 'MatchFinished';
+    public readonly eventName = TournamentEventType.MATCH_FINISHED;
     public readonly occurredAt = new Date();
 
     constructor(
@@ -50,7 +60,7 @@ export class MatchFinishedEvent implements RecordedEvent {
 }
 
 export class TournamentFinishedEvent implements RecordedEvent {
-    public readonly eventName = 'TournamentFinished';
+    public readonly eventName = TournamentEventType.FINISHED;
     public readonly occurredAt = new Date();
 
     constructor(

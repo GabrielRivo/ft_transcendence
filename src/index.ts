@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import Ajv from 'ajv';
 import * as ajvErrors from 'ajv-errors';
 import Fastify from 'fastify';

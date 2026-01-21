@@ -1,6 +1,7 @@
 import { InjectPlugin, Service } from 'my-fastify-decorators';
 import { Server } from 'socket.io';
 import { RecordedEvent } from '../../domain/events/base-event.js';
+import { TournamentEventType } from '../../domain/events/tournament-events.js';
 import { TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
 
 @Service()
@@ -9,9 +10,9 @@ export class SocketTournamentEventsPublisher implements TournamentEventsPublishe
   private io!: Server;
 
   public async publish(event: RecordedEvent): Promise<void> {
-    const roomId = `tournament_${event.aggregateId}`;
+    const roomId = `tournament:${event.aggregateId}`;
     this.io.to(roomId).emit(event.eventName, event);
-    if (this.isLobbyEvent(event.eventName)) {
+    if (this.isLobbyEvent(event.eventName as TournamentEventType)) {
       this.io.to('lobby').emit(event.eventName, event);
     }
   }
@@ -22,13 +23,13 @@ export class SocketTournamentEventsPublisher implements TournamentEventsPublishe
     }
   }
 
-  private isLobbyEvent(eventName: string): boolean {
+  private isLobbyEvent(eventName: TournamentEventType): boolean {
     return [
-      'TournamentCreated',
-      'TournamentStarted',
-      'TournamentFinished',
-      'TournamentCancelled',
-      'PlayerJoined'
+      TournamentEventType.CREATED,
+      TournamentEventType.STARTED,
+      TournamentEventType.FINISHED,
+      TournamentEventType.CANCELLED,
+      TournamentEventType.PLAYER_JOINED
     ].includes(eventName);
   }
 }

@@ -3,8 +3,10 @@ CREATE TABLE IF NOT EXISTS tournaments (
     name TEXT NOT NULL,
     size INTEGER NOT NULL,
     owner_id TEXT NOT NULL,
+    visibility TEXT NOT NULL DEFAULT 'PUBLIC',
     status TEXT NOT NULL,
-    winner_id TEXT
+    winner_id TEXT,
+    version INTEGER NOT NULL DEFAULT 0
 );
 
 -- Table des Participants (Liés à un tournoi)

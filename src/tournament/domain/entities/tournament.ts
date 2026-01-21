@@ -26,12 +26,15 @@ export const TOURNAMENT_STATUSES = ['CREATED', 'STARTED', 'FINISHED', 'CANCELED'
 export type TournamentStatus = (typeof TOURNAMENT_STATUSES)[number];
 export const TOURNAMENT_SIZES = [4, 8, 16] as const;
 export type TournamentSize = (typeof TOURNAMENT_SIZES)[number];
+export const TOURNAMENT_VISIBILITIES = ['PUBLIC', 'PRIVATE'] as const;
+export type TournamentVisibility = (typeof TOURNAMENT_VISIBILITIES)[number];
 
 export class Tournament {
     private _participants: Participant[] = [];
     private _matches: Match[] = [];
     private _status: TournamentStatus = 'CREATED';
     private _winner: Participant | null = null;
+    private _version: number = 0;
 
     private _recordedEvents: RecordedEvent[] = [];
 
@@ -39,16 +42,18 @@ export class Tournament {
         public readonly id: string,
         public readonly name: string,
         public readonly size: TournamentSize,
-        public readonly ownerId: string
+        public readonly ownerId: string,
+        public readonly visibility: TournamentVisibility
     ) {
         this.validateConfiguration();
-        this.addRecordedEvent(new TournamentCreatedEvent(this.id, this.name, this.size, this.ownerId));
+        this.addRecordedEvent(new TournamentCreatedEvent(this.id, this.name, this.size, this.ownerId, this.visibility));
     }
 
     get participants(): Participant[] { return this._participants; }
     get matches(): Match[] { return this._matches; }
     get status(): TournamentStatus { return this._status; }
     get winner(): Participant | null { return this._winner; }
+    get version(): number { return this._version; }
 
     public getRecordedEvents(): RecordedEvent[] { return this._recordedEvents; }
     public clearRecordedEvents(): void { this._recordedEvents = []; }
@@ -93,14 +98,17 @@ export class Tournament {
     public static reconstitute(
         data: {
             id: string, name: string, size: TournamentSize, ownerId: string,
-            status: TournamentStatus, participants: Participant[], matches: Match[], winner: Participant | null
+            visibility: TournamentVisibility,
+            status: TournamentStatus, participants: Participant[], matches: Match[], 
+            winner: Participant | null, version: number,
         }
     ) : Tournament {
-        const tournament = new Tournament(data.id, data.name, data.size, data.ownerId);
+        const tournament = new Tournament(data.id, data.name, data.size, data.ownerId, data.visibility);
         tournament._status = data.status;
         tournament._participants = [...data.participants];
         tournament._matches = [...data.matches];
         tournament._winner = data.winner;
+        tournament._version = data.version;
         tournament.clearRecordedEvents();
         return tournament;
     }
