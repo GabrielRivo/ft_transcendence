@@ -5,14 +5,14 @@ import {
 	Controller,
 	Get,
 	Inject,
+	NotFoundException,
 	Param,
 	Post,
 	Query,
 	Req,
 	Res,
-	UseGuards,
-	NotFoundException,
-	UnauthorizedException
+	UnauthorizedException,
+	UseGuards
 } from 'my-fastify-decorators';
 
 import config from '../config.js';
@@ -157,10 +157,19 @@ export class AuthController {
 	}
 
 	@Get('/user-by-username/:username')
-	async getUserByUsername(@Param('username') username: string, @Res() res: FastifyReply) {
+	async getUserByUsername(@Param('username') username: string) {
 		const user = await this.dbExchangeService.getUserByUsername(username);
 		if (!user) {
 			throw new NotFoundException('User not found');
+		}
+		return { id: user.id, username: user.username };
+	}
+
+	@Get('/user-by-id/:id')
+	async getUserById(@Param('id') id: number) {
+		const user = await this.dbExchangeService.getUserById(id);
+		if (!user) {
+			throw new NotFoundException('Id not found');
 		}
 		return { id: user.id, username: user.username };
 	}
