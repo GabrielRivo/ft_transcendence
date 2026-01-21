@@ -6,8 +6,11 @@ import { GroupItem } from './GroupItem';
 import { AddFriendModal } from './modals/AddFriendModal';
 import { CreateGroupModal } from './modals/CreateGroupModal';
 import { AddModal } from './modals/AddModal';
-import { Add } from '@/components/ui/icon/add';
+import { Add } from '@icon/add';
 import { useNavigate } from 'my-react-router';
+import { useToast } from '@hook/useToast'; 
+import { fetchWithAuth } from '@libs/fetchWithAuth';
+
 interface ChatSidebarPanelProps {
 	currentRoom: string;
 	friends: Friend[];
@@ -32,6 +35,8 @@ export function ChatSidebarPanel({
 	const [showMenu, setShowMenu] = useState(false);
 	const [showAddFriendModal, setShowAddFriendModal] = useState(false);
 	const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
+	const { toast } = useToast()
+
 	const navigate = useNavigate();
 	const handleAddFriend = () => {
 		setShowMenu(false);
@@ -94,12 +99,51 @@ export function ChatSidebarPanel({
 									isSelected={currentRoom.includes(String(friend.id))}
 									onClick={() => onSelectFriend(friend.id)}
 									contextMenuCallbacks={{
-										onChallenge: () => console.log('Défier', friend.username),
-										onInviteTournament: () => console.log('Inviter au tournoi', friend.username),
-										onStatistics: () => navigate(`/statistics/${friend.id}`),
-										onProfile: () => console.log('Profil', friend.username),
-										onToggleFriend: () => console.log('Retirer des amis', friend.username),
-										onBlock: () => console.log('Bloquer', friend.username),
+										onChallenge: () => {																				
+											console.log('Défier', friend.username)
+										},
+										onInviteTournament: () => {
+											console.log('Inviter au tournoi', friend.username)
+										},
+										onStatistics: () => {
+											navigate(`/statistics/${friend.id}`)
+										},
+										onProfile: () => {
+											navigate(`/profil/${friend.id}`)
+											console.log('Profil', friend.username)
+										},
+										onToggleFriend: () => {
+											fetchWithAuth(`/api/social/friend-management/friend`, {
+												method: 'DELETE',
+												headers: {
+													'Content-Type': 'application/json',
+												},
+												body: JSON.stringify({
+													otherId: friend.id
+												}),
+											}).then(data => data.json()).then(data => {
+												toast(data.message, data.success ? 'success' : 'error')
+											}).catch(e => {
+												toast('Network error', 'error')
+											})
+											console.log('Ajouter en ami', friend.username)
+										},
+										onBlock: () => {
+											fetchWithAuth(`/api/social/friend-management/block`, {
+												method: 'POST',
+												headers: {
+													'Content-Type': 'application/json',
+												},
+												body: JSON.stringify({
+													otherId: friend.id
+												}),
+											}).then(data => data.json()).then(data => {
+												toast(data.message, data.success ? 'success' : 'error')
+											}).catch(e => {
+												toast('Network error', 'error')
+											})
+											console.log('Bloquer', friend.username)
+										},
 									}}
 								/>
 							))}
