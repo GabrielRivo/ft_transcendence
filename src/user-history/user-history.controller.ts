@@ -16,6 +16,8 @@ export class UserHistoryController {
 			data.player2_id,
 			data.score_player1,
 			data.score_player2,
+			data.hit_player1,
+			data.hit_player2,
 			data.winner_id,
 			data.duration_seconds,
 			data.game_type,

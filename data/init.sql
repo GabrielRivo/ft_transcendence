@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS game_history (
     player2_id INTEGER NOT NULL,
     score_player1 INTEGER NOT NULL,
     score_player2 INTEGER NOT NULL,
+    hit_player1 INTEGER NOT NULL,
+    hit_player2 INTEGER NOT NULL,
     winner_id INTEGER NOT NULL,
     duration_seconds INTEGER NOT NULL,
     game_type TEXT NOT NULL CHECK(game_type IN ('tournament', 'ranked')),

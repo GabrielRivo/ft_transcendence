@@ -26,6 +26,16 @@ export class CreateUserHistoryDto {
 	@Minimum(0, {message : 'negative scores for player 2'})
 	score_player2: number;
 
+	@IsRequired({ message: 'hit player 2 is requiered' })
+	@IsNumber()
+	@Minimum(0, {message : 'negative hiy for player 2'})
+	hit_player1: number;
+
+	@IsRequired({ message: 'hit player 2 is requiered' })
+	@IsNumber()
+	@Minimum(0, {message : 'negative hiy for player 2'})
+	hit_player2: number;
+
 	@IsRequired({ message: 'winner id is requiered' })
 	@IsNumber()
 	@Minimum(1, {message : 'invalid id for winner'})

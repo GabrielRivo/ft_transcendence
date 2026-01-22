@@ -2,9 +2,9 @@ import Database, { Statement } from 'better-sqlite3';
 import { BadRequestException, InjectPlugin, Service } from 'my-fastify-decorators';
 
 const addMatchHistoryStatement: string = `INSERT INTO game_history (game_id, player1_id, player2_id, score_player1,
-												score_player2, winner_id, duration_seconds, game_type, tournament_id, is_final)
+												score_player2, hit_player1, hit_player2, winner_id, duration_seconds, game_type, tournament_id, is_final)
 										VALUES (@game_id, @player1_id, @player2_id, @score_player1,
-												@score_player2, @winner_id, @duration_seconds, @game_type, @tournament_id, @is_final);`;
+												@score_player2, @hit_player1, @hit_player2 @winner_id, @duration_seconds, @game_type, @tournament_id, @is_final);`;
 
 const getMatchHistory: string = `SELECT * FROM game_history
 									WHERE player1_id = ? OR player2_id = ? ORDER BY created_at DESC;`;
@@ -32,6 +32,8 @@ export class UserHistoryService {
 		player2_id: number;
 		score_player1: number;
 		score_player2: number;
+		hit_player1: number;
+		hit_player2: number;
 		winner_id: number;
 		duration_seconds: number;
 		game_type: string;
@@ -70,6 +72,8 @@ export class UserHistoryService {
 		player2_id: number,
 		score_player1: number,
 		score_player2: number,
+		hit_player1: number,
+		hit_player2: number,
 		winner_id: number,
 		duration_seconds: number,
 		game_type: string,
@@ -158,6 +162,8 @@ export class UserHistoryService {
 			player2_id,
 			score_player1,
 			score_player2,
+			hit_player1,
+			hit_player2,
 			winner_id,
 			duration_seconds,
 			game_type,
