@@ -26,6 +26,7 @@ import { AuthenticatedLayout } from './layout/AuthenticatedLayout';
 import { SetUsernameLayout } from './layout/SetUsernameLayout';
 import { GameProvider } from './context/GameProvider';
 import { ProfilePage } from './pages/profile';
+import { ProfileSlugPage } from './pages/profile/slug';
 import { LogoutPage } from './pages/logout';
 import { PlayPage } from './pages/play';
 import { OnlinePlayPage } from './pages/play/online';
@@ -134,6 +135,10 @@ const routes = [
 							{
 								path: '/profile',
 								component: ProfilePage,
+							},
+							{
+								path: '/profile/:slug',
+								component: ProfileSlugPage,
 							},
 							{
 								path: '/play',

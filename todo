@@ -5,7 +5,7 @@ Mettre a jours leurs informations
 - Peut telecharger un avatar (par default a mettre...)
 - bio
 --- modification mail
---- modification mot de passe (if mail et mdp inscrit)
+--- modification mot de passe (if mail et mdp inscrit) (provider mail sinon provider github ou autre donc pas editable)
 
 --- bouton supprimer mon compte
 
@@ -15,6 +15,7 @@ Mettre a jours leurs informations
 
 ------
 
+Bouton qui redirect sur statique depuis profile
 profile des users montre les statistique (victoire / defaite...)
 
 
