@@ -62,4 +62,4 @@ export function updateSocketAuth(userId: string, token?: string): void {
 	chatSocket.auth = auth;
 	matchmakingSocket.auth = auth;
 	socialSocket.auth = auth;
-}
+} 

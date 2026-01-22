@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'my-react';
+import { useState, useEffect, useCallback, useRef } from 'my-react';
 import { useAuth } from './useAuth';
 import { socialSocket } from '../libs/socket';
 import { fetchWithAuth } from '../libs/fetchWithAuth';
@@ -27,6 +27,28 @@ export function useFriends() {
 	const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const isConnectingRef = useRef(false);
+
+	useEffect(() => {
+			if (isAuthenticated && user && !user.noUsername) {
+				isConnectingRef.current = true;
+	
+				socialSocket.auth = {
+					userId: String(user.id),
+					username: user.username,
+				};
+	
+				socialSocket.connect();
+			}
+	
+			return () => {
+				if (socialSocket.connected) {
+					socialSocket.disconnect();
+				}
+				isConnectingRef.current = false;
+			};
+	}, [isAuthenticated, user]);
+	
 
 	const fetchFriends = useCallback(async () => {
 		if (!isAuthenticated || !user || user.noUsername) {
@@ -208,7 +230,7 @@ export function useFriends() {
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ userId: senderId, otherId: user.id }),
+					body: JSON.stringify({ otherId : senderId }),
 				});
 
 				if (!response.ok) {
