@@ -19,6 +19,16 @@ class Paddle {
     constructor(services: Services, owner?: any) {
         this.services = services;
         this.model = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15});
+
+        let subPaddle : OwnedMesh;
+        for (let i=0; i < 5; i++) {
+            subPaddle = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 - (i+1)*0.1 , height: 0.15});
+            subPaddle.parent = this.model;
+            subPaddle.owner = this;
+            this.services.Collision!.add(subPaddle);
+            subPaddle.visibility = 0;
+        }
+
         this.trigger1 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
         this.trigger2 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
 
@@ -120,6 +130,9 @@ class Paddle {
     update(deltaT: number) {
         this.move(deltaT);
         this.model.computeWorldMatrix(true);
+        this.model.getChildren().forEach(child => {
+            child.computeWorldMatrix(true);
+        });
     }
 
     dispose() {

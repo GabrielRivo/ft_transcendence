@@ -124,8 +124,10 @@ class Ball {
         const initPaddleDir1 = paddle1.getDirection();
         const initPaddleDir2 = paddle2.getDirection();
 
-        let excludedMeshes: Mesh[] = [];
-        excludedMeshes.push(this.model, paddle1.model, paddle2.model);
+        // let excludedMeshes: Mesh[] = [];
+        // excludedMeshes.push(this.model, paddle1.model, paddle2.model);
+        let excludedMeshes: OwnedMesh[] = [];
+        excludedMeshes.push(this.model, paddle1.model, ...paddle1.model.getChildren() as OwnedMesh[], paddle2.model, ...paddle2.model.getChildren() as OwnedMesh[]);
 
         let loopCount = 0;
         while (remainingDeltaT > Ball.EPSILON && this.moving) {
