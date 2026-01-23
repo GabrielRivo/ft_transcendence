@@ -7,8 +7,8 @@ export function StatisticsLayout({ children }: { children: Element }) {
 	const isGeneral = path.includes('/statistics/general');
 	const isHistoric = path.includes('/statistics/historic');
 	return (
-		<div className="flex size-full flex-col items-center overflow-hidden text-white">
-			<header className="p-2">
+		<div className="flex size-full flex-col overflow-hidden text-white">
+			<header className="p-2 shrink-0">
 				<h1 className="font-pirulen text-center text-6xl tracking-widest">Statistics</h1>
 				<nav className="font-pirulen mt-8 flex justify-center gap-4 text-2xl tracking-widest">
 					<Link
@@ -26,7 +26,7 @@ export function StatisticsLayout({ children }: { children: Element }) {
 					</Link>
 				</nav>
 			</header>
-			<main className="flex size-full">{children}</main>
+			<main className="flex-1 w-full overflow-auto scrollbar-neon">{children}</main>
 		</div>
 	);
 }
