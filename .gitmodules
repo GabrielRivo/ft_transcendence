@@ -48,3 +48,7 @@
 	path = apps/social
 	url = git@github.com:thetranscendence/social_management.git
 	branch = main
+[submodule "apps/worker-mail"]
+	path = apps/worker-mail
+	url = git@github.com:thetranscendence/worker-mail.git
+	branch = main
