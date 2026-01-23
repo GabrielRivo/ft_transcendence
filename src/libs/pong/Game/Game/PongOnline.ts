@@ -106,15 +106,27 @@ class PongOnline extends Game {
         groundMaterial.diffuseColor = new Color3(0.4, 0.4, 0.4);
         ground.material = groundMaterial;
 
-        this.ball.setFullPos(new Vector3(0, -100, 0));
-        this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
-        this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
+        this.ball.setPos(new Vector3(0, -100, 0));
+        this.ball.setModelPos(this.ball.position);
+
+        this.player1.paddle.setHitboxDirection(new Vector3(0, 0, 1));
+        this.player2.paddle.setHitboxDirection(new Vector3(0, 0, -1));
+
         this.player1.paddle.setFullPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
         this.player2.paddle.setFullPosition(new Vector3(0, 0.15, this.height / 2 - 2));
+
+        this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
+        this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
+
+        this.player1.paddle.setModelPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
+        this.player2.paddle.setModelPosition(new Vector3(0, 0.15, this.height / 2 - 2));
+
         this.player1.paddle.setTrigger1Position(new Vector3(0, 0.15, -this.height / 2 + 2));
         this.player2.paddle.setTrigger1Position(new Vector3(0, 0.15, this.height / 2 - 2));
+
         this.player1.paddle.setTrigger2Position(new Vector3(0, 0.15, -this.height / 2 + 2 - 0.15));
         this.player2.paddle.setTrigger2Position(new Vector3(0, 0.15, this.height / 2 - 2 + 0.15));
+
         this.player1.deathBar.model.position = new Vector3(0, 0.125, -this.height / 2 + 1);
         this.player2.deathBar.model.position = new Vector3(0, 0.125, this.height / 2 - 1);
         this.walls[0].model.position = new Vector3(-this.width / 2 - 0.1, 0.25, 0);
@@ -325,7 +337,8 @@ class PongOnline extends Game {
             Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: this.player1!.score, player2Score: this.player2!.score, scoreToWin: 5 });
             console.log("Player 1 score :", this.player1!.score);
         }*/
-        this.ball!.setFullPos(new Vector3(0, -100, 0));
+        this.ball!.setPos(new Vector3(0, -100, 0));
+        this.ball!.setModelPos(this.ball!.position);
         //this.ball = new Ball();
         //this.ball.setFullPos(new Vector3(0, 0.125, 0));
     }

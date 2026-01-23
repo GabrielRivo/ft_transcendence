@@ -189,8 +189,8 @@ class PongBackground extends Game {
 
 		// Position game objects
 		//this.ball.setFullPos(new Vector3(0, 0.125, 0));
-		this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
-		this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
+		this.player1.paddle.setHitboxDirection(new Vector3(0, 0, 1));
+		this.player2.paddle.setHitboxDirection(new Vector3(0, 0, -1));
 		this.player1.paddle.setPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
 		this.player2.paddle.setPosition(new Vector3(0, 0.15, this.height / 2 - 2));
 		this.player1.paddle.setTrigger1Position(new Vector3(0, 0.15, -this.height / 2 + 2));
@@ -247,7 +247,7 @@ class PongBackground extends Game {
 	 * @param ballX - The ball's X position
 	 */
 	private updateAI(player: Player, ballX: number): void {
-		const paddleX = player.paddle.model.position.x;
+		const paddleX = player.paddle.hitbox.position.x;
 		const diff = ballX - paddleX;
 
 		// Add some "imperfection" to make it look more natural

@@ -57,8 +57,7 @@ class Ball {
     setPos(position: Vector3) {
         this.position = position;
     }
-    setFullPos(position: Vector3) {
-        this.position = position;
+    setModelPos(position: Vector3) {
         this.model.position.copyFrom(position);
     }
 
@@ -110,7 +109,8 @@ class Ball {
     public generate(delay: number) {
         this.startDirection();
         this.setSpeed(2);
-        this.setFullPos(new Vector3(0, 0.125, 0));
+        this.setPos(new Vector3(0, 0.125, 0));
+        this.setModelPos(this.position);
         this.moving = false;
 
         this.generateEffect.play(this.model);    
@@ -145,7 +145,7 @@ class Ball {
         const initPaddleDir2 = paddle2.getDirection();
 
         let excludedMeshes: Mesh[] = [];
-        excludedMeshes.push(this.model, paddle1.model, ...paddle1.model.getChildren() as Mesh[], paddle2.model, ...paddle2.model.getChildren() as Mesh[]);
+        excludedMeshes.push(this.model, paddle1.hitbox, ...paddle1.hitbox.getChildren() as Mesh[], paddle2.hitbox, ...paddle2.hitbox.getChildren() as Mesh[]);
 
         let loopCount = 0;
         while (remainingDeltaT > Ball.EPSILON && this.moving) {
@@ -265,7 +265,6 @@ class Ball {
         const pickedMesh : OwnedMesh = hitInfo.pickedMesh as OwnedMesh;
         const name : string = pickedMesh.name;
 
-        console.log("Ball hit detected with mesh: " + name);
         if (name === "deathBar" || /*name === "paddle" ||*/ name === "wall" || name === "paddleTrigger") {
             const impact = this.findRadialImpact(pickedMesh);
             if (impact) {
@@ -448,8 +447,8 @@ class Ball {
             this.setDir(MathUtils.reflectVector(this.direction, normal));
     }
 
-    public reconcile(serverPos: Vector3, serverDir: Vector3, serverSpeed: number): void {
-        const previousPos = this.position.clone();
+    public reconcile(predictedPos: Vector3, serverPos: Vector3, serverDir: Vector3, serverSpeed: number): void {
+        const previousPos = predictedPos;
 
         this.position.copyFrom(serverPos);
         
@@ -458,8 +457,6 @@ class Ball {
         //console.log("Ball reconcile. Server pos: ", serverPos, " Previous pos: ", previousPos, " New pos: ", this.position, " Jump: ", jump);
         
         this.visualOffset.addInPlace(jump);
-
-        this.model.position.copyFrom(this.position).addInPlace(this.visualOffset);
 
         this.setDir(serverDir);
         this.setSpeed(serverSpeed);
@@ -486,13 +483,15 @@ class Ball {
     update(currentTime: number, deltaT: number, paddle1: Paddle, paddle2: Paddle, startingTime: number) {
         deltaT = this.getStartingDeltaT(currentTime, deltaT);
         this.move(startingTime, deltaT, paddle1, paddle2);
-        this.visualOffset = Vector3.Lerp(this.visualOffset, Vector3.Zero(), 0.01);
+    }
+
+    render() {
+        this.visualOffset = Vector3.Lerp(this.visualOffset, Vector3.Zero(), 0.3);
         if (this.visualOffset.lengthSquared() < 0.001) {
             this.visualOffset.setAll(0);
         }
         this.model.setDirection(this.direction);
         this.model.position.copyFrom(this.position).addInPlace(this.visualOffset);
-        this.model.computeWorldMatrix(true);
     }
 
     dispose() {

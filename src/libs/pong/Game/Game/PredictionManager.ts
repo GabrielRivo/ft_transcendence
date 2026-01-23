@@ -64,7 +64,7 @@ class PredictionManager {
         game.player2!.paddle.setFullPosition(state.p2.pos);
         game.player2!.paddle.setDirection(state.p2.dir); // a voir
 
-        game.ball!.setFullPos(state.ball.pos);
+        game.ball!.setPos(state.ball.pos);
         game.ball!.setFullDir(state.ball.dir);
         game.ball!.setSpeed(state.ball.speed);
     }
@@ -93,10 +93,10 @@ class PredictionManager {
         if (posDiffP1 > 0.1) {
             console.log(`Player 1 position prediction error: ${posDiffP1}`);
             //console.log("Truth pos:", truth.p1.pos, " Predicted pos:", prediction.p1.pos);
-            this.game.player1!.paddle.reconcile(truth.p1.pos);
+            this.game.player1!.paddle.reconcile(prediction.p1.pos, truth.p1.pos);
         }
         if (posDiffP2 > 0.1) {
-            this.game.player2!.paddle.reconcile(truth.p2.pos);
+            this.game.player2!.paddle.reconcile(prediction.p2.pos, truth.p2.pos);
             console.log(`Player 2 position prediction error: ${posDiffP2}`);
         }
         if (posDiffBall > 0.1 || dirDiffBall > 0.1 || speedDiffBall > 0.1) {
@@ -104,7 +104,7 @@ class PredictionManager {
             console.log(`- Pos Diff: ${posDiffBall.toFixed(4)} ${posDiffBall > 0.1 ? '❌' : '✅'}`);
             console.log(`- Dir Diff: ${dirDiffBall.toFixed(4)} ${dirDiffBall > 0.1 ? '❌' : '✅'}`);
             console.log(`- Spd Diff: ${speedDiffBall.toFixed(4)} ${speedDiffBall > 0.1 ? '❌' : '✅'}`);
-            this.game.ball!.reconcile(truth.ball.pos, truth.ball.dir, truth.ball.speed);
+            this.game.ball!.reconcile(prediction.ball.pos, truth.ball.pos, truth.ball.dir, truth.ball.speed);
         }
     }
 
@@ -192,14 +192,13 @@ class PredictionManager {
         return this.getGameState(this.game);
     }
 
-    // private test :boolean = false;
+    //private test :boolean = false;
     public async predictionUpdate(): Promise<void> {
         Services.TimeService!.update();
         const game = this.game;
         const time = Services.TimeService!.getTimestamp();
 
         this.deltaT = time - this.lastFrameTime;
-
         if (this.deltaT >= this.frameDuration) {
 
             this.inputManager.processLastInputs(this.game.clientPlayer!);
@@ -243,6 +242,9 @@ class PredictionManager {
             game.player1!.update(Services.TimeService!.getDeltaTime());
             game.player2!.update(Services.TimeService!.getDeltaTime());
         }
+        game.ball!.render();
+        game.player1!.paddle.render();
+        game.player2!.paddle.render();
     }
 
 
