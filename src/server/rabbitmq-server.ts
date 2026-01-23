@@ -16,7 +16,7 @@ export class RabbitMQServer {
     
     private handlers = new Map<string, Function>();
 
-        constructor(private options: RabbitMQOptions) {}
+    constructor(private options: RabbitMQOptions) {}
 
     async listen(): Promise<void> {
         if (!this.options.urls || this.options.urls.length === 0) {
