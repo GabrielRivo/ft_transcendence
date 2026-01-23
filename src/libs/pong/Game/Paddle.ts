@@ -6,29 +6,65 @@ import Ball from "./Ball";
 import MathUtils from "./MathUtils";
 
 class Paddle {
-    model: OwnedMesh<Paddle>;
+    model: Mesh;
+    hitbox: OwnedMesh<Paddle>;
+    trigger1: OwnedMesh<Paddle>;
+    trigger2: OwnedMesh<Paddle>;
+    trigger3: OwnedMesh<Paddle>;
     direction: Vector3 = new Vector3(0, 0, 0);
     position: Vector3 = new Vector3(0, 0, 0);
-    modelDirection: Vector3 = new Vector3(0, 1, 0).normalize();
-    speed : number = 9; //9
+    hitboxDirection: Vector3 = new Vector3(0, 1, 0).normalize();
+    speed : number = 4; //9
     owner: any;
 
     private visualOffset: Vector3 = new Vector3(0, 0, 0);
 
     constructor(owner?: any) {
         this.model = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15});
-		// this.model = MeshBuilder.CreateBox("paddle", {size: 0.30, width: 5.0 , height: 0.30});
+
+        this.hitbox = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15});
+
+        let subPaddle : OwnedMesh;
+        for (let i=0; i < 5; i++) {
+            subPaddle = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 - (i+1)*0.1 , height: 0.15});
+            subPaddle.parent = this.hitbox;
+            subPaddle.owner = this;
+            Services.Collision!.add(subPaddle);
+            subPaddle.visibility = 0;
+        }
+
+        this.trigger1 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
+        this.trigger2 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
+        this.trigger3 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
+		// this.hitbox = MeshBuilder.CreateBox("paddle", {size: 0.30, width: 5.0 , height: 0.30});
         let material = new StandardMaterial("playerMat", Services.Scene);
         material.emissiveColor = new Color3(0.8, 0, 0.2);
-        this.model.material = material;
+        let material2 = new StandardMaterial("playerMat2", Services.Scene);
+        material2.emissiveColor = new Color3(0, 0.2, 0.8);
+        this.model.material = material2;
+        this.model.isPickable = false;
+        this.model.visibility = 1;
 
-        this.model.isPickable = true;
-        Services.Collision!.add(this.model);
+        this.hitbox.material = material;
+        this.hitbox.visibility = 0;
+        this.trigger1.material = material;
+        this.trigger1.visibility = 0;
+        this.trigger2.material = material;
+        this.trigger2.visibility = 0;
+        this.trigger3.material = material;
+        this.trigger3.visibility = 0;
+
+        this.hitbox.isPickable = true;
+        Services.Collision!.add(this.hitbox);
+        Services.Collision!.add(this.trigger1);
+        Services.Collision!.add(this.trigger2);
 
         this.direction = new Vector3(0, 0, 0);
 
         this.owner = owner;
-        this.model.owner = this;
+        this.hitbox.owner = this;
+        this.trigger1.owner = this;
+        this.trigger2.owner = this;
     }
 
     getDirection(): Vector3 {
@@ -37,8 +73,11 @@ class Paddle {
     setDirection(direction: Vector3) {
         this.direction = direction;
     }
+    setHitboxDirection(hitboxDirection: Vector3) {
+        this.hitboxDirection = hitboxDirection;
+        this.hitbox.setDirection(hitboxDirection);
+    }
     setModelDirection(modelDirection: Vector3) {
-        this.modelDirection = modelDirection;
         this.model.setDirection(modelDirection);
     }
 
@@ -50,7 +89,20 @@ class Paddle {
     }
     setFullPosition(position: Vector3) {
         this.position.copyFrom(position);
+        this.hitbox.position.copyFrom(position);
+    }
+    setModelPosition(position: Vector3) {
         this.model.position.copyFrom(position);
+    }
+
+    setTrigger1Position(position: Vector3) {
+        this.trigger1.position.copyFrom(position);
+    }
+    setTrigger2Position(position: Vector3) {
+        this.trigger2.position.copyFrom(position);
+    }
+    setTrigger3Position(position: Vector3) {
+        this.trigger3.position.copyFrom(position);
     }
 
     getSpeed(): number {
@@ -58,51 +110,52 @@ class Paddle {
     }
 
     move(deltaT: number) {
-        const basePos : Vector3 = this.position;//this.model.position.clone();
+        const basePos : Vector3 = this.position;//this.hitbox.position.clone();
         deltaT = deltaT / 1000;
         const distance : number = this.speed * deltaT;
         const displacement : Vector3 = this.direction.scale(distance);
         let newPos : Vector3 = basePos.add(displacement);
 
-        const playerBox = this.model.getBoundingInfo().boundingBox.extendSize;
+        const playerBox = this.hitbox.getBoundingInfo().boundingBox.extendSize;
         const maxX = Services.Dimensions!.x / 2 - playerBox.x;
         
         newPos.x = Math.min(Math.max(newPos.x, -maxX), maxX);
-        //this.model.position.copyFrom(newPos);
-        this.position.copyFrom(newPos);
+        //this.hitbox.position.copyFrom(newPos);
+        //this.position.copyFrom(newPos);
+        this.setFullPosition(newPos);
     }
 
     onBallHit(ball: Ball) {
-        let abstractPaddlePos : Vector3 = new Vector3(this.model.position.x, 0, this.model.position.z).add(this.modelDirection.scale(-0.225));
+        let abstractPaddlePos : Vector3 = new Vector3(this.hitbox.position.x, 0, this.hitbox.position.z).add(this.hitboxDirection.scale(-0.225));
         let abstractBallPos : Vector3 = new Vector3(ball.position.x, 0, ball.position.z);
         let newDir : Vector3 = abstractBallPos.subtract(abstractPaddlePos).normalize();
 
-        let angle : number = Math.acos(Vector3.Dot(this.modelDirection, newDir));
-        let cross : number = this.modelDirection.x * newDir.z - this.modelDirection.z * newDir.x;
+        let angle : number = Math.acos(Vector3.Dot(this.hitboxDirection, newDir));
+        let cross : number = this.hitboxDirection.x * newDir.z - this.hitboxDirection.z * newDir.x;
         angle = cross >= 0 ? angle : -angle;
 
 
         if (angle < -Math.PI / 3) {
             angle = -Math.PI / 3;
             //newDir = this.direction.scale(Math.cos(angle)).add(newDir.scale(Math.sin(angle))).normalize();
-            newDir = MathUtils.rotateOnXZ(this.modelDirection, angle);
+            newDir = MathUtils.rotateOnXZ(this.hitboxDirection, angle);
         }
         else if (angle > Math.PI / 3) {
             angle = Math.PI / 3;
             //newDir = new Vector3(Math.sin(angle), 0, Math.cos(angle));
-            newDir = MathUtils.rotateOnXZ(this.modelDirection, angle);
+            newDir = MathUtils.rotateOnXZ(this.hitboxDirection, angle);
         }
         ball.setDir(newDir);
         //ball.bounce(hitInfo);
         ball.speedUp();
         ball.owner = this.owner;
-        console.log("Ball hit by paddle, new direction : ", newDir, " angle : ", angle);
+        //console.log("Ball hit by paddle, new direction : ", newDir, " angle : ", angle);
     }
 
-    public reconcile(serverPos: Vector3): void {
-        const previousPos = this.position.clone();
+    public reconcile(predictedPos: Vector3, truthPos: Vector3): void {
+        const previousPos = predictedPos;
 
-        this.position.copyFrom(serverPos);
+        this.position.copyFrom(truthPos);
         
         const jump = previousPos.subtract(this.position);
 
@@ -110,21 +163,30 @@ class Paddle {
         
         this.visualOffset.addInPlace(jump);
 
-        this.model.position.copyFrom(this.position).addInPlace(this.visualOffset);
+        //this.hitbox.position.copyFrom(this.position).addInPlace(this.visualOffset);
     }
 
     update(deltaT: number) {
         this.move(deltaT);
-        this.visualOffset = Vector3.Lerp(this.visualOffset, Vector3.Zero(), 0.05);
-        if (this.visualOffset.lengthSquared() < 0.001) {
+        this.hitbox.computeWorldMatrix(true);
+        this.hitbox.getChildren().forEach(child => {
+            child.computeWorldMatrix(true);
+        });
+    }
+
+    render() {
+        //this.visualOffset = Vector3.Lerp(this.visualOffset, Vector3.Zero(), 0.03);
+        Vector3.LerpToRef(this.visualOffset, Vector3.Zero(), 0.3, this.visualOffset);
+        if (this.visualOffset.lengthSquared() < 0.0001) {
             this.visualOffset.setAll(0);
         }
         this.model.position.copyFrom(this.position).addInPlace(this.visualOffset);
-        this.model.computeWorldMatrix(true);
     }
 
     dispose() {
-        this.model.dispose();
+        this.hitbox.dispose();
+        this.trigger1.dispose();
+        this.trigger2.dispose();
     }
 }
 
