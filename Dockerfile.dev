@@ -1,0 +1,90 @@
+# =============================================================================
+# Dockerfile.dev - Authentication Service (Development)
+# =============================================================================
+#
+# This Dockerfile is optimized for local development with hot-reload support.
+# It is designed to work with docker-compose.yaml where source code is mounted
+# as volumes, enabling live code changes without rebuilding the container.
+#
+# Architecture: pnpm monorepo workspace
+# Dependencies: my-fastify-decorators, my-class-validator (workspace packages)
+# Database: SQLite (better-sqlite3 - native addon)
+# Hot-reload: tsx watch
+#
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# Base Image
+# -----------------------------------------------------------------------------
+# Using Node.js 24 on Alpine for a minimal footprint (~180MB vs ~1GB for full)
+# Alpine uses musl libc which is compatible with better-sqlite3 prebuilt binaries
+# Node 24+ is required by the project's package.json engine constraints
+FROM node:24-alpine
+
+# -----------------------------------------------------------------------------
+# Metadata Labels (OCI standard)
+# -----------------------------------------------------------------------------
+LABEL org.opencontainers.image.title="ft_transcendence Worker Mail (Dev)"
+LABEL org.opencontainers.image.description="Worker mail microservice"
+LABEL org.opencontainers.image.authors="ft_transcendence team"
+LABEL org.opencontainers.image.source="https://github.com/thetranscendence/worker-mail"
+
+# -----------------------------------------------------------------------------
+# Install System Dependencies
+# -----------------------------------------------------------------------------
+# These packages are required for:
+# - python3, make, g++: Building native Node.js addons (better-sqlite3)
+# - git: Some npm packages may need git for installation
+# Note: In production, use multi-stage builds to exclude build tools
+RUN apk add --no-cache \
+  python3 \
+  make \
+  g++ \
+  git
+
+# -----------------------------------------------------------------------------
+# Install pnpm Package Manager
+# -----------------------------------------------------------------------------
+# pnpm is required for monorepo workspace management
+# Using corepack (built into Node.js) for version management
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# -----------------------------------------------------------------------------
+# Set Working Directory
+# -----------------------------------------------------------------------------
+# All paths in docker-compose volumes are relative to /app
+# The monorepo structure will be mounted here:
+#   /app/package.json
+#   /app/pnpm-workspace.yaml
+#   /app/pnpm-lock.yaml
+#   /app/apps/auth/...
+#   /app/packages/...
+WORKDIR /app
+
+# -----------------------------------------------------------------------------
+# Environment Variables
+# -----------------------------------------------------------------------------
+# NODE_ENV: Development mode enables detailed error messages and debugging
+# PNPM_HOME: pnpm global bin directory
+# PATH: Include pnpm binaries in PATH
+ENV NODE_ENV=development
+ENV PNPM_HOME=/root/.local/share/pnpm
+ENV PATH="${PNPM_HOME}:${PATH}"
+
+
+# -----------------------------------------------------------------------------
+# Startup Command
+# -----------------------------------------------------------------------------
+# 1. Install dependencies with --frozen-lockfile to prevent lock file conflicts
+#    Multiple containers share the same pnpm-lock.yaml, so we must not modify it
+# 2. Run the dev script which uses tsx watch for hot-reload
+#
+# Why use shell form instead of exec form?
+# - Allows command chaining with &&
+# - Enables variable expansion if needed
+#
+# The source code is mounted via docker-compose volumes, so:
+# - Code changes trigger automatic restart (tsx watch)
+# - No container rebuild needed for code changes
+# - Dependencies are reinstalled only when package.json changes
+CMD ["sh", "-c", "pnpm install --frozen-lockfile && pnpm --filter worker-mail run dev"]
