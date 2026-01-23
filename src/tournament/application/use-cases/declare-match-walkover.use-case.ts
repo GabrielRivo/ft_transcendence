@@ -2,14 +2,16 @@ import { Inject, Service, NotFoundException } from 'my-fastify-decorators';
 import { type TournamentRepository } from '../../domain/ports/tournament.repository.js';
 import { type TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
 import { DeclareMatchWalkoverDto } from '../dtos/declare-match-walkover.dto.js';
+import { SqliteTournamentRepository } from '@/tournament/infrastructure/repositories/sqlite-tournament.repository.js';
+import { SocketTournamentEventsPublisher } from '@/tournament/infrastructure/publishers/socket-tournament-events.publisher.js';
 
 @Service()
 export class DeclareMatchWalkoverUseCase {
-    @Inject('TournamentRepository')
-    private repository!: TournamentRepository;
+    @Inject(SqliteTournamentRepository)
+    private repository!: SqliteTournamentRepository;
 
-    @Inject('TournamentEventsPublisher')
-    private publisher!: TournamentEventsPublisher;
+    @Inject(SocketTournamentEventsPublisher)
+    private publisher!: SocketTournamentEventsPublisher;
 
     public async execute(tournamentId: string, matchId: string, command: DeclareMatchWalkoverDto): Promise<void> {
         const tournament = await this.repository.findById(tournamentId);

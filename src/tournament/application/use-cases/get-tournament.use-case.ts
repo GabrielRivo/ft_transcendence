@@ -1,10 +1,11 @@
 import { Inject, Service, NotFoundException } from 'my-fastify-decorators';
 import { Tournament } from '../../domain/entities/tournament.js';
 import { type TournamentRepository } from '../../domain/ports/tournament.repository.js';
+import { SqliteTournamentRepository } from '@/tournament/infrastructure/repositories/sqlite-tournament.repository.js';
 
 @Service()
 export class GetTournamentUseCase {
-    @Inject('TournamentRepository')
+    @Inject(SqliteTournamentRepository)
     private repository!: TournamentRepository;
 
     public async execute(tournamentId: string): Promise<Tournament> {

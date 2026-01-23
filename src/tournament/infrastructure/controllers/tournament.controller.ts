@@ -12,7 +12,8 @@ import {
     Post,
     Query,
     QuerySchema,
-    UnauthorizedException
+    UnauthorizedException,
+    ResponseSchema
 } from 'my-fastify-decorators';
 
 import { CancelTournamentUseCase } from '../../application/use-cases/cancel-tournament.use-case.js';
@@ -22,9 +23,9 @@ import { ListTournamentsUseCase } from '../../application/use-cases/list-tournam
 
 import { CreateTournamentDto, CreateTournamentSchema } from '../../application/dtos/create-tournament.dto.js';
 import { ListTournamentsDto, ListTournamentsSchema } from '../../application/dtos/list-tournaments.dto.js';
-import { TournamentResponseDto } from '../dtos/responses/tournament.response.dto.js';
+import {  TournamentResponseSchema } from '../dtos/responses/tournament.response.dto.js';
 
-@Controller('/tournament')
+@Controller('/')
 export class TournamentController {
     @Inject(CancelTournamentUseCase)
     private cancelTournamentUseCase!: CancelTournamentUseCase;
@@ -51,15 +52,28 @@ export class TournamentController {
 
     @Get('/')
     @QuerySchema(ListTournamentsSchema)
+	@ResponseSchema(200, {
+        type: 'array',
+        items: TournamentResponseSchema
+    })
     public async list(@Query() query: ListTournamentsDto) {
         const tournaments = await this.listTournamentsUseCase.execute(query);
-        return plainToInstance(TournamentResponseDto, tournaments, { excludeExtraneousValues: true });
+		console.log(tournaments);
+        // return plainToInstance(TournamentResponseDto, tournaments, { excludeExtraneousValues: true });
+		return tournaments;
     }
-    
+
+	@Get('/lobby')
+	public async lobby() {
+		return { success: true };
+	}
+
     @Get('/:id')
+	@ResponseSchema(200, TournamentResponseSchema)
     public async get(@Param('id') id: string) {
         const tournament = await this.getTournamentUseCase.execute(id);
-        return plainToInstance(TournamentResponseDto, tournament, { excludeExtraneousValues: true });
+        // return plainToInstance(TournamentResponseDto, tournament, { excludeExtraneousValues: true });
+		return tournament;
     }
 
     @Delete('/:id')

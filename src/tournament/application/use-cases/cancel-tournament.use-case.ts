@@ -1,14 +1,15 @@
 import { Inject, Service, NotFoundException, ForbiddenException } from 'my-fastify-decorators';
-import { type TournamentRepository } from '../../domain/ports/tournament.repository.js';
+import { SqliteTournamentRepository } from '../../infrastructure/repositories/sqlite-tournament.repository.js';
 import { type TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
+import { SocketTournamentEventsPublisher } from '@/tournament/infrastructure/publishers/socket-tournament-events.publisher.js';
 
 @Service()
 export class CancelTournamentUseCase {
-    @Inject('TournamentRepository')
-    private repository!: TournamentRepository;
+    @Inject(SqliteTournamentRepository)
+    private repository!: SqliteTournamentRepository;
 
-    @Inject('TournamentEventsPublisher')
-    private publisher!: TournamentEventsPublisher;
+    @Inject(SocketTournamentEventsPublisher)
+    private publisher!: SocketTournamentEventsPublisher;
 
     public async execute(tournamentId: string, userId: string): Promise<void> {
         const tournament = await this.repository.findById(tournamentId);

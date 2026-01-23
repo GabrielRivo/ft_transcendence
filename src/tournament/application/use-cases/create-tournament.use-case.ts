@@ -4,14 +4,16 @@ import { Tournament } from '../../domain/entities/tournament.js';
 import { type TournamentRepository } from '../../domain/ports/tournament.repository.js';
 import { type TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
 import { CreateTournamentDto } from '../dtos/create-tournament.dto.js';
+import { SqliteTournamentRepository } from '@/tournament/infrastructure/repositories/sqlite-tournament.repository.js';
+import { SocketTournamentEventsPublisher } from '@/tournament/infrastructure/publishers/socket-tournament-events.publisher.js';
 
 @Service()
 export class CreateTournamentUseCase {
-    @Inject('TournamentRepository')
-    private repository!: TournamentRepository;
+    @Inject(SqliteTournamentRepository)
+    private repository!: SqliteTournamentRepository;
 
-    @Inject('TournamentEventsPublisher')
-    private publisher!: TournamentEventsPublisher;
+    @Inject(SocketTournamentEventsPublisher)
+    private publisher!: SocketTournamentEventsPublisher;
 
     public async execute(command: CreateTournamentDto, ownerId: string): Promise<string> {
         const tournament = new Tournament(
