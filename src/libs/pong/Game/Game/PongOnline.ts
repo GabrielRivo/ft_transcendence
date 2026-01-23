@@ -83,12 +83,13 @@ class PongOnline extends Game {
         this.walls = [new Wall(), new Wall()];
         this.walls.forEach(wall => Services.Scene!.addMesh(wall.model));
         //this.ball = new Ball();
-        const camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, Math.PI / 4, 12, Vector3.Zero(), Services.Scene);
-        camera.attachControl(Services.Canvas, true);
-        camera.lowerRadiusLimit = 8;
-        camera.upperRadiusLimit = 22;
-        camera.wheelDeltaPercentage = 0.01;
-        camera.upperBetaLimit = Math.PI / 1.6;
+        // const camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, /*Math.PI / 4*/0, 22, Vector3.Zero(), Services.Scene);
+        // camera.attachControl(Services.Canvas, true);
+        // camera.lowerRadiusLimit = 8;
+        // camera.upperRadiusLimit = 22;
+        // camera.wheelDeltaPercentage = 0.01;
+        // camera.upperBetaLimit = Math.PI / 1.6;
+        // camera._panningMouseButton = -1;
 
         //var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
         //light2.intensity = 0;
@@ -284,9 +285,23 @@ class PongOnline extends Game {
         if (payload.player === 1) {
             this.clientPlayer = this.player1;
             this.inputManager!.listenToPlayer1();
+            const camera: ArcRotateCamera = new ArcRotateCamera("Camera", -Math.PI/2, Math.PI / 4, 22, Vector3.Zero(), Services.Scene);
+            camera.attachControl(Services.Canvas, true);
+            camera.lowerRadiusLimit = 8;
+            camera.upperRadiusLimit = 22;
+            camera.wheelDeltaPercentage = 0.01;
+            camera.upperBetaLimit = Math.PI / 1.6;
+            camera._panningMouseButton = -1;
         } else if (payload.player === 2) {
             this.clientPlayer = this.player2;
             this.inputManager!.listenToPlayer2();
+            const camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI/2, Math.PI / 4, 22, Vector3.Zero(), Services.Scene);
+            camera.attachControl(Services.Canvas, true);
+            camera.lowerRadiusLimit = 8;
+            camera.upperRadiusLimit = 22;
+            camera.wheelDeltaPercentage = 0.01;
+            camera.upperBetaLimit = Math.PI / 1.6;
+            camera._panningMouseButton = -1;
         }
     }
 

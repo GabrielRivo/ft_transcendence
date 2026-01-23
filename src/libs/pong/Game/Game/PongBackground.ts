@@ -190,13 +190,25 @@ class PongBackground extends Game {
 		// Position game objects
 		//this.ball.setFullPos(new Vector3(0, 0.125, 0));
 		this.player1.paddle.setHitboxDirection(new Vector3(0, 0, 1));
-		this.player2.paddle.setHitboxDirection(new Vector3(0, 0, -1));
-		this.player1.paddle.setPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
-		this.player2.paddle.setPosition(new Vector3(0, 0.15, this.height / 2 - 2));
-		this.player1.paddle.setTrigger1Position(new Vector3(0, 0.15, -this.height / 2 + 2));
+        this.player2.paddle.setHitboxDirection(new Vector3(0, 0, -1));
+
+        this.player1.paddle.setFullPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
+        this.player2.paddle.setFullPosition(new Vector3(0, 0.15, this.height / 2 - 2));
+
+        this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
+        this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
+
+        this.player1.paddle.setModelPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
+        this.player2.paddle.setModelPosition(new Vector3(0, 0.15, this.height / 2 - 2));
+
+        this.player1.paddle.setTrigger1Position(new Vector3(0, 0.15, -this.height / 2 + 2));
         this.player2.paddle.setTrigger1Position(new Vector3(0, 0.15, this.height / 2 - 2));
-		this.player1.paddle.setTrigger2Position(new Vector3(0, 0.15, -this.height / 2 + 2 - 0.15));
-		this.player2.paddle.setTrigger2Position(new Vector3(0, 0.15, this.height / 2 - 2 + 0.15));
+
+        this.player1.paddle.setTrigger2Position(new Vector3(0, 0.15, -this.height / 2 + 2 - 0.075));
+        this.player2.paddle.setTrigger2Position(new Vector3(0, 0.15, this.height / 2 - 2 + 0.075));
+
+        this.player1.paddle.setTrigger3Position(new Vector3(0, 0.15, -this.height / 2 + 2 - 0.15));
+        this.player2.paddle.setTrigger3Position(new Vector3(0, 0.15, this.height / 2 - 2 + 0.15));
 		this.player1.deathBar.model.position = new Vector3(0, 0.125, -this.height / 2 + 1);
 		this.player2.deathBar.model.position = new Vector3(0, 0.125, this.height / 2 - 1);
 		this.walls[0].model.position = new Vector3(-this.width / 2 - 0.1, 0.25, 0);

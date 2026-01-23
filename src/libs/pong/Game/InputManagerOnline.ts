@@ -111,6 +111,12 @@ class InputManager {
                             this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: true, isResolved: false });
                             //socket.emit("playerInput", { timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: true });
                             break;
+                        case "ArrowLeft":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: LEFT, isPressed: true, isResolved: false });
+                            break;
+                        case "ArrowRight":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: true, isResolved: false });
+                            break;
                     }
                     break;
                 }
@@ -125,6 +131,12 @@ class InputManager {
                             this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: false, isResolved: false });
                             //socket.emit("playerInput", { timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: false });
                             break;
+                        case "ArrowLeft":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: LEFT, isPressed: false, isResolved: false });
+                            break;
+                        case "ArrowRight":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: false, isResolved: false });
+                            break;  
                     }
                     break;
                 }
@@ -149,6 +161,12 @@ class InputManager {
                             this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: true, isResolved: false });
                             //socket.emit("playerInput", { timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: true });
                             break;
+                        case "ArrowRight":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: LEFT, isPressed: true, isResolved: false });
+                            break;
+                        case "ArrowLeft":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: true, isResolved: false });
+                            break;
                     }
                     break;
                 }
@@ -162,6 +180,12 @@ class InputManager {
                         case "a":
                             this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: false, isResolved: false });
                             //socket.emit("playerInput", { timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: false });
+                            break;
+                        case "ArrowRight":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: LEFT, isPressed: false, isResolved: false });
+                            break;
+                        case "ArrowLeft":
+                            this.recordInput({ timestamp: Services.TimeService!.getTimestamp(), direction: RIGHT, isPressed: false, isResolved: false });
                             break;
                     }
                     break;

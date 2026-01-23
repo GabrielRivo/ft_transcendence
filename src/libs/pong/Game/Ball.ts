@@ -108,7 +108,7 @@ class Ball {
 
     public generate(delay: number) {
         this.startDirection();
-        this.setSpeed(2);
+        this.setSpeed(3);
         this.setPos(new Vector3(0, 0.125, 0));
         this.setModelPos(this.position);
         this.moving = false;
