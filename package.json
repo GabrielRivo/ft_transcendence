@@ -18,9 +18,11 @@
 		"build": "tsc -p tsconfig.json"
 	},
 	"peerDependencies": {
-		"reflect-metadata": "^0.2.0"
+		"reflect-metadata": "^0.2.0",
+		"my-fastify-decorators": "workspace:*"
 	},
 	"devDependencies": {
+		"@types/amqplib": "^0.10.8",
 		"@types/node": "^24.5.2",
 		"typescript": "^5.9.2"
 	},
