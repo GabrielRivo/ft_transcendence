@@ -100,11 +100,8 @@ export function base32ToBuffer(base32: string): Buffer {
 			throw new Error(`Caractère Base32 invalide : ${char}`);
 		}
 
-		// On décale la valeur existante de 5 bits à gauche et on ajoute les 5 nouveaux bits
 		value = (value << 5) | idx;
 		bits += 5;
-
-		// Dès qu'on a au moins 8 bits, on extrait un octet
 		if (bits >= 8) {
 			output.push((value >>> (bits - 8)) & 0xff);
 			bits -= 8;
