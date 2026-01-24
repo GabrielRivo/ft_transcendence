@@ -58,6 +58,7 @@ export class DuplicateParticipantNameException extends DomainException {
 
 export class PlayerAlreadyInActiveTournamentException extends DomainException {
     readonly code = 'PLAYER_BUSY_IN_OTHER_TOURNAMENT';
+    readonly statusCode = 409;
 
     constructor(public readonly playerId: string, public readonly activeTournamentId: string) {
         super(`Player ${playerId} is already active in another started tournament (${activeTournamentId}).`);

@@ -25,5 +25,7 @@ export class CancelTournamentUseCase {
         await this.repository.save(tournament);
         await this.publisher.publishAll(tournament.getRecordedEvents());
         tournament.clearRecordedEvents();
+
+
     }
 }

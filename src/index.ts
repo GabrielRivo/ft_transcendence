@@ -7,6 +7,7 @@ import bootstrapPlugin from './plugins/bootstrap-plugin.js';
 import jwtPlugin from './plugins/jwt-plugin.js';
 import socketPlugin from './plugins/socket-plugin.js';
 import sqlitePlugin from './plugins/sqlite-plugin.js';
+import rabbitmqPlugin from './plugins/rabbitmq-plugin.js';
 
 const app = Fastify({ logger: true, routerOptions: { ignoreTrailingSlash: true } });
 
@@ -20,6 +21,7 @@ registerValidators(ajv);
 app.register(sqlitePlugin);
 app.register(jwtPlugin);
 app.register(socketPlugin);
+app.register(rabbitmqPlugin);
 app.register(bootstrapPlugin);
 
 app.setValidatorCompiler(({ schema }) => {
@@ -38,7 +40,30 @@ app.setSchemaErrorFormatter((errors) => {
 	// On évite de pointer systématiquement sur index.ts
 	err.stack = undefined;
 
+	app.log.error({ validationErrors: errors }, 'Schema validation failed');
 	return err as Error;
+});
+
+app.setErrorHandler((error, request, reply) => {
+	app.log.error({
+		msg: 'Global Error Handler',
+		error: (error as any).message,
+		stack: (error as any).stack,
+		url: request.url,
+		method: request.method
+	});
+
+	// Pass through status code if set (e.g., 404, 400), otherwise 500
+	const statusCode = (error as any).statusCode || 500;
+
+	const response = {
+		statusCode,
+		error: statusCode === 500 ? 'Internal Server Error' : (error as any).name,
+		message: (error as any).message,
+		...(error as any) // Spread remaining properties (like activeTournamentId, code)
+	};
+
+	reply.status(statusCode).send(response);
 });
 
 async function start() {

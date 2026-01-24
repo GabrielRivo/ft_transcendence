@@ -7,4 +7,4 @@ import { TournamentModule } from './tournament/tournament.module.js';
 	imports: [TournamentModule],
 	controllers: [HealthController],
 })
-export class AppModule {}
+export class AppModule { }

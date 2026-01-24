@@ -39,15 +39,26 @@ export class TournamentController {
     @Inject(ListTournamentsUseCase)
     private listTournamentsUseCase!: ListTournamentsUseCase;
 
+    @Inject(GetActiveTournamentUseCase)
+    private getActiveTournamentUseCase!: GetActiveTournamentUseCase;
+
     @Post('/')
     @BodySchema(CreateTournamentSchema)
     public async create(
         @Body() body: CreateTournamentDto,
         @JWTBody() user: any
     ) {
+        console.log('[Backend] Create tournament request:', { body, userId: user?.id });
         if (!user) throw new UnauthorizedException();
-        const id = await this.createTournamentUseCase.execute(body, user.id);
+        const id = await this.createTournamentUseCase.execute(body, String(user.id), user.username);
         return { id };
+    }
+
+    @Get('/active')
+    public async getActive(@JWTBody() user: any) {
+        if (!user) throw new UnauthorizedException();
+        const tournament = await this.getActiveTournamentUseCase.execute(String(user.id));
+        return tournament ? plainToInstance(TournamentResponseDto, tournament, { excludeExtraneousValues: true }) : null;
     }
 
     @Get('/')
@@ -58,15 +69,8 @@ export class TournamentController {
     })
     public async list(@Query() query: ListTournamentsDto) {
         const tournaments = await this.listTournamentsUseCase.execute(query);
-		console.log(tournaments);
-        // return plainToInstance(TournamentResponseDto, tournaments, { excludeExtraneousValues: true });
-		return tournaments;
+        return plainToInstance(TournamentResponseDto, tournaments, { excludeExtraneousValues: true });
     }
-
-	@Get('/lobby')
-	public async lobby() {
-		return { success: true };
-	}
 
     @Get('/:id')
 	@ResponseSchema(200, TournamentResponseSchema)
@@ -79,7 +83,7 @@ export class TournamentController {
     @Delete('/:id')
     public async cancel(@Param('id') id: string, @JWTBody() user: any) {
         if (!user) throw new UnauthorizedException();
-        await this.cancelTournamentUseCase.execute(id, user.id);
+        await this.cancelTournamentUseCase.execute(id, String(user.id));
         return { success: true };
     }
 }

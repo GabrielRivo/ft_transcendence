@@ -5,9 +5,15 @@ import { TournamentEventType } from '../../domain/events/tournament-events.js';
 import { TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
 
 @Service()
-export class SocketTournamentEventsPublisher implements TournamentEventsPublisher {
+export class SocketTournamentEventsPublisher extends TournamentEventsPublisher {
   @InjectPlugin('io')
   private io!: Server;
+
+  constructor() {
+    super();
+    // container.register(TournamentEventsPublisher, this); // Handled by Composite
+    console.log('[SocketTournamentEventsPublisher] Initialized');
+  }
 
   public async publish(event: RecordedEvent): Promise<void> {
     const roomId = `tournament:${event.aggregateId}`;

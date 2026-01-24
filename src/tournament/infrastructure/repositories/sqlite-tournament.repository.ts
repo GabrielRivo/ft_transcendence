@@ -1,5 +1,5 @@
 import { type Database, Transaction } from 'better-sqlite3';
-import { InjectPlugin, Service } from 'my-fastify-decorators';
+import { InjectPlugin, Service, container } from 'my-fastify-decorators';
 import { Match, MatchStatus, WinReason } from '../../domain/entities/match.js';
 import { Tournament, TournamentSize, TournamentStatus, TournamentVisibility } from '../../domain/entities/tournament.js';
 import { TournamentRepository } from '../../domain/ports/tournament.repository.js';
@@ -7,9 +7,15 @@ import { Participant } from '../../domain/value-objects/participant.js';
 import { ConcurrencyException, PlayerAlreadyInActiveTournamentException } from '../../domain/exceptions.js';
 
 @Service()
-export class SqliteTournamentRepository implements TournamentRepository {
+export class SqliteTournamentRepository extends TournamentRepository {
   @InjectPlugin('db')
   private db!: Database;
+
+  constructor() {
+    super();
+    container.register(TournamentRepository, this);
+    console.log('[SqliteTournamentRepository] Registered as TournamentRepository');
+  }
 
   public async save(tournament: Tournament): Promise<void> {
     const transaction: Transaction = this.db.transaction(() => {
@@ -30,7 +36,7 @@ export class SqliteTournamentRepository implements TournamentRepository {
           throw new PlayerAlreadyInActiveTournamentException(p.id, conflict.conflicting_tournament_id);
         }
       }
-      
+
       let result;
 
       if (tournament.version === 0) {
@@ -139,7 +145,7 @@ export class SqliteTournamentRepository implements TournamentRepository {
       const playerA = m.player_a_id ? participantsMap.get(m.player_a_id) || null : null;
       const playerB = m.player_b_id ? participantsMap.get(m.player_b_id) || null : null;
       const winner = m.winner_id ? participantsMap.get(m.winner_id) || null : null;
-      
+
       return Match.reconstitute({
         id: m.id,
         round: m.round,
@@ -195,7 +201,7 @@ export class SqliteTournamentRepository implements TournamentRepository {
 
     const allParticipants = this.db.prepare(`SELECT * FROM participants WHERE tournament_id IN (${placeholders})`)
       .all([...tournamentsIds]) as any[];
-    
+
     const allMatches = this.db.prepare(`SELECT * FROM matches WHERE tournament_id IN (${placeholders})`)
       .all([...tournamentsIds]) as any[];
 
@@ -206,12 +212,12 @@ export class SqliteTournamentRepository implements TournamentRepository {
       const participant = p.type === 'GUEST'
         ? Participant.createGuest(p.id, p.display_name)
         : Participant.createUser(p.id, p.display_name);
-        
-        if (!participantsByTournamentId.has(p.tournament_id)) {
-          participantsByTournamentId.set(p.tournament_id, []);
-        }
-        participantsByTournamentId.get(p.tournament_id)!.push(participant);
-        globalParticipantsMap.set(p.id, participant);
+
+      if (!participantsByTournamentId.has(p.tournament_id)) {
+        participantsByTournamentId.set(p.tournament_id, []);
+      }
+      participantsByTournamentId.get(p.tournament_id)!.push(participant);
+      globalParticipantsMap.set(p.id, participant);
     }
 
     const matchesByTournamentId = new Map<string, Match[]>();

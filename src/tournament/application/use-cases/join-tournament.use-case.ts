@@ -1,7 +1,7 @@
 import { Inject, Service, NotFoundException } from 'my-fastify-decorators';
 import { PlayerAlreadyInActiveTournamentException } from '../../domain/exceptions.js';
-import { type TournamentRepository } from '../../domain/ports/tournament.repository.js';
-import { type TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
+import { TournamentRepository } from '../../domain/ports/tournament.repository.js';
+import { TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
 import { Participant } from '../../domain/value-objects/participant.js';
 import { JoinTournamentDto } from '../dtos/join-tournament.dto.js';
 import { SqliteTournamentRepository } from '@/tournament/infrastructure/repositories/sqlite-tournament.repository.js';
@@ -31,6 +31,7 @@ export class JoinTournamentUseCase {
             throw new NotFoundException(`Tournament ${tournamentId} not found`);
         }
 
+        const participant = isGuest
         const participant = isGuest
             ? Participant.createGuest(userId, command.displayName)
             : Participant.createUser(userId, command.displayName);
