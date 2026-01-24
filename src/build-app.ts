@@ -8,6 +8,7 @@ import cookiePlugin from './plugins/cookie-plugin.js';
 import jwtPlugin from './plugins/jwt-plugin.js';
 import socketPlugin from './plugins/socket-plugin.js';
 import sqlitePlugin from './plugins/sqlite-plugin.js';
+import rabbitmqPlugin from './plugins/rabbitmq-plugin.js';
 
 export function buildApp(options: { dbPath?: string } = {}) {
 	const app = Fastify({
@@ -28,6 +29,7 @@ export function buildApp(options: { dbPath?: string } = {}) {
 	app.register(jwtPlugin);
 	app.register(sqlitePlugin, { dbPath: options.dbPath });
 	app.register(socketPlugin);
+	app.register(rabbitmqPlugin);
 	app.register(bootstrapPlugin);
 
 	app.setValidatorCompiler(({ schema }) => {
