@@ -10,12 +10,11 @@ VALUES (1, 0, 0, CURRENT_TIMESTAMP), (2, 0, 0, CURRENT_TIMESTAMP), (3, 0, 0, CUR
 
 CREATE TABLE IF NOT EXISTS user_stats (
     user_id INTEGER PRIMARY KEY,
-    elo INTEGER DEFAULT 700,
+    elo INTEGER DEFAULT 1000,
     total_games INTEGER DEFAULT 0,
     wins INTEGER DEFAULT 0,
     losses INTEGER DEFAULT 0,
     winrate INTEGER DEFAULT 0,
-    total_score INTEGER DEFAULT 0,
     average_score INTEGER DEFAULT 0,
     tournament_played INTEGER DEFAULT 0,
     tournament_won INTEGER DEFAULT 0,

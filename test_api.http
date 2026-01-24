@@ -15,10 +15,6 @@ GET http://localhost:3000/match-history/user/1
 Accept: application/json
 
 
-### -----------------------
-### SECTION ECRITURE (POST)
-### -----------------------
-
 ### Register a match (Standard Ranked - No Tournament)
 POST http://localhost:3000/match-history/add
 Content-Type: application/json
@@ -100,11 +96,11 @@ POST http://localhost:3000/match-history/add
 Content-Type: application/json
 
 {
-    "game_id" : 15,
+    "game_id" : 5,
     "player1_id": 1,
     "player2_id": 2,
     "score_player1": 0,
-    "score_player2": 5,
+    "score_player2": 2,
     "winner_id" : 2,
     "duration_seconds" : 3600,
     "game_type" : "ranked",

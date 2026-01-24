@@ -52,7 +52,7 @@ export class UserHistoryService {
 	private statementisGameIdValid!: Statement;
 	private statementIsUserExists!: Statement;
 	private statementIsTournamentExists!: Statement;
-	private runMatchTransaction!: (match: any, p1: any, p2: any, isFinal: any) => void;
+	private statementMatchTransaction!: (match: any, p1: any, p2: any, isFinal: any) => void;
 	private statementUpdateStats!: Statement;
 
 	onModuleInit() {
@@ -63,7 +63,7 @@ export class UserHistoryService {
 		this.statementIsTournamentExists = this.db.prepare(isTournamentExists);
 		this.statementUpdateStats = this.db.prepare(updateUserGlobalStats);
 
-		this.runMatchTransaction = this.db.transaction((match, p1, p2, isFinal) => {
+		this.statementMatchTransaction = this.db.transaction((match, p1, p2, isFinal) => {
 			this.statementAddMatchtoHistory.run(match);
 			this.statementUpdateStats.run(p1);
 			this.statementUpdateStats.run(p2);
@@ -189,7 +189,7 @@ export class UserHistoryService {
 		};
 
 		return (
-			this.runMatchTransaction(matchData, p1Stats, p2Stats, is_final),
+			this.statementMatchTransaction(matchData, p1Stats, p2Stats, is_final),
 			{ message: 'Match registered' }
 		);
 	}

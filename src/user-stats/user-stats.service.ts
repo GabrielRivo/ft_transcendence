@@ -60,7 +60,7 @@ onModuleInit() {
 	async updateUserGlobalStats(userId: number, matchData: any) {
 		const current = (this.statementGetStats.get(userId) as UserStatsValues) || {
 			user_id: userId,
-			elo: 700,
+			elo: 1000,
 			total_games: 0,
 			wins: 0,
 			losses: 0,
