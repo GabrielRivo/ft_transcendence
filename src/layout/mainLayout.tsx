@@ -2,7 +2,7 @@ import { createElement } from 'my-react';
 import type { Element } from 'my-react';
 import { useGame } from '../hook/useGame';
 
-export function MainLayout({ children }: { children: Element }) {
+export function MainLayout({ children }: { children?: Element }) {
 	const { canvasRef, mode } = useGame();
 
 	// Apply blur only in background mode

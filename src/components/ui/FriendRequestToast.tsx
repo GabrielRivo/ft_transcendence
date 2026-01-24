@@ -132,15 +132,16 @@ export function FriendRequestToastContainer() {
 	return createPortal(
 		<FragmentComponent>
 			<div className="pointer-events-none fixed bottom-5 left-5 z-50 flex flex-col gap-3">
-				{allInvitations.map((invitation) => (
-					<FriendRequestToastItem
-						key={invitation.senderId}
-						invitation={invitation}
-						onAccept={handleAccept}
-						onDecline={handleDecline}
-						onClose={handleClose}
-					/>
-				))}
+				{allInvitations.map((invitation) => {
+					const itemProps = {
+						invitation,
+						onAccept: handleAccept,
+						onDecline: handleDecline,
+						onClose: handleClose,
+						key: invitation.senderId,
+					};
+					return <FriendRequestToastItem {...itemProps} />;
+				})}
 			</div>
 		</FragmentComponent>,
 		document.body,

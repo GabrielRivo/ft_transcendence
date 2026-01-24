@@ -1,7 +1,7 @@
 import { Scene, AbstractMesh, SceneLoader } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 
-interface CachedAsset {
+export interface CachedAsset {
     blob: Blob;
     blobUrl: string;
     originalUrl: string;
@@ -12,9 +12,9 @@ interface CachedAsset {
 class AssetCacheSingleton {
     private static instance: AssetCacheSingleton;
     
-    private cache: Map<string, CachedAsset> = new Map();
+    public cache: Map<string, CachedAsset> = new Map();
     
-    private downloadPromises: Map<string, Promise<CachedAsset>> = new Map();
+    public downloadPromises: Map<string, Promise<CachedAsset>> = new Map();
 
     private constructor() {
         console.log('[AssetCache] Service initialized');
@@ -114,7 +114,7 @@ class AssetCacheSingleton {
         };
     }
 
-    private async downloadAndCache(key: string, url: string): Promise<CachedAsset> {
+    public async downloadAndCache(key: string, url: string): Promise<CachedAsset> {
         const startTime = performance.now();
         
         const response = await fetch(url);
@@ -140,7 +140,7 @@ class AssetCacheSingleton {
         return cached;
     }
 
-    private async loadFromBlob(cached: CachedAsset, scene: Scene): Promise<AbstractMesh[]> {
+    public async loadFromBlob(cached: CachedAsset, scene: Scene): Promise<AbstractMesh[]> {
         const startTime = performance.now();
 
         const result = await SceneLoader.ImportMeshAsync(
@@ -158,7 +158,7 @@ class AssetCacheSingleton {
         return result.meshes;
     }
 
-    private formatSize(bytes: number): string {
+    public formatSize(bytes: number): string {
         if (bytes < 1024) return `${bytes} B`;
         if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
         return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
