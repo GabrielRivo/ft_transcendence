@@ -7,14 +7,16 @@ Rajouter un auto scrolling pour les nouveaux messages
 ajouter tooltip
 	- inviter/defier
 	- tournoi
-	- block
+	- unblock
+	- unfriend
 
 group =>
 	- quitter
-	- inviter
+	- inviter une fois dans le groupe?
 
-recoit message des blocked user
-	- effect spoil
+
+blocked user
+	- effect spoil -> actuellement-> msg delete
 
 -supprimer conversation personne block OK 
 
@@ -36,3 +38,14 @@ START GAME
 social -> asset un challenge (verif) communiaue qu chqt -> notif aux 2
 users -> ecouter l'event qui fait un navigate sur la page : 
 /game?id=gameId
+
+Faire fonctionner les boutons de tournois et relier au back (groupes)
+
+Voir le status des amis => hors ligne
+incorporer le back des stats au front
+pareil avec l'historique
+recuperer les stats des fins de match + recuperer l'info de quand un match fini -> envoyer la requete aux users
+
+fix le invit user en challenge
+notif sur les prochaines games de tournois?
+

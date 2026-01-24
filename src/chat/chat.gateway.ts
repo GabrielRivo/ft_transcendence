@@ -298,6 +298,7 @@ export class ChatGateway {
 			console.log(user1, user2);
 			await this.privateChatService.savePrivateMessage(user1, user2, content, user?.id);
 		}
+		
 		const messageData = {
 			userId: user.id,
 			username: user.username,
