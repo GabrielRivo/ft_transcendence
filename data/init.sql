@@ -19,7 +19,6 @@ CREATE TABLE IF NOT EXISTS user_stats (
     average_score INTEGER DEFAULT 0,
     tournament_played INTEGER DEFAULT 0,
     tournament_won INTEGER DEFAULT 0,
-    play_time_seconds INTEGER DEFAULT 0,
     average_game_duration_in_seconde INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,

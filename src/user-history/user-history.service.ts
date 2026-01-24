@@ -122,6 +122,8 @@ export class UserHistoryService {
 		}
 		if (game_type === 'ranked' && (gain_player1 == null || gain_player2 == null))
 			throw new BadRequestException("Ranked needs gain value");
+		if (game_type != 'ranked' && (gain_player1 != null || gain_player2 != null))
+			throw new BadRequestException("Only ranked can modify the elo");
 
 		const player1Exists = this.statementIsUserExists.get(player1_id);
 		if (!player1Exists) {

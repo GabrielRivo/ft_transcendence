@@ -66,24 +66,50 @@ Content-Type: application/json
     "score_player2": 5,
     "winner_id" : 2,
     "duration_seconds" : 500,
-    "game_type" : "ranked"
+    "game_type" : "ranked",
+    "hit_player1": 6,
+    "hit_player2": 8, 
+    "gain_player1" : 52,
+    "gain_player2" : 5,
+    "is_final": false
 }
 
-### Register a match (Long Duration / High Score)
+### Register a match Ranked needs gain value(!ranked + gain)
 POST http://localhost:3000/match-history/add
 Content-Type: application/json
 
 {
-    "game_id" : 17,
+    "tournament_id": 900,
+    "game_id" : 1,
+    "player1_id": 2,
+    "player2_id": 1,
+    "score_player1": 1,
+    "score_player2": 5,
+    "winner_id" : 2,
+    "duration_seconds" : 500,
+    "game_type" : "tournament",
+    "hit_player1": 6,
+    "hit_player2": 8, 
+    "gain_player1" : 52,
+    "gain_player2" : 5,
+    "is_final": false
+}
+
+### Register a match (true)
+POST http://localhost:3000/match-history/add
+Content-Type: application/json
+
+{
+    "game_id" : 15,
     "player1_id": 1,
     "player2_id": 2,
     "score_player1": 0,
     "score_player2": 5,
-    "hit_player1": 6,
-    "hit_player2": 8, 
     "winner_id" : 2,
     "duration_seconds" : 3600,
     "game_type" : "ranked",
+    "hit_player1": 6,
+    "hit_player2": 8, 
     "gain_player1" : 52,
     "gain_player2" : 5,
     "is_final": false
@@ -94,6 +120,7 @@ POST http://localhost:3000/match-history/add
 Content-Type: application/json
 
 {
+    "tournament_id": 90,
     "game_id" : 103,
     "player1_id": 1,
     "player2_id": 2,

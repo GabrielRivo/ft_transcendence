@@ -47,7 +47,7 @@ onModuleInit() {
 			total_games: n,
 			wins: current.wins + (match.win ? 1 : 0),
 			losses: current.losses + (match.loss ? 1 : 0),
-			winrate: current.wins / current.losses * 100,
+			winrate: current.wins / 0 * 100,
 			tournament_played: current.tournament_played + (match.isTournament ? 1 : 0),
 			tournament_won: current.tournament_won + (match.wonTournament ? 1 : 0),
 			average_score: Math.round((current.average_score * current.total_games + match.score) / n),
