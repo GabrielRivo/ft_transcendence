@@ -39,7 +39,7 @@ function MatchCard({ match, isSelected, onClick }: { match: Match; isSelected: b
 			className={`w-full p-4 ${bgColor} ${borderColor} rounded-lg transition-all duration-200 hover:scale-[1.02] hover:brightness-110 text-center`}
 		>
 			<p className="font-pirulen text-lg tracking-wider text-white mb-1">
-				{match.isWin ? 'Victoire !' : 'Défaite'}
+				{match.isWin ? 'Victory !' : 'Defeat'}
 			</p>
 			<p className="text-sm text-white/80 mb-2">Vs "{match.opponent}"</p>
 			<p className="font-orbitron text-xl font-bold text-white">
@@ -84,8 +84,8 @@ function MatchDetails({ match, username }: { match: Match; username: string }) {
 
 			{/* Stats supplémentaires */}
 			<div className="flex justify-between text-gray-400">
-				<p>Durée {match.duration}</p>
-				<p>Nombre de hit : {match.hits}</p>
+				<p>Duration {match.duration}</p>
+				<p>Hit number : {match.hits}</p>
 			</div>
 		</div>
 	);

@@ -4,7 +4,7 @@ import ApexCharts, { ApexOptions } from 'apexcharts';
 
 // Données mockées - à remplacer par les appels API
 const mockGeneralStats = {
-	username: 'Vous',
+	username: 'You',
 	elo: 700,
 	gamesPlayed: 18,
 	wins: 10,
@@ -35,7 +35,7 @@ function WinRatePieChart({ winRate }: { winRate: number }) {
 				background: 'transparent',
 			},
 			series: [winRate, 100 - winRate],
-			labels: ['Victoires', 'Défaites'],
+			labels: ['Victories', 'Defeat'],
 			colors: ['#22c55e', '#ef4444'],
 			legend: {
 				show: false,
@@ -117,7 +117,7 @@ export function StatisticsGeneralPage() {
 
 				{/* Parties jouées */}
 				<div className="flex flex-col items-center justify-center rounded-lg border border-purple-500/30 bg-slate-900/50 p-6">
-					<StatCard title="Parties jouées :" value={stats.gamesPlayed} />
+					<StatCard title="Games played :" value={stats.gamesPlayed} />
 				</div>
 			</div>
 
@@ -125,28 +125,28 @@ export function StatisticsGeneralPage() {
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
 				{/* Score moyen par partie */}
 				<div className="flex flex-col items-center justify-center rounded-lg border border-orange-500/30 bg-slate-900/50 p-6">
-					<p className="font-pirulen mb-1 text-xs tracking-wider text-orange-400">Score moyen par partie :</p>
+					<p className="font-pirulen mb-1 text-xs tracking-wider text-orange-400">Average score by game :</p>
 					<p className="font-orbitron mb-2 text-4xl font-bold text-white">{stats.averageScore}</p>
-					<p className="text-xs text-gray-500 italic">(arrondi au 0,01 sup)</p>
+					<p className="text-xs text-gray-500 italic">(rounded up to the 0.01 sup)</p>
 				</div>
 
 				{/* Pie Chart - Taux de victoire */}
 				<div className="flex flex-col items-center rounded-lg border border-green-500/30 bg-slate-900/50 p-4 lg:col-span-2">
-					<p className="font-pirulen mb-2 text-sm tracking-wider text-green-400">Taux de victoire : {stats.winRate}%</p>
+					<p className="font-pirulen mb-2 text-sm tracking-wider text-green-400">Winrate : {stats.winRate}%</p>
 					<WinRatePieChart winRate={stats.winRate} />
 				</div>
 
 				{/* Tournois */}
 				<div className="flex flex-col items-center justify-center gap-6 rounded-lg border border-red-500/30 bg-slate-900/50 p-6">
-					<StatCard title="Tournois joués :" value={stats.tournamentsPlayed} />
-					<StatCard title="Tournois remportés :" value={stats.tournamentsWon} />
+					<StatCard title="Tournament played :" value={stats.tournamentsPlayed} />
+					<StatCard title="Tournament won :" value={stats.tournamentsWon} />
 				</div>
 			</div>
 
 			{/* Ligne 3 : Message de félicitations */}
 			<div className="rounded-lg border border-cyan-500/30 bg-slate-900/50 p-6 text-center">
 				<p className="font-pirulen text-lg tracking-wider text-cyan-400">
-					Félicitations, vous êtes meilleurs que {stats.percentile}% des joueurs!
+					Congratulations, you are better than {stats.percentile}% of players!
 				</p>
 			</div>
 		</div>

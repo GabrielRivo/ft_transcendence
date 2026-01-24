@@ -67,7 +67,7 @@ export function ChatMessagesPanel({
 						<button
 							onClick={() => setShowInviteModal(true)}
 							className="rounded p-1 text-purple-400 transition-colors hover:bg-purple-500/20 hover:text-white"
-							title="Inviter des amis"
+							title="Add friends"
 						>
 							<Users size={18} />
 						</button>
@@ -133,7 +133,7 @@ export function ChatMessagesPanel({
 			{/* Invite Modal */}
 			{showInviteModal && (
 				<Modal
-					title="Inviter des amis"
+					title="Add friends"
 					variant="purple"
 					onClose={() => {
 						setShowInviteModal(false);
@@ -142,7 +142,7 @@ export function ChatMessagesPanel({
 				>
 					<div className="flex flex-col gap-4">
 						{friends.length === 0 ? (
-							<p className="text-center text-gray-400">Aucun ami à inviter</p>
+							<p className="text-center text-gray-400">No friends to invite</p>
 						) : (
 							<div className="max-h-64 overflow-y-auto flex flex-col gap-1">
 								{friends.map((friend) => {

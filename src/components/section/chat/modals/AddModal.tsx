@@ -11,7 +11,7 @@ interface AddModalProps {
 
 export function AddModal({ onClose, handleAddFriend, handleCreateGroup }: AddModalProps) {
 	return (
-		<Modal onClose={onClose} title="Nouvelle conversation" variant="cyan">
+		<Modal onClose={onClose} title="New chat" variant="cyan">
 			<div className="flex flex-col gap-3">
 				<button
 					onClick={handleAddFriend}
@@ -23,10 +23,10 @@ export function AddModal({ onClose, handleAddFriend, handleCreateGroup }: AddMod
 					</div>
 					<div className="relative flex flex-col gap-1">
 						<span className="font-orbitron text-sm font-bold tracking-wider text-cyan-300 transition-colors group-hover:text-cyan-200">
-							AJOUTER UN AMI
+							ADD FRIEND
 						</span>
 						<span className="font-mono text-xs text-gray-500 transition-colors group-hover:text-gray-400">
-							Envoyer une invitation à un utilisateur
+							Send an invitation to a user
 						</span>
 					</div>
 				</button>
@@ -41,10 +41,10 @@ export function AddModal({ onClose, handleAddFriend, handleCreateGroup }: AddMod
 					</div>
 					<div className="relative flex flex-col gap-1">
 						<span className="font-orbitron text-sm font-bold tracking-wider text-purple-300 transition-colors group-hover:text-purple-200">
-							CRÉER UN GROUPE
+							CREATE GROUP
 						</span>
 						<span className="font-mono text-xs text-gray-500 transition-colors group-hover:text-gray-400">
-							Démarrer une conversation de groupe
+							Start a group conversation
 						</span>
 					</div>
 				</button>

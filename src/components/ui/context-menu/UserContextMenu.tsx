@@ -143,17 +143,17 @@ export function UserContextMenu({ isOpen, position, onClose, isFriend = false, c
 			style={`left: ${adjustedPosition.x}px; top: ${adjustedPosition.y}px;`}
 		>
 			<div className="py-1">
-				<MenuItem label="Défier" onClick={() => handleAction(callbacks.onChallenge)} />
-				<MenuItem label="Inviter au tournoi" onClick={() => handleAction(callbacks.onInviteTournament)} />
+				<MenuItem label="Defy" onClick={() => handleAction(callbacks.onChallenge)} />
+				<MenuItem label="Invit to tournament" onClick={() => handleAction(callbacks.onInviteTournament)} />
 				<Divider />
-				<MenuItem label="Statistiques" onClick={() => handleAction(callbacks.onStatistics)} />
+				<MenuItem label="Stats" onClick={() => handleAction(callbacks.onStatistics)} />
 				<MenuItem label="Profil" onClick={() => handleAction(callbacks.onProfile)} />
 				<Divider />
 				<MenuItem
-					label={isFriend ? 'Retirer des amis' : 'Ajouter en ami'}
+					label={isFriend ? 'Remove friends': 'Add as friend'}
 					onClick={() => handleAction(callbacks.onToggleFriend)}
 				/>
-				<MenuItem label="Bloquer" onClick={() => handleAction(callbacks.onBlock)} variant="danger" />
+				<MenuItem label="Block" onClick={() => handleAction(callbacks.onBlock)} variant="danger" />
 			</div>
 		</div>,
 		document.body,

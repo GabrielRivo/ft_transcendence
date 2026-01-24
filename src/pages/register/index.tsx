@@ -30,7 +30,7 @@ export function Register() {
 		const result = validate({ email, password });
 		if (!result.valid) {
 			setErrors(result.errors);
-			toast('Veuillez corriger les erreurs', 'warning');
+			toast('Please correct the errors', 'warning');
 			return;
 		}
 
@@ -128,7 +128,7 @@ export function Register() {
 								{confirmError && <span className="text-xs text-red-400">{confirmError}</span>}
 							</div>
 							<div className="mt-4 flex flex-col justify-center gap-2">
-								<ButtonStyle4 type="submit">{isLoading ? 'INSCRIPTION...' : "S'INSCRIRE"}</ButtonStyle4>
+								<ButtonStyle4 type="submit">{isLoading ? 'INSCRIPTION...' : "SUBSCRIBE"}</ButtonStyle4>
 								<ButtonStyle3 onClick={handleClickReturn}>Return</ButtonStyle3>
 							</div>
 						</form>

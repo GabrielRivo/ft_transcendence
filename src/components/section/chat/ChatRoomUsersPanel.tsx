@@ -76,7 +76,7 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 										}).catch(e => {
 											toast('Network error', 'error')
 										})
-										console.log('Ajouter en ami', roomUser.username)
+										console.log('Add friend', roomUser.username)
 									},
 									onBlock: () => {
 										fetchWithAuth(`/api/social/friend-management/block`, {
@@ -92,7 +92,7 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 										}).catch(e => {
 											toast('Network error', 'error')
 										})
-										console.log('Bloquer', roomUser.username)
+										console.log('Block', roomUser.username)
 									},
 								}}
 							/>
