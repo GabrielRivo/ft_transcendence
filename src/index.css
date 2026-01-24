@@ -229,6 +229,16 @@ inset_0_0_30px_rgba(6,182,212,0.2),0_0_20px_rgba(6,182,212,0.2)				shadow-neon-c
 		inset 0 0 30px rgba(6, 182, 212, 0.08);
 }
 
+@utility shadow-neon-red {
+	box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+}
+@utility shadow-neon-red-low {
+	box-shadow:
+		0 0 25px rgba(239, 68, 68, 0.25),
+		inset 0 0 30px rgba(239, 68, 68, 0.08);
+}
+
+
 @utility shadow-neon-purple {
 	box-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
 }
@@ -247,6 +257,19 @@ inset_0_0_30px_rgba(6,182,212,0.2),0_0_20px_rgba(6,182,212,0.2)				shadow-neon-c
 		inset 0 0 30px rgba(249, 115, 22, 0.08);
 }
 
+
+@utility shadow-neon-red {
+	box-shadow: 0 0 30px rgba(239, 68, 68, 0.5);
+}
+
+@utility shadow-neon-red-low {
+	box-shadow:
+		0 0 25px rgba(239, 68, 68, 0.25),
+		inset 0 0 30px rgba(239, 68, 68, 0.08);
+}
+
+
+
 @utility shadow-neon-green {
 	box-shadow: 0 0 30px rgba(34, 197, 94, 0.5);
 }
@@ -261,6 +284,32 @@ inset_0_0_30px_rgba(6,182,212,0.2),0_0_20px_rgba(6,182,212,0.2)				shadow-neon-c
 }
 
 @layer components {
+	.scrollbar-neon {
+		scrollbar-width: thin;
+		scrollbar-color: rgba(6, 182, 212, 0.6) rgba(15, 23, 42, 0.5);
+	}
+	
+	.scrollbar-neon::-webkit-scrollbar {
+		width: 10px;
+	}
+	
+	.scrollbar-neon::-webkit-scrollbar-track {
+		background: rgba(15, 23, 42, 0.5);
+		border-radius: 5px;
+	}
+	
+	.scrollbar-neon::-webkit-scrollbar-thumb {
+		background: linear-gradient(180deg, rgba(6, 182, 212, 0.7) 0%, rgba(168, 85, 247, 0.7) 100%);
+		border-radius: 5px;
+		border: 2px solid transparent;
+		background-clip: padding-box;
+	}
+	
+	.scrollbar-neon::-webkit-scrollbar-thumb:hover {
+		background: linear-gradient(180deg, rgba(6, 182, 212, 1) 0%, rgba(168, 85, 247, 1) 100%);
+		box-shadow: 0 0 15px rgba(6, 182, 212, 0.6), 0 0 25px rgba(168, 85, 247, 0.4);
+	}
+
 	.chamfer {
 		--cut: 20px;
 
@@ -327,9 +376,32 @@ html {
 	height: 100%;
 }
 
+/* Styles de scrollbar personnalisés */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: rgba(15, 23, 42, 0.5);
+	border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: linear-gradient(180deg, rgba(6, 182, 212, 0.6) 0%, rgba(168, 85, 247, 0.6) 100%);
+	border-radius: 4px;
+	transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: linear-gradient(180deg, rgba(6, 182, 212, 0.9) 0%, rgba(168, 85, 247, 0.9) 100%);
+	box-shadow: 0 0 10px rgba(6, 182, 212, 0.5), 0 0 20px rgba(168, 85, 247, 0.3);
+}
+
+/* Firefox */
 html {
 	scrollbar-width: thin;
-	scrollbar-width: none;
+	scrollbar-color: rgba(6, 182, 212, 0.6) rgba(15, 23, 42, 0.5);
 }
 
 @keyframes ffDashboardPanelEnter {

@@ -111,7 +111,7 @@ export function TournamentPlayersPage() {
 
 		setIsSubmitting(true);
 
-		const result = await fetchJsonWithAuth<CreateTournamentResponse>('/api/tournament', {
+		const result = await fetchJsonWithAuth<CreateTournamentResponse>('/api/tournament/', {
 			method: 'POST',
 			body: JSON.stringify(payload),
 		});

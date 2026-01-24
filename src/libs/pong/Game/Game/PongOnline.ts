@@ -1,4 +1,4 @@
-import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer } from "@babylonjs/core";
+import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, SetValueAction } from "@babylonjs/core";
 import Services from "../Services/Services";
 import type { DeathBarPayload, GameState } from "../globalType";
 import Player from "../Player";
@@ -61,15 +61,35 @@ class PongOnline extends Game {
             mainTextureRatio: 0.25
         });
         this.glowLayer.intensity = 0.3;
-
+        
         this.player1 = new Player(undefined);
         this.player2 = new Player(undefined);
-        this.ball = new Ball();
+        if (this.isDisposed || !Services.Scene) return;
+        let ballMesh : Mesh | undefined = undefined;
+        /*try {
+            const ballMeshs = await Services.AssetCache.loadModel('pong-ball', './models/ball.glb', Services.Scene);
+            if (this.isDisposed) return; // Check again after async operation
+            ballMeshs.forEach(mesh => {
+                mesh.isPickable = false;
+            });
+            ballMesh = ballMeshs[0]! as Mesh;
+        } catch (e) {
+            if (!this.isDisposed) {
+                console.error('[PongOnline] Failed to load pong.glb:', e);
+            }
+        }
+        ballMesh!.scaling = new Vector3(0.5, 0.5, 0.5);*/
+        this.ball = new Ball(ballMesh);
         this.walls = [new Wall(), new Wall()];
         this.walls.forEach(wall => Services.Scene!.addMesh(wall.model));
         //this.ball = new Ball();
-        const camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, Math.PI / 4, 10, Vector3.Zero(), Services.Scene);
-        camera.attachControl(Services.Canvas, true);
+        // const camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, /*Math.PI / 4*/0, 22, Vector3.Zero(), Services.Scene);
+        // camera.attachControl(Services.Canvas, true);
+        // camera.lowerRadiusLimit = 8;
+        // camera.upperRadiusLimit = 22;
+        // camera.wheelDeltaPercentage = 0.01;
+        // camera.upperBetaLimit = Math.PI / 1.6;
+        // camera._panningMouseButton = -1;
 
         //var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
         //light2.intensity = 0;
@@ -91,11 +111,30 @@ class PongOnline extends Game {
         groundMaterial.diffuseColor = new Color3(0.4, 0.4, 0.4);
         ground.material = groundMaterial;
 
-        this.ball.setFullPos(new Vector3(0, -100, 0));
-        this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
-        this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
+        this.ball.setPos(new Vector3(0, -100, 0));
+        this.ball.setModelPos(this.ball.position);
+
+        this.player1.paddle.setHitboxDirection(new Vector3(0, 0, 1));
+        this.player2.paddle.setHitboxDirection(new Vector3(0, 0, -1));
+
         this.player1.paddle.setFullPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
         this.player2.paddle.setFullPosition(new Vector3(0, 0.15, this.height / 2 - 2));
+
+        this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
+        this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
+
+        this.player1.paddle.setModelPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
+        this.player2.paddle.setModelPosition(new Vector3(0, 0.15, this.height / 2 - 2));
+
+        this.player1.paddle.setTrigger1Position(new Vector3(0, 0.15, -this.height / 2 + 2));
+        this.player2.paddle.setTrigger1Position(new Vector3(0, 0.15, this.height / 2 - 2));
+
+        this.player1.paddle.setTrigger2Position(new Vector3(0, 0.15, -this.height / 2 + 2 - 0.075));
+        this.player2.paddle.setTrigger2Position(new Vector3(0, 0.15, this.height / 2 - 2 + 0.075));
+
+        this.player1.paddle.setTrigger3Position(new Vector3(0, 0.15, -this.height / 2 + 2 - 0.15));
+        this.player2.paddle.setTrigger3Position(new Vector3(0, 0.15, this.height / 2 - 2 + 0.15));
+
         this.player1.deathBar.model.position = new Vector3(0, 0.125, -this.height / 2 + 1);
         this.player2.deathBar.model.position = new Vector3(0, 0.125, this.height / 2 - 1);
         this.walls[0].model.position = new Vector3(-this.width / 2 - 0.1, 0.25, 0);
@@ -246,9 +285,25 @@ class PongOnline extends Game {
         if (payload.player === 1) {
             this.clientPlayer = this.player1;
             this.inputManager!.listenToPlayer1();
+            const camera: ArcRotateCamera = new ArcRotateCamera("Camera", -Math.PI/2, Math.PI / 4, 22, Vector3.Zero(), Services.Scene);
+            camera.attachControl(Services.Canvas, true);
+            camera.lowerRadiusLimit = 8;
+            camera.upperRadiusLimit = 22;
+            camera.wheelDeltaPercentage = 0.01;
+            camera.upperBetaLimit = Math.PI / 1.6;
+            camera._panningMouseButton = -1;
+            camera.inputs.removeByType("ArcRotateCameraKeyboardMoveInput");
         } else if (payload.player === 2) {
             this.clientPlayer = this.player2;
             this.inputManager!.listenToPlayer2();
+            const camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI/2, Math.PI / 4, 22, Vector3.Zero(), Services.Scene);
+            camera.attachControl(Services.Canvas, true);
+            camera.lowerRadiusLimit = 8;
+            camera.upperRadiusLimit = 22;
+            camera.wheelDeltaPercentage = 0.01;
+            camera.upperBetaLimit = Math.PI / 1.6;
+            camera._panningMouseButton = -1;
+            camera.inputs.removeByType("ArcRotateCameraKeyboardMoveInput");
         }
     }
 
@@ -306,7 +361,8 @@ class PongOnline extends Game {
             Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: this.player1!.score, player2Score: this.player2!.score, scoreToWin: 5 });
             console.log("Player 1 score :", this.player1!.score);
         }*/
-        this.ball!.setFullPos(new Vector3(0, -100, 0));
+        this.ball!.setPos(new Vector3(0, -100, 0));
+        this.ball!.setModelPos(this.ball!.position);
         //this.ball = new Ball();
         //this.ball.setFullPos(new Vector3(0, 0.125, 0));
     }
@@ -335,6 +391,8 @@ class PongOnline extends Game {
     run() {
         console.log("Game running.");
         this.isDisposed = false;
+        Services.TimeService!.update();
+        this.predictionManager!.resetLastFrameTime();
         Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
         Services.Engine!.runRenderLoop(this.renderLoop);
     }
