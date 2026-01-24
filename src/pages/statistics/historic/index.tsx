@@ -1,31 +1,22 @@
-import { createElement, useState } from 'my-react';
+import { createElement, useState, useEffect } from 'my-react';
+import { useAuth } from '../../../hook/useAuth';
+import { api } from '../../../hook/useFetch';
+import { MatchHistory, TransformedMatch, UserInfo } from '../../../types/stats';
 
-// Types pour les matchs
-interface Match {
-	id: number;
-	date: string;
-	opponent: string;
-	myScore: number;
-	opponentScore: number;
-	isWin: boolean;
-	eloChange: number;
-	duration: string;
-	hits: number;
+function formatDate(dateStr: string): string {
+	const date = new Date(dateStr);
+	const day = String(date.getDate()).padStart(2, '0');
+	const month = String(date.getMonth() + 1).padStart(2, '0');
+	const year = String(date.getFullYear()).slice(-2);
+	return `${day}/${month}/${year}`;
 }
 
-// Données mockées - à remplacer par les appels API
-const mockHistoricStats = {
-	username: 'Vous',
-	matches: [
-		{ id: 1, date: '10/01/26', opponent: 'UserName1', myScore: 5, opponentScore: 0, isWin: true, eloChange: 15, duration: '2 min', hits: 42 },
-		{ id: 2, date: '09/01/26', opponent: 'UserName2', myScore: 5, opponentScore: 3, isWin: true, eloChange: 12, duration: '4 min', hits: 67 },
-		{ id: 3, date: '08/01/26', opponent: 'UserName', myScore: 1, opponentScore: 5, isWin: false, eloChange: -18, duration: '3 min', hits: 34 },
-		{ id: 4, date: '07/01/26', opponent: 'UserName', myScore: 2, opponentScore: 5, isWin: false, eloChange: -14, duration: '5 min', hits: 56 },
-		{ id: 5, date: '06/01/26', opponent: 'ProPlayer', myScore: 5, opponentScore: 4, isWin: true, eloChange: 20, duration: '8 min', hits: 89 },
-	] as Match[],
-};
+function formatDuration(seconds: number): string {
+	const minutes = Math.floor(seconds / 60);
+	return `${minutes} min`;
+}
 
-function MatchCard({ match, isSelected, onClick }: { match: Match; isSelected: boolean; onClick: () => void }) {
+function MatchCard({ match, isSelected, onClick }: { match: TransformedMatch; isSelected: boolean; onClick: () => void }) {
 	const bgColor = match.isWin ? 'bg-green-600' : 'bg-red-600';
 	const borderColor = isSelected
 		? match.isWin
@@ -49,7 +40,7 @@ function MatchCard({ match, isSelected, onClick }: { match: Match; isSelected: b
 	);
 }
 
-function MatchDetails({ match, username }: { match: Match; username: string }) {
+function MatchDetails({ match, username }: { match: TransformedMatch; username: string }) {
 	return (
 		<div className="rounded-lg border border-slate-600/50 bg-slate-900/50 p-6 h-full flex flex-col">
 			{/* Date */}
@@ -92,20 +83,119 @@ function MatchDetails({ match, username }: { match: Match; username: string }) {
 }
 
 export function StatisticsHistoricPage() {
-	const [selectedMatchId, setSelectedMatchId] = useState<number>(mockHistoricStats.matches[0]?.id || 0);
+	const { user } = useAuth();
+	const [matches, setMatches] = useState<TransformedMatch[]>([]);
+	const [selectedMatchId, setSelectedMatchId] = useState<number>(0);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-	const selectedMatch = mockHistoricStats.matches.find((m) => m.id === selectedMatchId) || mockHistoricStats.matches[0];
+	useEffect(() => {
+		async function fetchHistory() {
+			if (!user?.id) return;
+
+			setLoading(true);
+			setError(null);
+
+			try {
+				const historyRes = await api.get<MatchHistory[]>(`/api/stats/match-history/user/${user.id}`);
+
+				if (historyRes.error || !historyRes.data) {
+					setError(historyRes.error || 'Impossible de charger l\'historique');
+					setLoading(false);
+					return;
+				}
+
+				const rawMatches = historyRes.data;
+				if (rawMatches.length === 0) {
+					setMatches([]);
+					setLoading(false);
+					return;
+				}
+
+				// Récupérer les usernames des adversaires
+				const opponentIds = new Set<number>();
+				rawMatches.forEach((m) => {
+					const opponentId = m.player1_id === user.id ? m.player2_id : m.player1_id;
+					opponentIds.add(opponentId);
+				});
+
+				const usernameMap = new Map<number, string>();
+				await Promise.all(
+					Array.from(opponentIds).map(async (id) => {
+						const res = await api.get<UserInfo>(`/api/auth/user-by-id/${id}`);
+						usernameMap.set(id, res.data?.username || `Joueur #${id}`);
+					})
+				);
+
+				// Transformer les matchs
+				const transformedMatches: TransformedMatch[] = rawMatches.map((m) => {
+					const isPlayer1 = m.player1_id === user.id;
+					const opponentId = isPlayer1 ? m.player2_id : m.player1_id;
+
+					return {
+						id: m.game_id,
+						date: formatDate(m.created_at),
+						opponent: usernameMap.get(opponentId) || `Joueur #${opponentId}`,
+						myScore: isPlayer1 ? m.score_player1 : m.score_player2,
+						opponentScore: isPlayer1 ? m.score_player2 : m.score_player1,
+						isWin: m.winner_id === user.id,
+						eloChange: isPlayer1 ? (m.gain_player1 || 0) : (m.gain_player2 || 0),
+						duration: formatDuration(m.duration_seconds),
+						hits: isPlayer1 ? m.hit_player1 : m.hit_player2,
+					};
+				});
+
+				setMatches(transformedMatches);
+				if (transformedMatches.length > 0) {
+					setSelectedMatchId(transformedMatches[0].id);
+				}
+			} catch (err) {
+				setError('Erreur lors du chargement de l\'historique');
+			} finally {
+				setLoading(false);
+			}
+		}
+
+		fetchHistory();
+	}, [user?.id]);
+
+	if (loading) {
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<p className="font-pirulen text-cyan-400">Chargement de l'historique...</p>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<p className="font-pirulen text-red-400">{error}</p>
+			</div>
+		);
+	}
+
+	if (matches.length === 0) {
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<p className="font-pirulen text-gray-400">Aucun match dans l'historique</p>
+			</div>
+		);
+	}
+
+	const selectedMatch = matches.find((m) => m.id === selectedMatchId) || matches[0];
+	const username = user?.username || 'Vous';
 
 	return (
 		<div className="flex gap-6 p-4 h-full w-full min-h-[500px]">
 			{/* Colonne gauche : Détails du match */}
 			<div className="flex-[3]">
-				{selectedMatch && <MatchDetails match={selectedMatch} username={mockHistoricStats.username} />}
+				{selectedMatch && <MatchDetails match={selectedMatch} username={username} />}
 			</div>
 
 			{/* Colonne droite : Liste des matchs */}
 			<div className="flex-[2] flex flex-col gap-3 overflow-y-auto max-h-[600px] pr-2 scrollbar-neon">
-				{mockHistoricStats.matches.map((match) => (
+				{matches.map((match) => (
 					<MatchCard
 						key={match.id}
 						match={match}

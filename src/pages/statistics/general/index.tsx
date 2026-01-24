@@ -1,21 +1,23 @@
-import { createElement, useEffect, useRef } from 'my-react';
+import { createElement, useEffect, useRef, useState } from 'my-react';
 import EloHistogram from '@ui/charts/EloHistogram';
 import ApexCharts, { ApexOptions } from 'apexcharts';
+import { useAuth } from '../../../hook/useAuth';
+import { api } from '../../../hook/useFetch';
+import { UserStats } from '../../../types/stats';
 
-// Données mockées - à remplacer par les appels API
-const mockGeneralStats = {
-	username: 'Vous',
-	elo: 700,
-	gamesPlayed: 18,
-	wins: 10,
-	losses: 8,
-	winRate: 57,
-	averageScore: 2.56,
-	tournamentsPlayed: 5,
-	tournamentsWon: 1,
-	percentile: 70.5,
-	allPlayersElo: [500, 500, 500, 600, 700, 1000, 1000, 1000, 1000, 1500, 1800, 1758],
-};
+interface GeneralStatsDisplay {
+	username: string;
+	elo: number;
+	gamesPlayed: number;
+	wins: number;
+	losses: number;
+	winRate: number;
+	averageScore: number;
+	tournamentsPlayed: number;
+	tournamentsWon: number;
+	percentile: number;
+	allPlayersElo: number[];
+}
 
 function WinRatePieChart({ winRate }: { winRate: number }) {
 	const chartRef = useRef<HTMLDivElement | null>(null);
@@ -101,7 +103,75 @@ function StatCard({ title, value, subtitle }: { title: string; value: string | n
 }
 
 export function StatisticsGeneralPage() {
-	const stats = mockGeneralStats;
+	const { user } = useAuth();
+	const [stats, setStats] = useState<GeneralStatsDisplay | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		async function fetchStats() {
+			if (!user?.id) return;
+
+			setLoading(true);
+			setError(null);
+
+			try {
+				const [userStatsRes, allElosRes] = await Promise.all([
+					api.get<UserStats>(`/api/stats/user/${user.id}`),
+					api.get<number[]>('/api/stats/all-elos'),
+				]);
+
+				if (userStatsRes.error || !userStatsRes.data) {
+					setError(userStatsRes.error || 'Impossible de charger les statistiques');
+					setLoading(false);
+					return;
+				}
+
+				const userStats = userStatsRes.data;
+				const allElos = allElosRes.data || [];
+
+				// Calcul du percentile
+				const playersBelow = allElos.filter((elo) => elo < userStats.elo).length;
+				const percentile = allElos.length > 0 ? Math.round((playersBelow / allElos.length) * 1000) / 10 : 0;
+
+				setStats({
+					username: user.username || 'Vous',
+					elo: userStats.elo,
+					gamesPlayed: userStats.total_games,
+					wins: userStats.wins,
+					losses: userStats.losses,
+					winRate: userStats.winrate,
+					averageScore: userStats.average_score,
+					tournamentsPlayed: userStats.tournament_played,
+					tournamentsWon: userStats.tournament_won,
+					percentile,
+					allPlayersElo: allElos,
+				});
+			} catch (err) {
+				setError('Erreur lors du chargement des statistiques');
+			} finally {
+				setLoading(false);
+			}
+		}
+
+		fetchStats();
+	}, [user?.id, user?.username]);
+
+	if (loading) {
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<p className="font-pirulen text-cyan-400">Chargement des statistiques...</p>
+			</div>
+		);
+	}
+
+	if (error || !stats) {
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<p className="font-pirulen text-red-400">{error || 'Aucune statistique disponible'}</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex w-full flex-col gap-6 p-4">
