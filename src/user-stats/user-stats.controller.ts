@@ -13,7 +13,7 @@ import { UserHistoryService } from '../user-history/user-history.service.js';
 import { CreateGameStatDto, CreateGameStatSchema } from './dto/user-stats.dto.js';
 import { UserStatsService } from './user-stats.service.js';
 
-@Controller('/stats')
+@Controller('/')
 export class UserStatsController {
 	@Inject(UserHistoryService)
 	private userHistoryService!: UserHistoryService;
@@ -33,6 +33,11 @@ export class UserStatsController {
 		}
 	}
 
+	@Get('/all-elos')
+	getAllElos() {
+		return this.statsService.getAllElos();
+	}
+
 	// @Post('/add')
 	// @BodySchema(CreateGameStatSchema)
 	// async addMatch(@Body() data: CreateGameStatDto) {
@@ -43,7 +48,7 @@ export class UserStatsController {
 	// 			data.player2_id,
 	// 			data.score_player1,
 	// 			data.score_player2,
-	// 			data.hit_player1, 
+	// 			data.hit_player1,
 	// 			data.hit_player2,
 	// 			data.winner_id,
 	// 			data.duration_seconds,

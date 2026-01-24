@@ -20,12 +20,15 @@ export class UserStatsService {
 	private db!: Database.Database;
 	private statementGetStats!: Statement<number>;
 	private statementUserStats!: Statement<UserStatsValues>;
+	private statementGetAllElos!: Statement<[]>;
 
-onModuleInit() {
-	this.statementGetStats = this.db.prepare(
-		`SELECT * FROM user_stats WHERE user_id = ?`);
+	onModuleInit() {
+		this.statementGetStats = this.db.prepare(
+			`SELECT * FROM user_stats WHERE user_id = ?`);
 
-	this.statementUserStats = this.db.prepare(
+		this.statementGetAllElos = this.db.prepare('SELECT elo FROM user_stats');
+
+		this.statementUserStats = this.db.prepare(
 		`INSERT INTO user_stats (user_id, elo, total_games, wins, losses, winrate, tournament_played,
 			tournament_won, average_score, average_game_duration_in_seconde, updated_at)
 		VALUES (@user_id, @elo, @total_games, @wins, @losses, @winrate, @tournament_played, @tournament_won, @average_score, @average_game_duration_in_seconde, CURRENT_TIMESTAMP)
@@ -36,6 +39,11 @@ onModuleInit() {
 	}
 	async getGlobalStats(userId: number) {
 		return this.statementGetStats.get(userId) as UserStatsValues | undefined;
+	}
+
+	getAllElos(): number[] {
+		const rows = this.statementGetAllElos.all() as { elo: number }[];
+		return rows.map((r) => r.elo);
 	}
 
 	private updateStats(current: UserStatsValues, match: any): UserStatsValues {
