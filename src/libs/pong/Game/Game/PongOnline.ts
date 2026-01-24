@@ -10,6 +10,9 @@ import Game from "./Game";
 
 import { gameSocket as socket } from "../../../socket";
 import InputManagerOnline from "../InputManagerOnline";
+import ZoomEffect from "../Effects/ZoomEffect";
+import BlackScreenEffect from "../Effects/BlackScreenEffect";
+import RotateCameraAlphaEffect from "../Effects/RotateCameraAlphaEffect";
 
 class PongOnline extends Game {
 
@@ -22,6 +25,7 @@ class PongOnline extends Game {
     walls?: Wall[];
     width: number = 7;
     height: number = 12;
+    camera?: ArcRotateCamera;
 
     private currentGameState: "waiting" | "playing" | null;
     private gameState: "waiting" | "playing" | null;
@@ -55,6 +59,10 @@ class PongOnline extends Game {
 
     async drawScene(): Promise<void> {
         if (this.isDisposed || !Services.Scene) return;
+
+        this.camera = new ArcRotateCamera("Camera", 0, Math.PI / 2.8, 22, Vector3.Zero(), Services.Scene);
+        const blackScreen = new BlackScreenEffect(1, 0);
+        blackScreen.play();
 
         this.glowLayer = new GlowLayer("glow", Services.Scene, {
             blurKernelSize: 32,
@@ -260,7 +268,7 @@ class PongOnline extends Game {
 
         console.log("Lost connection to server, attempting to reconnect...");
         this.serverState = "disconnected";
-        this.gameJoined = false;
+        //this.gameJoined = false;
         this.gameState = "waiting";
         this.processGameState();
         let connectionTimeout;
@@ -275,36 +283,42 @@ class PongOnline extends Game {
             socket.on("disconnect", this.onServerLostConnection);
             console.log("Resuming game after reconnection.");
             this.serverState = "connected";
-            this.processGameState();
+            //this.processGameState();
         });
     }
 
     private onGameJoined = (payload: any): void => {
-        this.gameJoined = true;
+        
         console.log("Game joined with payload:", payload, " timestamp:", performance.now());
-        if (payload.player === 1) {
-            this.clientPlayer = this.player1;
-            this.inputManager!.listenToPlayer1();
-            const camera: ArcRotateCamera = new ArcRotateCamera("Camera", -Math.PI/2, Math.PI / 4, 22, Vector3.Zero(), Services.Scene);
-            camera.attachControl(Services.Canvas, true);
-            camera.lowerRadiusLimit = 8;
-            camera.upperRadiusLimit = 22;
-            camera.wheelDeltaPercentage = 0.01;
-            camera.upperBetaLimit = Math.PI / 1.6;
-            camera._panningMouseButton = -1;
-            camera.inputs.removeByType("ArcRotateCameraKeyboardMoveInput");
-        } else if (payload.player === 2) {
-            this.clientPlayer = this.player2;
-            this.inputManager!.listenToPlayer2();
-            const camera: ArcRotateCamera = new ArcRotateCamera("Camera", Math.PI/2, Math.PI / 4, 22, Vector3.Zero(), Services.Scene);
-            camera.attachControl(Services.Canvas, true);
-            camera.lowerRadiusLimit = 8;
-            camera.upperRadiusLimit = 22;
-            camera.wheelDeltaPercentage = 0.01;
-            camera.upperBetaLimit = Math.PI / 1.6;
-            camera._panningMouseButton = -1;
-            camera.inputs.removeByType("ArcRotateCameraKeyboardMoveInput");
+        if (!this.gameJoined) {
+            this.camera!.attachControl(Services.Canvas, true);
+            this.camera!.lowerRadiusLimit = 8;
+            this.camera!.upperRadiusLimit = 22;
+            this.camera!.wheelDeltaPercentage = 0.01;
+            this.camera!.upperBetaLimit = Math.PI / 1.6;
+            this.camera!._panningMouseButton = -1;
+            this.camera!.inputs.removeByType("ArcRotateCameraKeyboardMoveInput");
+            this.camera!.beta = Math.PI / 2.8;
+            const zoomEffect = new ZoomEffect(22, 11);
+            let rotateCameraAlphaEffect : RotateCameraAlphaEffect;
+            if (payload.player === 1) {
+                this.clientPlayer = this.player1;
+                this.inputManager!.listenToPlayer1();
+                //this.camera!.alpha = -Math.PI/2;
+                rotateCameraAlphaEffect = new RotateCameraAlphaEffect(-Math.PI/2);
+                rotateCameraAlphaEffect.play(this.camera!);
+                zoomEffect.play(this.camera!);
+            } else if (payload.player === 2) {
+                this.clientPlayer = this.player2;
+                this.inputManager!.listenToPlayer2();
+                //this.camera!.alpha = Math.PI/2;
+                rotateCameraAlphaEffect = new RotateCameraAlphaEffect(Math.PI/2);
+                rotateCameraAlphaEffect.play(this.camera!);
+                zoomEffect.play(this.camera!);
+            }
+            this.gameJoined = true;
         }
+        this.processGameState();
     }
 
     private onGameStopped = (payload: any): void => {
@@ -420,7 +434,11 @@ class PongOnline extends Game {
 
     private endGame(): void {
         //Services.EventBus!.emit("UI:MenuStateChange", "pongMenu");
-        Services.EventBus!.emit("Game:Ended", { name: "PongOnline", winnerId: null, score: { player1: this.player1!.score, player2: this.player2!.score } });
+        const blackScreen = new BlackScreenEffect(0, 1);
+        blackScreen.play();
+        setTimeout(() => {
+            Services.EventBus!.emit("Game:Ended", { name: "PongOnline", winnerId: null, score: { player1: this.player1!.score, player2: this.player2!.score } });
+        }, 1000);
         //this.dispose();
     }
 

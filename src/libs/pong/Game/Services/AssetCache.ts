@@ -153,7 +153,7 @@ class AssetCacheSingleton {
         );
 
         const loadTime = performance.now() - startTime;
-        console.log(`[AssetCache] Loaded ${result.meshes.length} meshes from cache in ${loadTime.toFixed(0)}ms`);
+        //console.log(`[AssetCache] Loaded ${result.meshes.length} meshes from cache in ${loadTime.toFixed(0)}ms`);
 
         return result.meshes;
     }

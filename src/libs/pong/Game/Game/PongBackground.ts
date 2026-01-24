@@ -40,6 +40,7 @@ import Player from '../Player';
 import Ball from '../Ball';
 import Wall from '../Wall';
 import Game from './Game';
+import BlackScreenEffect from '../Effects/BlackScreenEffect';
 
 // -----------------------------------------------------------------------------
 // Constants
@@ -170,6 +171,8 @@ class PongBackground extends Game {
 			Vector3.Zero(),
 			Services.Scene,
 		);
+		const blackScreen = new BlackScreenEffect(1, 0);
+        blackScreen.play();
 		// Don't attach controls - this is a background, not interactive
 		// this.camera.attachControl(Services.Canvas, true);
 
