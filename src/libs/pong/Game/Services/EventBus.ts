@@ -84,7 +84,7 @@ class EventBus {
                 }
                 catch(err: any)
                 {
-                    console.log("Error in handler : " + listener.name + " event : " + event);
+                    console.log("Error in handler : " + listener.name + " event : " + event + " Error: " + err.message);
                 }
             });
         }

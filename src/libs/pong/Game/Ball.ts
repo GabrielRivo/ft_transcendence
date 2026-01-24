@@ -21,7 +21,7 @@ class Ball {
     direction!: Vector3;
     position!: Vector3;
     speed: number = 3;
-    maxSpeed: number = 150;
+    maxSpeed: number = 50;
     acceleration: number = 1.1;
     diameter: number = 0.25;
     moving: boolean = true;
@@ -29,6 +29,8 @@ class Ball {
     owner: any;
 
     private visualOffset: Vector3 = new Vector3(0, 0, 0);
+
+    private generateTImeoutId: NodeJS.Timeout | null = null;
 
     constructor(model?: Mesh) {
         let white : Color4 = new Color4(1, 1, 1, 1);
@@ -112,12 +114,17 @@ class Ball {
         this.setPos(new Vector3(0, 0.125, 0));
         this.setModelPos(this.position);
         this.moving = false;
-
-        this.generateEffect.play(this.model);    
+   
 
         const currentTime = Services.TimeService!.getTimestamp();
         
         this.startMovingTime = currentTime + delay;
+
+        this.model.visibility = 0;
+        this.generateTImeoutId = setTimeout(() => {
+            this.generateEffect.play(this.model);
+            this.model.visibility = 1;
+        }, 1500);
     }
 
     private testId: number = 0;
@@ -444,7 +451,10 @@ class Ball {
         if (!normal)
             console.log("No normal found for bounce!");
         else
+        {
             this.setDir(MathUtils.reflectVector(this.direction, normal));
+            Services.EventBus!.emit("BallBounce", {ball : this});
+        }
     }
 
     public reconcile(predictedPos: Vector3, serverPos: Vector3, serverDir: Vector3, serverSpeed: number): void {
@@ -498,6 +508,11 @@ class Ball {
         this.moving = false;
         Services.Collision!.remove(this.model);
         this.model.dispose();
+
+        if (this.generateTImeoutId) {
+            clearTimeout(this.generateTImeoutId);
+            this.generateTImeoutId = null;
+        }
 
         setTimeout(() => {
             this.hitEffect.dispose();

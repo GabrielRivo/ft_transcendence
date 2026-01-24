@@ -7,6 +7,7 @@ import Ball from "../Ball";
 import Wall from "../Wall";
 import InputManager from "../InputManagerLocal";
 import Game from "./Game";
+import BlackScreenEffect from "../Effects/BlackScreenEffect";
 
 import { socket } from "../../../socket";
 
@@ -63,6 +64,9 @@ class PongLocal extends Game {
         camera.wheelDeltaPercentage = 0.01;
         camera.upperBetaLimit = Math.PI / 1.6;
         camera._panningMouseButton = -1;
+
+        const blackScreen = new BlackScreenEffect(1, 0);
+        blackScreen.play();
 
         //var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
         //light2.intensity = 0;
@@ -133,10 +137,12 @@ class PongLocal extends Game {
     }
 
     private onDeathBarHit = (payload: DeathBarPayload) => {
-        if (payload.deathBar.owner == this.player1) {
+        this.ball!.setPos(new Vector3(0, -100, 0));
+        this.ball!.setModelPos(new Vector3(0, -100, 0));
+        if (payload.deathBar.owner == this.player1 && this.player2!.score < 5) {
             this.player2!.scoreUp();
         }
-        else if (payload.deathBar.owner == this.player2) {
+        else if (payload.deathBar.owner == this.player2 && this.player1!.score < 5) {
             this.player1!.scoreUp();
         }
         
@@ -148,8 +154,10 @@ class PongLocal extends Game {
         });
 
         // Check for game end
-        if (this.player1!.score >= 5 || this.player2!.score >= 5) {
-            this.endGame();
+        if (this.player1!.score == 5 || this.player2!.score == 5) {
+            setTimeout(() => {
+                this.endGame();
+            }, 8000);
             return;
         }
 
@@ -195,8 +203,11 @@ class PongLocal extends Game {
     }
 
     private endGame() : void {
-        Services.EventBus!.emit("UI:MenuStateChange", "pongMenu");
-        Services.EventBus!.emit("Game:Ended", {name: "Pong", winnerId: null, score: {player1: this.player1!.score, player2: this.player2!.score}});
+        const blackScreen = new BlackScreenEffect(0, 1);
+        blackScreen.play();
+        setTimeout(() => {
+            Services.EventBus!.emit("Game:Ended", { name: "PongLocal", winnerId: null, score: { player1: this.player1!.score, player2: this.player2!.score } });
+        }, 1000);
     }
 
     dispose(): void {

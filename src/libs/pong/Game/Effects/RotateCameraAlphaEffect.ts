@@ -33,7 +33,7 @@ class ZoomEffect extends Effect {
 
         camera.animations.push(this.rotateCameraAnimation);
 
-        Services.Scene!.beginAnimation(camera, 0, 120, false, 1.2);
+        Services.Scene!.beginDirectAnimation(camera, [this.rotateCameraAnimation],0, 120, false, 1.2);
     }
 
     stop(): void {

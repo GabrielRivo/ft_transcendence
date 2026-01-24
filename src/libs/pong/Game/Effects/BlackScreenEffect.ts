@@ -1,7 +1,4 @@
-import { 
-    Vector3, Mesh, MeshBuilder, Animation, StandardMaterial, Axis, 
-    ParticleSystem, Texture, Color3, GlowLayer, BackEase, EasingFunction, 
-    Camera, CubicEase, Layer, Color4
+import { Vector3, Mesh, MeshBuilder, Animation, StandardMaterial, Axis, ParticleSystem, Texture, Color3, GlowLayer, BackEase, EasingFunction, Camera, CubicEase, Layer, Color4
 } from "@babylonjs/core";
 import Effect from "./Effect";
 import Services from "../Services/Services";

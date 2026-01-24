@@ -150,6 +150,7 @@ class Paddle {
         ball.speedUp();
         ball.owner = this.owner;
         //console.log("Ball hit by paddle, new direction : ", newDir, " angle : ", angle);
+        Services.EventBus!.emit("PaddleHitBall", {paddle: this, ball: ball});
     }
 
     public reconcile(predictedPos: Vector3, truthPos: Vector3): void {
