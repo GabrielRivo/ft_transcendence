@@ -1,5 +1,5 @@
 Si pas Oauth :
-	Ajouter mot de passe oublier
+	Ajouter mot de passe oublie
 	Ajouter verification de mail
 	Ajout peut etre du Magic Code
 	Ajouter double identification via OTP (enable / disable) => bien donner 2 recovery code en cas de perte...

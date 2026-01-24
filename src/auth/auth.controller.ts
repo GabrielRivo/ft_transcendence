@@ -18,9 +18,11 @@ import {
 import config from '../config.js';
 import { AuthService, AuthTokens, JwtPayload } from './auth.service.js';
 import { DbExchangeService } from './dbExchange.service.js';
+
 import { LoginDto, LoginSchema } from './dto/login.dto.js';
 import { RegisterDto, RegisterSchema } from './dto/register.dto.js';
 import { SetUsernameDto, SetUsernameSchema } from './dto/setUsername.dto.js';
+
 import { AuthGuard } from './guards/auth.guard.js';
 import type { ProviderKeys } from './providers.js';
 import { providers } from './providers.js';
@@ -172,6 +174,15 @@ export class AuthController {
 			throw new NotFoundException('Id not found');
 		}
 		return { id: user.id, username: user.username };
+	}
+
+	@Get('/user-is-exist/:id')
+	async isExist(@Param('id') id: number){
+		const user = await this.dbExchangeService.getUserById(id);
+		if (!user) {
+			return { exist : false}
+		}
+		return { exist : true };
 	}
 
 	@Get('/:provider/callback')
