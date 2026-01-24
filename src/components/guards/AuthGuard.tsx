@@ -14,7 +14,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
 	useEffect(() => {
 		if (!loading && !isAuthenticated) {
-			toast(`Tu dois être connecté pour accéder à cette page !`, 'error', 3000);
+			toast(`You must be logged in to access this page!`, 'error', 3000);
 			navigate('/login');
 			return;
 		}
@@ -23,7 +23,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 		// et n'est pas déjà sur la page set-username
 		const currentPath = window.location.pathname;
 		if (!loading && isAuthenticated && user?.noUsername && currentPath !== '/set-username') {
-			toast(`Tu n'as pas encore de pseudo !`, 'error', 3000);
+			toast(`You don't have a username yet. !`, 'error', 3000);
 			navigate('/set-username');
 		}
 	}, [loading, isAuthenticated, user?.noUsername, navigate]);

@@ -33,7 +33,7 @@ export function SetUsername() {
 		const result = validate({ username });
 		if (!result.valid) {
 			setErrors(result.errors);
-			toast('Veuillez corriger les erreurs', 'warning');
+			toast('Please correct the errors', 'warning');
 			return;
 		}
 
@@ -43,13 +43,13 @@ export function SetUsername() {
 			const success = await setUsername(username);
 
 			if (success) {
-				toast('Pseudo défini avec succès!', 'success');
+				toast('Username successfully set!', 'success');
 				navigate('/play');
 			} else {
-				toast('Ce pseudo est déjà utilisé ou invalide', 'error');
+				toast('This username is already in use or invalid', 'error');
 			}
 		} catch {
-			toast('Une erreur est survenue', 'error');
+			toast('An error has occurred', 'error');
 		} finally {
 			setIsLoading(false);
 		}
@@ -63,8 +63,8 @@ export function SetUsername() {
 				<CardStyle2>
 					<div className="flex w-full flex-col gap-8">
 						<div className="text-center">
-							<h1 className="font-pirulen text-xl tracking-widest text-white">Choisir un pseudo</h1>
-							<p className="mt-2 text-sm text-gray-400">Choisissez un pseudo unique pour votre compte</p>
+							<h1 className="font-pirulen text-xl tracking-widest text-white">Choose a nickname</h1>
+							<p className="mt-2 text-sm text-gray-400">Choose a unique username for your account</p>
 						</div>
 						<form className="flex flex-col gap-6" onSubmit={handleSubmit}>
 							<div className="group flex flex-col gap-2">
@@ -81,14 +81,14 @@ export function SetUsername() {
 									value={username}
 									onInput={(e: Event) => setUsernameValue((e.target as HTMLInputElement).value)}
 									className={`focus:border-neon-blue w-full rounded-sm border bg-transparent p-3 text-sm text-white transition-all duration-300 outline-none placeholder:text-gray-600 focus:bg-white/5 ${usernameError ? 'border-red-500' : 'border-white/10'}`}
-									placeholder="MonPseudo123"
+									placeholder="Username123"
 									autoFocus
 								/>
 								{usernameError && <span className="text-xs text-red-400">{usernameError}</span>}
-								<p className="text-xs text-gray-500">3-20 caractères, lettres, chiffres et underscore uniquement</p>
+								<p className="text-xs text-gray-500">3-20 characters, letters, numbers and underscores only</p>
 							</div>
 							<div className="mt-4 flex flex-col justify-center gap-2">
-								<ButtonStyle4 type="submit">{isLoading ? 'ENREGISTREMENT...' : 'VALIDER'}</ButtonStyle4>
+								<ButtonStyle4 type="submit">{isLoading ? 'REGISTRATION...': 'VALIDATE'}</ButtonStyle4>
 							</div>
 						</form>
 					</div>

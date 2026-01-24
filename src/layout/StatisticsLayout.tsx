@@ -22,7 +22,7 @@ export function StatisticsLayout({ children }: { children: Element }) {
 						to={params?.statsId ? `/statistics/historic/${params.statsId}` : '/statistics/historic'}
 						className={`hover:text-cyan-500 ${isHistoric ? 'text-cyan-400' : ''}`}
 					>
-						Historic
+						History
 					</Link>
 				</nav>
 			</header>

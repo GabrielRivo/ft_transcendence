@@ -33,12 +33,12 @@ export function AddFriendModal({ onClose }: AddFriendModalProps) {
 				onClose();
 			}, 1500);
 		} else {
-			setError(result.message || "Impossible d'envoyer l'invitation");
+			setError(result.message || "Unable to send invitation");
 		}
 	};
 
 	return (
-		<Modal onClose={onClose} title="Ajouter un ami" variant="cyan">
+		<Modal onClose={onClose} title="Add a friend" variant="cyan">
 			{success ? (
 				<div className="flex flex-col items-center gap-6 py-8">
 					<div className="relative flex size-20 items-center justify-center">
@@ -47,13 +47,13 @@ export function AddFriendModal({ onClose }: AddFriendModalProps) {
 							<Check className="size-8 text-green-400" />
 						</div>
 					</div>
-					<p className="font-orbitron text-lg font-bold tracking-wider text-green-400">INVITATION ENVOYÉE !</p>
+					<p className="font-orbitron text-lg font-bold tracking-wider text-green-400">INVITATION SENT !</p>
 				</div>
 			) : (
 				<form onSubmit={handleSubmit} className="flex flex-col gap-6">
 					<div>
 						<label className="mb-3 block font-mono text-xs font-bold tracking-widest text-cyan-400/80 uppercase">
-							Pseudo de l'utilisateur
+							Username
 						</label>
 						<div className="relative">
 							<span className="absolute top-1/2 left-4 -translate-y-1/2 font-mono text-cyan-500/50">@</span>
@@ -61,7 +61,7 @@ export function AddFriendModal({ onClose }: AddFriendModalProps) {
 								type="text"
 								value={username}
 								onInput={(e: Event) => setUsername((e.target as HTMLInputElement).value)}
-								placeholder="Entrez le pseudo..."
+								placeholder="Enter nickname..."
 								className="w-full rounded-lg border-2 border-cyan-500/30 bg-slate-900/80 py-3 pr-4 pl-9 font-mono text-sm text-white placeholder-gray-500 shadow-[inset_0_0_20px_rgba(6,182,212,0.1)] transition-all duration-200 outline-none focus:border-cyan-400 focus:shadow-[inset_0_0_30px_rgba(6,182,212,0.2),0_0_20px_rgba(6,182,212,0.2)]"
 								autoFocus
 							/>
@@ -79,7 +79,7 @@ export function AddFriendModal({ onClose }: AddFriendModalProps) {
 							onClick={onClose}
 							className="font-orbitron flex-1 rounded-lg border-2 border-gray-500/30 bg-gray-500/5 py-3 text-xs font-bold tracking-wider text-gray-400 transition-all duration-200 hover:border-gray-400/50 hover:bg-gray-500/10 hover:text-gray-300"
 						>
-							ANNULER
+							CANCEL
 						</button>
 						<button
 							type="submit"
@@ -89,10 +89,10 @@ export function AddFriendModal({ onClose }: AddFriendModalProps) {
 							{loading ? (
 								<span className="flex items-center justify-center gap-2">
 									<span className="size-4 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
-									ENVOI...
+									SENDING...
 								</span>
 							) : (
-								'ENVOYER'
+								'SEND'
 							)}
 						</button>
 					</div>

@@ -93,9 +93,9 @@ export function ProfilePage() {
 		});
 
 		if (result.ok) {
-			toast('Avatar mis à jour', 'success');
+			toast('Avatar updated', 'success');
 		} else {
-			toast(result.error || 'Erreur lors du téléchargement', 'error');
+			toast(result.error || 'Error while downloading', 'error');
 			setAvatarPreview(null);
 		}
 		setIsUploadingAvatar(false);
@@ -113,7 +113,7 @@ export function ProfilePage() {
 			toast('Bio mise à jour', 'success');
 			setIsEditingBio(false);
 		} else {
-			toast(result.error || 'Erreur lors de la sauvegarde', 'error');
+			toast(result.error || 'Error during backup', 'error');
 		}
 		setIsSavingBio(false);
 	};
@@ -121,7 +121,7 @@ export function ProfilePage() {
 	// Email handler
 	const handleUpdateEmail = async () => {
 		if (!newEmail) {
-			toast('Veuillez entrer un email', 'warning');
+			toast('Please enter an email', 'warning');
 			return;
 		}
 
@@ -131,22 +131,22 @@ export function ProfilePage() {
 		});
 
 		if (result.ok) {
-			toast('Email mis à jour', 'success');
+			toast('Email updated', 'success');
 			setIsEditingEmail(false);
 			setNewEmail('');
 		} else {
-			toast(result.error || 'Erreur lors de la mise à jour', 'error');
+			toast(result.error || 'Error during update', 'error');
 		}
 	};
 
 	// Password handler
 	const handleUpdatePassword = async () => {
 		if (newPassword !== confirmPassword) {
-			toast('Les mots de passe ne correspondent pas', 'error');
+			toast('The passwords do not match', 'error');
 			return;
 		}
 		if (newPassword.length < 8) {
-			toast('Le mot de passe doit faire au moins 8 caractères', 'warning');
+			toast('The password must be at least 8 characters long.', 'warning');
 			return;
 		}
 
@@ -159,13 +159,13 @@ export function ProfilePage() {
 		});
 
 		if (result.ok) {
-			toast('Mot de passe mis à jour', 'success');
+			toast('Password updated', 'success');
 			setIsEditingPassword(false);
 			setCurrentPassword('');
 			setNewPassword('');
 			setConfirmPassword('');
 		} else {
-			toast(result.error || 'Erreur lors de la mise à jour', 'error');
+			toast(result.error || 'Error during update', 'error');
 		}
 	};
 
@@ -180,14 +180,14 @@ export function ProfilePage() {
 			setQrCodeUrl(result.data.qrCodeUrl);
 			setShow2FAModal(true);
 		} else {
-			toast(result.error || 'Erreur lors de la configuration 2FA', 'error');
+			toast(result.error || 'Error during 2FA setup', 'error');
 		}
 		setIsSettingUp2FA(false);
 	};
 
 	const handleVerify2FA = async () => {
 		if (totpCode.length !== 6) {
-			toast('Le code doit contenir 6 chiffres', 'warning');
+			toast('The code must contain 6 digits', 'warning');
 			return;
 		}
 
@@ -197,12 +197,12 @@ export function ProfilePage() {
 		});
 
 		if (result.ok) {
-			toast('2FA activé avec succès', 'success');
+			toast('2FA activated successfully', 'success');
 			setIs2FAEnabled(true);
 			setShow2FAModal(false);
 			setTotpCode('');
 		} else {
-			toast(result.error || 'Code invalide', 'error');
+			toast(result.error || 'Invalid code', 'error');
 		}
 	};
 
@@ -212,17 +212,17 @@ export function ProfilePage() {
 		});
 
 		if (result.ok) {
-			toast('2FA désactivé', 'success');
+			toast('2FA disabeled', 'success');
 			setIs2FAEnabled(false);
 		} else {
-			toast(result.error || 'Erreur lors de la désactivation', 'error');
+			toast(result.error || 'Error during deactivation', 'error');
 		}
 	};
 
 	// Delete account handler
 	const handleDeleteAccount = async () => {
-		if (deleteConfirmText !== 'SUPPRIMER') {
-			toast('Veuillez taper SUPPRIMER pour confirmer', 'warning');
+		if (deleteConfirmText !== 'DELETE') {
+			toast('Please type DELETE to confirm', 'warning');
 			return;
 		}
 
@@ -232,10 +232,10 @@ export function ProfilePage() {
 		});
 
 		if (result.ok) {
-			toast('Compte supprimé', 'success');
+			toast('Account deleted', 'success');
 			window.location.href = '/';
 		} else {
-			toast(result.error || 'Erreur lors de la suppression', 'error');
+			toast(result.error || 'Error during deletion', 'error');
 		}
 		setIsDeleting(false);
 	};
@@ -245,12 +245,12 @@ export function ProfilePage() {
 			<div className="mx-auto max-w-4xl">
 				{/* Header */}
 				<div className="mb-8 flex items-center justify-between">
-					<h1 className="font-pirulen text-3xl tracking-widest">MON PROFIL</h1>
+					<h1 className="font-pirulen text-3xl tracking-widest">MY PROFIL</h1>
 					<Link
 						to="/statistics"
 						className="font-pirulen text-xs tracking-wider text-cyan-400 transition-colors hover:text-white"
 					>
-						VOIR STATISTIQUES →
+						VIEW STATISTICS →
 					</Link>
 				</div>
 
@@ -273,7 +273,7 @@ export function ProfilePage() {
 										</div>
 									)}
 									<div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
-										<span className="font-pirulen text-xs text-white">MODIFIER</span>
+										<span className="font-pirulen text-xs text-white">MODIFY</span>
 									</div>
 									{isUploadingAvatar && (
 										<div className="absolute inset-0 flex items-center justify-center bg-black/80">
@@ -288,29 +288,29 @@ export function ProfilePage() {
 									onChange={handleAvatarChange}
 									className="hidden"
 								/>
-								<p className="text-center text-xs text-gray-500">Cliquez pour changer</p>
+								<p className="text-center text-xs text-gray-500">Clic here for change</p>
 							</div>
 						</div>
 
 						{/* Quick Stats Card */}
 						<div className="rounded-lg border border-purple-500/30 bg-slate-900/50 p-6">
-							<h2 className="font-pirulen mb-4 text-xs tracking-wider text-purple-500">STATISTIQUES</h2>
+							<h2 className="font-pirulen mb-4 text-xs tracking-wider text-purple-500">STATISTICS</h2>
 							<div className="space-y-3">
 								<div className="flex justify-between">
-									<span className="text-gray-400">Victoires</span>
+									<span className="text-gray-400">Victories</span>
 									<span className="font-bold text-green-400">{stats.wins}</span>
 								</div>
 								<div className="flex justify-between">
-									<span className="text-gray-400">Défaites</span>
+									<span className="text-gray-400">Defeats</span>
 									<span className="font-bold text-red-400">{stats.losses}</span>
 								</div>
 								<div className="flex justify-between">
-									<span className="text-gray-400">Total parties</span>
+									<span className="text-gray-400">Total games</span>
 									<span className="font-bold text-white">{stats.totalGames}</span>
 								</div>
 								<div className="mt-4 border-t border-white/10 pt-4">
 									<div className="flex justify-between">
-										<span className="text-gray-400">Taux de victoire</span>
+										<span className="text-gray-400">Winrate</span>
 										<span className="font-bold text-cyan-400">{stats.winRate}%</span>
 									</div>
 									<div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-700">
@@ -335,7 +335,7 @@ export function ProfilePage() {
 									<p className="text-lg font-bold text-white">{user?.username || 'Non défini'}</p>
 								</div>
 								<div>
-									<label className="text-xs text-gray-500">Email</label>
+									<label className="text-xs text-gray-500">Mail</label>
 									<p className="text-white">{user?.email || 'Non défini'}</p>
 								</div>
 							</div>
@@ -350,7 +350,7 @@ export function ProfilePage() {
 										onClick={() => setIsEditingBio(true)}
 										className="text-xs text-gray-400 transition-colors hover:text-white"
 									>
-										Modifier
+										Modify
 									</button>
 								)}
 							</div>
@@ -359,35 +359,35 @@ export function ProfilePage() {
 									<textarea
 										value={bio}
 										onInput={(e: Event) => setBio((e.target as HTMLTextAreaElement).value)}
-										placeholder="Décrivez-vous en quelques mots..."
+										placeholder="Describe yourself in a few words..."
 										className="h-24 w-full resize-none rounded-sm border border-white/10 bg-transparent p-3 text-sm text-white outline-none transition-all duration-300 placeholder:text-gray-600 focus:border-orange-500/50 focus:bg-white/5"
 										maxLength={200}
 									/>
 									<div className="flex items-center justify-between">
 										<span className="text-xs text-gray-500">{bio.length}/200</span>
 								<div className="flex gap-2">
-									<ButtonStyle3 onClick={() => setIsEditingBio(false)}>Annuler</ButtonStyle3>
+									<ButtonStyle3 onClick={() => setIsEditingBio(false)}>Cancel</ButtonStyle3>
 									<ButtonStyle4 onClick={() => { handleSaveBio(); }} disabled={isSavingBio}>
-												{isSavingBio ? 'Sauvegarde...' : 'Sauvegarder'}
+												{isSavingBio ? 'Saving...' : 'Save'}
 											</ButtonStyle4>
 										</div>
 									</div>
 								</div>
 							) : (
-								<p className="text-sm text-gray-400">{bio || 'Aucune bio définie. Cliquez sur modifier pour en ajouter une.'}</p>
+								<p className="text-sm text-gray-400">{bio || 'No bio defined. Click edit to add one.'}</p>
 							)}
 						</div>
 
 						{/* Account Settings Card (only for email provider) */}
 						{isEmailProvider && (
 							<div className="rounded-lg border border-purple-500/30 bg-slate-900/50 p-6">
-								<h2 className="font-pirulen mb-4 text-xs tracking-wider text-purple-500">PARAMÈTRES DU COMPTE</h2>
+								<h2 className="font-pirulen mb-4 text-xs tracking-wider text-purple-500">ACCOUNT SETTINGS</h2>
 								<div className="space-y-4">
 									{/* Email Section */}
 									<div className="rounded-sm border border-white/10 p-4">
 										<div className="flex items-center justify-between">
 											<div>
-												<h3 className="text-sm font-bold text-white">Adresse email</h3>
+												<h3 className="text-sm font-bold text-white">Mail</h3>
 												<p className="text-xs text-gray-500">{user?.email}</p>
 											</div>
 											{!isEditingEmail && (
@@ -395,7 +395,7 @@ export function ProfilePage() {
 													onClick={() => setIsEditingEmail(true)}
 													className="text-xs text-purple-400 transition-colors hover:text-white"
 												>
-													Modifier
+													Modify
 												</button>
 											)}
 										</div>
@@ -409,8 +409,8 @@ export function ProfilePage() {
 													className="w-full rounded-sm border border-white/10 bg-transparent p-2 text-sm text-white outline-none focus:border-purple-500/50"
 												/>
 												<div className="flex justify-end gap-2">
-													<ButtonStyle3 onClick={() => setIsEditingEmail(false)}>Annuler</ButtonStyle3>
-													<ButtonStyle4 onClick={() => { handleUpdateEmail(); }}>Mettre à jour</ButtonStyle4>
+													<ButtonStyle3 onClick={() => setIsEditingEmail(false)}>Cancel</ButtonStyle3>
+													<ButtonStyle4 onClick={() => { handleUpdateEmail(); }}>Update</ButtonStyle4>
 												</div>
 											</div>
 										)}
@@ -420,7 +420,7 @@ export function ProfilePage() {
 									<div className="rounded-sm border border-white/10 p-4">
 										<div className="flex items-center justify-between">
 											<div>
-												<h3 className="text-sm font-bold text-white">Mot de passe</h3>
+												<h3 className="text-sm font-bold text-white">Passeword</h3>
 												<p className="text-xs text-gray-500">••••••••</p>
 											</div>
 											{!isEditingPassword && (
@@ -428,7 +428,7 @@ export function ProfilePage() {
 													onClick={() => setIsEditingPassword(true)}
 													className="text-xs text-purple-400 transition-colors hover:text-white"
 												>
-													Modifier
+													Modify
 												</button>
 											)}
 										</div>
@@ -438,26 +438,26 @@ export function ProfilePage() {
 													type="password"
 													value={currentPassword}
 													onInput={(e: Event) => setCurrentPassword((e.target as HTMLInputElement).value)}
-													placeholder="Mot de passe actuel"
+													placeholder="Current passeword"
 													className="w-full rounded-sm border border-white/10 bg-transparent p-2 text-sm text-white outline-none focus:border-purple-500/50"
 												/>
 												<input
 													type="password"
 													value={newPassword}
 													onInput={(e: Event) => setNewPassword((e.target as HTMLInputElement).value)}
-													placeholder="Nouveau mot de passe"
+													placeholder="New passeword"
 													className="w-full rounded-sm border border-white/10 bg-transparent p-2 text-sm text-white outline-none focus:border-purple-500/50"
 												/>
 												<input
 													type="password"
 													value={confirmPassword}
 													onInput={(e: Event) => setConfirmPassword((e.target as HTMLInputElement).value)}
-													placeholder="Confirmer le nouveau mot de passe"
+													placeholder="Confirm the new password"
 													className="w-full rounded-sm border border-white/10 bg-transparent p-2 text-sm text-white outline-none focus:border-purple-500/50"
 												/>
 												<div className="flex justify-end gap-2">
-													<ButtonStyle3 onClick={() => setIsEditingPassword(false)}>Annuler</ButtonStyle3>
-													<ButtonStyle4 onClick={() => { handleUpdatePassword(); }}>Mettre à jour</ButtonStyle4>
+													<ButtonStyle3 onClick={() => setIsEditingPassword(false)}>Cancel</ButtonStyle3>
+													<ButtonStyle4 onClick={() => { handleUpdatePassword(); }}>Update</ButtonStyle4>
 												</div>
 											</div>
 										)}
@@ -469,7 +469,7 @@ export function ProfilePage() {
 						{/* 2FA Card */}
 						<div className="rounded-lg border border-green-500/30 bg-slate-900/50 p-6">
 							<h2 className="font-pirulen mb-4 text-xs tracking-wider text-green-500">
-								AUTHENTIFICATION À DEUX FACTEURS (2FA)
+								TWO-FACTOR AUTHENTICATION (2FA)
 							</h2>
 							<div className="space-y-4">
 								<div className="flex items-center justify-between">
@@ -509,7 +509,7 @@ export function ProfilePage() {
 									onClick={() => setShowDeleteModal(true)}
 									className="rounded-sm border border-red-500/50 bg-red-500/10 px-4 py-2 text-xs font-bold text-red-400 transition-all duration-300 hover:bg-red-500/20 hover:text-red-300"
 								>
-									Supprimer
+									Delete
 								</button>
 							</div>
 						</div>

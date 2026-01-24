@@ -22,7 +22,7 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 			</div>
 			<div className="flex flex-col gap-3 overflow-y-auto p-4 text-xs [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-orange-500/50 [&::-webkit-scrollbar-track]:bg-slate-800/30">
 				{roomUsers.length === 0 ? (
-					<div className="text-center text-gray-500">Aucun utilisateur</div>
+					<div className="text-center text-gray-500">No user</div>
 				) : (
 					roomUsers.map((roomUser) => {
 						const isCurrentUser = roomUser.userId === user?.id;

@@ -84,7 +84,7 @@ export function ChatMessagesPanel({
 				className="min-h-0 flex-1 overflow-y-auto p-2 font-mono text-xs text-purple-300 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-purple-500/50 hover:[&::-webkit-scrollbar-thumb]:bg-purple-400 [&::-webkit-scrollbar-track]:bg-slate-800/30"
 			>
 				{messages.length === 0 ? (
-					<div className="flex h-full items-center justify-center text-gray-500">Aucun message</div>
+					<div className="flex h-full items-center justify-center text-gray-500">No message</div>
 				) : (
 					<div className="flex flex-col gap-1">
 						{messages.map((msg, index) => {

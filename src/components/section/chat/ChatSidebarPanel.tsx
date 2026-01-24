@@ -56,17 +56,17 @@ export function ChatSidebarPanel({
 			<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 font-mono text-xs text-cyan-300 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cyan-500/50 [&::-webkit-scrollbar-track]:bg-slate-800/30">
 				{/* Hub */}
 				<div className="border-b border-cyan-500/20 pb-3">
-					<div className="mb-2 text-[10px] text-gray-500 uppercase">Général</div>
+					<div className="mb-2 text-[10px] text-gray-500 uppercase">General</div>
 					<UserItem name="Hub" isOnline={true} isSelected={currentRoom === 'hub'} onClick={onSelectHub} />
 				</div>
 
 				{/* Groupes */}
 				<div className="border-b border-cyan-500/20 pb-3">
-					<div className="mb-2 text-[10px] text-gray-500 uppercase">Groupes</div>
+					<div className="mb-2 text-[10px] text-gray-500 uppercase">Groups</div>
 					{groupsLoading ? (
-						<div className="text-gray-500">Chargement...</div>
+						<div className="text-gray-500">Loading...</div>
 					) : groups.length === 0 ? (
-						<div className="text-gray-500">Aucun groupe</div>
+						<div className="text-gray-500">No groups</div>
 					) : (
 						<div className="flex flex-col gap-3">
 							{groups.map((group) => (
@@ -85,9 +85,9 @@ export function ChatSidebarPanel({
 				<div>
 					<div className="mb-2 text-[10px] text-gray-500 uppercase">Amis</div>
 					{friendsLoading ? (
-						<div className="text-gray-500">Chargement...</div>
+						<div className="text-gray-500">Loading...</div>
 					) : friends.length === 0 ? (
-						<div className="text-gray-500">Aucun ami</div>
+						<div className="text-gray-500">No friends</div>
 					) : (
 						<div className="flex flex-col gap-3">
 							{friends.map((friend) => (

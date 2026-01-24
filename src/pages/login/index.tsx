@@ -28,7 +28,7 @@ export function Login() {
 		const result = validate({ email, password });
 		if (!result.valid) {
 			setErrors(result.errors);
-			toast('Veuillez corriger les erreurs', 'warning');
+			toast('Please fix errors', 'warning');
 			return;
 		}
 
@@ -38,13 +38,13 @@ export function Login() {
 			const success = await login(email, password);
 
 			if (success) {
-				toast('Connexion réussie!', 'success');
+				toast('Connection success', 'success');
 				navigate('/play');
 			} else {
-				toast('Email ou mot de passe incorrect', 'error');
+				toast('Mail or passeword incorrect', 'error');
 			}
 		} catch {
-			toast('Une erreur est survenue', 'error');
+			toast('An error has occurred', 'error');
 		} finally {
 			setIsLoading(false);
 		}
@@ -70,7 +70,7 @@ export function Login() {
 									htmlFor="email"
 									className="font-pirulen text-xs tracking-wider text-gray-400 transition-colors group-focus-within:text-white"
 								>
-									Email
+									Mail
 								</label>
 								<input
 									type="email"
@@ -103,10 +103,10 @@ export function Login() {
 							</div>
 							<div className="mt-4 flex flex-col justify-center gap-2">
 								<Link to="/forgot-password" className="text-secondary hover:text-neon-blue">
-									Mot de passe oublié ?
+									Forgot passeword
 								</Link>
-								<ButtonStyle4 type="submit">{isLoading ? 'CONNEXION...' : 'SE CONNECTER'}</ButtonStyle4>
-								<ButtonStyle3 onClick={handleClickReturn}>Retour</ButtonStyle3>
+								<ButtonStyle4 type="submit">{isLoading ? 'CONNEXION...' : 'Connect'}</ButtonStyle4>
+								<ButtonStyle3 onClick={handleClickReturn}>Return</ButtonStyle3>
 							</div>
 						</form>
 					</div>

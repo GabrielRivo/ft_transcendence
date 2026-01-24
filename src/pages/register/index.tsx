@@ -35,8 +35,8 @@ export function Register() {
 		}
 
 		if (password !== confirmPassword) {
-			setConfirmError('Les mots de passe ne correspondent pas');
-			toast('Les mots de passe ne correspondent pas', 'error');
+			setConfirmError(`Passwords doesn't match`);
+			toast(`Passwords doesn't match`, 'error');
 			return;
 		}
 
@@ -46,13 +46,13 @@ export function Register() {
 			const success = await register(email, password);
 
 			if (success) {
-				toast('Inscription réussie!', 'success');
+				toast('Registered!', 'success');
 				navigate('/play');
 			} else {
-				toast("L'inscription a échoué. Cet email est peut-être déjà utilisé.", 'error');
+				toast("Register failed, the mail may be already used", 'error');
 			}
 		} catch {
-			toast('Une erreur est survenue', 'error');
+			toast('An error has occurred', 'error');
 		} finally {
 			setIsLoading(false);
 		}
@@ -71,14 +71,14 @@ export function Register() {
 			<div className="relative z-10 flex h-full items-center justify-center p-4">
 				<CardStyle2>
 					<div className="flex w-full flex-col gap-8">
-						<h1 className="font-pirulen text-center text-xl tracking-widest text-white">Inscription</h1>
+						<h1 className="font-pirulen text-center text-xl tracking-widest text-white">Subscription</h1>
 						<form className="flex flex-col gap-6" onSubmit={handleSubmit}>
 							<div className="group flex flex-col gap-2">
 								<label
 									htmlFor="email"
 									className="font-pirulen text-xs tracking-wider text-gray-400 transition-colors group-focus-within:text-white"
 								>
-									Email
+									Mail
 								</label>
 								<input
 									type="email"
@@ -96,7 +96,7 @@ export function Register() {
 									htmlFor="password"
 									className="font-pirulen text-xs tracking-wider text-gray-400 transition-colors group-focus-within:text-white"
 								>
-									Mot de passe
+									Passeword
 								</label>
 								<input
 									type="password"
@@ -114,7 +114,7 @@ export function Register() {
 									htmlFor="confirmPassword"
 									className="font-pirulen text-xs tracking-wider text-gray-400 transition-colors group-focus-within:text-white"
 								>
-									Confirmer le mot de passe
+									Confirme passeword
 								</label>
 								<input
 									type="password"
@@ -129,7 +129,7 @@ export function Register() {
 							</div>
 							<div className="mt-4 flex flex-col justify-center gap-2">
 								<ButtonStyle4 type="submit">{isLoading ? 'INSCRIPTION...' : "S'INSCRIRE"}</ButtonStyle4>
-								<ButtonStyle3 onClick={handleClickReturn}>Retour</ButtonStyle3>
+								<ButtonStyle3 onClick={handleClickReturn}>Return</ButtonStyle3>
 							</div>
 						</form>
 					</div>

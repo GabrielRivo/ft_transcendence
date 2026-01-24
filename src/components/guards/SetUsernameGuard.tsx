@@ -20,14 +20,14 @@ export function SetUsernameGuard({ children }: SetUsernameGuardProps) {
 	useEffect(() => {
 		if (!loading) {
 			if (!isAuthenticated) {
-				toast(`Tu dois être connecté pour définir un pseudo !`, 'error', 3000);
+				toast(`You must be logged in to set a nickname !`, 'error', 3000);
 				navigate('/login');
 				return;
 			}
 
 			// Si l'utilisateur a déjà un username, rediriger vers dashboard
 			if (!user?.noUsername) {
-				toast(`Tu as déjà un pseudo !`, 'error', 3000);
+				toast(`You already have a username !`, 'error', 3000);
 				navigate('/play');
 			}
 		}
