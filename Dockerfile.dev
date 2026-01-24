@@ -101,4 +101,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
 # - Code changes trigger automatic restart (tsx watch)
 # - No container rebuild needed for code changes
 # - Dependencies are reinstalled only when package.json changes
-CMD ["sh", "-c", "pnpm install --frozen-lockfile && pnpm --filter auth stats dev"]
+CMD ["sh", "-c", "pnpm install --frozen-lockfile && pnpm --filter stats dev"]
