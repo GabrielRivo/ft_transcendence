@@ -33,6 +33,11 @@ export const matchmakingSocket: Socket = io(SOCKET_BASE_URL, {
 	path: '/api/matchmaking/',
 });
 
+export const tournamentSocket: Socket = io(SOCKET_BASE_URL, {
+	...DEFAULT_SOCKET_OPTIONS,
+	path: '/api/tournament/ws',
+});
+
 // export const socialSocket: Socket = io(SOCKET_BASE_URL, {
 // 	...DEFAULT_SOCKET_OPTIONS,
 // 	path: '/api/social/ws',
@@ -46,6 +51,7 @@ export function connectAllSockets(): void {
 	chatSocket.connect();
 	matchmakingSocket.connect();
 	socialSocket.connect();
+	tournamentSocket.connect();
 }
 
 export function disconnectAllSockets(): void {
@@ -53,6 +59,7 @@ export function disconnectAllSockets(): void {
 	chatSocket.disconnect();
 	matchmakingSocket.disconnect();
 	socialSocket.disconnect();
+	tournamentSocket.disconnect();
 }
 
 export function updateSocketAuth(userId: string, token?: string): void {
@@ -62,4 +69,5 @@ export function updateSocketAuth(userId: string, token?: string): void {
 	chatSocket.auth = auth;
 	matchmakingSocket.auth = auth;
 	socialSocket.auth = auth;
-} 
+	tournamentSocket.auth = auth;
+}

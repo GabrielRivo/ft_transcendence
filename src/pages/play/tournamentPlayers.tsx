@@ -1,10 +1,11 @@
 import 'reflect-metadata';
 import { createElement, useCallback, useEffect, useRef, useState } from 'my-react';
-import { Link, useNavigate, useParams } from 'my-react-router';
+import { Link, useNavigate, useParams, useLocation } from 'my-react-router';
 import { ButtonStyle4 } from '@/components/ui/button/style4';
 import { ButtonStyle3 } from '@/components/ui/button/style3';
 import { CardStyle2 } from '@/components/ui/card/style2';
 import { fetchJsonWithAuth } from '@libs/fetchWithAuth';
+import { tournamentSocket } from '@libs/socket';
 import { useToast } from '@hook/useToast';
 import { useValidation, ValidationError } from '@hook/useValidation';
 import { CreateTournamentSchema } from '../../dto';
@@ -34,16 +35,26 @@ interface CreateTournamentResponse {
 	id: string;
 }
 
+// Define interface for location state to avoid TS errors
+interface LocationState {
+	activeTournamentId?: string;
+}
+
 export function TournamentPlayersPage() {
 	const params = useParams();
 	const navigate = useNavigate();
+	const location = useLocation<LocationState>();
 	const { toast } = useToast();
 	const { validate, getFieldError } = useValidation(CreateTournamentSchema);
 
 	const [tournamentName, setTournamentName] = useState('');
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [errors, setErrors] = useState<ValidationError[]>([]);
-	const [createdTournamentId, setCreatedTournamentId] = useState<string | null>(null);
+
+	// Initialize from location state if available (from AuthGuard redirect)
+	const initialId = location.state?.activeTournamentId || null;
+	const [createdTournamentId, setCreatedTournamentId] = useState<string | null>(initialId);
+
 	const [tournament, setTournament] = useState<TournamentResponse | null>(null);
 	const [isLoadingTournament, setIsLoadingTournament] = useState(false);
 	const [loadError, setLoadError] = useState<string | null>(null);
@@ -54,6 +65,24 @@ export function TournamentPlayersPage() {
 	const isValidType = TOURNAMENT_TYPES.includes(tournamentType as (typeof TOURNAMENT_TYPES)[number]);
 	const isValidSize = TOURNAMENT_SIZES.includes(playersCount as (typeof TOURNAMENT_SIZES)[number]);
 	const visibility: TournamentVisibility = tournamentType === 'private' ? 'PRIVATE' : 'PUBLIC';
+
+	useEffect(() => {
+		const checkActiveTournament = async () => {
+			try {
+				const result = await fetchJsonWithAuth<TournamentResponse>(`/api/tournament/active`);
+				if (result.ok && result.data && result.data.id) {
+					console.log('[Frontend] Found active tournament:', result.data.id);
+					setCreatedTournamentId(result.data.id);
+				}
+			} catch (e) {
+				console.error('Failed to check active tournament', e);
+			}
+		};
+
+		if (!createdTournamentId) {
+			checkActiveTournament();
+		}
+	}, []);
 
 	useEffect(() => {
 		if (!isValidType || !isValidSize) {
@@ -85,7 +114,9 @@ export function TournamentPlayersPage() {
 	}, [toast]);
 
 	useEffect(() => {
-		if (createdTournamentId) {
+		// If we have an ID but no tournament data loaded yet, load it.
+		// Also ensures we don't reload if the ID hasn't changed.
+		if (createdTournamentId && activeTournamentIdRef.current !== createdTournamentId) {
 			loadTournament(createdTournamentId);
 		}
 	}, [createdTournamentId, loadTournament]);
@@ -109,7 +140,9 @@ export function TournamentPlayersPage() {
 			return;
 		}
 
+
 		setIsSubmitting(true);
+		console.log('[Frontend] Creating tournament with payload:', payload);
 
 		const result = await fetchJsonWithAuth<CreateTournamentResponse>('/api/tournament/', {
 			method: 'POST',
@@ -117,6 +150,15 @@ export function TournamentPlayersPage() {
 		});
 
 		if (!result.ok || !result.data?.id) {
+			// Check for Active Tournament Redirection
+			if ((result as any).activeTournamentId) {
+				const activeId = (result as any).activeTournamentId;
+				toast('You are already in an active tournament. Redirecting...', 'info');
+				setCreatedTournamentId(activeId);
+				setIsSubmitting(false);
+				return;
+			}
+
 			toast(result.error || 'Tournament creation failed', 'error');
 			setIsSubmitting(false);
 			return;
@@ -127,16 +169,6 @@ export function TournamentPlayersPage() {
 		setIsSubmitting(false);
 	};
 
-	const handleCreateAnother = () => {
-		activeTournamentIdRef.current = null;
-		setTournamentName('');
-		setErrors([]);
-		setCreatedTournamentId(null);
-		setTournament(null);
-		setLoadError(null);
-		setIsLoadingTournament(false);
-	};
-
 	const handleRetryLoad = () => {
 		if (createdTournamentId) {
 			loadTournament(createdTournamentId);
@@ -144,6 +176,73 @@ export function TournamentPlayersPage() {
 	};
 
 	const nameError = getFieldError(errors, 'name');
+
+	useEffect(() => {
+		if (!tournament || !tournament.id) return;
+
+		const onPlayerJoined = (data: any) => {
+			console.log('[Frontend] Player joined event:', data);
+			if (data.tournamentId === tournament.id) {
+				setTournament((prev) => {
+					if (!prev) return null;
+					// Check if player already exists
+					if (prev.participants.some(p => p.id === data.participantId)) return prev;
+
+					return {
+						...prev,
+						participants: [
+							...prev.participants,
+							{
+								id: data.participantId,
+								displayName: data.displayName,
+								type: 'USER' // Default to USER for now
+							}
+						]
+					};
+				});
+				toast(`Player ${data.displayName} joined!`, 'info');
+			}
+		};
+
+		const onTournamentStarted = (data: any) => {
+			console.log('[Frontend] Tournament started event:', data);
+			if (data.tournamentId === tournament.id) {
+				setTournament(prev => prev ? ({ ...prev, status: 'STARTED' }) : null);
+				toast('Tournament started!', 'success');
+			}
+		};
+
+		tournamentSocket.on('player_joined', onPlayerJoined);
+		tournamentSocket.on('tournament_started', onTournamentStarted);
+
+		return () => {
+			tournamentSocket.off('player_joined', onPlayerJoined);
+			tournamentSocket.off('tournament_started', onTournamentStarted);
+		};
+	}, [tournament?.id, toast]);
+
+	const handleCancelTournament = async () => {
+		if (!tournament?.id) return;
+
+		try {
+			const result = await fetchJsonWithAuth(`/api/tournament/${tournament.id}`, {
+				method: 'DELETE',
+				body: JSON.stringify({}),
+			});
+
+			if (result.ok) {
+				toast('Tournament canceled', 'success');
+				setCreatedTournamentId(null);
+				setTournament(null); // Clear local state
+				navigate('/play');
+			} else {
+				toast(result.error || 'Failed to cancel tournament', 'error');
+			}
+		} catch (error) {
+			console.error('Failed to cancel tournament', error);
+			toast('An error occurred', 'error');
+		}
+	};
 
 	if (!isValidType || !isValidSize) {
 		return null;
@@ -256,14 +355,14 @@ export function TournamentPlayersPage() {
 									</div>
 								</div>
 							)}
+
 							<div className="mt-2 flex flex-col items-center gap-2">
-								<ButtonStyle3 onClick={handleCreateAnother}>Create another</ButtonStyle3>
-								<Link
-									to="/play"
-									className="text-center font-pirulen text-xs font-bold tracking-widest text-gray-400 hover:text-neon-blue"
+								<button
+									onClick={handleCancelTournament}
+									className="text-center font-pirulen text-xs font-bold tracking-widest text-red-400 hover:text-red-300 transition-colors"
 								>
-									Return
-								</Link>
+									Cancel Tournament
+								</button>
 							</div>
 						</div>
 					</CardStyle2>

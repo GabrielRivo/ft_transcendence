@@ -1,21 +1,23 @@
-import { createElement, useEffect, useRef } from 'my-react';
+import { createElement, useEffect, useRef, useState } from 'my-react';
 import EloHistogram from '@ui/charts/EloHistogram';
 import ApexCharts, { ApexOptions } from 'apexcharts';
+import { useAuth } from '../../../hook/useAuth';
+import { api } from '../../../hook/useFetch';
+import { UserStats } from '../../../types/stats';
 
-// Données mockées - à remplacer par les appels API
-const mockGeneralStats = {
-	username: 'Vous',
-	elo: 700,
-	gamesPlayed: 18,
-	wins: 10,
-	losses: 8,
-	winRate: 57,
-	averageScore: 2.56,
-	tournamentsPlayed: 5,
-	tournamentsWon: 1,
-	percentile: 70.5,
-	allPlayersElo: [500, 500, 500, 600, 700, 1000, 1000, 1000, 1000, 1500, 1800, 1758],
-};
+interface GeneralStatsDisplay {
+	username: string;
+	elo: number;
+	gamesPlayed: number;
+	wins: number;
+	losses: number;
+	winRate: number;
+	averageScore: number;
+	tournamentsPlayed: number;
+	tournamentsWon: number;
+	percentile: number;
+	allPlayersElo: number[];
+}
 
 function WinRatePieChart({ winRate }: { winRate: number }) {
 	const chartRef = useRef<HTMLDivElement | null>(null);
@@ -35,7 +37,7 @@ function WinRatePieChart({ winRate }: { winRate: number }) {
 				background: 'transparent',
 			},
 			series: [winRate, 100 - winRate],
-			labels: ['Victoires', 'Défaites'],
+			labels: ['Victories', 'Defeat'],
 			colors: ['#22c55e', '#ef4444'],
 			legend: {
 				show: false,
@@ -101,7 +103,75 @@ function StatCard({ title, value, subtitle }: { title: string; value: string | n
 }
 
 export function StatisticsGeneralPage() {
-	const stats = mockGeneralStats;
+	const { user } = useAuth();
+	const [stats, setStats] = useState<GeneralStatsDisplay | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		async function fetchStats() {
+			if (!user?.id) return;
+
+			setLoading(true);
+			setError(null);
+
+			try {
+				const [userStatsRes, allElosRes] = await Promise.all([
+					api.get<UserStats>(`/api/stats/user/${user.id}`),
+					api.get<number[]>('/api/stats/all-elos'),
+				]);
+
+				if (userStatsRes.error || !userStatsRes.data) {
+					setError(userStatsRes.error || 'Impossible de charger les statistiques');
+					setLoading(false);
+					return;
+				}
+
+				const userStats = userStatsRes.data;
+				const allElos = allElosRes.data || [];
+
+				// Calcul du percentile
+				const playersBelow = allElos.filter((elo) => elo < userStats.elo).length;
+				const percentile = allElos.length > 0 ? Math.round((playersBelow / allElos.length) * 1000) / 10 : 0;
+
+				setStats({
+					username: user.username || 'Vous',
+					elo: userStats.elo,
+					gamesPlayed: userStats.total_games,
+					wins: userStats.wins,
+					losses: userStats.losses,
+					winRate: userStats.winrate,
+					averageScore: userStats.average_score,
+					tournamentsPlayed: userStats.tournament_played,
+					tournamentsWon: userStats.tournament_won,
+					percentile,
+					allPlayersElo: allElos,
+				});
+			} catch (err) {
+				setError('Erreur lors du chargement des statistiques');
+			} finally {
+				setLoading(false);
+			}
+		}
+
+		fetchStats();
+	}, [user?.id, user?.username]);
+
+	if (loading) {
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<p className="font-pirulen text-cyan-400">Chargement des statistiques...</p>
+			</div>
+		);
+	}
+
+	if (error || !stats) {
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<p className="font-pirulen text-red-400">{error || 'Aucune statistique disponible'}</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex w-full flex-col gap-6 p-4">
@@ -117,7 +187,7 @@ export function StatisticsGeneralPage() {
 
 				{/* Parties jouées */}
 				<div className="flex flex-col items-center justify-center rounded-lg border border-purple-500/30 bg-slate-900/50 p-6">
-					<StatCard title="Parties jouées :" value={stats.gamesPlayed} />
+					<StatCard title="Games played :" value={stats.gamesPlayed} />
 				</div>
 			</div>
 
@@ -125,28 +195,28 @@ export function StatisticsGeneralPage() {
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
 				{/* Score moyen par partie */}
 				<div className="flex flex-col items-center justify-center rounded-lg border border-orange-500/30 bg-slate-900/50 p-6">
-					<p className="font-pirulen mb-1 text-xs tracking-wider text-orange-400">Score moyen par partie :</p>
+					<p className="font-pirulen mb-1 text-xs tracking-wider text-orange-400">Average score by game :</p>
 					<p className="font-orbitron mb-2 text-4xl font-bold text-white">{stats.averageScore}</p>
-					<p className="text-xs text-gray-500 italic">(arrondi au 0,01 sup)</p>
+					<p className="text-xs text-gray-500 italic">(rounded up to the 0.01 sup)</p>
 				</div>
 
 				{/* Pie Chart - Taux de victoire */}
 				<div className="flex flex-col items-center rounded-lg border border-green-500/30 bg-slate-900/50 p-4 lg:col-span-2">
-					<p className="font-pirulen mb-2 text-sm tracking-wider text-green-400">Taux de victoire : {stats.winRate}%</p>
+					<p className="font-pirulen mb-2 text-sm tracking-wider text-green-400">Winrate : {stats.winRate}%</p>
 					<WinRatePieChart winRate={stats.winRate} />
 				</div>
 
 				{/* Tournois */}
 				<div className="flex flex-col items-center justify-center gap-6 rounded-lg border border-red-500/30 bg-slate-900/50 p-6">
-					<StatCard title="Tournois joués :" value={stats.tournamentsPlayed} />
-					<StatCard title="Tournois remportés :" value={stats.tournamentsWon} />
+					<StatCard title="Tournament played :" value={stats.tournamentsPlayed} />
+					<StatCard title="Tournament won :" value={stats.tournamentsWon} />
 				</div>
 			</div>
 
 			{/* Ligne 3 : Message de félicitations */}
 			<div className="rounded-lg border border-cyan-500/30 bg-slate-900/50 p-6 text-center">
 				<p className="font-pirulen text-lg tracking-wider text-cyan-400">
-					Félicitations, vous êtes meilleurs que {stats.percentile}% des joueurs!
+					Congratulations, you are better than {stats.percentile}% of players!
 				</p>
 			</div>
 		</div>

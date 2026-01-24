@@ -16,10 +16,10 @@ export function Authentification() {
 	return (
 		<div className="flex flex-col items-center gap-8 text-white">
 			<h1 className="font-aquire text-2xl font-bold">Authentification</h1>
-			<p className="text-s font-orbitron">Connectez-vous à votre compte pour accéder à votre espace personnel.</p>
+			<p className="text-s font-orbitron">Log in to your account to access your personal space.</p>
 			<div className="flex min-w-2/3 flex-col gap-2">
-				<ButtonStyle4 onClick={() => navigate('/login')}>Me connecter</ButtonStyle4>
-				<ButtonStyle4 onClick={() => navigate('/register')}>Me créer un compte</ButtonStyle4>
+				<ButtonStyle4 onClick={() => navigate('/login')}>Log in</ButtonStyle4>
+				<ButtonStyle4 onClick={() => navigate('/register')}>Create an account</ButtonStyle4>
 			</div>
 			<div className="flex w-full items-center gap-2">
 				<hr className="w-full" />

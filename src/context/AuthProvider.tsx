@@ -1,5 +1,6 @@
 import { createElement, useState, useEffect, useCallback, useRef, Element } from 'my-react';
 import { AuthContext, User } from './authContext';
+import { useNavigate } from 'my-react-router';
 
 const API_BASE = '/api/auth';
 const REFRESH_INTERVAL = 4 * 60 * 1000; // Refresh every 4 minutes (token expires in 5min)

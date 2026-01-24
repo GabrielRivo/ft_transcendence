@@ -30,7 +30,7 @@ class ServicesSingleton {
         return ServicesSingleton.instance;
     }
 
-    private initNbr = 0;
+    public initNbr = 0;
     init(canvas : HTMLCanvasElement) {
         if (this.GameService?.isRunning()) {
             console.warn("[Services] Game is running. Disposing it before re-initializing services.");

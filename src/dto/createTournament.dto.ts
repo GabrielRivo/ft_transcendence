@@ -1,4 +1,4 @@
-import { generateSchema, IsEnum, IsRequired, IsString, MaxLength, MinLength, IsInt } from 'my-class-validator';
+import { generateSchema, IsEnum, IsRequired, IsString, MaxLength, MinLength } from 'my-class-validator';
 
 export const TOURNAMENT_SIZES = [4, 8, 16] as const;
 export type TournamentSize = (typeof TOURNAMENT_SIZES)[number];
@@ -14,7 +14,6 @@ export class CreateTournamentDto {
 	name!: string;
 
 	@IsRequired()
-	@IsInt()
 	@IsEnum(TOURNAMENT_SIZES, { message: 'Size must be 4, 8 or 16' })
 	size!: TournamentSize;
 

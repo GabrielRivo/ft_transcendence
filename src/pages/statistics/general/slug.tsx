@@ -1,22 +1,23 @@
-import { createElement, useEffect, useRef } from 'my-react';
+import { createElement, useEffect, useRef, useState } from 'my-react';
 import { useParams } from 'my-react-router';
 import EloHistogram from '@ui/charts/EloHistogram';
 import ApexCharts, { ApexOptions } from 'apexcharts';
+import { api } from '../../../hook/useFetch';
+import { UserStats, UserInfo } from '../../../types/stats';
 
-// Données mockées pour un autre utilisateur - à remplacer par les appels API
-const getMockStatsForUser = (userId: string) => ({
-	username: userId,
-	elo: 1200,
-	gamesPlayed: 42,
-	wins: 28,
-	losses: 14,
-	winRate: 67,
-	averageScore: 3.21,
-	tournamentsPlayed: 8,
-	tournamentsWon: 3,
-	percentile: 85.2,
-	allPlayersElo: [500, 500, 500, 600, 700, 1000, 1000, 1000, 1000, 1200, 1500, 1800, 1758],
-});
+interface GeneralStatsDisplay {
+	username: string;
+	elo: number;
+	gamesPlayed: number;
+	wins: number;
+	losses: number;
+	winRate: number;
+	averageScore: number;
+	tournamentsPlayed: number;
+	tournamentsWon: number;
+	percentile: number;
+	allPlayersElo: number[];
+}
 
 function WinRatePieChart({ winRate }: { winRate: number }) {
 	const chartRef = useRef<HTMLDivElement | null>(null);
@@ -103,12 +104,81 @@ function StatCard({ title, value, subtitle }: { title: string; value: string | n
 
 export function StatisticsGeneralPageSlug() {
 	const params = useParams();
-	const userId = params.statsId || 'Unknown';
-	const stats = getMockStatsForUser(userId);
+	const userId = params.statsId || '';
+	const [stats, setStats] = useState<GeneralStatsDisplay | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
 	useEffect(() => {
-		console.log('Statistics Page Params :', params);
-	}, [params]);
+		async function fetchStats() {
+			if (!userId) {
+				setError('ID utilisateur invalide');
+				setLoading(false);
+				return;
+			}
+
+			setLoading(true);
+			setError(null);
+
+			try {
+				const [userStatsRes, allElosRes, userInfoRes] = await Promise.all([
+					api.get<UserStats>(`/api/stats/user/${userId}`),
+					api.get<number[]>('/api/stats/all-elos'),
+					api.get<UserInfo>(`/api/auth/user-by-id/${userId}`),
+				]);
+
+				if (userStatsRes.error || !userStatsRes.data) {
+					setError(userStatsRes.error || 'Impossible de charger les statistiques');
+					setLoading(false);
+					return;
+				}
+
+				const userStats = userStatsRes.data;
+				const allElos = allElosRes.data || [];
+				const username = userInfoRes.data?.username || `Joueur #${userId}`;
+
+				// Calcul du percentile
+				const playersBelow = allElos.filter((elo) => elo < userStats.elo).length;
+				const percentile = allElos.length > 0 ? Math.round((playersBelow / allElos.length) * 1000) / 10 : 0;
+
+				setStats({
+					username,
+					elo: userStats.elo,
+					gamesPlayed: userStats.total_games,
+					wins: userStats.wins,
+					losses: userStats.losses,
+					winRate: userStats.winrate,
+					averageScore: userStats.average_score,
+					tournamentsPlayed: userStats.tournament_played,
+					tournamentsWon: userStats.tournament_won,
+					percentile,
+					allPlayersElo: allElos,
+				});
+			} catch (err) {
+				setError('Erreur lors du chargement des statistiques');
+			} finally {
+				setLoading(false);
+			}
+		}
+
+		fetchStats();
+	}, [userId]);
+
+	if (loading) {
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<p className="font-pirulen text-cyan-400">Chargement des statistiques...</p>
+			</div>
+		);
+	}
+
+	if (error || !stats) {
+		return (
+			<div className="flex h-full w-full items-center justify-center">
+				<p className="font-pirulen text-red-400">{error || 'Aucune statistique disponible'}</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex w-full flex-col gap-6 p-4">

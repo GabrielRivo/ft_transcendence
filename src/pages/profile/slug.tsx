@@ -96,7 +96,7 @@ export function ProfileSlugPage() {
 			<div className="flex h-full items-center justify-center">
 				<div className="flex flex-col items-center gap-4">
 					<div className="h-8 w-8 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
-					<span className="font-pirulen text-xs tracking-widest text-gray-400">CHARGEMENT...</span>
+					<span className="font-pirulen text-xs tracking-widest text-gray-400">LOADING...</span>
 				</div>
 			</div>
 		);
@@ -110,11 +110,11 @@ export function ProfileSlugPage() {
 						<span className="text-4xl">?</span>
 					</div>
 					<div>
-						<h2 className="font-pirulen text-xl tracking-widest text-white">UTILISATEUR NON TROUVÉ</h2>
+						<h2 className="font-pirulen text-xl tracking-widest text-white">USER NOT FOUND</h2>
 						<p className="mt-2 text-sm text-gray-400">{error || `L'utilisateur "${username}" n'existe pas.`}</p>
 					</div>
 					<Link to="/">
-						<ButtonStyle3>Retour à l'accueil</ButtonStyle3>
+						<ButtonStyle3>Return to homepage</ButtonStyle3>
 					</Link>
 				</div>
 			</div>
@@ -130,7 +130,7 @@ export function ProfileSlugPage() {
 						onClick={() => window.history.back()}
 						className="text-gray-400 transition-colors hover:text-white"
 					>
-						← Retour
+						← Return
 					</button>
 				</div>
 
@@ -169,14 +169,14 @@ export function ProfileSlugPage() {
 											: 'bg-gray-500/20 text-gray-400'
 									}`}
 								>
-									{profile.isOnline ? 'En ligne' : 'Hors ligne'}
+									{profile.isOnline ? 'Online' : 'Offline'}
 								</span>
 							</div>
 							{profile.bio && (
 								<p className="mt-4 text-sm text-gray-400">{profile.bio}</p>
 							)}
 							<p className="mt-2 text-xs text-gray-600">
-								Membre depuis {new Date(profile.createdAt).toLocaleDateString('fr-FR', {
+								Member since {new Date(profile.createdAt).toLocaleDateString('fr-FR', {
 									year: 'numeric',
 									month: 'long',
 								})}
@@ -185,13 +185,13 @@ export function ProfileSlugPage() {
 							{/* Action buttons */}
 							<div className="mt-6 flex flex-wrap justify-center gap-3 md:justify-start">
 								{profile.isFriend ? (
-									<ButtonStyle3 onClick={() => { handleRemoveFriend(); }}>Supprimer des amis</ButtonStyle3>
+									<ButtonStyle3 onClick={() => { handleRemoveFriend(); }}>Delete from friends</ButtonStyle3>
 								) : profile.hasPendingRequest ? (
 									<button
 										disabled
 										className="cursor-not-allowed rounded-sm border border-yellow-500/50 bg-yellow-500/10 px-6 py-2 text-xs text-yellow-400"
 									>
-										Demande envoyée
+										Invitation send
 									</button>
 								) : (
 									<ButtonStyle4 onClick={() => { handleAddFriend(); }} disabled={isSendingRequest}>
@@ -199,7 +199,7 @@ export function ProfileSlugPage() {
 									</ButtonStyle4>
 								)}
 								<Link to={`/statistics/general/${profile.username}`}>
-									<ButtonStyle3>Voir statistiques</ButtonStyle3>
+									<ButtonStyle3>Show stats</ButtonStyle3>
 								</Link>
 							</div>
 						</div>
@@ -210,19 +210,19 @@ export function ProfileSlugPage() {
 				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
 					{/* Wins */}
 					<div className="rounded-lg border border-green-500/30 bg-slate-900/50 p-6 text-center">
-						<h3 className="font-pirulen text-xs tracking-wider text-green-500">VICTOIRES</h3>
+						<h3 className="font-pirulen text-xs tracking-wider text-green-500">VICTORIES</h3>
 						<p className="mt-2 text-4xl font-bold text-green-400">{profile.stats.wins}</p>
 					</div>
 
 					{/* Losses */}
 					<div className="rounded-lg border border-red-500/30 bg-slate-900/50 p-6 text-center">
-						<h3 className="font-pirulen text-xs tracking-wider text-red-500">DÉFAITES</h3>
+						<h3 className="font-pirulen text-xs tracking-wider text-red-500">DEFEATS</h3>
 						<p className="mt-2 text-4xl font-bold text-red-400">{profile.stats.losses}</p>
 					</div>
 
 					{/* Win Rate */}
 					<div className="rounded-lg border border-cyan-500/30 bg-slate-900/50 p-6 text-center">
-						<h3 className="font-pirulen text-xs tracking-wider text-cyan-500">TAUX VICTOIRE</h3>
+						<h3 className="font-pirulen text-xs tracking-wider text-cyan-500">WINRATE</h3>
 						<p className="mt-2 text-4xl font-bold text-cyan-400">{profile.stats.winRate}%</p>
 					</div>
 
@@ -235,18 +235,18 @@ export function ProfileSlugPage() {
 
 				{/* Detailed Stats */}
 				<div className="mt-6 rounded-lg border border-cyan-500/30 bg-slate-900/50 p-6">
-					<h2 className="font-pirulen mb-6 text-xs tracking-wider text-cyan-500">STATISTIQUES DÉTAILLÉES</h2>
+					<h2 className="font-pirulen mb-6 text-xs tracking-wider text-cyan-500">DETAILED STATISTICS</h2>
 					
 					<div className="space-y-4">
 						{/* Total Games */}
 						<div className="flex items-center justify-between">
-							<span className="text-gray-400">Total de parties</span>
+							<span className="text-gray-400">Games total</span>
 							<span className="font-bold text-white">{profile.stats.totalGames}</span>
 						</div>
 
 						{/* Rank */}
 						<div className="flex items-center justify-between">
-							<span className="text-gray-400">Classement mondial</span>
+							<span className="text-gray-400">World ranking</span>
 							<span className="font-bold text-yellow-400">#{profile.stats.rank}</span>
 						</div>
 
@@ -272,7 +272,7 @@ export function ProfileSlugPage() {
 
 				{/* Recent Activity Placeholder */}
 				<div className="mt-6 rounded-lg border border-orange-500/30 bg-slate-900/50 p-6">
-					<h2 className="font-pirulen mb-4 text-xs tracking-wider text-orange-500">ACTIVITÉ RÉCENTE</h2>
+					<h2 className="font-pirulen mb-4 text-xs tracking-wider text-orange-500">RECENT ACTIVITY</h2>
 					<div className="space-y-3">
 						{profile.stats.totalGames > 0 ? (
 							<p className="text-center text-sm text-gray-400">
@@ -280,11 +280,11 @@ export function ProfileSlugPage() {
 									to={`/statistics/historic/${profile.username}`}
 									className="text-orange-400 transition-colors hover:text-white"
 								>
-									Voir l'historique des parties →
+									View game history →
 								</Link>
 							</p>
 						) : (
-							<p className="text-center text-sm text-gray-500">Aucune partie jouée pour le moment.</p>
+							<p className="text-center text-sm text-gray-500">No games played yet.</p>
 						)}
 					</div>
 				</div>

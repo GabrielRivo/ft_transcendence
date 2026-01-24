@@ -31,7 +31,7 @@ function Menu() {
 
 	const handleLogout = () => {
 		logout().then(() => {
-			toast('Déconnexion réussie', 'success');
+			toast('Logout successful', 'success');
 			navigate('/');
 		});
 	};

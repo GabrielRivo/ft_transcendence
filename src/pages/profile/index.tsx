@@ -477,8 +477,8 @@ export function ProfilePage() {
 										<h3 className="text-sm font-bold text-white">TOTP Authenticator</h3>
 										<p className="text-xs text-gray-500">
 											{is2FAEnabled
-												? 'Activé - Votre compte est protégé'
-												: 'Désactivé - Ajoutez une couche de sécurité supplémentaire'}
+												? 'Activated - Your account is protected'
+												: 'Disabled - Add an extra layer of security'}
 										</p>
 									</div>
 									<div
@@ -490,7 +490,7 @@ export function ProfilePage() {
 										<ButtonStyle3 onClick={() => { handleDisable2FA(); }}>Désactiver 2FA</ButtonStyle3>
 									) : (
 										<ButtonStyle4 onClick={() => { handleSetup2FA(); }} disabled={isSettingUp2FA}>
-											{isSettingUp2FA ? 'Configuration...' : 'Activer 2FA'}
+											{isSettingUp2FA ? 'Configuration...' : 'Unable 2FA'}
 										</ButtonStyle4>
 									)}
 								</div>
@@ -499,11 +499,11 @@ export function ProfilePage() {
 
 						{/* Danger Zone */}
 						<div className="rounded-lg border border-red-500/30 bg-slate-900/50 p-6">
-							<h2 className="font-pirulen mb-4 text-xs tracking-wider text-red-500">ZONE DANGEREUSE</h2>
+							<h2 className="font-pirulen mb-4 text-xs tracking-wider text-red-500">DANGER ZONE</h2>
 							<div className="flex items-center justify-between">
 								<div>
-									<h3 className="text-sm font-bold text-white">Supprimer mon compte</h3>
-									<p className="text-xs text-gray-500">Cette action est irréversible</p>
+									<h3 className="text-sm font-bold text-white">Delete my account</h3>
+									<p className="text-xs text-gray-500">This action is irreversible</p>
 								</div>
 								<button
 									onClick={() => setShowDeleteModal(true)}
@@ -549,29 +549,29 @@ export function ProfilePage() {
 
 			{/* Delete Account Modal */}
 			{showDeleteModal && (
-				<Modal onClose={() => setShowDeleteModal(false)} title="Supprimer le compte" variant="purple">
+				<Modal onClose={() => setShowDeleteModal(false)} title="Delete the account" variant="purple">
 					<div className="space-y-4">
 						<p className="text-sm text-red-400">
-							Attention ! Cette action supprimera définitivement votre compte et toutes vos données.
+							Warning! This action will permanently delete your account and all your data.
 						</p>
 						<div className="space-y-2">
 							<label className="text-xs text-gray-500">
-								Tapez <span className="font-bold text-white">SUPPRIMER</span> pour confirmer
+								Tap <span className="font-bold text-white">DELETE</span> for confirmation
 							</label>
 							<input
 								type="text"
 								value={deleteConfirmText}
 								onInput={(e: Event) => setDeleteConfirmText((e.target as HTMLInputElement).value)}
-								placeholder="SUPPRIMER"
+								placeholder="DELETE"
 								className="w-full rounded-sm border border-red-500/30 bg-transparent p-3 text-center text-white outline-none focus:border-red-500"
 							/>
 						</div>
 						<button
 							onClick={handleDeleteAccount}
-							disabled={deleteConfirmText !== 'SUPPRIMER' || isDeleting}
+							disabled={deleteConfirmText !== 'DELETE' || isDeleting}
 							className="w-full rounded-sm border border-red-500 bg-red-500/20 py-3 text-sm font-bold text-red-400 transition-all duration-300 hover:bg-red-500/30 disabled:cursor-not-allowed disabled:opacity-50"
 						>
-							{isDeleting ? 'Suppression...' : 'Supprimer définitivement mon compte'}
+							{isDeleting ?'Deletion...': 'Permanently delete my account'}
 						</button>
 					</div>
 				</Modal>
