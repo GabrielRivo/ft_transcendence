@@ -5,6 +5,7 @@ import {
 	Controller,
 	Get,
 	Inject,
+	InjectPlugin,
 	NotFoundException,
 	Param,
 	Post,
@@ -13,7 +14,6 @@ import {
 	Res,
 	UnauthorizedException,
 	UseGuards,
-	InjectPlugin
 } from 'my-fastify-decorators';
 
 import config from '../config.js';
@@ -24,10 +24,17 @@ import { LoginDto, LoginSchema } from './dto/login.dto.js';
 import { RegisterDto, RegisterSchema } from './dto/register.dto.js';
 import { SetUsernameDto, SetUsernameSchema } from './dto/setUsername.dto.js';
 
+import { RabbitMQClient } from 'my-fastify-decorators-microservices';
+import {
+	base32ToBuffer,
+	bufferToBase32,
+	generateTOTPSecret,
+	getTOTP,
+	linkTOTPSecret,
+} from '../utils/crypto.js';
 import { AuthGuard } from './guards/auth.guard.js';
 import type { ProviderKeys } from './providers.js';
 import { providers } from './providers.js';
-import { RabbitMQClient } from 'my-fastify-decorators-microservices';
 
 // Extend FastifyRequest to include user from AuthGuard
 interface AuthenticatedRequest extends FastifyRequest {
@@ -137,7 +144,9 @@ export class AuthController {
 	 */
 	@Post('/logout')
 	async logout(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
-		const refreshToken = (req.cookies as Record<string, string | undefined>)[config.refreshTokenName];
+		const refreshToken = (req.cookies as Record<string, string | undefined>)[
+			config.refreshTokenName
+		];
 
 		if (refreshToken) {
 			await this.authService.logout(refreshToken);
@@ -187,12 +196,12 @@ export class AuthController {
 	}
 
 	@Get('/user-is-exist/:id')
-	async isExist(@Param('id') id: number){
+	async isExist(@Param('id') id: number) {
 		const user = await this.dbExchangeService.getUserById(id);
 		if (!user) {
-			return { exist : false}
+			return { exist: false };
 		}
-		return { exist : true };
+		return { exist: true };
 	}
 
 	@Get('/:provider/callback')
@@ -209,5 +218,19 @@ export class AuthController {
 	@Get('/:provider/redirect/uri')
 	async redirectUri(@Param('provider') provider: ProviderKeys, @Res() res: FastifyReply) {
 		res.redirect(providers[provider].authorizationUrl);
+	}
+
+	@Get('/test/totp/generate')
+	async generateTOTPSecret() {
+		const secret = generateTOTPSecret();
+		return {
+			secret: bufferToBase32(secret),
+			link: linkTOTPSecret(secret, 'MyApp', 'MyLabel'),
+		};
+	}
+
+	@Get('/test/totp/get')
+	async verifyTOTP(@Query('buffer') buffer: string) {
+		return { code: getTOTP(base32ToBuffer(buffer), 6, 30, 'sha1') };
 	}
 }
