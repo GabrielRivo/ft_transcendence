@@ -1,8 +1,8 @@
 
 import Database, { Statement } from 'better-sqlite3';
-import { Inject, InjectPlugin, Service } from 'my-fastify-decorators';
+import { InjectPlugin, Service } from 'my-fastify-decorators';
 
-
+const FRIEND_URL = 'http://social:3000';
 
 @Service()
 export class PrivateChatService {
@@ -11,11 +11,6 @@ export class PrivateChatService {
 	private statementSavePrivate !: Statement<{ u1: number, u2 : number,  content: string, senderId : string }>;
 	private statementGetPrivateHistory !: Statement<{userId1 : number, userId2 : number}>;
 	private statementDeleteConversation!: Statement<{ user1: number; user2: number }>;
-	//private statementCheckBlock!: Statement<{ sender: number; receiver: number }>;
-
-
-	// @Inject(FriendManagementService)
-	// private friendService!: FriendManagementService;
 
 	onModuleInit() {
 		this.statementSavePrivate = this.db.prepare(
@@ -27,13 +22,6 @@ export class PrivateChatService {
 					ORDER BY created_at DESC LIMIT 50`
 		);
 
-		
-		// this.statementDeleteConversation = this.db.prepare(`
-		// 	DELETE FROM privateChatHistory 
-		// 	WHERE (userId1 = @user1 AND userId2 = @user2) 
-		// 		OR (userId2 = @user2 AND userId1 = @user1)
-		// `);
-
 		this.statementDeleteConversation = this.db.prepare(`
 			DELETE FROM privateChatHistory 
 			WHERE (userId1 = @user1 AND userId2 = @user2) 
@@ -42,10 +30,22 @@ export class PrivateChatService {
 	}
 
 	async createPrivateRoom(userId1 : number, userId2 : number) {
-		// const isfriend = await this.friendService.is_friend(userId1, userId2); // ADD LA REQUETE
-		// if (isfriend == false) {
-		// 	return { message: "You are not friend with this user" } 
-		// }
+	const response = await fetch(`${FRIEND_URL}/social/is_friend`, {
+	method: 'POST',
+	headers: { 
+		'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			userId: userId1, 
+			otherId: userId2 
+		})
+	});
+	if (!response)
+		return {message : "Error"}
+		const isFriend = await response.json();
+		if (isFriend == false) {
+			return { message: "You are not friend with this user" } 
+		}
 
 		const min = Math.min(userId1, userId2)
 		const max = Math.max(userId1, userId2)

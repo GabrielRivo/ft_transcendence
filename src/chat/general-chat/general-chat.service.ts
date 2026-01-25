@@ -1,7 +1,5 @@
 import Database, { Statement } from 'better-sqlite3';
 import { InjectPlugin, Service, Inject } from 'my-fastify-decorators';
-// import { BlockManagementService } from '../../friend-management/block-management.service.js';
-
 
 const BLOCK_URL = 'http://social:3000';
 
@@ -12,10 +10,6 @@ export class GeneralChatService {
 	private statementSaveGeneral !: Statement<{ userId: number, username: string, msgContent: string }>;
 	private statementGetGeneralHistory !: Statement<[]>;
 	private statementGetAllGeneralHistory !: Statement<[]>;
-
-
-	// @Inject(BlockManagementService)
-	// private blockService!: BlockManagementService;
 
 	onModuleInit() {
 		this.statementSaveGeneral = this.db.prepare(
@@ -59,7 +53,3 @@ export class GeneralChatService {
 		return this.statementGetAllGeneralHistory.all();
 	}
 }
-// return this.statementGetGeneralHistory.all();
-
-// faire un clear history a + de 100 messages
-// faire un afficher history pour quand les users rejoignent le chat 

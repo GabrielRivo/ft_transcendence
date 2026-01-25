@@ -28,25 +28,11 @@ export class GroupController {
 		const members = this.groupService.getGroupMembers(Number(groupId));
 		return { ...group, members };
 	}
-
-	// @Get('/group_history')
-	// async get_history(groupId: number) {
-	// 	const history = this.groupService.getGroupHistory(groupId);
-	// 	return history.reverse();
-	// 	// const history = this.chatService.getGroupHistory();
-	// 	// return history.reverse();
-	// }
-
 	@Post('/add_user')
 	@BodySchema(GroupMemberSchema)
 	async add_member(@Body() data: GroupMemberDto) {
 		try {
-				// const response = await fetch(`${AUTH_SERVICE_URL}/auth/user-by-username/${encodeURIComponent(data.userId  )}`);
-				
-				// if (!response.ok) {
-				// 	return { success: false, message: "User not found" };
-				// }
-			return this.groupService.addMember(data.groupId, data.userId, data.otherId)
+				return this.groupService.addMember(data.groupId, data.userId, data.otherId)
 			} catch (error: any) {
 				return { 
 					success: false,
@@ -54,7 +40,6 @@ export class GroupController {
 				};
 		}
 	}
-
 	@Post('/remove_member')
 	@BodySchema(GroupMemberSchema)
 	async remove_member(@Body() data: GroupMemberDto & { removerId: number }) {

@@ -43,7 +43,6 @@ export class PrivateChatController {
 
 	@Delete('/private_history')
 	async delete_history(@Body()payload: DeleteChatPayload) {
-		console.log("B");
 		try {
 			await this.chatService.removePrivateChat(
 				Number(payload.userId), 
@@ -53,7 +52,6 @@ export class PrivateChatController {
 		catch(e) {
 			console.log(e);
 		}
-		console.log("D")
 		return { ok : true};
 	}
 }
