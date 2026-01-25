@@ -1,6 +1,6 @@
 
 import Database, { Statement } from 'better-sqlite3';
-import { Inject, InjectPlugin, Service } from 'my-fastify-decorators';
+import { InjectPlugin, Service } from 'my-fastify-decorators';
 
 
 
@@ -8,8 +8,8 @@ import { Inject, InjectPlugin, Service } from 'my-fastify-decorators';
 export class PrivateChatService {
 	@InjectPlugin('db')
 	private db !: Database.Database;
-	private statementSavePrivate !: Statement<{ u1: number, u2 : number,  content: string, senderId : string }>;
-	private statementGetPrivateHistory !: Statement<{userId1 : number, userId2 : number}>;
+	private statementSavePrivate !: Statement<{ u1: number, u2: number, content: string, senderId: string }>;
+	private statementGetPrivateHistory !: Statement<{ userId1: number, userId2: number }>;
 	private statementDeleteConversation!: Statement<{ user1: number; user2: number }>;
 	//private statementCheckBlock!: Statement<{ sender: number; receiver: number }>;
 
@@ -19,7 +19,7 @@ export class PrivateChatService {
 
 	onModuleInit() {
 		this.statementSavePrivate = this.db.prepare(
-		`INSERT INTO privateChatHistory (userId1, userId2, senderId, msgContent) 
+			`INSERT INTO privateChatHistory (userId1, userId2, senderId, msgContent) 
 				VALUES (MIN(@u1, @u2), MAX(@u1, @u2), @senderId, @content)`
 		);
 		this.statementGetPrivateHistory = this.db.prepare(
@@ -27,7 +27,7 @@ export class PrivateChatService {
 					ORDER BY created_at DESC LIMIT 50`
 		);
 
-		
+
 		// this.statementDeleteConversation = this.db.prepare(`
 		// 	DELETE FROM privateChatHistory 
 		// 	WHERE (userId1 = @user1 AND userId2 = @user2) 
@@ -41,7 +41,7 @@ export class PrivateChatService {
 		`);
 	}
 
-	async createPrivateRoom(userId1 : number, userId2 : number) {
+	async createPrivateRoom(userId1: number, userId2: number) {
 		// const isfriend = await this.friendService.is_friend(userId1, userId2); // ADD LA REQUETE
 		// if (isfriend == false) {
 		// 	return { message: "You are not friend with this user" } 
@@ -49,21 +49,21 @@ export class PrivateChatService {
 
 		const min = Math.min(userId1, userId2)
 		const max = Math.max(userId1, userId2)
-		return(`room_${min}_${max}`)
+		return (`room_${min}_${max}`)
 	}
 
-	savePrivateMessage(userId1 : number, userId2 : number, content: string, senderId : string) {
-		return this.statementSavePrivate.run({u1: userId1, u2: userId2, content: content, senderId});
+	savePrivateMessage(userId1: number, userId2: number, content: string, senderId: string) {
+		return this.statementSavePrivate.run({ u1: userId1, u2: userId2, content: content, senderId });
 	}
 
-	async getPrivateHistory(userId1 : number, userId2 : number) {
+	async getPrivateHistory(userId1: number, userId2: number) {
 		const min = Math.min(userId1, userId2)
 		const max = Math.max(userId1, userId2)
-		const history = this.statementGetPrivateHistory.all({userId1: min, userId2: max})
+		const history = this.statementGetPrivateHistory.all({ userId1: min, userId2: max })
 		return history;
 	}
 	async removePrivateChat(userId1: number, userId2: number): Promise<void> {
-		const test = this.statementDeleteConversation.run({ user1: userId1, user2: userId2 }); 
+		const test = this.statementDeleteConversation.run({ user1: userId1, user2: userId2 });
 		console.log(test);
 	}
 }

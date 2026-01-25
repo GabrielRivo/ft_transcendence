@@ -5,6 +5,7 @@ import { registerValidators } from 'my-class-validator';
 import 'reflect-metadata';
 import pluginManager from './plugin-manager.js';
 import bootstrapPlugin from './plugins/bootstrap-plugin.js';
+import rabbitmqPlugin from './plugins/rabbitmq-plugin.js';
 
 export function buildApp(options: { dbPath?: string } = {}) {
 	const app = Fastify({
@@ -22,6 +23,7 @@ export function buildApp(options: { dbPath?: string } = {}) {
 	registerValidators(ajv);
 
 	pluginManager(app, options);
+	app.register(rabbitmqPlugin);
 	app.register(bootstrapPlugin);
 
 	app.setValidatorCompiler(({ schema }) => {

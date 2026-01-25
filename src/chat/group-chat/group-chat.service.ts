@@ -4,37 +4,39 @@ import { Server } from 'socket.io';
 
 const BLOCK_URL = 'http://social:3000';
 
-const CreateGroup = 
+const CreateGroup =
 	`INSERT INTO privateGroup (name, ownerId) VALUES (@name, @ownerId)`;
 
-const AddMember = 
+const AddMember =
 	`INSERT INTO groupMembers (groupId, userId) VALUES (@groupId, @userId)`;
 
-const RemoveMember = 
+const RemoveMember =
 	`DELETE FROM groupMembers WHERE groupId = @groupId AND userId = @userId`;
 
-const GetGroupMembers = 
+const GetGroupMembers =
 	`SELECT userId FROM groupMembers WHERE groupId = @groupId`;
 
-const GetUserGroups = 
+const GetUserGroups =
 	`SELECT g.groupId, g.name, g.ownerId, g.created_at
 	FROM privateGroup g
-	LEFT JOIN groupMembers m ON g.groupId = m.groupId
-	WHERE g.ownerId = @userId OR m.userId = @userId
+	INNER JOIN groupMembers m ON g.groupId = m.groupId
+	WHERE m.userId = @userId
 	GROUP BY g.groupId`;
 
-const GetGroupById = 
+const GetGroupById =
 	`SELECT groupId, name, ownerId, created_at FROM privateGroup WHERE groupId = @groupId`;
 
-const DeleteGroup = 
+const DeleteGroup =
 	`DELETE FROM privateGroup WHERE groupId = @groupId AND ownerId = @ownerId`;
 
-const IsMember = 
-	`SELECT 1 FROM groupMembers WHERE groupId = @groupId AND userId = @userId
-	UNION SELECT 1 FROM privateGroup WHERE groupId = @groupId AND ownerId = @userId`;
+const IsMember =
+	`SELECT 1 FROM groupMembers WHERE groupId = @groupId AND userId = @userId`;
 
-const GetGrpHistory = 
+const GetGrpHistory =
 	`SELECT * FROM groupChatHistory WHERE groupId = @groupId ORDER BY created_at DESC LIMIT 50`
+
+const FindGroupByNameAndOwner =
+	`SELECT groupId FROM privateGroup WHERE ownerId = @ownerId AND name = @name`;
 
 const SaveGroupMessage =
 	`INSERT INTO groupChatHistory (groupId, userId, msgContent) VALUES (@groupId, @userId, @msgContent)`
@@ -62,8 +64,9 @@ export class GroupChatService {
 	private statementGetGroupById: Statement<{ groupId: number }>;
 	private statementDeleteGroup: Statement<{ groupId: number; ownerId: number }>;
 	private statementIsMember: Statement<{ groupId: number; userId: number }>;
-	private statemenGetGroupHistory: Statement<{ groupId: number, userId : number }>;
-	private statementSaveGroupMessage: Statement<{ groupId: number,  userId: number, msgContent: string }>;
+	private statemenGetGroupHistory: Statement<{ groupId: number, userId: number }>;
+	private statementSaveGroupMessage: Statement<{ groupId: number, userId: number, msgContent: string }>;
+	private statementFindGroupByNameAndOwner: Statement<{ ownerId: number, name: string }>;
 
 	onModuleInit() {
 		this.statementCreateGroup = this.db.prepare(CreateGroup);
@@ -76,15 +79,18 @@ export class GroupChatService {
 		this.statementIsMember = this.db.prepare(IsMember);
 		this.statemenGetGroupHistory = this.db.prepare(GetGrpHistory);
 		this.statementSaveGroupMessage = this.db.prepare(SaveGroupMessage);
+		this.statementFindGroupByNameAndOwner = this.db.prepare(FindGroupByNameAndOwner);
 	}
 
 	createGroup(ownerId: number, name: string): { success: boolean; message: string; groupId?: number } {
 		try {
 			const result = this.statementCreateGroup.run({ name, ownerId });
 			const groupId = Number(result.lastInsertRowid);
-			
+
 			this.statementAddMember.run({ groupId, userId: ownerId });
-			
+
+			this.emitToUser(ownerId, 'group_list_update', {});
+
 			return { success: true, message: "Group created", groupId };
 		} catch (error: any) {
 			return { success: false, message: error.message || "Failed to create group" };
@@ -96,19 +102,20 @@ export class GroupChatService {
 		if (!canInvite) {
 			return { success: false, message: "You are not a member of this group" }; //A CHANGER
 		}
-		
+
 		const members = this.getGroupMembers(groupId);
 		if (members.length >= 16) {
 			return { success: false, message: "Group is full (max 16 members)" };
 		}
-		
+
 		try {
-			this.statementAddMember.run({ groupId, userId : otherId });
+			this.statementAddMember.run({ groupId, userId: otherId });
 		} catch (error: any) {
 			console.log(error);
 			return { success: false, message: "User is already a member" };
 		}
 		this.emitToUser(userId, 'group_invite', { groupId });
+		this.emitToUser(otherId, 'group_list_update', {});
 		// USER EXIST
 		return { success: true, message: "Member added" };
 	}
@@ -118,7 +125,7 @@ export class GroupChatService {
 		if (!group) {
 			return { success: false, message: "Group not found" };
 		}
-		
+
 		// if (group.ownerId !== userId) {
 		// 	console.log("owner : ", group.ownerId, "remover :")
 		// 	return { success: false, message: "You don't have permission to remove this member" };
@@ -128,16 +135,17 @@ export class GroupChatService {
 			console.log("user : ", userId, "leave")
 			return { success: false, message: "You don't have permission to remove this member" };
 		}
-		
+
 		// if (otherId === group.ownerId) {
 		// 	return { success: false, message: "Owner cannot leave. Delete the group instead." };
 		// }
-		
+
 		const result = this.statementRemoveMember.run({ groupId, userId: otherId });
 		if (result.changes === 0) {
 			return { success: false, message: "User is not a member" };
 		}
-		
+
+		this.emitToUser(otherId, 'group_list_update', {});
 		return { success: true, message: "Member removed" };
 	}
 
@@ -155,18 +163,30 @@ export class GroupChatService {
 	}
 
 	isMember(groupId: number, userId: number): boolean {
-		if (!!this.statementGetGroupById.get({groupId})){
+		if (!!this.statementGetGroupById.get({ groupId })) {
 			return !!this.statementIsMember.get({ groupId, userId });
 		}
 		return false;
 	}
 
 	deleteGroup(groupId: number, ownerId: number): { success: boolean; message: string } {
+		const members = this.getGroupMembers(groupId);
 		const result = this.statementDeleteGroup.run({ groupId, ownerId });
 		if (result.changes === 0) {
 			return { success: false, message: "Group not found or you are not the owner" };
 		}
+
+		// Notify all members including owner
+		const allToNotify = new Set([...members, ownerId]);
+		allToNotify.forEach(userId => {
+			this.emitToUser(userId, 'group_list_update', {});
+		});
+
 		return { success: true, message: "Group deleted" };
+	}
+
+	findGroupByNameAndOwner(ownerId: number, name: string): { groupId: number } | undefined {
+		return this.statementFindGroupByNameAndOwner.get({ ownerId, name }) as { groupId: number } | undefined;
 	}
 
 	private emitToUser(userId: number, event: string, data: any): void {
@@ -177,20 +197,18 @@ export class GroupChatService {
 		}
 	}
 
-	async getGroupHistory(groupId: number, userId : number) {
-		//return this.statemenGetGroupHistory.all({ groupId });
+	async getGroupHistory(groupId: number, userId: number) {
 		const rows = this.statemenGetGroupHistory.all({ groupId, userId }) as any[];
 		const filteredHistory = [];
 		for (const msg of rows) {
-			console.log("mess : ", userId, msg.userId)
+			// console.log("mess : ", userId, msg.userId)
 			const res = await fetch(`${BLOCK_URL}/friend-management/block?userId=${userId}&otherId=${msg.userId}`);
 			if (!res.ok) {
 				console.error(`Error with friend service ${res.status}`);
-			}
-			else {
+			} else {
 				const data = await res.json() as { isBlocked: boolean };
 				if (data.isBlocked === false) {
-					console.log("false")
+					// console.log("false")
 					filteredHistory.push(msg);
 				}
 			}

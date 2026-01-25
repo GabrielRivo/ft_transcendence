@@ -13,10 +13,10 @@ import {
 import { Socket } from 'socket.io';
 import { GeneralChatService } from './general-chat/general-chat.service.js';
 import { PrivateChatService } from './private-chat/private-chat.service.js';
-import {GroupChatService } from './group-chat/group-chat.service.js'
+import { GroupChatService } from './group-chat/group-chat.service.js'
 // import { BlockManagementService } from '../friend-management/block-management.service.js';
 import { ChatSchema, ChatDto } from './dto/chat.dto.js';
-import { group } from 'console';
+// import { group } from 'console';
 
 @WebSocketGateway()
 export class ChatGateway {
@@ -35,7 +35,7 @@ export class ChatGateway {
 	// Helper: Récupérer les utilisateurs d'une room via Socket.io (dédupliqués par userId)
 	private async getUsersInRoom(client: Socket, roomId: string): Promise<{ userId: number; username: string }[]> {
 		const sockets = await client.nsp.in(roomId).fetchSockets();
-		
+
 		// Dédupliquer par userId (un utilisateur peut avoir plusieurs onglets/connexions)
 		const userMap = new Map<number, string>();
 		for (const s of sockets) {
@@ -43,7 +43,7 @@ export class ChatGateway {
 				userMap.set(s.data.userId, s.data.username);
 			}
 		}
-		
+
 		return Array.from(userMap.entries()).map(([userId, username]) => ({
 			userId,
 			username,
@@ -77,7 +77,7 @@ export class ChatGateway {
 
 		await this.broadcastRoomUsers(client, 'hub');
 	}
-	
+
 	@SubscribeDisconnection()
 	async handleDisconnect(@ConnectedSocket() client: Socket) {
 		console.log("[disconnect]");
@@ -146,7 +146,7 @@ export class ChatGateway {
 		}
 
 		// start test
-		if (roomId.startsWith("group")){
+		if (roomId.startsWith("group")) {
 			console.log("[join_group]");
 			const groupId = parseInt(roomId.slice(6));
 			//await this.groupChatServie.getGroupHistory(groupId);
@@ -154,8 +154,8 @@ export class ChatGateway {
 			client.emit('group_history', messages);
 			console.log("messges : ", messages)
 		}
-		
-		
+
+
 		//
 
 
@@ -229,7 +229,7 @@ export class ChatGateway {
 		const users = await this.getUsersInRoom(client, roomId);
 		client.emit('room_users', { roomId, users });
 	}
-	
+
 	@SubscribeMessage('send_private_message')
 	async handleSendPrivateMessage(
 		@ConnectedSocket() client: Socket,
@@ -237,12 +237,12 @@ export class ChatGateway {
 		@JWTBody() user: any
 	) {
 		console.log("[send_private_message]");
-				console.log("MESSAGESSE")
+		console.log("MESSAGESSE")
 		if (!user?.id) return;
 
 		const fromId = user.id;
 		const { friendId, content } = data;
-	
+
 		console.log('Handshake Auth:', client.handshake.auth);
 		console.log('Handshake Query:', client.handshake.query);
 		console.log('Client Data:', client.data);
@@ -289,10 +289,10 @@ export class ChatGateway {
 				client.emit('error', { message: 'invalid user number' });
 			}
 			const [user1, user2] = users as [number, number];
-			if (user1 >= user2){
+			if (user1 >= user2) {
 				client.emit('error', { message: 'invalid user sort' });
 			}
-			if (user1 == user2){
+			if (user1 == user2) {
 				client.emit('error', { message: 'same id!' });
 			}
 			console.log(user1, user2);
@@ -307,27 +307,27 @@ export class ChatGateway {
 		};
 
 		// bloc de test
-		const testdata = {
-			userId: user.id,
-			username: user.username,
-			msgContent: "le message lul",
-			roomId: "group_1",
-			created_at: new Date().toISOString(),
-		};
+		// const testdata = {
+		// 	userId: user.id,
+		// 	username: user.username,
+		// 	msgContent: "le message lul",
+		// 	roomId: "group_1",
+		// 	created_at: new Date().toISOString(),
+		// };
 
 		//client.nsp.in(targetRoom).emit('message', messageData);
 		//client.nsp.in("group_1").emit('message', messageData);
 
 
 		// fin du test
-		
+
 		console.log("sender : ", user.id)
 		// test pour group
 		if (roomId.startsWith("group")) {
 			const groupId = parseInt(roomId.slice(6));
 			console.log("room id : ", groupId);
 			console.log("here room: ", roomId);
-			if (!groupId) 
+			if (!groupId)
 				client.emit('error', { message: 'invalid group name' });
 			if (groupId < 0)
 				client.emit('error', { message: 'invalid group id' });
@@ -348,7 +348,7 @@ export class ChatGateway {
 		if (targetRoom === 'hub') {
 			await this.generalChatService.saveGeneralMessage(user.id, user.username, content);
 		}
-		
+
 		client.nsp.in(targetRoom).emit('message', messageData);
 	}
 }
