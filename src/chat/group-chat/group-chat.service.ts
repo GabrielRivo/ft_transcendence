@@ -2,7 +2,7 @@ import Database, { Statement } from 'better-sqlite3';
 import { InjectPlugin, Service } from 'my-fastify-decorators';
 import { Server } from 'socket.io';
 
-const BLOCK_URL = 'http://social:3000';
+const BLOCK_URL = 'http://user:3000';
 
 const CreateGroup =
 	`INSERT INTO privateGroup (name, ownerId) VALUES (@name, @ownerId)`;

@@ -6,7 +6,7 @@ interface DeleteChatPayload {
 	otherId: number;
 }
 
-const BLOCK_URL = 'http://social:3000';
+const BLOCK_URL = 'http://user:3000';
 
 @Controller('/private')
 export class PrivateChatController {
