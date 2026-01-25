@@ -128,7 +128,7 @@ class PongOnline extends Game {
         // Load 3D background model from cache
         if (this.isDisposed || !Services.Scene) return;
         try {
-            const meshes = await Services.AssetCache.loadModel('pong-background', './models/pong.glb', Services.Scene);
+            const meshes = await Services.AssetCache.loadModel('pong-background', '/models/pong.glb', Services.Scene);
             if (this.isDisposed) return; // Check again after async operation
             meshes.forEach(mesh => {
                 mesh.isPickable = false;

@@ -20,6 +20,7 @@ interface ChatSidebarPanelProps {
 	onSelectHub: () => void;
 	onSelectFriend: (friendId: number) => void;
 	onSelectGroup: (groupId: number) => void;
+	onRemoveFriend: (friendId: number) => Promise<boolean>;
 }
 
 export function ChatSidebarPanel({
@@ -31,6 +32,7 @@ export function ChatSidebarPanel({
 	onSelectHub,
 	onSelectFriend,
 	onSelectGroup,
+	onRemoveFriend,
 }: ChatSidebarPanelProps) {
 	const [showMenu, setShowMenu] = useState(false);
 	const [showAddFriendModal, setShowAddFriendModal] = useState(false);
@@ -99,7 +101,20 @@ export function ChatSidebarPanel({
 									isSelected={currentRoom.includes(String(friend.id))}
 									onClick={() => onSelectFriend(friend.id)}
 									contextMenuCallbacks={{
-										onChallenge: () => {																				
+										onChallenge: () => {
+											fetchWithAuth(`/api/user/friend-management/challenge`, {
+												method: 'POST',
+												headers: {
+													'Content-Type': 'application/json',
+												},
+												body: JSON.stringify({
+													otherId: friend.id
+												}),																	
+											}).then(data => data.json()).then(data => {
+												toast(data.message, data.success ? 'success' : 'error')
+											}).catch(e => {
+												toast('Network error', 'error')
+											})
 											console.log('Défier', friend.username)
 										},
 										onInviteTournament: () => {
@@ -109,27 +124,20 @@ export function ChatSidebarPanel({
 											navigate(`/statistics/${friend.id}`)
 										},
 										onProfile: () => {
-											navigate(`/profil/${friend.id}`)
+											navigate(`/profile/${friend.id}`)
 											console.log('Profil', friend.username)
 										},
-										onToggleFriend: () => {
-											fetchWithAuth(`/api/social/friend-management/friend`, {
-												method: 'DELETE',
-												headers: {
-													'Content-Type': 'application/json',
-												},
-												body: JSON.stringify({
-													otherId: friend.id
-												}),
-											}).then(data => data.json()).then(data => {
-												toast(data.message, data.success ? 'success' : 'error')
-											}).catch(e => {
-												toast('Network error', 'error')
-											})
-											console.log('Ajouter en ami', friend.username)
+										onToggleFriend: async () => {
+											const success = await onRemoveFriend(friend.id);
+											if (success) {
+												toast('Friend removed successfully', 'success');
+											} else {
+												toast('Failed to remove friend', 'error');
+											}
+											console.log('Supprimer ami', friend.username)
 										},
 										onBlock: () => {
-											fetchWithAuth(`/api/social/friend-management/block`, {
+											fetchWithAuth(`/api/user/friend-management/block`, {
 												method: 'POST',
 												headers: {
 													'Content-Type': 'application/json',

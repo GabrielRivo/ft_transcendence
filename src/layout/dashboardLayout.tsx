@@ -29,12 +29,9 @@ function Menu() {
 	const navigate = useNavigate();
 	const { toast } = useToast();
 
-	const handleLogout = () => {
-		logout().then(() => {
-			toast('Logout successful', 'success');
-			navigate('/');
-		});
-	};
+	// const handleLogout = () => {
+	// 	navigate('/logout');
+	// };
 
 	return (
 		<nav className="flex h-14 w-full shrink-0 items-center justify-center gap-8 pb-12">
@@ -44,7 +41,7 @@ function Menu() {
 			{/* <span>|</span> */}
 			<NavLink path="/statistics/general" label="Stats" />
 			{/* <span>|</span> */}
-			<Link className="font-pirulen text-cyan-500 hover:text-white/80" to="/logout" onClick={handleLogout}>
+			<Link className="font-pirulen text-cyan-500 hover:text-white/80" to="/logout">
 				Logout
 			</Link>
 			{/* <NavLink path="/deconnexion" label="Deconnexion" className="text-cyan-500" /> */}

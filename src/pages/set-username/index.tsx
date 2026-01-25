@@ -33,7 +33,6 @@ export function SetUsername() {
 		const result = validate({ username });
 		if (!result.valid) {
 			setErrors(result.errors);
-			toast('Please correct the errors', 'warning');
 			return;
 		}
 

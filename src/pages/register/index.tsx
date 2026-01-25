@@ -30,7 +30,6 @@ export function Register() {
 		const result = validate({ email, password });
 		if (!result.valid) {
 			setErrors(result.errors);
-			toast('Please correct the errors', 'warning');
 			return;
 		}
 
@@ -71,7 +70,7 @@ export function Register() {
 			<div className="relative z-10 flex h-full items-center justify-center p-4">
 				<CardStyle2>
 					<div className="flex w-full flex-col gap-8">
-						<h1 className="font-pirulen text-center text-xl tracking-widest text-white">Subscription</h1>
+						<h1 className="font-pirulen text-center text-xl tracking-widest text-white">Register</h1>
 						<form className="flex flex-col gap-6" onSubmit={handleSubmit}>
 							<div className="group flex flex-col gap-2">
 								<label

@@ -1,4 +1,4 @@
-import { createElement, FragmentComponent, createPortal, Element, useEffect } from 'my-react';
+import { createElement, FragmentComponent, createPortal, Element, useEffect, useRef } from 'my-react';
 import { Cross } from '@icon/cross';
 
 interface ModalProps {
@@ -83,31 +83,53 @@ function ModalBody({ children }: { children?: Element | Element[] }) {
 	return <div className="p-6">{children}</div>;
 }
 
+// Export Modal using a manual container to ensure cleanup on unmount
 export function Modal({ onClose, children, title = false, variant = 'cyan' }: ModalProps) {
-	// Écouter la touche Escape sur le document (capture phase pour avoir priorité)
-	useEffect(() => {
-		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === 'Escape') {
-				e.preventDefault();
-				e.stopPropagation();
-				onClose();
-			}
-		};
+	const containerRef = useRef<HTMLElement | null>(null);
 
-		// Utiliser capture: true pour intercepter l'événement avant les autres listeners
-		document.addEventListener('keydown', handleKeyDown, true);
-		return () => document.removeEventListener('keydown', handleKeyDown, true);
+	// Create container once
+	if (!containerRef.current) {
+		containerRef.current = document.createElement('div');
+	}
+
+	const onCloseRef = useRef(onClose);
+	useEffect(() => {
+		onCloseRef.current = onClose;
 	}, [onClose]);
 
-	// Utiliser onClick au lieu de onMouseDown pour plus de fiabilité
+	useEffect(() => {
+		const container = containerRef.current;
+		if (container) {
+			document.body.appendChild(container);
+
+			const handleKeyDown = (e: KeyboardEvent) => {
+				if (e.key === 'Escape') {
+					e.preventDefault();
+					e.stopPropagation();
+					onCloseRef.current();
+				}
+			};
+
+			document.addEventListener('keydown', handleKeyDown, true);
+
+			return () => {
+				document.removeEventListener('keydown', handleKeyDown, true);
+				if (document.body.contains(container)) {
+					document.body.removeChild(container);
+				}
+			};
+		}
+	}, []);
+
 	const handleBackdropClick = (e: MouseEvent) => {
-		// Vérifier que le clic est directement sur le backdrop, pas sur un enfant
 		if (e.target === e.currentTarget) {
 			e.preventDefault();
 			e.stopPropagation();
 			onClose();
 		}
 	};
+
+	if (!containerRef.current) return null;
 
 	return createPortal(
 		<div
@@ -119,6 +141,6 @@ export function Modal({ onClose, children, title = false, variant = 'cyan' }: Mo
 				<ModalBody>{children}</ModalBody>
 			</ModalContent>
 		</div>,
-		document.body,
+		containerRef.current,
 	);
 }

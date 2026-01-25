@@ -16,7 +16,7 @@ function formatDuration(seconds: number): string {
 	return `${minutes} min`;
 }
 
-function MatchCard({ match, isSelected, onClick }: { match: TransformedMatch; isSelected: boolean; onClick: () => void }) {
+function MatchCard({ match, isSelected, onClick }: { match: TransformedMatch; isSelected: boolean; onClick: () => void; key?: number | string }) {
 	const bgColor = match.isWin ? 'bg-green-600' : 'bg-red-600';
 	const borderColor = isSelected
 		? match.isWin

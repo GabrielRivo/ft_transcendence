@@ -49,21 +49,33 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 								onClick={() => {}}
 								contextMenuCallbacks={{
 									onChallenge: () => {
-										
+										fetchWithAuth(`/api/user/friend-management/challenge`, {
+											method: 'POST',
+											headers: {
+												'Content-Type': 'application/json',
+											},
+											body: JSON.stringify({
+												otherId: roomUser.userId
+											}),
+										}).then(data => data.json()).then(data => {
+											toast(data.message, data.success ? 'success' : 'error')
+										}).catch(e => {
+											toast('Network error', 'error')
+										})
 										console.log('Défier', roomUser.username)
 									},
 									onInviteTournament: () => {
 										console.log('Inviter au tournoi', roomUser.username)
 									},
 									onStatistics: () => {
-										navigate(`/statistics/${roomUser.userId}`)
+										navigate(`/statistics/general/${roomUser.userId}`)
 									},
 									onProfile: () => {
-										navigate(`/profil/${roomUser.userId}`)
+										navigate(`/profile/${roomUser.userId}`)
 										console.log('Profil', roomUser.username)
 									},
 									onToggleFriend: () => {
-										fetchWithAuth(`/api/social/friend-management/invite`, {
+										fetchWithAuth(`/api/user/friend-management/invite`, {
 											method: 'POST',
 											headers: {
 												'Content-Type': 'application/json',
@@ -79,7 +91,7 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 										console.log('Add friend', roomUser.username)
 									},
 									onBlock: () => {
-										fetchWithAuth(`/api/social/friend-management/block`, {
+										fetchWithAuth(`/api/user/friend-management/block`, {
 											method: 'POST',
 											headers: {
 												'Content-Type': 'application/json',

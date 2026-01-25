@@ -51,7 +51,7 @@ export function ButtonStyle1({ children, onClick, duration = 400, resetKey }: Bu
 						: undefined
 				}
 			>
-				<use href="/svg/buttonSymbol.svg"></use>
+				<use href="/svg/buttonSymbol.svg#symbol"></use>
 			</svg>
 			<svg
 				aria-hidden="true"
@@ -63,7 +63,7 @@ export function ButtonStyle1({ children, onClick, duration = 400, resetKey }: Bu
 						: undefined
 				}
 			>
-				<use href="/svg/buttonSymbol.svg"></use>
+				<use href="/svg/buttonSymbol.svg#symbol"></use>
 			</svg>
 			<button
 				className={`text-secondary spacing font-pirulen group-hover:text-neon-blue inline-flex cursor-pointer items-center pl-[0.3em] text-2xl font-normal tracking-[0.3em] transition-all duration-600`}

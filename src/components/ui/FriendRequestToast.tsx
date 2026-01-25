@@ -1,11 +1,9 @@
-import { createElement, useState, useEffect, createPortal, FragmentComponent } from 'my-react';
+import { createElement, useState, createPortal, FragmentComponent } from 'my-react';
 import { useFriends, PendingInvitation } from '../../hook/useFriends';
-import { chatSocket } from '../../libs/socket';
-import { useAuth } from '../../hook/useAuth';
 
 interface FriendRequestToastItemProps {
 	invitation: PendingInvitation;
-	onAccept: (senderId: number) => void;
+	onAccept: (senderId: number, senderUsername: string) => void;
 	onDecline: (senderId: number) => void;
 	onClose: (senderId: number) => void;
 }
@@ -15,7 +13,7 @@ function FriendRequestToastItem({ invitation, onAccept, onDecline, onClose }: Fr
 
 	const handleAccept = async () => {
 		setLoading(true);
-		await onAccept(invitation.senderId);
+		await onAccept(invitation.senderId, invitation.senderUsername);
 	};
 
 	const handleDecline = async () => {
@@ -68,47 +66,15 @@ function FriendRequestToastItem({ invitation, onAccept, onDecline, onClose }: Fr
 }
 
 export function FriendRequestToastContainer() {
-	const { isAuthenticated, user } = useAuth();
-	const { pendingInvitations, acceptFriendInvite, declineFriendInvite, refreshPendingInvitations } = useFriends();
+	const { pendingInvitations, acceptFriendInvite, declineFriendInvite } = useFriends();
 	const [dismissedIds, setDismissedIds] = useState<Set<number>>(new Set());
-	const [liveInvitations, setLiveInvitations] = useState<PendingInvitation[]>([]);
 
-	// Écouter les nouvelles demandes en temps réel
-	useEffect(() => {
-		if (!isAuthenticated || !user) return;
+	// Filter out dismissed invitations
+	const visibleInvitations = pendingInvitations.filter((inv) => !dismissedIds.has(inv.senderId));
 
-		const handleFriendRequest = (data: { senderId: number; senderUsername: string }) => {
-			setLiveInvitations((prev) => {
-				if (prev.some((inv) => inv.senderId === data.senderId)) {
-					return prev;
-				}
-				return [
-					...prev,
-					{
-						senderId: data.senderId,
-						senderUsername: data.senderUsername,
-						created_at: new Date().toISOString(),
-					},
-				];
-			});
-		};
-
-		chatSocket.on('friend_request', handleFriendRequest);
-
-		return () => {
-			chatSocket.off('friend_request', handleFriendRequest);
-		};
-	}, [isAuthenticated, user?.id]);
-
-	// Combiner les invitations persistées et les nouvelles
-	const allInvitations = [...pendingInvitations, ...liveInvitations]
-		.filter((inv, index, self) => self.findIndex((i) => i.senderId === inv.senderId) === index)
-		.filter((inv) => !dismissedIds.has(inv.senderId));
-
-	const handleAccept = async (senderId: number) => {
-		const success = await acceptFriendInvite(senderId);
+	const handleAccept = async (senderId: number, senderUsername: string) => {
+		const success = await acceptFriendInvite(senderId, senderUsername);
 		if (success) {
-			setLiveInvitations((prev) => prev.filter((inv) => inv.senderId !== senderId));
 			setDismissedIds((prev) => new Set(prev).add(senderId));
 		}
 	};
@@ -116,7 +82,6 @@ export function FriendRequestToastContainer() {
 	const handleDecline = async (senderId: number) => {
 		const success = await declineFriendInvite(senderId);
 		if (success) {
-			setLiveInvitations((prev) => prev.filter((inv) => inv.senderId !== senderId));
 			setDismissedIds((prev) => new Set(prev).add(senderId));
 		}
 	};
@@ -125,14 +90,14 @@ export function FriendRequestToastContainer() {
 		setDismissedIds((prev) => new Set(prev).add(senderId));
 	};
 
-	if (allInvitations.length === 0) {
+	if (visibleInvitations.length === 0) {
 		return <FragmentComponent />;
 	}
 
 	return createPortal(
 		<FragmentComponent>
 			<div className="pointer-events-none fixed bottom-5 left-5 z-50 flex flex-col gap-3">
-				{allInvitations.map((invitation) => {
+				{visibleInvitations.map((invitation) => {
 					const itemProps = {
 						invitation,
 						onAccept: handleAccept,

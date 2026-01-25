@@ -1,4 +1,5 @@
 import { createElement } from 'my-react';
+import { useNavigate } from 'my-react-router';
 import { useChat } from '../../../hook/useChat';
 import { useFriends } from '../../../hook/useFriends';
 import { useGroups } from '../../../hook/useGroups';
@@ -9,7 +10,7 @@ import { ChatRoomUsersPanel } from './ChatRoomUsersPanel';
 export function ChatSection() {
 	const { connected, currentRoom, messages, roomUsers, sendMessage, joinRoom, joinPrivateRoom, joinGroupRoom } =
 		useChat();
-	const { friends, loading: friendsLoading } = useFriends();
+	const { friends, loading: friendsLoading, removeFriend } = useFriends();
 	const { groups, loading: groupsLoading } = useGroups();
 
 	const handleSelectHub = () => {
@@ -22,6 +23,30 @@ export function ChatSection() {
 
 	const handleSelectGroup = (groupId: number) => {
 		joinGroupRoom(groupId);
+	};
+
+	const navigate = useNavigate();
+
+	const handleJoinTournament = async (tournamentId: string) => {
+		try {
+			// const { fetchJsonWithAuth } = await import('@libs/fetchWithAuth');
+			const { fetchJsonWithAuth } = await import('../../../libs/fetchWithAuth'); // Try relative path just in case, or keep alias if it works
+			const response = await fetchJsonWithAuth(`/api/tournament/${tournamentId}/join`, {
+				method: 'POST',
+				body: JSON.stringify({}),
+			});
+			if (response.ok && response.data) {
+				console.log('Joined tournament successfully', response.data);
+				const tournament = response.data as any;
+				const type = tournament.visibility.toLowerCase();
+				const size = tournament.size;
+				navigate(`/play/tournament/${type}/${size}?id=${tournament.id}`);
+			} else {
+				console.error('Failed to join tournament:', response.error);
+			}
+		} catch (error) {
+			console.error('Error joining tournament:', error);
+		}
 	};
 
 	return (
@@ -37,6 +62,7 @@ export function ChatSection() {
 					onSelectHub={handleSelectHub}
 					onSelectFriend={handleSelectFriend}
 					onSelectGroup={handleSelectGroup}
+					onRemoveFriend={removeFriend}
 				/>
 			</div>
 
@@ -52,6 +78,7 @@ export function ChatSection() {
 						// TODO: Implémenter l'invitation au groupe
 						console.log('Invite user:', userId);
 					}}
+					onJoinTournament={handleJoinTournament}
 				/>
 			</div>
 

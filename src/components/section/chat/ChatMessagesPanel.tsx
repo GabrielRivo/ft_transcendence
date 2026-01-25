@@ -4,6 +4,7 @@ import { useAuth } from '../../../hook/useAuth';
 import { useFriends } from '../../../hook/useFriends';
 import { Modal } from '../../ui/modal';
 import { Users } from '../../ui/icon/users';
+import { TournamentInvite } from './TournamentInvite';
 
 interface ChatMessagesPanelProps {
 	messages: ChatMessage[];
@@ -12,6 +13,7 @@ interface ChatMessagesPanelProps {
 	onSendMessage: (content: string) => void;
 	isGroup?: boolean;
 	onInviteUser?: (userId: number) => void;
+	onJoinTournament?: (tournamentId: string) => void;
 }
 
 export function ChatMessagesPanel({
@@ -20,7 +22,8 @@ export function ChatMessagesPanel({
 	connected,
 	onSendMessage,
 	isGroup = false,
-	onInviteUser
+	onInviteUser,
+	onJoinTournament
 }: ChatMessagesPanelProps) {
 	const { user } = useAuth();
 	const { friends } = useFriends();
@@ -92,18 +95,41 @@ export function ChatMessagesPanel({
 							return (
 								<div
 									key={`${msg.created_at}-${index}`}
-									className={`flex cursor-pointer flex-col gap-1 rounded border-b border-purple-500/10 px-1 py-1 transition-colors hover:bg-purple-500/20 hover:text-white ${
-										isOwn ? 'bg-purple-500/10' : ''
-									}`}
+									className={`flex cursor-pointer flex-col gap-1 rounded border-b border-purple-500/10 px-1 py-1 transition-colors hover:bg-purple-500/20 hover:text-white ${isOwn ? 'bg-purple-500/10' : ''
+										}`}
 								>
 									<div className="flex gap-2">
 										<span className="opacity-50 select-none">[{formatTime(msg.created_at)}]</span>
 										<span>
-											<span className={`font-bold ${isOwn ? 'text-cyan-400' : ''}`}>{msg.username}</span>
+											{msg.userId === -1 || msg.username === 'System' ? (
+												<span className="font-bold text-yellow-400">SYSTEM</span>
+											) : (
+												<span className={`font-bold ${isOwn ? 'text-cyan-400' : ''}`}>{msg.username}</span>
+											)}
 											{` >_`}
 										</span>
 									</div>
-									<p className="break-words">{msg.msgContent}</p>
+									<div className="break-words">
+										{(() => {
+											const joinMatch = msg.msgContent.match(/\[JOIN_TOURNAMENT:([a-zA-Z0-9-]+)\]/);
+											if (joinMatch) {
+												const tournamentId = joinMatch[1];
+												const cleanContent = msg.msgContent.replace(/\[JOIN_TOURNAMENT:[a-zA-Z0-9-]+\]/, '');
+												return (
+													<div className="flex flex-col gap-2">
+														<span>{cleanContent}</span>
+														<TournamentInvite
+															tournamentId={tournamentId}
+															onJoin={(id) => {
+																if (onJoinTournament) onJoinTournament(id);
+															}}
+														/>
+													</div>
+												);
+											}
+											return <p>{msg.msgContent}</p>;
+										})()}
+									</div>
 								</div>
 							);
 						})}
@@ -150,18 +176,16 @@ export function ChatMessagesPanel({
 									return (
 										<label
 											key={friend.id}
-											className={`group flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all duration-200 ${
-												isSelected
-													? 'border-purple-500 bg-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.3)]'
-													: 'border-purple-500/20 bg-slate-900/50 hover:border-purple-500/50 hover:bg-purple-500/10'
-											}`}
+											className={`group flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all duration-200 ${isSelected
+												? 'border-purple-500 bg-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.3)]'
+												: 'border-purple-500/20 bg-slate-900/50 hover:border-purple-500/50 hover:bg-purple-500/10'
+												}`}
 										>
 											<div
-												className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all duration-200 ${
-													isSelected
-														? 'border-purple-400 bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]'
-														: 'border-purple-500/50 bg-slate-900 group-hover:border-purple-400'
-												}`}
+												className={`relative flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-all duration-200 ${isSelected
+													? 'border-purple-400 bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]'
+													: 'border-purple-500/50 bg-slate-900 group-hover:border-purple-400'
+													}`}
 											>
 												{isSelected && (
 													<svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>

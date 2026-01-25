@@ -180,10 +180,6 @@ const routes = [
 				path: '/logout',
 				component: LogoutPage,
 			},
-			// {
-			// 	path: '/game',
-			// 	component: Game,
-			// },
 		],
 	},
 ];

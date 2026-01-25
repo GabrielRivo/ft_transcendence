@@ -1,6 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 202" fill="none">
-    <path fill="#d1ffe9" d="M23.707 200.293 2 178.586V23.414L23.707 1.707 22.293.293 0 22.586v156.828l22.293 22.293 1.414-1.414Z"/>
-    <path fill="#FFFFFF" d="m19 180.5-8-7.828V29.337l8-7.837v159Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none">
+    <symbol id="symbol" viewBox="0 0 24 202">
+		<path fill="#d1ffe9" d="M23.707 200.293 2 178.586V23.414L23.707 1.707 22.293.293 0 22.586v156.828l22.293 22.293 1.414-1.414Z"/>
+        <path fill="#FFFFFF" d="m19 180.5-8-7.828V29.337l8-7.837v159Z"/>
+	</symbol>
 </svg>
-
 

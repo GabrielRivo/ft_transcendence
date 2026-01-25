@@ -124,6 +124,13 @@ export function useChat() {
 			}
 		};
 
+		const handleInvalidateHistory = () => {
+			console.log('[useChat] Received invalidate_history event - Refreshing hub history');
+			if (currentRoom === 'hub') {
+				chatSocket.emit('get_hub_history');
+			}
+		};
+
 		chatSocket.on('connect', handleConnect);
 		chatSocket.on('disconnect', handleDisconnect);
 		chatSocket.on('message', handleMessage);
@@ -132,6 +139,7 @@ export function useChat() {
 		chatSocket.on('group_history', handleGroupHistory);
 		chatSocket.on('room_users_update', handleRoomUsersUpdate);
 		chatSocket.on('room_users', handleRoomUsers);
+		chatSocket.on('invalidate_history', handleInvalidateHistory);
 
 		if (chatSocket.connected) {
 			console.log('Chat socket already connected on mount');
@@ -147,6 +155,7 @@ export function useChat() {
 			chatSocket.off('group_history', handleGroupHistory);
 			chatSocket.off('room_users_update', handleRoomUsersUpdate);
 			chatSocket.off('room_users', handleRoomUsers);
+			chatSocket.off('invalidate_history', handleInvalidateHistory);
 		};
 	}, [currentRoom]);
 

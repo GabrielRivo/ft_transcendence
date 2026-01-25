@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'my-react';
 import { useAuth } from './useAuth';
 import { fetchWithAuth } from '../libs/fetchWithAuth';
+import { chatSocket } from '../libs/socket';
 
 const API_BASE = '/api/chat/group';
 
@@ -56,6 +57,19 @@ export function useGroups() {
 		fetchGroups();
 	}, [fetchGroups]);
 
+	// Écouter les mises à jour en temps réel
+	useEffect(() => {
+		const handleGroupUpdate = () => {
+			fetchGroups();
+		};
+
+		chatSocket.on('group_list_update', handleGroupUpdate);
+
+		return () => {
+			chatSocket.off('group_list_update', handleGroupUpdate);
+		};
+	}, [fetchGroups]);
+
 	// Créer un groupe
 	const createGroup = useCallback(async (name: string): Promise<GroupResult> => {
 		if (!user) return { success: false, message: 'Not authenticated' };
@@ -73,12 +87,12 @@ export function useGroups() {
 			});
 
 			const result = await response.json();
-			
+
 			if (result.success) {
 				// Rafraîchir la liste des groupes
 				await fetchGroups();
 			}
-			
+
 			return { success: result.success, message: result.message, groupId: result.groupId };
 		} catch {
 			return { success: false, message: 'Network error' };
@@ -142,11 +156,11 @@ export function useGroups() {
 			});
 
 			const result = await response.json();
-			
+
 			if (result.success) {
 				setGroups((prev) => prev.filter((g) => g.groupId !== groupId));
 			}
-			
+
 			return { success: result.success, message: result.message };
 		} catch {
 			return { success: false, message: 'Network error' };
@@ -170,11 +184,11 @@ export function useGroups() {
 			});
 
 			const result = await response.json();
-			
+
 			if (result.success) {
 				setGroups((prev) => prev.filter((g) => g.groupId !== groupId));
 			}
-			
+
 			return { success: result.success, message: result.message };
 		} catch {
 			return { success: false, message: 'Network error' };

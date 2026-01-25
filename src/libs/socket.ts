@@ -23,9 +23,9 @@ export const chatSocket: Socket = io(SOCKET_BASE_URL, {
 	path: '/api/chat/ws',
 });
 
-export const socialSocket: Socket = io(SOCKET_BASE_URL, {
+export const userSocket: Socket = io(SOCKET_BASE_URL, {
 	...DEFAULT_SOCKET_OPTIONS,
-	path: '/api/social/ws',
+	path: '/api/user/ws',
 });
 
 export const matchmakingSocket: Socket = io(SOCKET_BASE_URL, {
@@ -38,9 +38,9 @@ export const tournamentSocket: Socket = io(SOCKET_BASE_URL, {
 	path: '/api/tournament/ws',
 });
 
-// export const socialSocket: Socket = io(SOCKET_BASE_URL, {
+// export const userSocket: Socket = io(SOCKET_BASE_URL, {
 // 	...DEFAULT_SOCKET_OPTIONS,
-// 	path: '/api/social/ws',
+// 	path: '/api/user/ws',
 // });
 
 // deprecated voir pour enlever plus tard
@@ -50,7 +50,7 @@ export function connectAllSockets(): void {
 	gameSocket.connect();
 	chatSocket.connect();
 	matchmakingSocket.connect();
-	socialSocket.connect();
+	userSocket.connect();
 	tournamentSocket.connect();
 }
 
@@ -58,7 +58,7 @@ export function disconnectAllSockets(): void {
 	gameSocket.disconnect();
 	chatSocket.disconnect();
 	matchmakingSocket.disconnect();
-	socialSocket.disconnect();
+	userSocket.disconnect();
 	tournamentSocket.disconnect();
 }
 
@@ -68,6 +68,6 @@ export function updateSocketAuth(userId: string, token?: string): void {
 	gameSocket.auth = auth;
 	chatSocket.auth = auth;
 	matchmakingSocket.auth = auth;
-	socialSocket.auth = auth;
+	userSocket.auth = auth;
 	tournamentSocket.auth = auth;
 }
