@@ -1,4 +1,5 @@
-import { createElement, useState, useEffect, useRef, useCallback } from 'my-react';
+import { createElement, useState, useEffect, useRef, useCallback, useMemo } from 'my-react';
+import { useNavigate } from 'my-react-router';
 import type { Element } from 'my-react';
 import { GameContext, GameMode, GameScores } from './gameContext';
 import Game from '../libs/pong/Game/index';
@@ -20,11 +21,13 @@ export function GameProvider({ children }: GameProviderProps) {
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [gameId, setGameId] = useState<string | null>(null);
 	const { toast } = useToast();
+	const navigate = useNavigate();
 	const [scores, setScores] = useState<GameScores>({
 		player1Score: 0,
 		player2Score: 0,
 		scoreToWin: 5,
 	});
+	const gameMetadataRef = useRef<{ type?: string; tournamentId?: string; tournamentType?: string; playersCount?: string }>({});
 
 	const currentModeRef = useRef<GameMode>('background');
 
@@ -66,6 +69,30 @@ export function GameProvider({ children }: GameProviderProps) {
 			Services.EventBus?.on('Game:Ended', () => {
 				setModeState('background');
 				toast('Game ended', 'warning');
+
+				// Redirection logic
+				// Priority to stored metadata which is explicitly passed
+				const { type, tournamentId, tournamentType, playersCount } = gameMetadataRef.current;
+
+				if (type === 'ranked') {
+					navigate('/');
+				} else if (type === 'tournament' && tournamentId && tournamentType && playersCount) {
+					navigate(`/play/tournament/${tournamentType}/${playersCount}?id=${tournamentId}`);
+				} else {
+					// Fallback to URL params if metadata wasn't set (e.g. reload)
+					const searchParams = new URLSearchParams(window.location.search);
+					const urlType = searchParams.get('type');
+					if (urlType === 'ranked') {
+						navigate('/');
+					} else if (urlType === 'tournament') {
+						const urlTournamentId = searchParams.get('tournamentId');
+						const urlTournamentType = searchParams.get('tournamentType');
+						const urlPlayersCount = searchParams.get('playersCount');
+						if (urlTournamentId && urlTournamentType && urlPlayersCount) {
+							navigate(`/play/tournament/${urlTournamentType}/${urlPlayersCount}?id=${urlTournamentId}`);
+						}
+					}
+				}
 			});
 
 			Game.Services.GameService!.launchGame('PongBackground');
@@ -82,7 +109,7 @@ export function GameProvider({ children }: GameProviderProps) {
 
 	}, []);
 
-	const setMode = useCallback((newMode: GameMode, newGameId?: string | null) => {
+	const setMode = useCallback((newMode: GameMode, newGameId?: string | null, metadata?: { type?: string; tournamentId?: string; tournamentType?: string; playersCount?: string }) => {
 		if (currentModeRef.current === newMode) {
 			console.log('[GameProvider] Mode already set to:', newMode);
 			return;
@@ -91,7 +118,11 @@ export function GameProvider({ children }: GameProviderProps) {
 		console.log('[GameProvider] Switching mode from', currentModeRef.current, 'to', newMode);
 		currentModeRef.current = newMode;
 		setModeState(newMode);
-		
+
+		if (metadata) {
+			gameMetadataRef.current = metadata;
+		}
+
 		if (newGameId !== undefined) {
 			setGameId(newGameId);
 		} else if (newMode === 'background') {
@@ -113,10 +144,10 @@ export function GameProvider({ children }: GameProviderProps) {
 		setError(null);
 
 		try {
-			const gameType = newMode === 'background' 
-				? 'PongBackground' 
-				: newMode === 'local' 
-					? 'PongLocal' 
+			const gameType = newMode === 'background'
+				? 'PongBackground'
+				: newMode === 'local'
+					? 'PongLocal'
 					: 'PongOnline';
 
 			Game.Services.GameService!.launchGame(gameType);
@@ -141,7 +172,7 @@ export function GameProvider({ children }: GameProviderProps) {
 		}
 	}, [isInitialized]);
 
-	const contextValue = {
+	const contextValue = useMemo(() => ({
 		mode,
 		setMode,
 		canvasRef,
@@ -150,7 +181,7 @@ export function GameProvider({ children }: GameProviderProps) {
 		gameId,
 		scores,
 		isInitialized,
-	};
+	}), [mode, setMode, isLoading, error, gameId, scores, isInitialized]);
 
 	return (
 		<GameContext.Provider value={contextValue}>
@@ -160,4 +191,3 @@ export function GameProvider({ children }: GameProviderProps) {
 }
 
 export default GameProvider;
-

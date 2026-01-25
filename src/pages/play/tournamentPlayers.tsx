@@ -50,13 +50,14 @@ export function TournamentPlayersPage() {
 	}, [isValidType, isValidSize, navigate, toast]);
 
 	// Read tournament ID from URL query on mount
+	const queryId = query.get('id');
+
 	useEffect(() => {
-		const queryId = query.get('id');
 		if (queryId && !createdTournamentId) {
 			console.log('[TournamentPage] Found tournament ID in URL:', queryId);
 			setCreatedTournamentId(queryId);
 		}
-	}, [query, createdTournamentId]);
+	}, [queryId, createdTournamentId]); // depend on queryId string, not query object
 
 	// Load and listen to tournament when ID changes
 	useEffect(() => {

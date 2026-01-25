@@ -1,4 +1,4 @@
-import { createElement, useState, useEffect, useCallback, useRef, Element } from 'my-react';
+import { createElement, useMemo, useState, useEffect, useCallback, useRef, Element } from 'my-react';
 import { AuthContext, User } from './authContext';
 import { useNavigate } from 'my-react-router';
 
@@ -222,20 +222,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
 		checkAuth();
 	}, [checkAuth]);
 
-	return (
-		<AuthContext.Provider
-			value={{
-				isAuthenticated,
-				user,
-				loading,
-				login,
-				register,
-				logout,
-				checkAuth,
-				setUsername,
-			}}
-		>
-			{children}
-		</AuthContext.Provider>
+	const value = useMemo(
+		() => ({
+			isAuthenticated,
+			user,
+			loading,
+			login,
+			register,
+			logout,
+			checkAuth,
+			setUsername,
+		}),
+		[isAuthenticated, user, loading, login, register, logout, checkAuth, setUsername]
 	);
+
+	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

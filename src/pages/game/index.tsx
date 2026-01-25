@@ -1,7 +1,7 @@
 
 import { createElement, useEffect } from 'my-react';
 import { useNavigate, useQuery } from 'my-react-router';
-import { useGame } from '../../hook/useGame';	
+import { useGame } from '../../hook/useGame';
 
 function LoadingOverlay() {
 	return (
@@ -116,18 +116,30 @@ export const Game = () => {
 
 	// Get gameId from URL query
 	const urlGameId = query.get('id');
+	const type = query.get('type');
+	const tournamentId = query.get('tournamentId');
+	const tournamentType = query.get('tournamentType');
+	const playersCount = query.get('playersCount');
 
 	// Switch to online mode on mount, back to background on unmount
 	useEffect(() => {
 		console.log('[GamePage] Mounting - switching to online mode with gameId:', urlGameId);
-		setMode('online', urlGameId);
+
+		// Pass metadata to GameProvider
+		const metadata = type ? {
+			type,
+			tournamentId: tournamentId || undefined,
+			tournamentType: tournamentType || undefined,
+			playersCount: playersCount || undefined
+		} : undefined;
+		setMode('online', urlGameId, metadata);
 
 		return () => {
 			console.log("A");
 			console.log('[GamePage] Unmounting - switching back to background mode');
 			setMode('background');
 		};
-	}, [setMode, urlGameId]);
+	}, [setMode, urlGameId, type, tournamentId, tournamentType, playersCount]);
 
 	/**
 	 * Handles retry action - navigates back to matchmaking.
