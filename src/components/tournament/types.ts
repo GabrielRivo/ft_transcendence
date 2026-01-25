@@ -15,6 +15,19 @@ export interface TournamentResponse {
     visibility: TournamentVisibility;
     status: TournamentStatus;
     participants: TournamentParticipant[];
+    matches?: Match[];
+}
+
+export interface Match {
+    id: string;
+    round: number;
+    position: number;
+    playerA: TournamentParticipant | null;
+    playerB: TournamentParticipant | null;
+    scoreA: number;
+    scoreB: number;
+    winner: TournamentParticipant | null;
+    status: 'PENDING' | 'IN_PROGRESS' | 'FINISHED';
 }
 
 export interface CreateTournamentResponse {

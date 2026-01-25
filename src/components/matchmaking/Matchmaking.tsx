@@ -318,7 +318,7 @@ export function Matchmaking() {
 		if (status === 'MATCH_CONFIRMED' && confirmedMatch) {
 			const timeout = setTimeout(() => {
 				// Navigate to the game with the gameId as a query parameter
-				navigate(`/game?id=${confirmedMatch.gameId}`);
+				navigate(`/game?id=${confirmedMatch.gameId}&type=ranked`);
 				resetState();
 			}, 1500);
 

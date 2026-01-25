@@ -11,7 +11,7 @@ export interface GameScores {
 
 export interface GameContextType {
 	mode: GameMode;
-	setMode: (mode: GameMode, gameId?: string | null) => void;
+	setMode: (mode: GameMode, gameId?: string | null, metadata?: { type?: string; tournamentId?: string; tournamentType?: string; playersCount?: string }) => void;
 	canvasRef: RefObject<HTMLCanvasElement | null>;
 	isLoading: boolean;
 	error: string | null;

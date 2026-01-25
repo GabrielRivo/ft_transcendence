@@ -41,7 +41,9 @@ export function TournamentInvite({ tournamentId, onJoin }: TournamentInviteProps
                     if (result.ok && result.data) {
                         setTournament(result.data);
                         // Join lobby only after we know the tournament exists
-                        tournamentSocket.emit('listen_lobby');
+                        if (result.data) {
+                            tournamentSocket.emit('listen_lobby');
+                        }
                     } else {
                         setError(true);
                     }

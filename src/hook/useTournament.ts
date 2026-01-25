@@ -78,6 +78,7 @@ export function useTournament(): UseTournamentReturn {
 
     // Track which tournament we're currently listening to (as state to trigger effects)
     const [listeningToId, setListeningToId] = useState<string | null>(null);
+    const listeningToIdRef = useRef<string | null>(null);
 
     // -------------------------------------------------------------------------
     // Tournament Loading
@@ -107,12 +108,13 @@ export function useTournament(): UseTournamentReturn {
     // -------------------------------------------------------------------------
 
     const listenToTournament = useCallback((id: string) => {
-        if (listeningToId === id) {
+        if (listeningToIdRef.current === id) {
             console.log('[useTournament] Already listening to tournament:', id);
             return;
         }
 
         console.log('[useTournament] Starting to listen to tournament:', id);
+        listeningToIdRef.current = id;
         setListeningToId(id);
 
         if (tournamentSocket.connected) {
@@ -122,7 +124,7 @@ export function useTournament(): UseTournamentReturn {
                 displayName: 'Guest'
             });
         }
-    }, [listeningToId]);
+    }, []);
 
     // -------------------------------------------------------------------------
     // Socket Event Subscription (via centralized hook)
@@ -191,8 +193,19 @@ export function useTournament(): UseTournamentReturn {
                 // Avoid duplicate updates
                 if (currentTournament?.status === 'STARTED') return;
 
-                setTournament(prev => prev ? ({ ...prev, status: 'STARTED' as TournamentStatus }) : null);
+                // Refetch full tournament data to get matches
+                loadTournament(listeningToId);
                 toastRef.current('Tournament started!', 'success');
+            },
+            onMatchFinished: () => {
+                // Refetch to update bracket scores/status
+                if (listeningToId) loadTournament(listeningToId);
+            },
+            onMatchStarted: () => {
+                if (listeningToId) loadTournament(listeningToId);
+            },
+            onBracketUpdated: () => {
+                if (listeningToId) loadTournament(listeningToId);
             }
         });
 
