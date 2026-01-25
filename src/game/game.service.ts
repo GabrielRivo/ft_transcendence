@@ -1,7 +1,11 @@
 import { Service } from 'my-fastify-decorators';
 import Pong from './pong/Game/Pong.js';
+import { GameType } from './game.dto.js';
+import { GameFinishedEvent, GameScoreUpdatedEvent } from './game.events.js';
 
 import { Socket } from 'socket.io';
+import { Inject } from 'my-fastify-decorators';
+import { GameEventsPublisher } from './infrastructure/publishers/game-events.publisher.js';
 
 /**
  * Result type for game creation operations.
@@ -23,11 +27,14 @@ export type ConnectPlayerResult =
 
 @Service()
 export class GameService {
-    private gameCount = 0;
-    private gamesByPlayer: Map<string, Pong> = new Map();
-    private games: Map<string, Pong> = new Map();
+	private gameCount = 0;
+	private gamesByPlayer: Map<string, Pong> = new Map();
+	private games: Map<string, Pong> = new Map();
 
-    public connectPlayer(client: Socket): ConnectPlayerResult {
+	@Inject(GameEventsPublisher)
+	private eventsPublisher!: GameEventsPublisher;
+
+	public connectPlayer(client: Socket): ConnectPlayerResult {
 		const userId = client.data.userId;
 
 		// Validate that userId is present (should be set by Gateway after auth)
@@ -46,7 +53,7 @@ export class GameService {
 		if (!game) {
 			console.log(
 				`[GameService] Connection rejected: No pending game for user ${userId}. ` +
-					'Player must use Matchmaking Service first.',
+				'Player must use Matchmaking Service first.',
 			);
 			return {
 				success: false,
@@ -65,7 +72,7 @@ export class GameService {
 		};
 	}
 
-    public disconnectPlayer(client: Socket): void {
+	public disconnectPlayer(client: Socket): void {
 		const userId = client.data.userId;
 
 		if (!userId) {
@@ -83,7 +90,7 @@ export class GameService {
 		}
 	}
 
-    public createGame(id: string, player1Id: string, player2Id: string): CreateGameResult {
+	public createGame(id: string, player1Id: string, player2Id: string, type: GameType): CreateGameResult {
 		// Validate that neither player is already in an active game
 		if (this.gamesByPlayer.has(player1Id)) {
 			console.log(
@@ -118,7 +125,7 @@ export class GameService {
 		}
 
 		// Create and initialize the game instance
-		const gameInstance = new Pong(id, player1Id, player2Id, this);
+		const gameInstance = new Pong(id, player1Id, player2Id, type, this);
 
 		// Register game in tracking maps
 		this.gamesByPlayer.set(player1Id, gameInstance);
@@ -136,7 +143,17 @@ export class GameService {
 		return { success: true, gameId: id };
 	}
 
-    public removeGame(game: Pong, player1Id: string, player2Id: string): void {
+	public async removeGame(
+		game: Pong,
+		player1Id: string,
+		player2Id: string,
+		result?: {
+			score1: number;
+			score2: number;
+			winnerId: string | null;
+			reason: 'score_limit' | 'surrender' | 'disconnection' | 'timeout';
+		},
+	): Promise<void> {
 		this.gamesByPlayer.delete(player1Id);
 		this.gamesByPlayer.delete(player2Id);
 		this.games.delete(game.id);
@@ -145,13 +162,39 @@ export class GameService {
 		console.log(
 			`[GameService] Game ${game.id} removed. Players ${player1Id} and ${player2Id} are now free.`,
 		);
+
+		if (result) {
+			await this.eventsPublisher.publishGameFinished({
+				eventName: 'game.finished',
+				gameId: game.id,
+				player1Id,
+				player2Id,
+				score1: result.score1,
+				score2: result.score2,
+				winnerId: result.winnerId,
+				reason: result.reason,
+				timestamp: Date.now(),
+			});
+		}
 	}
 
-    public getActiveGamesCount(): number {
+	public getActiveGamesCount(): number {
 		return this.games.size;
 	}
 
-    public async onPlayerInput(client: Socket, data: any): Promise<void> {
+	public async publishScoreUpdate(gameId: string, player1Id: string, player2Id: string, score1: number, score2: number) {
+		await this.eventsPublisher.publishScoreUpdated({
+			eventName: 'game.score_updated',
+			gameId,
+			player1Id,
+			player2Id,
+			score1,
+			score2,
+			timestamp: Date.now(),
+		});
+	}
+
+	public async onPlayerInput(client: Socket, data: any): Promise<void> {
 		const game = this.gamesByPlayer.get(client.data.userId);
 		//console.log(`[GameService] Received input from player ${client.data.userId} : `, data);
 		if (game && game.inputManager) {

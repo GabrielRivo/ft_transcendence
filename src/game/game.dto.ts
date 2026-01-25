@@ -9,7 +9,7 @@
 // - Admin endpoints: Manual game creation for testing
 // ============================================================================
 
-import { IsString, IsRequired, MinLength, generateSchema } from 'my-class-validator';
+import { IsString, IsRequired, MinLength, generateSchema, IsEnum } from 'my-class-validator';
 
 /**
  * DTO for creating a new game instance.
@@ -53,7 +53,18 @@ export class CreateGameDto {
 	@IsRequired({ message: 'player2Id is required' })
 	@MinLength(1, { message: 'player2Id cannot be empty' })
 	player2Id!: string;
+
+	/**
+	 * Type of the game.
+	 * Determines the ruleset and context of the match.
+	 */
+	@IsString({ message: 'type must be a string' })
+	@IsRequired({ message: 'type is required' })
+	@IsEnum(['local', 'tournament', 'ranked', 'friend'], { message: 'Invalid game type' })
+	type!: GameType;
 }
+
+export type GameType = 'local' | 'tournament' | 'ranked' | 'friend';
 
 /**
  * Response DTO for successful game creation.

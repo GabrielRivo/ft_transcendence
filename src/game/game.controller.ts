@@ -71,7 +71,7 @@ export class GameController {
 	 *   "message": "Player 42 is already in an active game"
 	 * }
 	 *
-	 * @param dto - Game creation parameters (gameId, player1Id, player2Id)
+	 * @param dto - Game creation parameters (gameId, player1Id, player2Id, type)
 	 * @param res - Fastify response object for setting status codes
 	 * @returns CreateGameResponseDto | CreateGameErrorDto
 	 *
@@ -88,7 +88,7 @@ export class GameController {
 		);
 
 		// Attempt to create the game
-		const result = this.gameService.createGame(dto.gameId, dto.player1Id, dto.player2Id);
+		const result = this.gameService.createGame(dto.gameId, dto.player1Id, dto.player2Id, dto.type);
 
 		// Handle success - return 201 Created
 		if (result.success) {

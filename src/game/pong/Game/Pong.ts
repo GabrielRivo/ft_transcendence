@@ -1,8 +1,9 @@
-import { Engine, Scene, ImportMeshAsync, MeshBuilder, StandardMaterial, SpotLight, Color3, ArcRotateCamera, Vector2, Vector3, HemisphericLight, GlowLayer, Node} from "@babylonjs/core";
+import { Scene, Vector2, Vector3 } from "@babylonjs/core";
 import { Socket, Namespace } from "socket.io";
 
 import Services from "../Services/Services.js";
 import { GameService } from "../../game.service.js";
+import { GameType } from "../../game.dto.js";
 
 import { DeathBarPayload } from "../globalType.js";
 import Player from "../Player.js";
@@ -13,17 +14,17 @@ import Game from "./Game.js";
 import TruthManager from "./TruthManager.js";
 
 class Pong extends Game {
-    private gameService : GameService;
+    private gameService: GameService;
     private services: Services;
 
-    private p1Socket : Socket | null;
-    private p2Socket : Socket | null;
-    private p1Id : string;
-    private p2Id : string;
-    private p1Ready : boolean = false;
-    private p2Ready : boolean = false;
-    private nsp : Namespace | null;
-    public id : string;
+    private p1Socket: Socket | null;
+    private p2Socket: Socket | null;
+    private p1Id: string;
+    private p2Id: string;
+    private p1Ready: boolean = false;
+    private p2Ready: boolean = false;
+    private nsp: Namespace | null;
+    public id: string;
 
     inputManager?: InputManager;
     truthManager?: TruthManager;
@@ -35,11 +36,13 @@ class Pong extends Game {
     width: number = 7;
     height: number = 12;
 
-    private gameState : "waiting" | "playing" | null;
+    private gameState: "waiting" | "playing" | null;
 
-	private disconnectTimeout : Map<string, NodeJS.Timeout | null> = new Map();
+    public type: GameType;
 
-    constructor(id: string, p1Id: string, p2Id: string, gameService: GameService) {
+    private disconnectTimeout: Map<string, NodeJS.Timeout | null> = new Map();
+
+    constructor(id: string, p1Id: string, p2Id: string, type: GameType, gameService: GameService) {
         super();
         this.id = id;
         this.p1Socket = null;
@@ -47,12 +50,13 @@ class Pong extends Game {
         this.nsp = null;
         this.p1Id = p1Id;
         this.p2Id = p2Id;
+        this.type = type;
 
         this.gameService = gameService;
         this.gameState = "waiting";
 
         this.services = new Services();
-        
+
     }
 
     initialize(): void {
@@ -62,13 +66,13 @@ class Pong extends Game {
 
         this.inputManager = new InputManager(this.services, this);
         this.truthManager = new TruthManager(this.services, this);
-        
+
         this.services.EventBus!.on("DeathBarHit", this.onDeathBarHit);
 
         this.drawScene();
     }
 
-    drawScene() : void {
+    drawScene(): void {
 
         this.player1 = new Player(this.services, this.p1Id);
         this.player2 = new Player(this.services, this.p2Id);
@@ -134,13 +138,18 @@ class Pong extends Game {
 
         if (!this.disconnectTimeout.has(client.data.userId)) {
             this.disconnectTimeout.set(client.data.userId,
-				setTimeout(() => {
-					if (this.p1Socket?.disconnected || this.p2Socket?.disconnected) {
-						console.log(`Timeout reached for client ${client.data.userId}. Disposing game ${this.id}...`);
-						this.dispose();
-					}
-        		}, 15000)
-			);
+                setTimeout(() => {
+                    if (this.p1Socket?.disconnected || this.p2Socket?.disconnected) {
+                        console.log(`Timeout reached for client ${client.data.userId}. Disposing game ${this.id}...`);
+                        // Determine winner (the one who didn't disconnect)
+                        const remainingPlayer =
+                            this.p1Socket?.connected ? this.p1Id :
+                                this.p2Socket?.connected ? this.p2Id : null;
+
+                        this.dispose('disconnection', remainingPlayer);
+                    }
+                }, 15000)
+            );
         }
     }
 
@@ -152,12 +161,16 @@ class Pong extends Game {
         else if (payload.deathBar.owner == this.player2 && this.player1!.score < 5) {
             this.player1!.scoreUp();
         }
-        this.nsp!.to(this.id).emit('score', {player1Score: this.player1!.score, player2Score: this.player2!.score});
+        this.nsp!.to(this.id).emit('score', { player1Score: this.player1!.score, player2Score: this.player2!.score });
+
+        // Publish score update to other services (RabbitMQ)
+        this.gameService.publishScoreUpdate(this.id, this.p1Id, this.p2Id, this.player1!.score, this.player2!.score);
 
         if (this.player1!.score == 5 || this.player2!.score == 5) {
 
             setTimeout(() => {
-                this.dispose();
+                const winnerId = this.player1!.score === 5 ? this.p1Id : this.p2Id;
+                this.dispose('score_limit', winnerId);
             }, 8000);
 
             return;
@@ -166,7 +179,7 @@ class Pong extends Game {
         //this.ball = new Ball(this.services);
         //this.ball.setFullPos(new Vector3(0, 0.125, 0));
         this.ball!.generate(2000);
-        
+
         this.nsp!.to(this.id).emit('generateBall', { timestamp: this.services.TimeService!.getTimestamp() });
     }
 
@@ -214,7 +227,7 @@ class Pong extends Game {
             this.truthManager!.resetLastFrameTime();
             this.services.Engine!.stopRenderLoop();
             this.services.Engine!.runRenderLoop(() => {
-                
+
                 //latency comparison test
                 // if (this.services.TimeService!.getRealTimestamp() > 20000)
                 // {
@@ -233,17 +246,20 @@ class Pong extends Game {
             this.gameState = "waiting";
             this.nsp!.to(this.id).emit('gameStopped', { gameId: this.id, message: message || `Game ${this.id} has been paused.` });
             this.services.Engine!.stopRenderLoop();
-            this.services.Engine!.runRenderLoop(() => {});
+            this.services.Engine!.runRenderLoop(() => { });
         }
     }
 
-    dispose(): void {
-		this.disconnectTimeout.forEach((timeout) => {
-			if (timeout) {
-				clearTimeout(timeout);
-			}
-		});
-		this.disconnectTimeout.clear();
+    dispose(
+        reason: 'score_limit' | 'surrender' | 'disconnection' | 'timeout' = 'surrender',
+        winnerId: string | null = null
+    ): void {
+        this.disconnectTimeout.forEach((timeout) => {
+            if (timeout) {
+                clearTimeout(timeout);
+            }
+        });
+        this.disconnectTimeout.clear();
 
         this.services.Engine!.stopRenderLoop();
 
@@ -257,7 +273,12 @@ class Pong extends Game {
 
         console.log(`Ending game instance ${this.id}`);
         this.nsp!.to(this.id).emit('gameEnded', { gameId: this.id, message: `Game ${this.id} has ended.` });
-        this.gameService.removeGame(this, this.p1Id, this.p2Id);
+        this.gameService.removeGame(this, this.p1Id, this.p2Id, {
+            score1: this.player1?.score || 0,
+            score2: this.player2?.score || 0,
+            winnerId,
+            reason
+        });
     }
 }
 
