@@ -1,5 +1,5 @@
 
-import { Scene, Vector3, Mesh, MeshBuilder, Color4, Ray, Effect, PickingInfo, StandardMaterial, Color3, Quaternion, Axis} from "@babylonjs/core";
+import { Scene, Vector3, Mesh, MeshBuilder, Color4, Ray, Effect, PickingInfo, StandardMaterial, Color3, Quaternion, Space} from "@babylonjs/core";
 import HitEffect from "./Effects/HitEffect";
 import ShockwaveEffect from "./Effects/ShockwaveEffect";
 import MathUtils from "./MathUtils";
@@ -29,7 +29,7 @@ class Ball {
     owner: any;
 
     private visualOffset: Vector3 = new Vector3(0, 0, 0);
-    private totalDistance: number = 0;
+    //private totalDistance: number = 0;
 
     private generateTImeoutId: NodeJS.Timeout | null = null;
 
@@ -115,7 +115,7 @@ class Ball {
 
     public generate(delay: number) {
         this.startDirection();
-        this.totalDistance = 0;
+        //this.totalDistance = 0;
         this.setSpeed(3);
         this.setPos(new Vector3(0, 0.125, 0));
         this.setModelPos(this.position);
@@ -511,17 +511,16 @@ class Ball {
         this.visualOffset = Vector3.Lerp(this.visualOffset, Vector3.Zero(), 0.3);
         if (this.visualOffset.lengthSquared() < 0.001) {
             this.visualOffset.setAll(0);
-        }
+        } 
 
 
-        this.totalDistance += this.speed * (deltaT / 1000);
-        const radius = this.diameter / 2;
-        const rollingAngle = this.totalDistance / radius / 4;
+        const distanceTraveled = this.speed * (deltaT / 1000);
 
-        const headingQuat = Quaternion.FromLookDirectionLH(this.direction, Vector3.Up());
-        const rollingQuat = Quaternion.RotationAxis(Axis.X, rollingAngle);
+        const rotationAxis = Vector3.Cross(Vector3.Up(), this.direction);
 
-        headingQuat.multiplyToRef(rollingQuat, this.model.rotationQuaternion!);
+        const rotationFactor = 1 / (this.diameter / 2) / 2;
+
+        this.model.rotate(rotationAxis, distanceTraveled * rotationFactor, Space.WORLD);
 
         this.model.position.copyFrom(this.position).addInPlace(this.visualOffset);
     }
