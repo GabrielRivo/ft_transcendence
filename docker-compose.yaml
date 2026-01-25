@@ -118,7 +118,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: development
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+      RABBITMQ_URI: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
     volumes:
       - ./package.json:/app/package.json:ro
       - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml:ro
@@ -126,6 +126,7 @@ services:
       - ./apps/game:/app/apps/game
       - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
       - ./packages/my-class-validator:/app/packages/my-class-validator
+      - ./packages/my-fastify-decorators-microservices:/app/packages/my-fastify-decorators-microservices
       - game-node-modules:/app/node_modules
       - game-data:/app/apps/game/db
     networks:
