@@ -10,7 +10,7 @@ const PRIVATE_CHAT_URL = 'http://chat:3000';
 
 @Service()
 export class BlockManagementService {
-	@InjectPlugin('db')
+	@InjectPlugin('db') 
 	private db !: Database.Database;
 
 	@Inject(FriendManagementService)

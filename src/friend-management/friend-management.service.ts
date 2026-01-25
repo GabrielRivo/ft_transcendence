@@ -208,7 +208,10 @@ export class FriendManagementService {
 					body: JSON.stringify(data)
 				}).then(data => data.json()).then(data => console.log(data))
 				.catch(e => console.log(e))
-			console.log("C")
+
+			// Notify the other user that they have been removed
+			this.emitToUser(otherId, 'friend_removed', { friendId: userId });
+
 			return { success: true, message: "Deleted relationship" };
 		}
 		return { success: false, message: "This user wasn't in your friendlist or didn't send you a friend request" };
