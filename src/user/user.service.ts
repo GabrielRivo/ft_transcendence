@@ -12,9 +12,12 @@ const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const GetProfile = `SELECT userId, username, bio, avatar, avatar_provider, self_hosted FROM profiles WHERE userId = ?`;
 const CreateProfile = `INSERT INTO profiles (userId, username, bio, avatar, avatar_provider, self_hosted) VALUES (?, '', '', NULL, NULL, 0)`;
+const CreateProfileWithAvatar = `INSERT INTO profiles (userId, username, bio, avatar, avatar_provider, self_hosted) VALUES (?, '', '', ?, ?, 0)`;
 const UpdateBio = `UPDATE profiles SET bio = ?, updated_at = CURRENT_TIMESTAMP WHERE userId = ?`;
 const UpdateAvatar = `UPDATE profiles SET avatar = ?, self_hosted = ?, updated_at = CURRENT_TIMESTAMP WHERE userId = ?`;
 const UpdateAvatarProvider = `UPDATE profiles SET avatar_provider = ?, updated_at = CURRENT_TIMESTAMP WHERE userId = ?`;
+const UpdateUsername = `UPDATE profiles SET username = ?, updated_at = CURRENT_TIMESTAMP WHERE userId = ?`;
+const DeleteProfile = `DELETE FROM profiles WHERE userId = ?`;
 const GetAvatarInfo = `SELECT avatar, avatar_provider, self_hosted FROM profiles WHERE userId = ?`;
 
 interface ProfileRow {
@@ -39,22 +42,27 @@ export class UserService {
 
 	private stmtGetProfile!: Statement;
 	private stmtCreateProfile!: Statement;
+	private stmtCreateProfileWithAvatar!: Statement;
 	private stmtUpdateBio!: Statement;
 	private stmtUpdateAvatar!: Statement;
 	private stmtUpdateAvatarProvider!: Statement;
+	private stmtUpdateUsername!: Statement;
+	private stmtDeleteProfile!: Statement;
 	private stmtGetAvatarInfo!: Statement;
 
 	onModuleInit() {
-		// Ensure images directory exists
 		if (!fs.existsSync(IMAGES_DIR)) {
 			fs.mkdirSync(IMAGES_DIR, { recursive: true });
 		}
 
 		this.stmtGetProfile = this.db.prepare(GetProfile);
 		this.stmtCreateProfile = this.db.prepare(CreateProfile);
+		this.stmtCreateProfileWithAvatar = this.db.prepare(CreateProfileWithAvatar);
 		this.stmtUpdateBio = this.db.prepare(UpdateBio);
 		this.stmtUpdateAvatar = this.db.prepare(UpdateAvatar);
 		this.stmtUpdateAvatarProvider = this.db.prepare(UpdateAvatarProvider);
+		this.stmtUpdateUsername = this.db.prepare(UpdateUsername);
+		this.stmtDeleteProfile = this.db.prepare(DeleteProfile);
 		this.stmtGetAvatarInfo = this.db.prepare(GetAvatarInfo);
 	}
 
@@ -173,6 +181,51 @@ export class UserService {
 		if (avatarInfo && !avatarInfo.self_hosted) {
 			this.stmtUpdateAvatar.run(avatarProviderUrl, 0, userId);
 		}
+	}
+
+
+	initProfile(userId: number, avatarProviderUrl?: string | null): void {
+		const existingProfile = this.stmtGetProfile.get(userId) as ProfileRow | undefined;
+		
+		if (existingProfile) {
+			if (avatarProviderUrl) {
+				this.stmtUpdateAvatarProvider.run(avatarProviderUrl, userId);
+				this.stmtUpdateAvatar.run(avatarProviderUrl, 0, userId);
+			}
+			return;
+		}
+
+		if (avatarProviderUrl) {
+			this.stmtCreateProfileWithAvatar.run(userId, avatarProviderUrl, avatarProviderUrl);
+		} else {
+			this.stmtCreateProfile.run(userId);
+		}
+
+		console.log(`[UserService] Profile initialized for user ${userId}`);
+	}
+
+	updateUsername(userId: number, username: string): void {
+		this.getOrCreateProfile(userId);
+		this.stmtUpdateUsername.run(username, userId);
+		console.log(`[UserService] Username updated for user ${userId}: ${username}`);
+	}
+
+	deleteProfile(userId: number): void {
+		const avatarInfo = this.stmtGetAvatarInfo.get(userId) as AvatarInfoRow | undefined;
+
+		if (avatarInfo?.self_hosted && avatarInfo.avatar) {
+			const filename = avatarInfo.avatar.split('/').pop();
+			if (filename) {
+				const filepath = path.join(IMAGES_DIR, filename);
+				if (fs.existsSync(filepath)) {
+					fs.unlinkSync(filepath);
+					console.log(`[UserService] Deleted avatar file: ${filepath}`);
+				}
+			}
+		}
+
+		this.stmtDeleteProfile.run(userId);
+		console.log(`[UserService] Profile deleted for user ${userId}`);
 	}
 
 	private getExtensionFromMimeType(mimeType: string): string {

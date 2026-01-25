@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS challengeUser(
 
 CREATE TABLE IF NOT EXISTS profiles (
     userId INTEGER PRIMARY KEY,
-    username TEXT NOT NULL DEFAULT '',
+    username TEXT NOT NULL DEFAULT '' COLLATE NOCASE,
     bio TEXT NOT NULL DEFAULT '',
     avatar TEXT DEFAULT NULL,
     avatar_provider TEXT DEFAULT NULL,
