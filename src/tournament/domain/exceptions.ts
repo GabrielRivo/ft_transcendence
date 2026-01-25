@@ -144,3 +144,11 @@ export class ConcurrencyException extends DomainException {
         super(`Concurrency conflict on aggregate ${aggregateId} (version ${version}). Please retry.`);
     }
 }
+
+export class PlayerNotRegisteredException extends DomainException {
+    readonly code = 'PLAYER_NOT_REGISTERED';
+
+    constructor(public readonly playerId: string) {
+        super(`Player ${playerId} is not registered in this tournament.`);
+    }
+}

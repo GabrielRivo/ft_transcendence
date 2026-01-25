@@ -1,6 +1,6 @@
 import { Inject, Service } from 'my-fastify-decorators';
 import { Tournament } from '../../domain/entities/tournament.js';
-import { TournamentRepository } from '../../domain/ports/tournament.repository.js';
+
 import { ListTournamentsDto } from '../dtos/list-tournaments.dto.js';
 import { SqliteTournamentRepository } from '@/tournament/infrastructure/repositories/sqlite-tournament.repository.js';
 

@@ -1,19 +1,17 @@
 import { Inject, Service, NotFoundException } from 'my-fastify-decorators';
 import { PlayerAlreadyInActiveTournamentException } from '../../domain/exceptions.js';
-import { TournamentRepository } from '../../domain/ports/tournament.repository.js';
-import { TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
 import { Participant } from '../../domain/value-objects/participant.js';
 import { JoinTournamentDto } from '../dtos/join-tournament.dto.js';
 import { SqliteTournamentRepository } from '@/tournament/infrastructure/repositories/sqlite-tournament.repository.js';
-import { SocketTournamentEventsPublisher } from '@/tournament/infrastructure/publishers/socket-tournament-events.publisher.js';
+import { CompositeTournamentEventsPublisher } from '@/tournament/infrastructure/publishers/composite-tournament-events.publisher.js';
 
 @Service()
 export class JoinTournamentUseCase {
     @Inject(SqliteTournamentRepository)
     private repository!: SqliteTournamentRepository;
 
-    @Inject(SocketTournamentEventsPublisher)
-    private publisher!: SocketTournamentEventsPublisher;
+    @Inject(CompositeTournamentEventsPublisher)
+    private publisher!: CompositeTournamentEventsPublisher;
 
     public async execute(
         tournamentId: string,
@@ -31,7 +29,6 @@ export class JoinTournamentUseCase {
             throw new NotFoundException(`Tournament ${tournamentId} not found`);
         }
 
-        const participant = isGuest
         const participant = isGuest
             ? Participant.createGuest(userId, command.displayName)
             : Participant.createUser(userId, command.displayName);

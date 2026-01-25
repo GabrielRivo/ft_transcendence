@@ -2,24 +2,26 @@ import { randomUUID } from "crypto";
 import { Match } from "./match.js";
 import { Participant } from "../value-objects/participant.js";
 import { RecordedEvent } from "../events/base-event.js";
-import { 
+import {
     PlayerJoinedEvent,
-    MatchFinishedEvent, 
+    MatchFinishedEvent,
     TournamentCancelledEvent,
     TournamentCreatedEvent,
     TournamentFinishedEvent,
-    TournamentStartedEvent
+    TournamentStartedEvent,
+    PlayerLeftEvent
 } from "../events/tournament-events.js";
 import {
     DuplicateParticipantNameException,
-    InvalidTournamentSizeException, 
+    InvalidTournamentSizeException,
     InvalidTournamentStateException,
     MatchNotFoundException,
     PlayerAlreadyRegisteredException,
     TournamentCannotBeCancelledException,
     TournamentEnrollmentClosedException,
     TournamentFullException,
-    TournamentNotReadyToStartException
+    TournamentNotReadyToStartException,
+    PlayerNotRegisteredException
 } from "../exceptions.js";
 
 export const TOURNAMENT_STATUSES = ['CREATED', 'STARTED', 'FINISHED', 'CANCELED'] as const;
@@ -62,10 +64,10 @@ export class Tournament {
     public join(participant: Participant): void {
         this.ensureEnrollmentIsOpen();
         this.ensureParticipantUnique(participant);
-        
+
         this._participants.push(participant);
 
-        this.addRecordedEvent(new PlayerJoinedEvent(this.id, participant.id, participant.displayName));
+        this.addRecordedEvent(new PlayerJoinedEvent(this.id, participant.id, participant.displayName, this.name, this.ownerId));
 
         if (this._participants.length === this.size) {
             this.start();
@@ -77,7 +79,19 @@ export class Tournament {
             throw new TournamentCannotBeCancelledException(this._status);
         }
         this._status = 'CANCELED';
-        this.addRecordedEvent(new TournamentCancelledEvent(this.id));
+        this.addRecordedEvent(new TournamentCancelledEvent(this.id, this.name, this.ownerId));
+    }
+
+    public leave(playerId: string): void {
+        this.ensureEnrollmentIsOpen();
+
+        const index = this._participants.findIndex(p => p.id === playerId);
+        if (index === -1) {
+            throw new PlayerNotRegisteredException(playerId);
+        }
+
+        this._participants.splice(index, 1);
+        this.addRecordedEvent(new PlayerLeftEvent(this.id, playerId, this.name, this.ownerId));
     }
 
     public onMatchFinished(matchId: string): void {
@@ -99,10 +113,10 @@ export class Tournament {
         data: {
             id: string, name: string, size: TournamentSize, ownerId: string,
             visibility: TournamentVisibility,
-            status: TournamentStatus, participants: Participant[], matches: Match[], 
+            status: TournamentStatus, participants: Participant[], matches: Match[],
             winner: Participant | null, version: number,
         }
-    ) : Tournament {
+    ): Tournament {
         const tournament = new Tournament(data.id, data.name, data.size, data.ownerId, data.visibility);
         tournament._status = data.status;
         tournament._participants = [...data.participants];
@@ -136,7 +150,7 @@ export class Tournament {
     }
 
     private generateBracket(): void {
-        const shuffledParticipants = [...this._participants].sort(() => Math.random () - 0.5);
+        const shuffledParticipants = [...this._participants].sort(() => Math.random() - 0.5);
         const totalRounds = Math.log2(this.size);
         this._matches = [];
 
@@ -187,7 +201,7 @@ export class Tournament {
         const slot = finishedMatch.position % 2 !== 0 ? 1 : 2;
         nextMatch.assignParticipant(slot, finishedMatch.winner!);
     }
-    
+
     private validateConfiguration(): void {
         if (!TOURNAMENT_SIZES.includes(this.size)) {
             throw new InvalidTournamentSizeException(this.size);

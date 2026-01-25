@@ -1,9 +1,48 @@
-import { FastifyInstance } from 'fastify';
 import fp from 'fastify-plugin';
-import rabbitmqPlugin from 'rabbitmq-client';
+import { FastifyInstance } from 'fastify';
+import { RabbitMQClient } from 'my-fastify-decorators-microservices';
 
-export default fp(async (fastify: FastifyInstance) => {
-    await fastify.register(rabbitmqPlugin, {
-        url: process.env.RABBITMQ_URI || process.env.RABBITMQ_URL || '',
+declare module 'fastify' {
+    interface FastifyInstance {
+        mq: RabbitMQClient;
+    }
+}
+
+async function rabbitmqPlugin(fastify: FastifyInstance) {
+    const urls = [process.env.RABBITMQ_URI!];
+
+
+    const client = new RabbitMQClient({
+        urls,
+        // queue: 'tournament_queue',
+        exchange : {
+            name : "tournament.fanout",
+            type  : "fanout"
+        }
     });
-});
+
+
+    // const server = new RabbitMQServer({
+    //     urls,
+    //     queue: 'auth_queue',
+    // });
+
+
+    fastify.decorate('mq', client);
+
+
+    fastify.ready(async () => {
+        try {
+            await client.connect();
+        } catch (err) {
+            console.error('RabbitMQ connection failed', err);
+        }
+    });
+
+    fastify.addHook('onClose', async () => {
+        await client.close();
+        // await server.close();
+    });
+}
+
+export default fp(rabbitmqPlugin);

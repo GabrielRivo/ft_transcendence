@@ -85,6 +85,20 @@ export class SqliteTournamentRepository extends TournamentRepository {
           type = excluded.type
       `);
 
+      // Delete participants that are no longer in the tournament
+      const currentParticipantIds = tournament.participants.map(p => p.id);
+      if (currentParticipantIds.length > 0) {
+        const placeholders = currentParticipantIds.map(() => '?').join(',');
+        this.db.prepare(`
+          DELETE FROM participants 
+          WHERE tournament_id = ? 
+          AND id NOT IN (${placeholders})
+        `).run(tournament.id, ...currentParticipantIds);
+      } else {
+        // If no participants remaining, delete all for this tournament
+        this.db.prepare('DELETE FROM participants WHERE tournament_id = ?').run(tournament.id);
+      }
+
       for (const p of tournament.participants) {
         upsertParticipant.run(tournament.id, p.id, p.displayName, p.type);
       }

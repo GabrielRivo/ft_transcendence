@@ -17,8 +17,14 @@ export class SocketTournamentEventsPublisher extends TournamentEventsPublisher {
 
   public async publish(event: RecordedEvent): Promise<void> {
     const roomId = `tournament:${event.aggregateId}`;
+    console.log(`[SocketPublisher] Publishing event ${event.eventName} to room ${roomId}`, JSON.stringify(event));
     this.io.to(roomId).emit(event.eventName, event);
+
+    // Also emit snake_case version for compatibility if needed, tracking both
+    // this.io.to(roomId).emit(event.eventName.replace(/([A-Z])/g, "_$1").toLowerCase().substring(1), event);
+
     if (this.isLobbyEvent(event.eventName as TournamentEventType)) {
+      console.log(`[SocketPublisher] Publishing event ${event.eventName} to 'lobby' room`);
       this.io.to('lobby').emit(event.eventName, event);
     }
   }

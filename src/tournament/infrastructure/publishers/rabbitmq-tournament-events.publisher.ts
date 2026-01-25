@@ -2,11 +2,11 @@ import { Service, InjectPlugin } from 'my-fastify-decorators';
 import { RecordedEvent } from '../../domain/events/base-event.js';
 import { TournamentEventType } from '../../domain/events/tournament-events.js';
 import { TournamentEventsPublisher } from '../../domain/ports/tournament-events-publisher.js';
-import { RabbitMQClient } from 'rabbitmq-client';
+import { RabbitMQClient } from 'my-fastify-decorators-microservices';
 
 @Service()
 export class RabbitMQTournamentEventsPublisher extends TournamentEventsPublisher {
-    @InjectPlugin('rabbitmq')
+    @InjectPlugin('mq')
     private readonly client!: RabbitMQClient;
 
     public async publish(event: RecordedEvent): Promise<void> {
@@ -34,6 +34,8 @@ export class RabbitMQTournamentEventsPublisher extends TournamentEventsPublisher
                 return 'tournament.created';
             case TournamentEventType.PLAYER_JOINED:
                 return 'tournament.player_joined';
+            case TournamentEventType.PLAYER_LEFT:
+                return 'tournament.player_left';
             case TournamentEventType.STARTED:
                 return 'tournament.started';
             case TournamentEventType.CANCELLED:

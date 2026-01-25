@@ -54,4 +54,27 @@ export class TournamentGateway {
             throw error;
         }
     }
+
+    @SubscribeMessage('listen_lobby')
+    public async handleListenLobby(@ConnectedSocket() socket: Socket) {
+        console.log(`[TournamentGateway] Socket ${socket.id} requesting to join 'lobby' room`);
+        await socket.join('lobby');
+        console.log(`[TournamentGateway] Socket ${socket.id} joined 'lobby' room`);
+        return { status: 'success' };
+    }
+
+    @SubscribeMessage('listen_tournament')
+    @SocketSchema(generateSchema(JoinTournamentPayload))
+    public async handleListenTournament(
+        @ConnectedSocket() socket: Socket,
+        @MessageBody() payload: JoinTournamentPayload
+    ) {
+        console.log(`[TournamentGateway] Socket ${socket.id} requesting to join tournament room: tournament:${payload.tournamentId}`);
+        const roomId = `tournament:${payload.tournamentId}`;
+        await socket.join(roomId);
+        console.log(`[TournamentGateway] Socket ${socket.id} joined room ${roomId}`);
+        const rooms = Array.from(socket.rooms);
+        console.log(`[TournamentGateway] Socket ${socket.id} is now in rooms: ${JSON.stringify(rooms)}`);
+        return { status: 'success' };
+    }
 }
