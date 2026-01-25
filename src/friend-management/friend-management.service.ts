@@ -257,16 +257,27 @@ export class FriendManagementService {
 		}
 	}
 
+	async getChallenge(userId: number, otherId: number, senderUsername: string)
+	{
+		if (userId === otherId)
+			throw new Error("Can't be challenged by yourself");
+		try {
+
+			const reverseChallenge = this.statementCheckPending.get({otherId, userId });
+			if (reverseChallenge)
+				return {success: true, message: `${senderUsername} is challenging you`}
+		}
+		catch (error: any) {
+			return { success: false, message: "Error!" };
+		}
+		return { success: false, message: "This user didn't challenge you!" };
+	}
+
 	async acceptChallenge(userId: number, otherId: number, senderUsername: string) {
 		const result = this.statementAcceptChallenge.run({ userId: userId, otherId: otherId });
 		// if (result.changes === 0) 
 		// 	return { success: false, message: "No challenge pending" };
 
-		this.emitToUser(otherId, 'challenge_accepted', {
-			friendId: userId,
-			friendUsername: senderUsername,
-		});
-		// launch match
 		const gameId = randomUUID();
 
 		const response = await fetch(`${GAME_URL}/games`, {
@@ -280,6 +291,7 @@ export class FriendManagementService {
 				player2Id: otherId,
 			}),
 		});
+		//WARN donner le gameTYPE
 
 		console.log(response);
 
@@ -294,6 +306,11 @@ export class FriendManagementService {
 					`Error: ${data.error} | Message: ${data.message}`,
 				);
 			}
+			this.emitToUser(otherId, 'challenge_accepted', {
+				friendId: userId,
+				friendUsername: senderUsername,
+				gameId
+			});
 
 			return { ...data, message: "starting match" };
 		}

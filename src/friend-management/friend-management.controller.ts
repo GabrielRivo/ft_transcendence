@@ -1,4 +1,4 @@
-import { Body, BodySchema, Controller, Delete, Get, Inject, JWTBody, Param, Post, Query, QuerySchema } from 'my-fastify-decorators';
+import { Body, BodySchema, Controller, Delete, Get, Inject, InjectPlugin, JWTBody, Param, Post, Query, QuerySchema } from 'my-fastify-decorators';
 import { BlockManagementService } from './block-management.service.js';
 import { AddFriendDto, AddFriendSchema } from './dto/addFriend.dto.js';
 import { InviteByUsernameDto, InviteByUsernameSchema } from './dto/inviteByUsername.dto.js';
@@ -6,12 +6,12 @@ import { FriendManagementService } from './friend-management.service.js';
 
 
 import { FriendManagementDto, FriendManagementSchema } from './dto/addFriend.dto.js';
+import { Server } from 'socket.io';
 
 const AUTH_SERVICE_URL = 'http://auth:3000';
 
 @Controller('/friend-management')
 export class FriendManagementController {
-
 	@Inject(FriendManagementService)
 	private friend_managementService!: FriendManagementService;
 
@@ -185,6 +185,12 @@ export class FriendManagementController {
 		}
 	}
 
+	@Get('/challenge')
+	async get_challenge(@JWTBody() user: { id: number; username: string }, @Query() query: { otherId: string }) {
+		const targetId = Number(query.otherId);
+		return this.friend_managementService.getChallenge(user.id, targetId, user.username);
+	}
+
 	@Post('/accept_challenge')
 	@BodySchema(AddFriendSchema)
 	async accept_challenge(@Body() data: AddFriendDto, @JWTBody() user: { id: number; username: string }) {
@@ -197,3 +203,4 @@ export class FriendManagementController {
 		return this.friend_managementService.deleteMatch(data.userId, data.otherId);
 	}
 }
+
