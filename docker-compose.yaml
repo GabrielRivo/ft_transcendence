@@ -150,6 +150,7 @@ services:
       - ./apps/chat:/app/apps/chat
       - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
       - ./packages/my-class-validator:/app/packages/my-class-validator
+      - ./packages/my-fastify-decorators-microservices:/app/packages/my-fastify-decorators-microservices
       - chat-node-modules:/app/node_modules
       - chat-data:/app/apps/chat/db
     networks:
@@ -192,7 +193,7 @@ services:
     restart: unless-stopped
     environment:
       NODE_ENV: development
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
+      RABBITMQ_URI: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672
       JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
       GAME_SERVICE_URL: http://game:3000
       ACCESS_TOKEN_NAME: ${ACCESS_TOKEN_NAME:-accessToken}
@@ -203,6 +204,7 @@ services:
       - ./apps/tournament:/app/apps/tournament
       - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
       - ./packages/my-class-validator:/app/packages/my-class-validator
+      - ./packages/my-fastify-decorators-microservices:/app/packages/my-fastify-decorators-microservices
       - tournament-node-modules:/app/node_modules
       - tournament-data:/app/apps/tournament/db
     networks:
@@ -274,6 +276,7 @@ services:
       - ./apps/social:/app/apps/social
       - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
       - ./packages/my-class-validator:/app/packages/my-class-validator
+      - ./packages/my-fastify-decorators-microservices:/app/packages/my-fastify-decorators-microservices
       - social-node-modules:/app/node_modules
       - social-data:/app/apps/social/db
     networks:
