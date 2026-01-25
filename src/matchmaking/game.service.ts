@@ -113,6 +113,11 @@ export interface CreateGameInput {
 	 * String representation of the numeric Auth Service user ID.
 	 */
 	player2Id: string;
+
+	/**
+	 * Type of the game (e.g., 'ranked', 'friend').
+	 */
+	type: 'local' | 'tournament' | 'ranked' | 'friend';
 }
 
 // =============================================================================
@@ -265,7 +270,7 @@ export class GameService {
 
 		console.info(
 			`[GameService] [createGameRequest] POST ${targetUrl} | ` +
-				`GameId: ${input.gameId} | P1: ${input.player1Id} | P2: ${input.player2Id}`,
+			`GameId: ${input.gameId} | P1: ${input.player1Id} | P2: ${input.player2Id}`,
 		);
 
 		const response = await fetch(targetUrl, {
@@ -280,6 +285,7 @@ export class GameService {
 				gameId: input.gameId,
 				player1Id: input.player1Id,
 				player2Id: input.player2Id,
+				type: input.type,
 			}),
 		});
 
@@ -297,7 +303,7 @@ export class GameService {
 			} else {
 				console.warn(
 					`[GameService] [createGameRequest] Game creation failed | ` +
-						`Error: ${data.error} | Message: ${data.message}`,
+					`Error: ${data.error} | Message: ${data.message}`,
 				);
 			}
 

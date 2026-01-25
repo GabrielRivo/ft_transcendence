@@ -43,7 +43,7 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		@Inject(MatchHistoryRepository) private matchHistoryRepository: MatchHistoryRepository,
 		@Inject(PenaltyRepository) private penaltyRepository: PenaltyRepository,
 		@Inject(GameService) private gameService: GameService,
-	) {}
+	) { }
 
 	public onModuleInit(): void {
 		this.matchmakingInterval = setInterval(() => this.matchmakingLoop(), TICK_RATE_MS);
@@ -267,6 +267,7 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 			gameId: match.matchId,
 			player1Id: match.player1.userId,
 			player2Id: match.player2.userId,
+			type: 'ranked',
 		});
 
 		// Step 4: Handle the game creation result
@@ -295,7 +296,7 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 	private handleGameCreationSuccess(match: PendingMatch, gameId: string): void {
 		console.info(
 			`[MatchmakingService] [handleGameCreationSuccess] Game created successfully | ` +
-				`GameId: ${gameId} | P1: ${match.player1.userId} | P2: ${match.player2.userId}`,
+			`GameId: ${gameId} | P1: ${match.player1.userId} | P2: ${match.player2.userId}`,
 		);
 
 		if (!this.server) {
@@ -342,7 +343,7 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 	): void {
 		console.error(
 			`[MatchmakingService] [handleGameCreationFailure] Failed to create game | ` +
-				`MatchId: ${match.matchId} | Error: ${errorCode} | Message: ${errorMessage}`,
+			`MatchId: ${match.matchId} | Error: ${errorCode} | Message: ${errorMessage}`,
 		);
 
 		// Notify both players of the failure
@@ -365,7 +366,7 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		for (const player of players) {
 			console.info(
 				`[MatchmakingService] [handleGameCreationFailure] Re-queueing player with PRIORITY | ` +
-					`UserId: ${player.userId}`,
+				`UserId: ${player.userId}`,
 			);
 
 			// Use async re-queue with error handling to prevent one failure from blocking others
