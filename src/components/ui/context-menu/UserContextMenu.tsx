@@ -143,7 +143,7 @@ export function UserContextMenu({ isOpen, position, onClose, isFriend = false, c
 			style={`left: ${adjustedPosition.x}px; top: ${adjustedPosition.y}px;`}
 		>
 			<div className="py-1">
-				<MenuItem label="Defy" onClick={() => handleAction(callbacks.onChallenge)} />
+				<MenuItem label="Challenge" onClick={() => handleAction(callbacks.onChallenge)} />
 				<MenuItem label="Invit to tournament" onClick={() => handleAction(callbacks.onInviteTournament)} />
 				<Divider />
 				<MenuItem label="Stats" onClick={() => handleAction(callbacks.onStatistics)} />

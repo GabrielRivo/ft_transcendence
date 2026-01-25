@@ -245,7 +245,7 @@ export function ProfilePage() {
 			<div className="mx-auto max-w-4xl">
 				{/* Header */}
 				<div className="mb-8 flex items-center justify-between">
-					<h1 className="font-pirulen text-3xl tracking-widest">MY PROFIL</h1>
+					<h1 className="font-pirulen text-3xl tracking-widest">MY PROFILE</h1>
 					<Link
 						to="/statistics"
 						className="font-pirulen text-xs tracking-wider text-cyan-400 transition-colors hover:text-white"

@@ -14,7 +14,7 @@ export function GuestGuard({ children }: GuestGuardProps) {
 	const { toast } = useToast();
 	useEffect(() => {
 		if (!loading && isAuthenticated) {
-			toast(`Tu es déjà connecté !`, 'error', 3000);
+			toast(`You are already connected !`, 'error', 3000);
 			navigate('/play');
 		}
 	}, [loading, isAuthenticated, navigate]);
