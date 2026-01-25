@@ -119,6 +119,9 @@ export class TournamentConsumer {
                 // It checks `const canInvite = this.isMember(groupId, userId);`.
                 // We should use the ownerId as the 'userId' performing the add, as they are definitely a member/owner.
 
+                if (ownerId == playerId) {
+                    return;
+                }
                 const result = this.groupService.addMember(group.groupId, ownerIdNum, playerIdNum);
 
                 if (result.success) {

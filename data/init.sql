@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS privateGroup ( --delete
 );
 
 CREATE TABLE IF NOT EXISTS groupMembers (
-    groupId INTEGER NOT N ULL,
+    groupId INTEGER NOT NULL,
     userId INTEGER NOT NULL,
     joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (groupId, userId),
