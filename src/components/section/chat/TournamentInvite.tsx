@@ -1,6 +1,7 @@
 import { createElement, useEffect, useState } from 'my-react';
 import { fetchJsonWithAuth } from '../../../libs/fetchWithAuth';
 import { tournamentSocket } from '../../../libs/socket';
+import { useTournamentUpdates } from '../../../hook/useTournamentUpdates';
 import { ButtonProgress } from '@/components/ui/button/buttonProgress';
 
 interface TournamentInviteProps {
@@ -21,12 +22,15 @@ export function TournamentInvite({ tournamentId, onJoin }: TournamentInviteProps
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
+    const { subscribeToTournament } = useTournamentUpdates();
+
+    // Fetch tournament details on mount
     useEffect(() => {
         let isMounted = true;
 
         // Ensure socket is connected
         if (!tournamentSocket.connected) {
-            console.log('[Frontend] TournamentInvite: Connecting tournament socket...');
+            console.log('[TournamentInvite] Connecting tournament socket...');
             tournamentSocket.connect();
         }
 
@@ -36,7 +40,7 @@ export function TournamentInvite({ tournamentId, onJoin }: TournamentInviteProps
                 if (isMounted) {
                     if (result.ok && result.data) {
                         setTournament(result.data);
-                        // Join lobbby only after we know the tournament exists
+                        // Join lobby only after we know the tournament exists
                         tournamentSocket.emit('listen_lobby');
                     } else {
                         setError(true);
@@ -59,67 +63,41 @@ export function TournamentInvite({ tournamentId, onJoin }: TournamentInviteProps
         };
     }, [tournamentId]);
 
+    // Subscribe to tournament updates via centralized hook
     useEffect(() => {
-        if (!tournament) return;
+        const unsubscribe = subscribeToTournament(tournamentId, {
+            onPlayerJoined: (data) => {
+                const playerId = data.playerId || data.participantId;
+                if (!playerId) return;
 
-        const onPlayerJoined = (data: any) => {
-            console.log(`[Frontend] TournamentInvite: PlayerJoined event for ${data.aggregateId || data.tournamentId}`, data);
-            const tId = data.aggregateId || data.tournamentId;
-            if (tId === tournamentId) {
                 setTournament((prev) => {
                     if (!prev) return null;
-                    const playerId = data.playerId || data.participantId;
-                    console.log(`[Frontend] TournamentInvite: Updating participants for tournament ${tId}`);
-                    // Avoid duplicates if socket sends event for existing participant (shouldn't happen but safe to check)
+                    // Avoid duplicates
                     if (prev.participants.some((p) => p.id === playerId)) return prev;
 
+                    console.log(`[TournamentInvite] Updating participants for tournament ${tournamentId}`);
                     return {
                         ...prev,
                         participants: [...prev.participants, { id: playerId }]
                     };
                 });
-            }
-        };
-
-        const onTournamentStarted = (data: any) => {
-            const tId = data.aggregateId || data.tournamentId;
-            if (tId === tournamentId) {
-                setTournament((prev) => prev ? ({ ...prev, status: 'STARTED' }) : null);
-            }
-        };
-
-        const onPlayerLeft = (data: any) => {
-            console.log(`[Frontend] TournamentInvite: PlayerLeft event`, data);
-            const tId = data.aggregateId || data.tournamentId;
-            if (tId === tournamentId) {
+            },
+            onPlayerLeft: (data) => {
                 setTournament((prev) => {
                     if (!prev) return null;
-                    const playerId = data.playerId;
                     return {
                         ...prev,
-                        participants: prev.participants.filter(p => p.id !== playerId)
+                        participants: prev.participants.filter(p => p.id !== data.playerId)
                     };
                 });
+            },
+            onTournamentStarted: () => {
+                setTournament((prev) => prev ? ({ ...prev, status: 'STARTED' }) : null);
             }
-        };
+        });
 
-        tournamentSocket.on('PlayerJoined', onPlayerJoined);
-        tournamentSocket.on('PlayerLeft', onPlayerLeft);
-        tournamentSocket.on('TournamentStarted', onTournamentStarted);
-        // Keep snake_case listeners just in case legacy events are still firing
-        tournamentSocket.on('player_joined', onPlayerJoined);
-        tournamentSocket.on('player_left', onPlayerLeft);
-        tournamentSocket.on('tournament_started', onTournamentStarted);
-
-        return () => {
-            tournamentSocket.off('PlayerJoined', onPlayerJoined);
-            tournamentSocket.off('PlayerLeft', onPlayerLeft);
-            tournamentSocket.off('TournamentStarted', onTournamentStarted);
-            tournamentSocket.off('player_joined', onPlayerJoined);
-            tournamentSocket.off('player_left', onPlayerLeft);
-            tournamentSocket.off('tournament_started', onTournamentStarted);
-        };
-    }, [tournamentId, tournament]);
+        return unsubscribe;
+    }, [tournamentId, subscribeToTournament]);
 
     if (loading) return <span className="text-xs text-gray-500 animate-pulse">Loading invite...</span>;
     if (error || !tournament) return <span className="text-xs text-red-500">Tournament expired or invalid</span>;
@@ -128,11 +106,10 @@ export function TournamentInvite({ tournamentId, onJoin }: TournamentInviteProps
     const maxCount = tournament.size;
     const isFull = currentCount >= maxCount;
     const isJoinable = tournament.status === 'CREATED' && !isFull;
-    const percentage = Math.min(100, Math.max(0, (currentCount / maxCount) * 100));
 
     return (
-        <ButtonProgress 
-            max={tournament.size} 
+        <ButtonProgress
+            max={tournament.size}
             current={tournament.participants.length}
             onClick={(e: any) => {
                 e.stopPropagation();
