@@ -14,7 +14,7 @@ class InputManager {
 
     private inputBuffer: History<PlayerDirectionData>;
     private rawInputBuffer: History<PlayerInputData>;
-
+ 
     constructor(game: PongOnline) {
         this.game = game;
         this.inputBuffer = new History<PlayerInputData>(100);
