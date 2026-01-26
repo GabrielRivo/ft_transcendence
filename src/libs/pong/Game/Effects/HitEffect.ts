@@ -29,7 +29,7 @@ class HitEffect extends Effect {
         // this.explosion = new ParticleSystem("hitEffect", 2000, Services.Scene!);
         this.explosion = new ParticleSystem("hitEffect", 2000, null!); //WARNING
 
-        this.explosion.particleTexture = new Texture("./dot.png");
+        this.explosion.particleTexture = new Texture("/dot.png");
         this.explosion.emitter = this.emitter;
         this.explosion.particleEmitterType = this.coneEmitter;
         this.explosion.addSizeGradient(0, 0.1);

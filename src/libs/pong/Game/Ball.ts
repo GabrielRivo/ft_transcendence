@@ -45,7 +45,7 @@ class Ball {
         let material = new StandardMaterial("ballmat", Services.Scene);
         material.emissiveColor = new Color3(0, 1, 1);
         this.model.material = material;
-        this.model.visibility = 0;
+        this.model.visibility = 1;
         this.model.isPickable = false;
 
         Services.Collision!.add(this.model);
@@ -132,6 +132,7 @@ class Ball {
         this.model.isPickable = false;
         Services.Collision!.add(this.model);
         this.model.owner = this;
+        this.setModelPos(this.position);
     }
 
     public generate(delay: number, side: number, direction?: Vector3) {

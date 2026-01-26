@@ -40,6 +40,8 @@ class PongOnline extends Game {
 
     private connectionTimeoutId?: NodeJS.Timeout;
 
+    private cameraAnimating: boolean = false;
+
     constructor() {
         super();
         this.currentGameState = null;
@@ -270,7 +272,7 @@ class PongOnline extends Game {
 
         this.connectionTimeoutId = setTimeout(() => {
             this.endGame();
-        }, 10000);
+        }, 8000);
         socket.once("connect", () => {
             console.log("Reconnected to server, resuming game.");
             clearTimeout(this.connectionTimeoutId);
@@ -301,16 +303,23 @@ class PongOnline extends Game {
                 this.inputManager!.listenToPlayer1();
                 //this.camera!.alpha = -Math.PI/2;
                 rotateCameraAlphaEffect = new RotateCameraAlphaEffect(-Math.PI/2);
-                rotateCameraAlphaEffect.play(this.camera!);
-                zoomEffect.play(this.camera!);
-            } else if (payload.player === 2) {
+            } else {
                 this.clientPlayer = this.player2;
                 this.inputManager!.listenToPlayer2();
                 //this.camera!.alpha = Math.PI/2;
                 rotateCameraAlphaEffect = new RotateCameraAlphaEffect(Math.PI/2);
-                rotateCameraAlphaEffect.play(this.camera!);
-                zoomEffect.play(this.camera!);
             }
+            Services.Scene!.stopAnimation(this.camera!);
+            this.cameraAnimating = true;
+            rotateCameraAlphaEffect.play(this.camera!);
+            zoomEffect.play(this.camera!);
+
+            setTimeout(() => {
+                this.cameraAnimating = false;
+            }, 1700);
+
+            Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: payload.player1Score, player2Score: payload.player2Score, scoreToWin: 5 });
+
             this.gameJoined = true;
         }
         this.processGameState();
@@ -362,17 +371,19 @@ class PongOnline extends Game {
     }
 
     private onBallBounce = (payload: any): void => {
+        if (this.cameraAnimating) return;
         let modifier = payload.ball.getSpeed() / 3;
         let duration = 15;
-        let magnitude = 0.03 + 0.03 * modifier * 2;
+        let magnitude = 0.02 + 0.035 * modifier;
         const cameraShake = new CameraShakeEffect(magnitude, duration);
         cameraShake.play(this.camera!);
     }
 
     private onPaddleHitBall = (payload: any): void => {
+        if (this.cameraAnimating) return;
         let modifier = payload.ball.getSpeed() / 3;
         let duration = 25;
-        let magnitude = 0.05 + 0.05 * modifier / 2;
+        let magnitude = 0.03 + 0.055 * modifier;
         const cameraShake = new CameraShakeEffect(magnitude, duration);
         cameraShake.play(this.camera!);
     }
@@ -491,8 +502,11 @@ class PongOnline extends Game {
         socket.offAny(this.onServerLog);
         socket.disconnect();
 
+        Services.Scene!.stopAllAnimations();
+        this.camera!.animations = [];
         Services.Scene!.dispose();
 
+        this.camera = undefined;
         Services.Scene = undefined;
         Services.Dimensions = undefined;
 

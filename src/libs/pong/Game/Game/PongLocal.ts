@@ -172,7 +172,7 @@ class PongLocal extends Game {
     private onBallBounce = (payload: any): void => {
         let modifier = payload.ball.getSpeed() / 3;
         let duration = 15;
-        let magnitude = 0.03 + 0.03 * modifier * 2;
+        let magnitude = 0.02 + 0.035 * modifier;
         const cameraShake = new CameraShakeEffect(magnitude, duration);
         cameraShake.play(this.camera!);
     }
@@ -180,7 +180,7 @@ class PongLocal extends Game {
     private onPaddleHitBall = (payload: any): void => {
         let modifier = payload.ball.getSpeed() / 3;
         let duration = 25;
-        let magnitude = 0.05 + 0.05 * modifier / 2;
+        let magnitude = 0.03 + 0.055 * modifier;
         const cameraShake = new CameraShakeEffect(magnitude, duration);
         cameraShake.play(this.camera!);
     }
@@ -285,8 +285,12 @@ class PongLocal extends Game {
         Services.EventBus!.off("DeathBarHit", this.onDeathBarHit);
         Services.EventBus!.off("BallBounce", this.onBallBounce);
         Services.EventBus!.off("PaddleHitBall", this.onPaddleHitBall);
+
+        Services.Scene!.stopAllAnimations();
+        this.camera!.animations = [];
         Services.Scene!.dispose();
 
+        this.camera = undefined;
         Services.Scene = undefined;
         Services.Dimensions = undefined;
 

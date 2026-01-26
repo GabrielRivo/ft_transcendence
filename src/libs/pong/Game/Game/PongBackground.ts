@@ -397,7 +397,11 @@ class PongBackground extends Game {
 
 		// Dispose Babylon.js scene
 		if (Services.Scene) {
-			Services.Scene.dispose();
+			Services.Scene!.stopAllAnimations();
+			this.camera!.animations = [];
+			Services.Scene!.dispose();
+
+			this.camera = undefined;
 			Services.Scene = undefined;
 		}
 		Services.Dimensions = undefined;
