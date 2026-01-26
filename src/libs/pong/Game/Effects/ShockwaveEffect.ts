@@ -75,6 +75,7 @@ class ShockwaveEffect extends Effect {
         ring.lookAt(position.add(direction));
         ring.rotate(Axis.X, Math.PI / 2);
         Services.Scene!.beginAnimation(ring, 0, 60, false, 1.2, () => {
+            material.dispose();
             ring.dispose();
         });
     }

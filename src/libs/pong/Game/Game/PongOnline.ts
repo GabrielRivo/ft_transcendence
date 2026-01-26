@@ -1,4 +1,4 @@
-import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, SetValueAction, Camera } from "@babylonjs/core";
+import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, SetValueAction, Camera, PBRMaterial } from "@babylonjs/core";
 import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 
@@ -17,6 +17,7 @@ import ZoomEffect from "../Effects/ZoomEffect";
 import BlackScreenEffect from "../Effects/BlackScreenEffect";
 import RotateCameraAlphaEffect from "../Effects/RotateCameraAlphaEffect";
 import CameraShakeEffect from "../Effects/CameraShakeEffect";
+import LightUpEffect from "../Effects/LightUpEffect";
 import Paddle from "../Paddle";
 
 
@@ -72,6 +73,9 @@ class PongOnline extends Game {
         if (this.isDisposed || !Services.Scene) return;
 
         this.camera = new ArcRotateCamera("Camera", 0, Math.PI / 2.8, 22, Vector3.Zero(), Services.Scene);
+
+        this.camera.inputs.attached.mousewheel.detachControl(); 
+
         const blackScreen = new BlackScreenEffect(1, 0);
         blackScreen.play();
 
@@ -362,7 +366,16 @@ class PongOnline extends Game {
 
     private onScore = (payload: any): void => {
         const cameraShake = new CameraShakeEffect(0.3, 50);
+        //const lightUpPillar = new LightUpEffect(0.05, 100);
+
+        let pillarColor: Color3;
+        if (payload.scoringPlayer === 1)
+            pillarColor = new Color3(0.2, 0.8, 1);
+        else
+            pillarColor = new Color3(0.8, 0, 0.8);
+
         cameraShake.play(this.camera!);
+        //lightUpPillar.play(Services.Scene!.getMaterialByName("PillarTop") as PBRMaterial, pillarColor);
         console.log("Score update from server:", payload);
         this.player1!.setScore(payload.player1Score);
         this.player2!.setScore(payload.player2Score);
@@ -379,6 +392,8 @@ class PongOnline extends Game {
         let duration = 15;
         let magnitude = 0.02 + 0.035 * modifier;
         const cameraShake = new CameraShakeEffect(magnitude, duration);
+        //const lightUpPillar = new LightUpEffect(0.05, 50);
+        //lightUpPillar.play(Services.Scene!.getMaterialByName("PillarTop") as PBRMaterial, new Color3(1, 1, 1));
         cameraShake.play(this.camera!);
     }
 

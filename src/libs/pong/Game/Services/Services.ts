@@ -45,6 +45,8 @@ class ServicesSingleton {
         
         console.log('[Services] Initializing services...' + this.initNbr++);
         this.Canvas = canvas;
+        this.Canvas?.addEventListener('wheel', (e) => {
+        }, { passive: true });
 
         this.Engine = new Engine(this.Canvas, true, {
             

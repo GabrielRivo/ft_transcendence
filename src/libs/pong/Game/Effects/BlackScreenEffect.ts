@@ -4,7 +4,6 @@ import Effect from "./Effect";
 import Services from "../Services/Services";
 
 class BlackScreenEffect extends Effect {
-    emitter: any;
     blackLayer: Layer;
     fadeAnimation: Animation;
 

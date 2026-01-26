@@ -4,7 +4,6 @@ import Services from "../Services/Services";
 
 
 class GenerateEffect extends Effect {
-    emitter: any;
     scalingAnimation: Animation;
 
     constructor() {

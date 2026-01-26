@@ -3,7 +3,6 @@ import Effect from "./Effect";
 import Services from "../Services/Services";
 
 class CameraShakeEffect extends Effect {
-    emitter: any;
     shakeAnimation: Animation;
     multiplier: number;
     duration: number;

@@ -4,7 +4,6 @@ import Services from "../Services/Services";
 
 
 class ZoomEffect extends Effect {
-    emitter: any;
     rotateCameraAnimation: Animation;
 
     constructor(target: number) {
