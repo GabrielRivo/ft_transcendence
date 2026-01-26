@@ -43,6 +43,8 @@ class Pong extends Game {
     public type: GameType;
 
     private disconnectTimeout: Map<string, NodeJS.Timeout | null> = new Map();
+    private disconnectForgivingP1: number = 0;
+    private disconnectForgivingP2: number = 0;
 
     constructor(id: string, p1Id: string, p2Id: string, type: GameType, gameService: GameService) {
         super();
@@ -127,16 +129,29 @@ class Pong extends Game {
             else
                 this.p2Ready = true;
             client.emit("gameJoined", { gameId: this.id, message: `Joined game ${this.id} successfully!`, player: playerNbr });
-            this.run(`Player ${client.data.userId} connected. Starting game...`);
+            if (this.p1Ready && this.p2Ready) {
+                if (playerNbr === 1)
+                    this.disconnectForgivingP1 += 1;
+                else
+                    this.disconnectForgivingP2 += 1;
+
+                if (playerNbr === 1 && this.disconnectForgivingP1 > 3 || playerNbr === 2 && this.disconnectForgivingP2 > 3)
+                    client.emit("gameStarted", { timestamp: this.services.TimeService!.getTimestamp(), gameId: this.id, message: `Player ${client.data.userId} reconnected too many times. Game will run without forgiving.` });
+                else
+                    this.run(`Player ${client.data.userId} connected. Starting game...`);
+            }
         }, 500);
     }
 
     public playerDisconnected(client: Socket) {
-        this.stop(`Player ${client.data.userId} has disconnected. Waiting for reconnection...`);
-        if (this.p1Id === client.data.userId)
-            this.p1Ready = false;
-        else
-            this.p2Ready = false;
+        if (this.p1Id === client.data.userId && this.disconnectForgivingP1 < 3 || this.p2Id === client.data.userId && this.disconnectForgivingP2 < 3)
+        {
+            this.stop(`Player ${client.data.userId} has disconnected. Waiting for reconnection...`);
+            if (this.p1Id === client.data.userId)
+                this.p1Ready = false;
+            else
+                this.p2Ready = false;
+        }
 
         if (!this.disconnectTimeout.has(client.data.userId)) {
             this.disconnectTimeout.set(client.data.userId,
@@ -146,7 +161,7 @@ class Pong extends Game {
                         this.endGame('disconnection');
                         //this.dispose('disconnection', remainingPlayer);
                     }
-                }, 15000)
+                }, 10000)
             );
         }
     }
