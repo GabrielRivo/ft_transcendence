@@ -65,7 +65,7 @@ class Pong extends Game {
         this.services = new Services();
 
         this.startingTimeout = setTimeout(() => {
-            console.log(`Game ${this.id} starting timeout reached. Disposing game...`);
+            console.log(`[Game] Game ${this.id} starting timeout reached. Disposing game...`);
             this.endGame('timeout');
         }, 20000);
     }
@@ -109,7 +109,7 @@ class Pong extends Game {
     }
 
     public async playerConnected(client: Socket) {
-        console.log(`Player connected: ${client.data.userId} to game ${this.id}`);
+        console.log(`[Game] Player connected: ${client.data.userId} to game ${this.id}`);
         if (!this.nsp) {
             this.nsp = client.nsp;
         }
@@ -128,7 +128,7 @@ class Pong extends Game {
         }
         //setTimeout(() => {
         if (client.connected === false) {
-            console.log(`Client ${client.data.userId} disconnected before the start.`);
+            console.log(`[Game] Client ${client.data.userId} disconnected before the start.`);
             return;
         }
         const playerNbr: number = this.p1Id === client.data.userId ? 1 : 2;
@@ -168,7 +168,7 @@ class Pong extends Game {
             this.disconnectTimeout.set(client.data.userId,
                 setTimeout(() => {
                     if (this.p1Socket?.disconnected || this.p2Socket?.disconnected) {
-                        console.log(`Timeout reached for client ${client.data.userId}. Disposing game ${this.id}...`);
+                        console.log(`[Game] Timeout reached for client ${client.data.userId}. Disposing game ${this.id}...`);
                         this.endGame('disconnection');
                         //this.dispose('disconnection', remainingPlayer);
                     }
@@ -181,15 +181,18 @@ class Pong extends Game {
         this.ball!.setFullPos(new Vector3(0, -100, 0));
         let playerScoring: Player;
         let scoredSide: number;
+        let scoringSide: number;
 
         if (payload.deathBar.owner === this.player1) {
             playerScoring = this.player2!;
             scoredSide = 1;
+            scoringSide = 2;
         }
         else
         {
             playerScoring = this.player1!;
             scoredSide = 2;
+            scoringSide = 1;
         }
 
         if (playerScoring.score < 5) {
@@ -201,7 +204,8 @@ class Pong extends Game {
         else if (payload.deathBar.owner == this.player2 && this.player1!.score < 5) {
             this.player1!.scoreUp();
         }*/
-        this.nsp!.to(this.id).emit('score', { player1Score: this.player1!.score, player2Score: this.player2!.score });
+       
+        this.nsp!.to(this.id).emit('score', { scoringPlayer: scoringSide, player1Score: this.player1!.score, player2Score: this.player2!.score });
 
         // Publish score update to other services (RabbitMQ)
         this.gameService.publishScoreUpdate(this.id, this.p1Id, this.p2Id, this.player1!.score, this.player2!.score);
@@ -246,18 +250,18 @@ class Pong extends Game {
 
     run(message?: string) {
         if (this.p1Socket?.connected === false || this.p2Socket?.connected === false) {
-            console.log("A player is still disconnected, cannot run the game.");
+            console.log("[Game] A player is still disconnected, cannot run the game.");
             return;
         }
         if (!this.p1Ready || !this.p2Ready) {
-            console.log("Both players are not ready, cannot run the game.");
+            console.log("[Game] Both players are not ready, cannot run the game.");
             return;
         }
 
         if (this.gameState === "waiting" || this.gameState === null) {
             this.gameState = "playing";
             this.services.TimeService!.update();
-            console.log("Game started with timestamp:", this.services.TimeService!.getTimestamp());
+            console.log("[Game] Game started with timestamp:", this.services.TimeService!.getTimestamp());
             if (!this.ball) {
                 this.ball = new Ball(this.services);
                 this.ball.generate(2000, Math.random() < 0.5 ? 1 : 2);
@@ -317,6 +321,7 @@ class Pong extends Game {
             hitPlayer2: this.player2?.hitCount || 0,
         };
         this.gameService.publishGameFinished(gameFinishedEvent);
+        console.log(`[Game] Ending game instance ${this.id}, reason: ${reason}, winner: ${winnerId}`);
         this.dispose();
     }
 
@@ -338,7 +343,6 @@ class Pong extends Game {
         this.services.EventBus!.off("DeathBarHit", this.onDeathBarHit);
         this.services.Scene!.dispose();
 
-        console.log(`Ending game instance ${this.id}`);
         this.nsp?.to(this.id).emit('gameEnded', { gameId: this.id, message: `Game ${this.id} has ended.` });
         this.gameService.removeGame(this, this.p1Id, this.p2Id/*, {
             score1: this.player1?.score || 0,
