@@ -10,6 +10,8 @@ import { Login } from './pages/login';
 import { Register } from './pages/register';
 import { Authentification } from './pages/authentification';
 import { SetUsername } from './pages/set-username';
+import { OTP } from './pages/otp';
+import { ForgotPassword } from './pages/forgot-password';
 import { DashboardLayout } from './layout/dashboardLayout';
 import { Dashboard } from './pages/dashboard';
 import { MatchmakingPage } from './pages/matchmaking';
@@ -24,6 +26,7 @@ import { Game } from './pages/game';
 import { GuestLayout } from './layout/GuestLayout';
 import { AuthenticatedLayout } from './layout/AuthenticatedLayout';
 import { SetUsernameLayout } from './layout/SetUsernameLayout';
+import { OTPLayout } from './layout/OTPLayout';
 import { GameProvider } from './context/GameProvider';
 import { ProfilePage } from './pages/profile';
 import { ProfileSlugPage } from './pages/profile/slug';
@@ -72,6 +75,10 @@ const routes = [
 								path: '/authentification',
 								component: Authentification,
 							},
+							{
+								path: '/forgot-password',
+								component: ForgotPassword,
+							},
 						],
 					},
 				],
@@ -86,6 +93,21 @@ const routes = [
 							{
 								path: '/set-username',
 								component: SetUsername,
+							},
+						],
+					},
+				],
+			},
+			// OTP verification route (for users with 2FA enabled but not verified)
+			{
+				layout: OTPLayout,
+				routes: [
+					{
+						layout: ConnexionLayout,
+						routes: [
+							{
+								path: '/otp',
+								component: OTP,
 							},
 						],
 					},

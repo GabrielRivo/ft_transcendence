@@ -25,15 +25,22 @@ export function AuthGuard({ children }: AuthGuardProps) {
 			return;
 		}
 
-		// Si l'utilisateur est authentifié mais n'a pas de username
-		// et n'est pas déjà sur la page set-username
 		const currentPath = window.location.pathname;
+
+		// Si 2FA activee mais pas verifiee, rediriger vers /otp
+		if (!loading && isAuthenticated && user?.twoFA && !user?.twoFAVerified && currentPath !== '/otp') {
+			toast('2FA verification required', 'warning', 3000);
+			navigate('/otp');
+			return;
+		}
+
+		// Si l'utilisateur est authentifie mais n'a pas de username
 		if (!loading && isAuthenticated && user?.noUsername && currentPath !== '/set-username') {
-			toast(`You don't have a username yet. !`, 'error', 3000);
+			toast(`You don't have a username yet!`, 'error', 3000);
 			navigate('/set-username');
 			return;
 		}
-	}, [loading, isAuthenticated, user?.noUsername, navigate]);
+	}, [loading, isAuthenticated, user?.twoFA, user?.twoFAVerified, user?.noUsername, navigate]);
 
 	if (loading || !isAuthenticated) {
 		return (
