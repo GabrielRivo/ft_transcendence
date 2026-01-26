@@ -339,7 +339,7 @@ class Pong extends Game {
         this.services.Scene!.dispose();
 
         console.log(`Ending game instance ${this.id}`);
-        this.nsp!.to(this.id).emit('gameEnded', { gameId: this.id, message: `Game ${this.id} has ended.` });
+        this.nsp?.to(this.id).emit('gameEnded', { gameId: this.id, message: `Game ${this.id} has ended.` });
         this.gameService.removeGame(this, this.p1Id, this.p2Id/*, {
             score1: this.player1?.score || 0,
             score2: this.player2?.score || 0,
