@@ -11,6 +11,7 @@ import { Register } from './pages/register';
 import { Authentification } from './pages/authentification';
 import { SetUsername } from './pages/set-username';
 import { OTP } from './pages/otp';
+import { ForgotPassword } from './pages/forgot-password';
 import { DashboardLayout } from './layout/dashboardLayout';
 import { Dashboard } from './pages/dashboard';
 import { MatchmakingPage } from './pages/matchmaking';
@@ -73,6 +74,10 @@ const routes = [
 							{
 								path: '/authentification',
 								component: Authentification,
+							},
+							{
+								path: '/forgot-password',
+								component: ForgotPassword,
 							},
 						],
 					},
