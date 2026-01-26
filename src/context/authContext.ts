@@ -6,6 +6,8 @@ export interface User {
 	username: string;
 	noUsername: boolean;
 	suggestedUsername?: string;
+	twoFA?: boolean;
+	twoFAVerified?: boolean;
 }
 
 export interface AuthContextType {
@@ -17,6 +19,7 @@ export interface AuthContextType {
 	logout: () => Promise<void>;
 	checkAuth: () => Promise<void>;
 	setUsername: (username: string) => Promise<boolean>;
+	verify2FA: (code: string) => Promise<boolean>;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);

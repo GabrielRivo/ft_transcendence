@@ -16,12 +16,13 @@ interface UserStats {
 }
 
 interface TwoFactorSetupResponse {
-	qrCodeUrl: string;
+	success: boolean;
+	link: string;
 	secret: string;
 }
 
 export function ProfilePage() {
-	const { user } = useAuth();
+	const { user, checkAuth } = useAuth();
 	const { toast } = useToast();
 
 	// Avatar state
@@ -43,9 +44,9 @@ export function ProfilePage() {
 	const [confirmPassword, setConfirmPassword] = useState('');
 
 	// 2FA state
-	const [is2FAEnabled, setIs2FAEnabled] = useState(false);
 	const [show2FAModal, setShow2FAModal] = useState(false);
 	const [qrCodeUrl, setQrCodeUrl] = useState('');
+	const [secret, setSecret] = useState('');
 	const [totpCode, setTotpCode] = useState('');
 	const [isSettingUp2FA, setIsSettingUp2FA] = useState(false);
 
@@ -173,12 +174,14 @@ export function ProfilePage() {
 	// 2FA handlers
 	const handleSetup2FA = async () => {
 		setIsSettingUp2FA(true);
-		const result = await fetchJsonWithAuth<TwoFactorSetupResponse>('/api/auth/2fa/setup', {
+		const result = await fetchJsonWithAuth<TwoFactorSetupResponse>('/api/auth/2fa/enable', {
 			method: 'POST',
+			body: JSON.stringify({}),
 		});
 
 		if (result.ok && result.data) {
-			setQrCodeUrl(result.data.qrCodeUrl);
+			setQrCodeUrl(result.data.link);
+			setSecret(result.data.secret);
 			setShow2FAModal(true);
 		} else {
 			toast(result.error || 'Error during 2FA setup', 'error');
@@ -192,29 +195,32 @@ export function ProfilePage() {
 			return;
 		}
 
-		const result = await fetchJsonWithAuth('/api/auth/2fa/verify', {
+		const result = await fetchJsonWithAuth('/api/auth/2fa/verify-setup', {
 			method: 'POST',
 			body: JSON.stringify({ code: totpCode }),
 		});
 
 		if (result.ok) {
 			toast('2FA activated successfully', 'success');
-			setIs2FAEnabled(true);
+			await checkAuth();
 			setShow2FAModal(false);
 			setTotpCode('');
+			setSecret('');
+			setQrCodeUrl('');
 		} else {
 			toast(result.error || 'Invalid code', 'error');
 		}
 	};
 
 	const handleDisable2FA = async () => {
-		const result = await fetchJsonWithAuth('/api/auth/2fa/disable', {
-			method: 'POST',
+		const result = await fetchJsonWithAuth('/api/auth/2fa', {
+			method: 'DELETE',
+			body: JSON.stringify({}),
 		});
 
 		if (result.ok) {
-			toast('2FA disabeled', 'success');
-			setIs2FAEnabled(false);
+			toast('2FA disabled', 'success');
+			await checkAuth();
 		} else {
 			toast(result.error || 'Error during deactivation', 'error');
 		}
@@ -482,21 +488,21 @@ export function ProfilePage() {
 									<div>
 										<h3 className="text-sm font-bold text-white">TOTP Authenticator</h3>
 										<p className="text-xs text-gray-500">
-											{is2FAEnabled
+											{user?.twoFA
 												? 'Activated - Your account is protected'
 												: 'Disabled - Add an extra layer of security'}
 										</p>
 									</div>
 									<div
-										className={`h-3 w-3 rounded-full ${is2FAEnabled ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-600'}`}
+										className={`h-3 w-3 rounded-full ${user?.twoFA ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-600'}`}
 									/>
 								</div>
 								<div className="flex gap-2">
-									{is2FAEnabled ? (
-										<ButtonStyle3 onClick={() => { handleDisable2FA(); }}>Désactiver 2FA</ButtonStyle3>
+									{user?.twoFA ? (
+										<ButtonStyle3 onClick={() => { handleDisable2FA(); }}>Disable 2FA</ButtonStyle3>
 									) : (
 										<ButtonStyle4 onClick={() => { handleSetup2FA(); }} disabled={isSettingUp2FA}>
-											{isSettingUp2FA ? 'Configuration...' : 'Unable 2FA'}
+											{isSettingUp2FA ? 'Setting up...' : 'Enable 2FA'}
 										</ButtonStyle4>
 									)}
 								</div>
@@ -525,18 +531,42 @@ export function ProfilePage() {
 
 			{/* 2FA Setup Modal */}
 			{show2FAModal && (
-				<Modal onClose={() => setShow2FAModal(false)} title="Configuration 2FA" variant="cyan">
+				<Modal onClose={() => setShow2FAModal(false)} title="2FA Setup" variant="cyan">
 					<div className="space-y-4">
 						<p className="text-sm text-gray-400">
-							Scannez ce QR code avec votre application d'authentification (Google Authenticator, Authy, etc.)
+							Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
 						</p>
 						{qrCodeUrl && (
-							<div className="flex justify-center rounded-lg bg-white p-4">
-								<img src={qrCodeUrl} alt="QR Code 2FA" className="h-48 w-48" />
+							<div className="flex flex-col items-center gap-4">
+								<div className="rounded-lg bg-white p-4">
+									<img
+									// voir pour generarer avec un canvas (plus secure)
+										src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrCodeUrl)}`}
+										alt="QR Code 2FA"
+										className="h-48 w-48"
+									/>
+								</div>
+
+								{/* Secret manuel */}
+								<div className="w-full space-y-2">
+									<p className="text-xs text-gray-500">Or enter this code manually:</p>
+									<div className="flex items-center gap-2 rounded-sm border border-white/10 bg-slate-800 p-3">
+										<code className="flex-1 break-all font-mono text-sm text-cyan-400">{secret}</code>
+										<button
+											onClick={() => {
+												navigator.clipboard.writeText(secret);
+												toast('Copied!', 'success');
+											}}
+											className="text-xs text-gray-400 transition-colors hover:text-white"
+										>
+											Copy
+										</button>
+									</div>
+								</div>
 							</div>
 						)}
 						<div className="space-y-2">
-							<label className="text-xs text-gray-500">Entrez le code à 6 chiffres</label>
+							<label className="text-xs text-gray-500">Enter the 6-digit code</label>
 							<input
 								type="text"
 								value={totpCode}
@@ -547,7 +577,7 @@ export function ProfilePage() {
 							/>
 						</div>
 						<ButtonStyle4 onClick={() => { handleVerify2FA(); }} className="w-full">
-							Vérifier et activer
+							Verify and enable
 						</ButtonStyle4>
 					</div>
 				</Modal>
