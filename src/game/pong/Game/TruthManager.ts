@@ -205,6 +205,10 @@ class TruthManager {
             //console.log("Gamestate at time ", time, ": ", this.getGameState(game));
 
             this.lastFrameTime = time;
+
+            if (time > 300000) {
+                this.game.endGame('timeout');
+            }
         }
     }
 

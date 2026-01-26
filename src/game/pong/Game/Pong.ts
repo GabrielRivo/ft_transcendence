@@ -14,6 +14,7 @@ import Game from "./Game.js";
 import TruthManager from "./TruthManager.js";
 
 import { GameFinishedEvent, GameScoreUpdatedEvent } from '../../game.events.js';
+import { clear } from "console";
 
 class Pong extends Game {
     private gameService: GameService;
@@ -46,6 +47,8 @@ class Pong extends Game {
     private disconnectForgivingP1: number = 0;
     private disconnectForgivingP2: number = 0;
 
+    private startingTimeout: NodeJS.Timeout | null = null;
+
     constructor(id: string, p1Id: string, p2Id: string, type: GameType, gameService: GameService) {
         super();
         this.id = id;
@@ -61,6 +64,10 @@ class Pong extends Game {
 
         this.services = new Services();
 
+        this.startingTimeout = setTimeout(() => {
+            console.log(`Game ${this.id} starting timeout reached. Disposing game...`);
+            this.endGame('timeout');
+        }, 20000);
     }
 
     initialize(): void {
@@ -114,6 +121,8 @@ class Pong extends Game {
             this.p2Socket = client;
         }
         await client.join(this.id);
+        if (this.startingTimeout)
+            clearTimeout(this.startingTimeout);
         if (this.disconnectTimeout.has(client.data.userId)) {
             clearTimeout(this.disconnectTimeout.get(client.data.userId)!);
             this.disconnectTimeout.delete(client.data.userId);
@@ -128,7 +137,7 @@ class Pong extends Game {
                 this.p1Ready = true;
             else
                 this.p2Ready = true;
-            client.emit("gameJoined", { gameId: this.id, message: `Joined game ${this.id} successfully!`, player: playerNbr });
+            client.emit("gameJoined", { gameId: this.id, player1Score: this.player1!.score, player2Score: this.player2!.score, message: `Joined game ${this.id} successfully!`, player: playerNbr });
             if (this.p1Ready && this.p2Ready) {
                 if (playerNbr === 1)
                     this.disconnectForgivingP1 += 1;
@@ -280,7 +289,7 @@ class Pong extends Game {
         }
     }
 
-    endGame(reason: 'score_limit' | 'surrender' | 'disconnection' | 'timeout' = 'score_limit'): void {
+    endGame(reason: 'score_limit' | 'surrender' | 'disconnection' | 'timeout'): void {
         let winnerId: string | null = null;
 
         if (reason === 'disconnection') {
