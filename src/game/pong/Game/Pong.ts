@@ -121,35 +121,37 @@ class Pong extends Game {
             this.p2Socket = client;
         }
         await client.join(this.id);
-        if (this.startingTimeout)
-            clearTimeout(this.startingTimeout);
+
         if (this.disconnectTimeout.has(client.data.userId)) {
             clearTimeout(this.disconnectTimeout.get(client.data.userId)!);
             this.disconnectTimeout.delete(client.data.userId);
         }
-        setTimeout(() => {
-            if (client.connected === false) {
-                console.log(`Client ${client.data.userId} disconnected before the start.`);
-                return;
-            }
-            const playerNbr: number = this.p1Id === client.data.userId ? 1 : 2;
-            if (playerNbr === 1)
-                this.p1Ready = true;
-            else
-                this.p2Ready = true;
-            client.emit("gameJoined", { gameId: this.id, player1Score: this.player1!.score, player2Score: this.player2!.score, message: `Joined game ${this.id} successfully!`, player: playerNbr });
-            if (this.p1Ready && this.p2Ready) {
-                if (playerNbr === 1)
-                    this.disconnectForgivingP1 += 1;
-                else
-                    this.disconnectForgivingP2 += 1;
+        //setTimeout(() => {
+        if (client.connected === false) {
+            console.log(`Client ${client.data.userId} disconnected before the start.`);
+            return;
+        }
+        const playerNbr: number = this.p1Id === client.data.userId ? 1 : 2;
+        if (playerNbr === 1)
+            this.p1Ready = true;
+        else
+            this.p2Ready = true;
 
-                if (playerNbr === 1 && this.disconnectForgivingP1 > 3 || playerNbr === 2 && this.disconnectForgivingP2 > 3)
-                    client.emit("gameStarted", { timestamp: this.services.TimeService!.getTimestamp(), gameId: this.id, message: `Player ${client.data.userId} reconnected too many times. Game will run without forgiving.` });
-                else
-                    this.run(`Player ${client.data.userId} connected. Starting game...`);
-            }
-        }, 500);
+        client.emit("gameJoined", { gameId: this.id, player1Score: this.player1!.score, player2Score: this.player2!.score, message: `Joined game ${this.id} successfully!`, player: playerNbr });
+        if (this.p1Ready && this.p2Ready) {
+            if (this.startingTimeout)
+                clearTimeout(this.startingTimeout);
+            if (playerNbr === 1)
+                this.disconnectForgivingP1 += 1;
+            else
+                this.disconnectForgivingP2 += 1;
+
+            if (playerNbr === 1 && this.disconnectForgivingP1 > 3 || playerNbr === 2 && this.disconnectForgivingP2 > 3)
+                client.emit("gameStarted", { timestamp: this.services.TimeService!.getTimestamp(), gameId: this.id, message: `Player ${client.data.userId} reconnected too many times. Game will run without forgiving.` });
+            else
+                this.run(`Player ${client.data.userId} connected. Starting game...`);
+        }
+        //}, 500);
     }
 
     public playerDisconnected(client: Socket) {
