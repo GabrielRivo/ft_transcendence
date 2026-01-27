@@ -50,10 +50,5 @@
     "reflect-metadata": "0.2.2",
     "socket.io": "4.8.1",
     "supertest": "7.1.4"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "better-sqlite3"
-    ]
   }
 }
