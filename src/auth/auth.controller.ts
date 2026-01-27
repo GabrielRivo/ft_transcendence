@@ -82,6 +82,7 @@ export class AuthController {
 	@Post('/register')
 	@BodySchema(RegisterSchema)
 	async register(@Body() dto: RegisterDto, @Res() res: FastifyReply) {
+		console.log("A");
 		const tokens = await this.authService.register(dto);
 		this.setAuthCookies(res, tokens);
 		return { success: true, message: 'Registration successful' };
