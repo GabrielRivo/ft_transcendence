@@ -1,6 +1,6 @@
 import type { MultipartFile } from '@fastify/multipart';
 import type { FastifyRequest } from 'fastify';
-import { Body, BodySchema, Controller, Delete, Get, Inject, JWTBody, Param, Post, Put, Req, ResponseSchema } from 'my-fastify-decorators';
+import { Body, BodySchema, Controller, Delete, Get, Inject, JWTBody, Param, Post, Put, Query, Req, ResponseSchema } from 'my-fastify-decorators';
 import { ReadProfileDtoResponse, ReadProfileDtoSchemaResponse } from './dto/readProfile.dto.js';
 import {
 	DeleteAvatarDtoResponse,
@@ -12,6 +12,7 @@ import {
 	UploadAvatarDtoResponse,
 	UploadAvatarDtoSchemaResponse
 } from './dto/updateProfile.dto.js';
+import { OnlineUsersDtoResponse, OnlineUsersDtoSchemaResponse } from './dto/onlineUsers.dto.js';
 import { UserService } from './user.service.js';
 
 interface MultipartRequest extends FastifyRequest {
@@ -28,6 +29,22 @@ export class UserController {
 	@ResponseSchema(200, ReadProfileDtoSchemaResponse)
 	async get_profile(@Param('userId') userId: string): Promise<ReadProfileDtoResponse> {
 		return this.userService.get_profile(userId);
+	}
+
+	@Get('/online')
+	@ResponseSchema(200, OnlineUsersDtoSchemaResponse)
+	async get_online_users(): Promise<OnlineUsersDtoResponse> {
+		return { users: this.userService.getOnlineUsers() };
+	}
+
+	@Get('/profiles')
+	@ResponseSchema(200, OnlineUsersDtoSchemaResponse)
+	async get_profiles_batch(@Query('ids') ids: string): Promise<OnlineUsersDtoResponse> {
+		if (!ids || ids.trim() === '') {
+			return { users: [] };
+		}
+		const userIds = ids.split(',').map(id => parseInt(id, 10)).filter(id => !isNaN(id));
+		return { users: this.userService.getProfilesBatch(userIds) };
 	}
 
 	// @Put('/profile/:userId')

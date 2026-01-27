@@ -113,6 +113,11 @@ export class FriendManagementController {
 		}
 	}
 
+	@Get('/blocked-list')
+	async get_blocked_list(@JWTBody() user: { id: number }) {
+		return { blockedIds: this.blockService.getBlockedUsers(user.id) };
+	}
+
 	@Post('/challenge')
 	@BodySchema(FriendManagementSchema)
 	async send_challenge(@Body() data: FriendManagementDto, @JWTBody() user: { id: number; username: string }) {

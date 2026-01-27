@@ -5,12 +5,14 @@ import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { ReadProfileDtoResponse } from './dto/readProfile.dto.js';
+import type { Server } from 'socket.io';
 
 const IMAGES_DIR = './images';
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 const GetProfile = `SELECT userId, username, bio, avatar, avatar_provider, self_hosted FROM profiles WHERE userId = ?`;
+const GetProfilesBatch = `SELECT userId, username, bio, avatar FROM profiles WHERE userId IN `;
 // const GetProfileByUsername = `SELECT userId, username, bio, avatar, avatar_provider, self_hosted FROM profiles WHERE username = ?`;
 const CreateProfile = `INSERT INTO profiles (userId, username, bio, avatar, avatar_provider, self_hosted) VALUES (?, '', '', NULL, NULL, 0)`;
 const CreateProfileWithAvatar = `INSERT INTO profiles (userId, username, bio, avatar, avatar_provider, self_hosted) VALUES (?, '', '', ?, ?, 0)`;
@@ -36,10 +38,19 @@ interface AvatarInfoRow {
 	self_hosted: number;
 }
 
+export interface OnlineUser {
+	userId: number;
+	username: string;
+	avatar: string | null;
+}
+
 @Service()
 export class UserService {
 	@InjectPlugin('db')
 	private db!: Database.Database;
+
+	@InjectPlugin('io')
+	private io!: Server;
 
 	private stmtGetProfile!: Statement;
 	// private stmtGetProfileByUsername!: Statement;
@@ -96,6 +107,28 @@ export class UserService {
 			avatar: profile.avatar,
 			bio: profile.bio,
 		};
+	}
+
+	getProfilesBatch(userIds: number[]): OnlineUser[] {
+		if (userIds.length === 0) {
+			return [];
+		}
+
+		// Limiter le nombre d'IDs pour éviter des requêtes trop volumineuses
+		const limitedIds = userIds.slice(0, 100);
+		
+		// Construire la clause IN dynamiquement
+		const placeholders = limitedIds.map(() => '?').join(', ');
+		const query = `${GetProfilesBatch}(${placeholders})`;
+		
+		const stmt = this.db.prepare(query);
+		const profiles = stmt.all(...limitedIds) as Array<{ userId: number; username: string; avatar: string | null }>;
+		
+		return profiles.map(p => ({
+			userId: p.userId,
+			username: p.username,
+			avatar: p.avatar
+		}));
 	}
 
 	async update_bio(userId: number, bio: string): Promise<{ message: string }> {
@@ -155,6 +188,8 @@ export class UserService {
 		const avatarUrl = `/api/images/${filename}`;
 		this.stmtUpdateAvatar.run(avatarUrl, 1, userId);
 
+		this.io.emit('avatar_uploaded', { userId, avatarUrl });
+
 		return { message: 'Avatar uploaded successfully', avatarUrl };
 	}
 
@@ -177,6 +212,8 @@ export class UserService {
 
 		const newAvatarUrl = avatarInfo.avatar_provider || null;
 		this.stmtUpdateAvatar.run(newAvatarUrl, 0, userId);
+
+		this.io.emit('avatar_deleted', { userId, avatarUrl: newAvatarUrl });
 
 		return {
 			message: 'Avatar deleted successfully',
@@ -218,7 +255,24 @@ export class UserService {
 	updateUsername(userId: number, username: string): void {
 		// this.getOrCreateProfile(userId);
 		this.stmtUpdateUsername.run(username, userId);
+		this.io.emit('username_updated', { userId, username });
 		console.log(`[UserService] Username updated for user ${userId}: ${username}`);
+	}
+
+	getOnlineUsers(): OnlineUser[] {
+		const userMap = new Map<number, OnlineUser>();
+		
+		for (const [, socket] of this.io.sockets.sockets) {
+			if (socket.data.userId && !userMap.has(socket.data.userId)) {
+				userMap.set(socket.data.userId, {
+					userId: socket.data.userId,
+					username: socket.data.username || '',
+					avatar: socket.data.avatar || null
+				});
+			}
+		}
+		
+		return Array.from(userMap.values());
 	}
 
 	deleteProfile(userId: number): void {
