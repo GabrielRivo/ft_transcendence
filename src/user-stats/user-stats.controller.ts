@@ -50,9 +50,9 @@ export class UserStatsController {
 	}
 
 	@Get('/user/small/:userId')
-	async get_small_stats(@JWTBody() body : { userId : number}) {
+	async get_small_stats(@Param('userId') userId: string) {
 		try {
-		const stats_log = await this.statsService.getGlobalStats(body.userId);
+		const stats_log = await this.statsService.getGlobalStats(Number(userId));
 		if (!stats_log) return {
 				elo: 1000,
 				total_games: 0,
