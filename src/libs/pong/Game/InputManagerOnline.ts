@@ -19,6 +19,14 @@ class InputManager {
         this.game = game;
         this.inputBuffer = new History<PlayerInputData>(100);
         this.rawInputBuffer = new History<PlayerInputData>(100);
+
+        window.addEventListener("blur", this.resetInputs);
+    }
+
+    private resetInputs = () => {
+        const time = Services.TimeService!.getTimestamp();
+        this.recordInput({ timestamp: time, direction: LEFT, isPressed: false, isResolved: false });
+        this.recordInput({ timestamp: time, direction: RIGHT, isPressed: false, isResolved: false });
     }
 
     public getInputBuffer(): History<PlayerDirectionData> {
@@ -195,6 +203,7 @@ class InputManager {
     }
 
     public dispose() {
+        window.removeEventListener("blur", () => this.resetInputs());
         Services.Scene!.onKeyboardObservable.clear();
     }
 }
