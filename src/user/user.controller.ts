@@ -3,14 +3,14 @@ import type { FastifyRequest } from 'fastify';
 import { Body, BodySchema, Controller, Delete, Get, Inject, JWTBody, Param, Post, Put, Req, ResponseSchema } from 'my-fastify-decorators';
 import { ReadProfileDtoResponse, ReadProfileDtoSchemaResponse } from './dto/readProfile.dto.js';
 import {
-    DeleteAvatarDtoResponse,
-    DeleteAvatarDtoSchemaResponse,
-    UpdateProfileDto,
-    UpdateProfileDtoResponse,
-    UpdateProfileDtoSchema,
-    UpdateProfileDtoSchemaResponse,
-    UploadAvatarDtoResponse,
-    UploadAvatarDtoSchemaResponse
+	DeleteAvatarDtoResponse,
+	DeleteAvatarDtoSchemaResponse,
+	UpdateProfileDto,
+	UpdateProfileDtoResponse,
+	UpdateProfileDtoSchema,
+	UpdateProfileDtoSchemaResponse,
+	UploadAvatarDtoResponse,
+	UploadAvatarDtoSchemaResponse
 } from './dto/updateProfile.dto.js';
 import { UserService } from './user.service.js';
 
@@ -38,6 +38,16 @@ export class UserController {
 		@Body() data: UpdateProfileDto
 	): Promise<UpdateProfileDtoResponse> {
 		return this.userService.update_profile(userId, data);
+	}
+
+	@Put('/bio')
+	@BodySchema(UpdateProfileDtoSchema)
+	@ResponseSchema(200, UpdateProfileDtoSchemaResponse)
+	async update_bio(
+		@JWTBody() jwt: { id: number },
+		@Body() data: UpdateProfileDto
+	): Promise<UpdateProfileDtoResponse> {
+		return this.userService.update_bio(jwt.id, data.bio);
 	}
 
 	@Post('/avatar')

@@ -93,6 +93,12 @@ export class UserService {
 		};
 	}
 
+	async update_bio(userId: number, bio: string): Promise<{ message: string }> {
+		this.getOrCreateProfile(userId);
+		this.stmtUpdateBio.run(bio, userId);
+		return { message: 'Bio updated successfully' };
+	}
+
 	async update_profile(userId: string, data: { bio: string }): Promise<{ message: string }> {
 		const userIdNum = parseInt(userId, 10);
 		if (isNaN(userIdNum)) {
@@ -141,7 +147,7 @@ export class UserService {
 
 		fs.writeFileSync(filepath, buffer);
 
-		const avatarUrl = `/images/${filename}`;
+		const avatarUrl = `/api/images/${filename}`;
 		this.stmtUpdateAvatar.run(avatarUrl, 1, userId);
 
 		return { message: 'Avatar uploaded successfully', avatarUrl };
