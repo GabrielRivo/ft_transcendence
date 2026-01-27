@@ -26,7 +26,11 @@ import {
 	Controller,
 	Inject,
 	Post,
+	Get,
 	Res,
+	JWTBody,
+	UnauthorizedException,
+	ResponseSchema,
 } from 'my-fastify-decorators';
 import type { FastifyReply } from 'fastify';
 
@@ -113,5 +117,25 @@ export class GameController {
 			error: result.error,
 			message: result.message,
 		};
+	}
+
+	@Get('/active')
+	@ResponseSchema(200, {
+		type: 'object',
+		properties: {
+			gameId: { type: 'string' },
+		},
+	})
+	async getActiveGame(@JWTBody() user: any) {
+		if (!user) throw new UnauthorizedException();
+		const result = this.gameService.getActiveGame(String(user.id));
+		return result || {};
+	}
+
+	@Post('/surrender')
+	async surrenderGame(@JWTBody() user: any) {
+		if (!user) throw new UnauthorizedException();
+		const result = this.gameService.surrenderGame(String(user.id));
+		return result;
 	}
 }

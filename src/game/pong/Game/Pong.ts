@@ -13,8 +13,7 @@ import InputManager from "../InputManager.js";
 import Game from "./Game.js";
 import TruthManager from "./TruthManager.js";
 
-import { GameFinishedEvent, GameScoreUpdatedEvent } from '../../game.events.js';
-import { clear } from "console";
+import { GameFinishedEvent } from '../../game.events.js';
 
 class Pong extends Game {
     private gameService: GameService;
@@ -156,8 +155,7 @@ class Pong extends Game {
     }
 
     public playerDisconnected(client: Socket) {
-        if (this.p1Id === client.data.userId && this.disconnectForgivingP1 < 3 || this.p2Id === client.data.userId && this.disconnectForgivingP2 < 3)
-        {
+        if (this.p1Id === client.data.userId && this.disconnectForgivingP1 < 3 || this.p2Id === client.data.userId && this.disconnectForgivingP2 < 3) {
             this.stop(`Player ${client.data.userId} has disconnected. Waiting for reconnection...`);
             if (this.p1Id === client.data.userId)
                 this.p1Ready = false;
@@ -189,8 +187,7 @@ class Pong extends Game {
             scoredSide = 1;
             scoringSide = 2;
         }
-        else
-        {
+        else {
             playerScoring = this.player1!;
             scoredSide = 2;
             scoringSide = 1;
@@ -205,7 +202,7 @@ class Pong extends Game {
         else if (payload.deathBar.owner == this.player2 && this.player1!.score < 5) {
             this.player1!.scoreUp();
         }*/
-       
+
         this.nsp!.to(this.id).emit('score', { scoringPlayer: scoringSide, player1Score: this.player1!.score, player2Score: this.player2!.score });
 
         // Publish score update to other services (RabbitMQ)
@@ -226,7 +223,7 @@ class Pong extends Game {
         //this.ball.setFullPos(new Vector3(0, 0.125, 0));
         this.ball!.generate(2000, scoredSide);
 
-        this.nsp!.to(this.id).emit('generateBall', { timestamp: this.services.TimeService!.getTimestamp(), ballDirection: this.ball!.getDirection()});
+        this.nsp!.to(this.id).emit('generateBall', { timestamp: this.services.TimeService!.getTimestamp(), ballDirection: this.ball!.getDirection() });
     }
 
     public sendGameState(): void {
@@ -296,7 +293,7 @@ class Pong extends Game {
         }
     }
 
-    endGame(reason: 'score_limit' | 'surrender' | 'disconnection' | 'timeout'): void {
+    endGame(reason: 'score_limit' | 'surrender' | 'disconnection' | 'timeout', explicitWinnerId?: string): void {
         let winnerId: string | null = null;
 
         if (this.player1!.score > this.player2!.score)
@@ -311,6 +308,10 @@ class Pong extends Game {
             const disconnectionWinnerId = this.p1Socket?.connected ? this.p1Id : this.p2Socket?.connected ? this.p2Id : null;
             if (disconnectionWinnerId)
                 winnerId = disconnectionWinnerId;
+        }
+
+        if (explicitWinnerId) {
+            winnerId = explicitWinnerId;
         }
 
         let gameFinishedEvent: GameFinishedEvent = {

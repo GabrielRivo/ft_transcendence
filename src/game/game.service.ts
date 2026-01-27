@@ -1,13 +1,11 @@
 import { Service } from 'my-fastify-decorators';
 import Pong from './pong/Game/Pong.js';
 import { GameType } from './game.dto.js';
-import { GameFinishedEvent, GameScoreUpdatedEvent } from './game.events.js';
+import { GameFinishedEvent } from './game.events.js';
 
 import { Socket } from 'socket.io';
 import { Inject } from 'my-fastify-decorators';
 import { GameEventsPublisher } from './infrastructure/publishers/game-events.publisher.js';
-import { time } from 'console';
-import Game from './pong/Game/Game.js';
 
 /**
  * Result type for game creation operations.
@@ -35,6 +33,27 @@ export class GameService {
 
 	@Inject(GameEventsPublisher)
 	private eventsPublisher!: GameEventsPublisher;
+
+	public getActiveGame(userId: string): { gameId: string } | null {
+		const game = this.gamesByPlayer.get(userId);
+		return game ? { gameId: game.id } : null;
+	}
+
+	public surrenderGame(userId: string): { success: boolean; message: string } {
+		const game = this.gamesByPlayer.get(userId);
+		if (!game) {
+			return { success: false, message: 'No active game found' };
+		}
+
+		const opponentId = game.player1?.id === userId ? game.player2?.id : game.player1?.id;
+		if (!opponentId) {
+			return { success: false, message: 'Opponent not found' };
+		}
+
+		console.log(`[GameService] Player ${userId} surrendered game ${game.id}. Winner: ${opponentId}`);
+		game.endGame('surrender', opponentId);
+		return { success: true, message: 'Game surrendered' };
+	}
 
 	public connectPlayer(client: Socket): ConnectPlayerResult {
 		const userId = client.data.userId;
