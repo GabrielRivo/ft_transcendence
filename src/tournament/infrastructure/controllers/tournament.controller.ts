@@ -20,6 +20,7 @@ import { GetTournamentUseCase } from '../../application/use-cases/get-tournament
 import { ListTournamentsUseCase } from '../../application/use-cases/list-tournaments.use-case.js';
 import { JoinTournamentUseCase } from '../../application/use-cases/join-tournament.use-case.js';
 import { LeaveTournamentUseCase } from '../../application/use-cases/leave-tournament.use-case.js';
+import { GetActiveTournamentUseCase } from '../../application/use-cases/active-tournament.use-case.js';
 
 import { CreateTournamentDto, CreateTournamentSchema } from '../../application/dtos/create-tournament.dto.js';
 import { ListTournamentsDto, ListTournamentsSchema } from '../../application/dtos/list-tournaments.dto.js';
@@ -42,6 +43,9 @@ export class TournamentController {
     @Inject(JoinTournamentUseCase)
     private joinTournamentUseCase!: JoinTournamentUseCase;
 
+    @Inject(GetActiveTournamentUseCase)
+    private getActiveTournamentUseCase!: GetActiveTournamentUseCase;
+
     @Post('/')
     @BodySchema(CreateTournamentSchema)
     public async create(
@@ -63,6 +67,14 @@ export class TournamentController {
     public async list(@Query() query: ListTournamentsDto) {
         const tournaments = await this.listTournamentsUseCase.execute(query);
         return tournaments;
+    }
+
+    @Get('/active')
+    @ResponseSchema(200, TournamentResponseSchema)
+    public async getActive(@JWTBody() user: any) {
+        if (!user) throw new UnauthorizedException();
+        const tournament = await this.getActiveTournamentUseCase.execute(String(user.id));
+        return tournament;
     }
 
     @Get('/:id')

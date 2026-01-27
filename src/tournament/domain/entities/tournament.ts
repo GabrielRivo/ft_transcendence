@@ -139,19 +139,6 @@ export class Tournament {
         }
 
         if (match.status === 'FINISHED') {
-            // Ensure we haven't already processed this due to idempotent calls causing double events?
-            // propagateWinner checks if next match already set? 
-            // setScore is idempotent if status already finished? match.finalize guards.
-            // But logic inside propagate needs to be idempotent if called multiple times?
-            // Ideally propogate only if we JUST finished.
-            // But tournament entity is re-loaded from DB, so status is current. 
-            // We need to check if we already propagated?
-            // The check is implicit: if next match has us, we are good.
-            // But assume updateMatchScore called ONCE per event.
-
-            // To be safe against double event emission on reload?
-            // "RecordedEvents" are transient.
-
             this.propagateWinnerToNextRound(match);
             this.addRecordedEvent(new MatchFinishedEvent(this.id, matchId, match.winner!.id));
         }
@@ -229,7 +216,7 @@ export class Tournament {
         if (finishedMatch.round === totalRounds) {
             this._winner = finishedMatch.winner;
             this._status = 'FINISHED';
-            this.addRecordedEvent(new TournamentFinishedEvent(this.id, finishedMatch.winner!.id));
+            this.addRecordedEvent(new TournamentFinishedEvent(this.id, finishedMatch.winner!.id, this.name, this.ownerId));
             return;
         }
 

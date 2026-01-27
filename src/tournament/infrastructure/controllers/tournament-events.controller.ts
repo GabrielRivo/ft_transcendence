@@ -6,6 +6,7 @@ import { type GameFinishedEvent } from '../../domain/events/shared/game-finished
 import { StartRoundUseCase } from '../../application/use-cases/start-round.use-case.js';
 
 import { SocketTournamentEventsPublisher } from '../publishers/socket-tournament-events.publisher.js';
+import { CompositeTournamentEventsPublisher } from '../publishers/composite-tournament-events.publisher.js';
 
 const READY_TIME_SEC = 30;
 
@@ -23,6 +24,9 @@ export class TournamentEventsController {
     @Inject(SocketTournamentEventsPublisher)
     private socketPublisher!: SocketTournamentEventsPublisher;
 
+    @Inject(CompositeTournamentEventsPublisher)
+    private compositePublisher!: CompositeTournamentEventsPublisher;
+
     @EventPattern('game.finished')
     async handleGameFinished(@Payload() event: GameFinishedEvent) {
         console.log(`[TournamentEventsController] Received game.finished event: ${event.gameId}`);
@@ -39,7 +43,7 @@ export class TournamentEventsController {
             // tournament.onMatchFinished(event.gameId); // REMOVE: updateMatchScore already handles this
 
             await this.repository.save(tournament);
-            await this.socketPublisher.publishAll(tournament.getRecordedEvents());
+            await this.compositePublisher.publishAll(tournament.getRecordedEvents());
             tournament.clearRecordedEvents();
 
             // Check if round finished

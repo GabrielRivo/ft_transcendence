@@ -11,6 +11,8 @@ import { RabbitMQTournamentEventsPublisher } from './infrastructure/publishers/r
 import { CompositeTournamentEventsPublisher } from './infrastructure/publishers/composite-tournament-events.publisher.js';
 import { JoinTournamentUseCase } from './application/use-cases/join-tournament.use-case.js';
 import { StartRoundUseCase } from './application/use-cases/start-round.use-case.js';
+import { GetActiveTournamentUseCase } from './application/use-cases/active-tournament.use-case.js';
+import { LeaveTournamentUseCase } from './application/use-cases/leave-tournament.use-case.js';
 import { HttpGameGateway } from './infrastructure/gateways/http-game.gateway.js';
 import { TimerAdapter } from './infrastructure/adapters/timer.adapter.js';
 import { TournamentEventsController } from './infrastructure/controllers/tournament-events.controller.js';
@@ -29,6 +31,8 @@ import { TournamentEventsController } from './infrastructure/controllers/tournam
         ListTournamentsUseCase,
         JoinTournamentUseCase,
         StartRoundUseCase,
+        GetActiveTournamentUseCase,
+        LeaveTournamentUseCase,
         HttpGameGateway,
         TimerAdapter,
     ]

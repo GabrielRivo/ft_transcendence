@@ -73,7 +73,9 @@ export class TournamentFinishedEvent implements RecordedEvent {
 
     constructor(
         public readonly aggregateId: string,
-        public readonly winnerId: string
+        public readonly winnerId: string,
+        public readonly name: string,
+        public readonly ownerId: string
     ) { }
 }
 
