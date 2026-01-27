@@ -16,7 +16,7 @@ import { PrivateChatService } from './private-chat/private-chat.service.js';
 import { GroupChatService } from './group-chat/group-chat.service.js'
 import { ChatSchema, ChatDto } from './dto/chat.dto.js';
 
-const CHALLENGE_URL = 'http://user:3000';
+
 
 @WebSocketGateway()
 export class ChatGateway {
@@ -265,7 +265,7 @@ export class ChatGateway {
 			content, roomId
 		)
 
-		if (roomId.startsWith("room")) { 
+		if (roomId.startsWith("room")) {
 			const users = roomId.slice(5).split("_").map((i) => !Number.isNaN(parseInt(i)) && parseInt(i));
 			if (users.length != 2) {
 				client.emit('error', { message: 'invalid user number' });

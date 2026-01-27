@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Param } from 'my-fastify-decorators';
+import { Controller, Get, Inject } from 'my-fastify-decorators';
 import { GeneralChatService } from './general-chat.service.js';
 
 @Controller('/chat/general')

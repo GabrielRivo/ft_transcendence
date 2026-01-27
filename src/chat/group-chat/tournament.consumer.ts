@@ -159,4 +159,22 @@ export class TournamentConsumer {
             }
         }
     }
+
+    @EventPattern('tournament.finished')
+    async handleTournamentFinished(@Payload() data: { aggregateId: string, winnerId: string, name: string, ownerId: string }) {
+        console.log('[TournamentConsumer] Received tournament.finished event:', data);
+        const { name, ownerId } = data;
+
+        if (name && ownerId) {
+            const ownerIdNum = Number(ownerId);
+            const group = this.groupService.findGroupByNameAndOwner(ownerIdNum, name);
+
+            if (group) {
+                console.log(`[TournamentConsumer] Deleting group ${group.groupId} for finished tournament`);
+                this.groupService.deleteGroup(group.groupId, ownerIdNum);
+            } else {
+                console.warn(`[TournamentConsumer] Group not found for finished tournament: ${name}`);
+            }
+        }
+    }
 }
