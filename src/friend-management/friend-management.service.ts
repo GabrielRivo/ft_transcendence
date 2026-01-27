@@ -232,9 +232,10 @@ export class FriendManagementService {
 	}
 
 	private emitToUser(userId: number, event: string, data: any): void {
-		console.log(userId, event);
+		// console.log('[AAA]',userId, event);
 		for (const [, socket] of this.io.sockets.sockets) {
 			if (socket.data.userId === userId) {
+				// console.log('[BBB]',Number(socket.data.userId), Number(userId));
 				socket.emit(event, data);
 			}
 		}

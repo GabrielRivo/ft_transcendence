@@ -1,14 +1,14 @@
-import { AdditionalProperties, IsInt, IsNullable, IsRequired, IsString, generateSchema } from "my-class-validator";
+import { AdditionalProperties, IsNullable, IsRequired, IsString, IsNumber, generateSchema } from "my-class-validator";
 
 @AdditionalProperties(false)
 export class ReadProfileDtoResponse {
-    @IsRequired()
-	@IsInt()
-	userId : number;
+	@IsRequired()
+	@IsString()
+	username : string;
 
     @IsRequired()
-    @IsString()
-    username : string;
+    @IsNumber()
+    id : number;
 
     @IsRequired()
     @IsString()

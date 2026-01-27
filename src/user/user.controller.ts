@@ -30,15 +30,15 @@ export class UserController {
 		return this.userService.get_profile(userId);
 	}
 
-	@Put('/profile/:userId')
-	@BodySchema(UpdateProfileDtoSchema)
-	@ResponseSchema(200, UpdateProfileDtoSchemaResponse)
-	async update_profile(
-		@Param('userId') userId: string, 
-		@Body() data: UpdateProfileDto
-	): Promise<UpdateProfileDtoResponse> {
-		return this.userService.update_profile(userId, data);
-	}
+	// @Put('/profile/:userId')
+	// @BodySchema(UpdateProfileDtoSchema)
+	// @ResponseSchema(200, UpdateProfileDtoSchemaResponse)
+	// async update_profile(
+	// 	@Param('userId') userId: string,
+	// 	@Body() data: UpdateProfileDto
+	// ): Promise<UpdateProfileDtoResponse> {
+	// 	return this.userService.update_profile(userId, data);
+	// }
 
 	@Put('/bio')
 	@BodySchema(UpdateProfileDtoSchema)
@@ -57,7 +57,7 @@ export class UserController {
 		@JWTBody() jwt: { id: number }
 	): Promise<UploadAvatarDtoResponse> {
 		const file = await request.file();
-		
+
 		if (!file) {
 			return { message: 'No file provided', avatarUrl: null };
 		}

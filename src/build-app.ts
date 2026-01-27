@@ -9,6 +9,7 @@ import bootstrapPlugin from './plugins/bootstrap-plugin.js';
 export function buildApp(options: { dbPath?: string } = {}) {
 	const app = Fastify({
 		logger: true,
+		bodyLimit: 10 * 1024 * 1024,
 		routerOptions: {
 			ignoreTrailingSlash: true,
 			ignoreDuplicateSlashes: true,
