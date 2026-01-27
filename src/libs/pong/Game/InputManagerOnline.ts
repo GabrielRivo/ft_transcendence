@@ -63,7 +63,7 @@ class InputManager {
                 break;
         }
 
-        if (sendToServer) {
+        if (sendToServer && socket.connected) {
             //console.log("EMITTING playerDirection:", data);
             socket.emit("playerDirection", data);
         }
@@ -105,8 +105,8 @@ class InputManager {
     listenToPlayer1() {
         Services.Scene!.onKeyboardObservable.clear();
         Services.Scene!.onKeyboardObservable.add((kbInfo) => {
-            if (!socket.connected)
-                return;
+            // if (!socket.connected)
+            //     return;
             switch (kbInfo.type) {
                 case KeyboardEventTypes.KEYDOWN:
                 {
@@ -155,8 +155,8 @@ class InputManager {
     listenToPlayer2() {
         Services.Scene!.onKeyboardObservable.clear();
         Services.Scene!.onKeyboardObservable.add((kbInfo) => {
-            if (!socket.connected)
-                return;
+            // if (!socket.connected)
+            //     return;
             switch (kbInfo.type) {
                 case KeyboardEventTypes.KEYDOWN:
                 {
