@@ -1,4 +1,4 @@
-import { createElement, useState, useRef } from 'my-react';
+import { createElement, useState, useRef, useEffect } from 'my-react';
 import { ChatMessage } from '../../../hook/useChat';
 import { useAuth } from '../../../hook/useAuth';
 import { useFriends } from '../../../hook/useFriends';
@@ -32,10 +32,18 @@ export function ChatMessagesPanel({
 	const [showInviteModal, setShowInviteModal] = useState(false);
 	const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
 
+
+	useEffect(() => {
+		if (scrollRef.current) {
+			scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+		}
+	}, [messages]);
+
 	const handleWheel = (e: WheelEvent) => {
 		if (scrollRef.current) {
 			scrollRef.current.scrollTop += e.deltaY;
 		}
+
 	};
 
 	const handleSubmit = (e: Event) => {
@@ -80,11 +88,12 @@ export function ChatMessagesPanel({
 					</span>
 				</div>
 			</div>
-
+					
 			{/* Messages */}
 			<div
 				ref={scrollRef}
 				className="min-h-0 flex-1 overflow-y-auto p-2 font-mono text-xs text-purple-300 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-purple-500/50 hover:[&::-webkit-scrollbar-thumb]:bg-purple-400 [&::-webkit-scrollbar-track]:bg-slate-800/30"
+				
 			>
 				{messages.length === 0 ? (
 					<div className="flex h-full items-center justify-center text-gray-500">No message</div>
@@ -152,7 +161,7 @@ export function ChatMessagesPanel({
 					disabled={!connected || !inputValue.trim()}
 					className="rounded bg-purple-500/20 px-4 py-2 text-xs font-bold text-purple-400 transition-colors hover:bg-purple-500/30 disabled:cursor-not-allowed disabled:opacity-50"
 				>
-					ENVOYER
+					SEND
 				</button>
 			</form>
 

@@ -10,6 +10,7 @@ export interface UserItemProps {
 	isRightPanel?: boolean;
 	onClick?: () => void;
 	contextMenuCallbacks?: UserContextMenuCallbacks;
+	className?: string;
 }
 
 export function UserItem({
@@ -20,6 +21,7 @@ export function UserItem({
 	isRightPanel = false,
 	onClick,
 	contextMenuCallbacks,
+	className = '',
 }: UserItemProps) {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const [contextMenu, setContextMenu] = useState<{ isOpen: boolean; x: number; y: number }>({
@@ -84,7 +86,7 @@ export function UserItem({
 				ref={setRef}
 				onClick={onClick}
 				className={`flex cursor-pointer flex-col items-center gap-2 transition-colors ${
-					isRightPanel ? 'text-red-400' : isSelected ? 'text-cyan-400' : 'hover:text-cyan-500'
+					isRightPanel ? 'text-red-400' : isSelected ? 'text-cyan-400' : 'hover:text-cyan-500 ${className}`'
 				}`}
 			>
 				<div className="relative">

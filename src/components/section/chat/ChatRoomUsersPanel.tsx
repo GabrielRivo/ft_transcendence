@@ -12,7 +12,7 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 	const { toast } = useToast();
 	const getTitle = () => {
 		if (currentRoom === 'hub') return 'Users';
-		return 'EN LIGNE';
+		return 'O';
 	};
 
 	return (
@@ -35,6 +35,7 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 									isSelected={false}
 									isRightPanel={true}
 									onClick={() => {}}
+									className="border-cyan-500/50! bg-cyan-950/30! text-cyan-300! shadow-[0_0_10px_rgba(6,182,212,0.3)]"
 								/>
 							);
 						}
