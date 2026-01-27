@@ -1,181 +1,176 @@
-
-  {
-   eventName: 'game.finished',
-   gameType: 'tournament',
-   gameId: '56beb99d-0148-4b69-b132-f77f07ef8363',
-   player1Id: '31',
-   player2Id: '29',
-   score1: 5,
-   score2: 1,
-   winnerId: '31',
-   reason: 'score_limit',
-   timestamp: 33195.895198999904,
-   hitPlayer1: 1,
-   hitPlayer2: 0
- }
- event type =  tournament
- winner =  31
- p1 =  {
-   user_id: 31,
-   score: 5,
-   win: true,
-   loss: false,
-   elo_gain: 0,
-   duration: 1991.7537119399944,
-   wonTournament: false
- }  p2 =  {
-   user_id: 29,
-   score: 1,
-   win: false,
-   loss: true,
-   elo_gain: 0,
-   duration: 1991.7537119399944,
-   wonTournament: false
- } match =  {
-   game_id: '56beb99d-0148-4b69-b132-f77f07ef8363',
-   player1_id: 31,
-   player2_id: 29,
-   score_player1: 5,
-   score_player2: 1,
-   hit_player1: 1,
-   hit_player2: 0,
-   winner_id: 31,
-   duration_seconds: 1991.7537119399944,
-   game_type: 'tournament',
-   gain_player1: null,
-   gain_player2: null,
-   is_final: 0
- }
- new T =  1
- new win =  0
- winner =  31
- is t=  tournament
- is defeat 0
- 
- new T =  1
- new win =  0
- winner =  31
- is t=  tournament
- is defeat 0
- [Microservice] No handler for pattern "game.score_updated"
- Event launched {
-   eventName: 'game.finished',
-   gameType: 'tournament',
-   gameId: 'bd9fafbf-8a60-4d3c-8aa5-d80a4d3da710',
-   player1Id: '32',
-   player2Id: '30',
-   score1: 2,
-   score2: 5,
-   winnerId: '30',
-   reason: 'score_limit',
-   timestamp: 41804.16596799996,
-   hitPlayer1: 1,
-   hitPlayer2: 1
- }
- event type =  tournament
- winner =  30
- p1 =  {
-   user_id: 32,
-   score: 2,
-   win: false,
-   loss: true,
-   elo_gain: 0,
-   duration: 2508.249958079997,
-   wonTournament: false
- }  p2 =  {
-   user_id: 30,
-   score: 5,
-   win: true,
-   loss: false,
-   elo_gain: 0,
-   duration: 2508.249958079997,
-   wonTournament: false
- } match =  {
-   game_id: 'bd9fafbf-8a60-4d3c-8aa5-d80a4d3da710',
-   player1_id: 32,
-   player2_id: 30,
-   score_player1: 2,
-   score_player2: 5,
-   hit_player1: 1,
-   hit_player2: 1,
-   winner_id: 30,
-   duration_seconds: 2508.249958079997,
-   game_type: 'tournament',
-   gain_player1: null,
-   gain_player2: null,
-   is_final: 0
- }
- new T =  1
- new win =  0
- winner =  30
- is t=  tournament
- is defeat 0
- new T =  1
- new win =  0
- winner =  30
- is t=  tournament
- is defeat 0
- [Microservice] No handler for pattern "game.score_updated"
- [Microservice] No handler for pattern "game.score_updated"
- [Microservice] No handler for pattern "game.score_updated"
- [Microservice] No handler for pattern "game.score_updated"
- [Microservice] No handler for pattern "game.score_updated"
- [Microservice] No handler for pattern "game.score_updated"
- [Microservice] No handler for pattern "game.score_updated"
- Event launched {
-   eventName: 'game.finished',
-   gameType: 'tournament',
-   gameId: '395206e7-b2e8-4c86-b0f5-4295b5618dd5',
-   player1Id: '30',
-   player2Id: '31',
-   score1: 5,
-   score2: 2,
-   winnerId: '30',
-   reason: 'score_limit',
-   timestamp: 37851.681772000156,
-   hitPlayer1: 1,
-   hitPlayer2: 0
- }
- event type =  tournament
- winner =  30
- p1 =  {
-   user_id: 30,
-   score: 5,
-   win: true,
-   loss: false,
-   elo_gain: 0,
-   duration: 2271.1009063200095,
-   wonTournament: false
- }  p2 =  {
-   user_id: 31,
-   score: 2,
-   win: false,
-   loss: true,
-   elo_gain: 0,
-   duration: 2271.1009063200095,
-   wonTournament: false
- } match =  {
-   game_id: '395206e7-b2e8-4c86-b0f5-4295b5618dd5',
-   player1_id: 30,
-   player2_id: 31,
-   score_player1: 5,
-   score_player2: 2,
-   hit_player1: 1,
-   hit_player2: 0,
-   winner_id: 30,
-   duration_seconds: 2271.1009063200095,
-   game_type: 'tournament',
-   gain_player1: null,
-   gain_player2: null,
-   is_final: 0
- }
- new T =  2
- new win =  0
- winner =  30
- is t=  tournament
- is defeat 0
- new T =  2
- new win =  0
- winner =  30
- is t=  tournament
- is defeat 0
+ {
+ eventName: 'game.finished',
+  gameType: 'tournament',
+  gameId: '3ccdcbb4-3dd1-434d-9b3d-cd17eee44580',
+  player1Id: '3',
+  player2Id: '4',
+  score1: 5,
+  score2: 0,
+  winnerId: '3',
+  reason: 'score_limit',
+  timestamp: 27739.207345999996,
+  hitPlayer1: 0,
+  hitPlayer2: 0
+}
+event type =  tournament
+winner =  3
+p1 =  {
+  user_id: 3,
+  score: 5,
+  win: true,
+  loss: false,
+  elo_gain: 0,
+  duration: 1664.3524407599998,
+  wonTournament: false
+}  p2 =  {
+  user_id: 4,
+  score: 0,
+  win: false,
+  loss: true,
+  elo_gain: 0,
+  duration: 1664.3524407599998,
+  wonTournament: false
+} match =  {
+  game_id: '3ccdcbb4-3dd1-434d-9b3d-cd17eee44580',
+  player1_id: 3,
+  player2_id: 4,
+  score_player1: 5,
+  score_player2: 0,
+  hit_player1: 0,
+  hit_player2: 0,
+  winner_id: 3,
+  duration_seconds: 1664.3524407599998,
+  game_type: 'tournament',
+  gain_player1: null,
+  gain_player2: null,
+  is_final: 0
+}
+new T =  1
+new win =  0
+winner =  3
+is t=  tournament
+is defeat 0
+new T =  1
+new win =  0
+winner =  3
+is t=  tournament
+is defeat 0
+Event launched {
+  eventName: 'game.finished',
+  gameType: 'tournament',
+  gameId: 'b8852b31-95a1-4f7a-bc70-653e608d2029',
+  player1Id: '1',
+  player2Id: '2',
+  score1: 5,
+  score2: 0,
+  winnerId: '1',
+  reason: 'score_limit',
+  timestamp: 27927.045618999982,
+  hitPlayer1: 0,
+  hitPlayer2: 0
+}
+event type =  tournament
+winner =  1
+p1 =  {
+  user_id: 1,
+  score: 5,
+  win: true,
+  loss: false,
+  elo_gain: 0,
+  duration: 1675.6227371399991,
+  wonTournament: false
+}  p2 =  {
+  user_id: 2,
+  score: 0,
+  win: false,
+  loss: true,
+  elo_gain: 0,
+  duration: 1675.6227371399991,
+  wonTournament: false
+} match =  {
+  game_id: 'b8852b31-95a1-4f7a-bc70-653e608d2029',
+  player1_id: 1,
+  player2_id: 2,
+  score_player1: 5,
+  score_player2: 0,
+  hit_player1: 0,
+  hit_player2: 0,
+  winner_id: 1,
+  duration_seconds: 1675.6227371399991,
+  game_type: 'tournament',
+  gain_player1: null,
+  gain_player2: null,
+  is_final: 0
+}
+new T =  1
+new win =  0
+winner =  1
+is t=  tournament
+is defeat 0
+new T =  1
+new win =  0
+winner =  1
+is t=  tournament
+is defeat 0
+[Microservice] No handler for pattern "game.score_updated"
+[Microservice] No handler for pattern "game.score_updated"
+[Microservice] No handler for pattern "game.score_updated"
+[Microservice] No handler for pattern "game.score_updated"
+[Microservice] No handler for pattern "game.score_updated"
+Event launched {
+  eventName: 'game.finished',
+  gameType: 'tournament',
+  gameId: 'cd5f320d-0e17-4c77-8892-9b790b05782a',
+  player1Id: '1',
+  player2Id: '3',
+  score1: 0,
+  score2: 5,
+  winnerId: '3',
+  reason: 'score_limit',
+  timestamp: 27165.115548,
+  hitPlayer1: 0,
+  hitPlayer2: 0
+}
+event type =  tournament
+winner =  3
+p1 =  {
+  user_id: 1,
+  score: 0,
+  win: false,
+  loss: true,
+  elo_gain: 0,
+  duration: 1629.90693288,
+  wonTournament: false
+}  p2 =  {
+  user_id: 3,
+  score: 5,
+  win: true,
+  loss: false,
+  elo_gain: 0,
+  duration: 1629.90693288,
+  wonTournament: false
+} match =  {
+  game_id: 'cd5f320d-0e17-4c77-8892-9b790b05782a',
+  player1_id: 1,
+  player2_id: 3,
+  score_player1: 0,
+  score_player2: 5,
+  hit_player1: 0,
+  hit_player2: 0,
+  winner_id: 3,
+  duration_seconds: 1629.90693288,
+  game_type: 'tournament',
+  gain_player1: null,
+  gain_player2: null,
+  is_final: 0
+}
+new T =  2
+new win =  0
+winner =  3
+is t=  tournament
+is defeat 0
+new T =  2
+new win =  0
+winner =  3
+is t=  tournament
+is defeat 0

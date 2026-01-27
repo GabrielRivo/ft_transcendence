@@ -38,7 +38,7 @@ export class UserHistoryController {
 			gain2 = await this.userHistoryService.calcElo(parseInt(event.player2Id), parseInt(event.player1Id), 
 						event.score2, event.score1);
 		}
-		console.log("event type = ", event.gameType)
+
 		try {
 			await this.userHistoryService.add_match_to_history(
 				event.gameId,
@@ -52,7 +52,8 @@ export class UserHistoryController {
 				gain2,
 				parseInt(event.winnerId ?? "-1"),
 				event.timestamp / 1000 * 60, 
-				event.gameType
+				event.gameType,
+				false
 			);
 		} catch (error) {
 		console.error("Error while saving", error);

@@ -81,22 +81,41 @@ export class UserStatsService {
 
 	updateStats(current: UserStatsValues, match: any): UserStatsValues {
 		const n = current.total_games + 1;
-		let newWins: number = 0
+		let newWins: number = current.wins;
+		let elog: number = 0;
+		let newTournament = 0;
+		let newTournamentWin = 0;
+		if (match.game_type == "ranked")
+		{
+			if (current.user_id == match.player1_id)
+				elog = match.gain_player1
+			else
+				elog = match.gain_player2
+			if (elog == null)
+				elog = 0
+		}
+	
 		if (current.user_id == match.winner_id)
-			newWins = 1
-		//const newWins = current.wins + (match.win ? 1 : 0);
-		const newLosses = current.losses + (match.loss ? 1 : 0);
-		const newTournament = current.tournament_played + (match.game_type == "tournament" ? 1 : 0 && match.loss ? 1 : 0);
+		{
+			newWins += 1;
+			if (match.game_type == "tournament" && match.is_final == true)
+			{
+				newTournament = 1;
+				newTournamentWin = 1;
+			}
+		}
 
-		console.log("new T = ", newTournament);
-		console.log("new win = ", match.win ? 1 : 0)
-		console.log("winner = ", match.winner_id)
-		console.log("is t= ", match.game_type);
-		console.log("is defeat", match.loss ? 1 : 0)
-		const newTournamentWin = current.tournament_won + (match.game_type == "tournament" ? 1 : 0 && match.win ? 1 : 0 && match.is_final ? 1 : 0);
+		let newLosses : number = current.wins
+		if (current.user_id != match.winner_id)
+		{
+			newLosses += 1;
+			if (match.game_type == "tournament")
+				newTournament = 1;
+		}
+
 		return {
 			user_id: current.user_id,
-			elo: current.elo + match.elo_gain,
+			elo: current.elo + elog,
 			total_games: n,
 			wins: newWins,
 			losses: newLosses,
