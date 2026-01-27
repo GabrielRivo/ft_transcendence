@@ -14,13 +14,18 @@ export interface UserStatsValues {
 	average_game_duration_in_seconde: number;
 }
 
+
 @Service()
 export class UserStatsService {
 	@InjectPlugin('db')
 	private db!: Database.Database;
+
 	private statementGetStats!: Statement<number>;
 	private statementUserStats!: Statement<UserStatsValues>;
 	private statementGetAllElos!: Statement<[]>;
+	private statementRegisterUser!: Statement;
+	private statementChangeUsername!: Statement;
+
 
 	onModuleInit() {
 		this.statementGetStats = this.db.prepare(
@@ -36,6 +41,9 @@ export class UserStatsService {
 			losses = EXCLUDED.losses, winrate = EXCLUDED.winrate, tournament_played = EXCLUDED.tournament_played, tournament_won = EXCLUDED.tournament_won,
 			average_score = EXCLUDED.average_score, average_game_duration_in_seconde = EXCLUDED.average_game_duration_in_seconde,
 			updated_at = CURRENT_TIMESTAMP`);
+
+		this.statementRegisterUser = this.db.prepare(`INSERT INTO user_stats (user_id) VALUES (@user_id)`)
+		this.statementChangeUsername = this.db.prepare(`UPDATE user_stats SET username = @username WHERE user_id = @user_id`)
 	}
 	async getGlobalStats(userId: number) {
 		return this.statementGetStats.get(userId) as UserStatsValues;
@@ -46,7 +54,7 @@ export class UserStatsService {
 		return rows.map((r) => r.elo);
 	}
 
-	getWinrate(wins: number, losses: number, n: number)
+	get_win_rate(wins: number, losses: number, n: number)
 	{
 		if (n == 0)
 			return (null);
@@ -59,6 +67,18 @@ export class UserStatsService {
 		return (wins / n * 100);
 	}
 
+	registerUser(userId: number)
+	{
+		this.statementRegisterUser.run({ user_id: userId });
+	}
+
+	updateUserName(userId: number, username: string) {
+		this.statementChangeUsername.run({
+			username: username,
+			user_id: userId
+		});
+	}
+
 	updateStats(current: UserStatsValues, match: any): UserStatsValues {
 		const n = current.total_games + 1;
 		const newWins = current.wins + (match.win ? 1 : 0);
@@ -69,7 +89,7 @@ export class UserStatsService {
 			total_games: n,
 			wins: newWins,
 			losses: newLosses,
-			winrate: this.getWinrate(newWins, newLosses, n),
+			winrate: this.get_win_rate(newWins, newLosses, n),
 			tournament_played: current.tournament_played + (match.isTournament ? 1 : 0),
 			tournament_won: current.tournament_won + (match.wonTournament ? 1 : 0),
 			average_score: Math.round((current.average_score * current.total_games + match.score) / n),

@@ -1,15 +1,7 @@
 
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY,
-    tournament_won INTEGER DEFAULT 0,
-    tournament_played INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-INSERT OR IGNORE INTO users (id, tournament_won, tournament_played, created_at)
-VALUES (1, 0, 0, CURRENT_TIMESTAMP), (2, 0, 0, CURRENT_TIMESTAMP), (3, 0, 0, CURRENT_TIMESTAMP);
-
 CREATE TABLE IF NOT EXISTS user_stats (
     user_id INTEGER PRIMARY KEY,
+    username TEXT DEFAULT '',
     elo INTEGER DEFAULT 1000,
     total_games INTEGER DEFAULT 0,
     wins INTEGER DEFAULT 0,
@@ -20,11 +12,10 @@ CREATE TABLE IF NOT EXISTS user_stats (
     tournament_won INTEGER DEFAULT 0,
     average_game_duration_in_seconde INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-INSERT OR IGNORE INTO user_stats (user_id)
-VALUES (1), (2), (3);
+-- INSERT OR IGNORE INTO user_stats (user_id)
+-- VALUES (1), (2), (3);
 
 
 CREATE TABLE IF NOT EXISTS game_history (
@@ -44,8 +35,6 @@ CREATE TABLE IF NOT EXISTS game_history (
     tournament_won INTEGER DEFAULT 0,
     is_final INTEGER NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (player1_id) REFERENCES users(id),
-    FOREIGN KEY (player2_id) REFERENCES users(id),
     FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id)
 );
 
@@ -62,7 +51,7 @@ CREATE TABLE IF NOT EXISTS tournament_players (
     joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (tournament_id, user_id),
     FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id),
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users_stats(id)
 );
 INSERT OR IGNORE INTO tournament (tournament_id, status, players_number)
 VALUES (900, 'started', 4);

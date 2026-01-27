@@ -1,10 +1,4 @@
-import {
-	Controller,
-	Get,
-	Inject,
-	JWTBody,
-	Param,
-} from 'my-fastify-decorators';
+import { Controller, Get, Inject, JWTBody, Param } from 'my-fastify-decorators';
 
 
 export interface UserStatsValues {
@@ -72,4 +66,6 @@ export class UserStatsController {
 			return { message: 'Error' };
 		}
 	}
+
 }
+

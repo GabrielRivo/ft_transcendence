@@ -2,7 +2,7 @@ import { generateSchema, IsNumber, IsRequired, IsString } from 'my-class-validat
 
 export class CreateGameStatDto {
 	@IsRequired({ message: 'game id is requiered' })
-	@IsNumber()
+	@IsString()
 	game_id: string;
 
 	@IsRequired({ message: 'player 1 id is requiered' })
@@ -18,8 +18,7 @@ export class CreateGameStatDto {
 	score_player1: number;
 
 	@IsRequired({ message: 'score player 2 is requiered' })
-	@IsNumber()
-	score_player2: number;
+	score_player2: string;
 
 	@IsRequired({ message: 'number hit player 1 is requiered' })
 	@IsNumber()
