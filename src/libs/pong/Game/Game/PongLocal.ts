@@ -1,4 +1,4 @@
-import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh } from "@babylonjs/core";
+import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, PBRMaterial } from "@babylonjs/core";
 import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector"; //A ENLEVER
 
@@ -13,6 +13,7 @@ import Game from "./Game";
 import BlackScreenEffect from "../Effects/BlackScreenEffect";
 import CameraShakeEffect from "../Effects/CameraShakeEffect";
 import ZoomEffect from "../Effects/ZoomEffect";
+import LightUpEffect from "../Effects/LightUpEffect";
 
 import { socket } from "../../../socket";
 
@@ -67,6 +68,7 @@ class PongLocal extends Game {
         this.walls.forEach(wall => Services.Scene!.addMesh(wall.model));
         //this.ball = new Ball();
         const camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, Math.PI / 4, 11, Vector3.Zero(), Services.Scene);
+        camera.inputs.attached.mousewheel.detachControl(); 
         camera.attachControl(Services.Canvas, true);
         camera.lowerRadiusLimit = 8;
         camera.upperRadiusLimit = 22;
@@ -193,7 +195,17 @@ class PongLocal extends Game {
         this.ball!.setModelPos(new Vector3(0, -100, 0));
 
         const cameraShake = new CameraShakeEffect(0.3, 50);
+        const lightUpPillar = new LightUpEffect(0.05, 100);
+
+        let pillarColor: Color3;
+        if (payload.deathBar.owner == this.player2)
+            //pillarColor = new Color3(0.8, 0, 0.8);
+            pillarColor = new Color3(0.2, 0.8, 1);
+        else
+            pillarColor = new Color3(0.6, 0, 0.6);
+
         cameraShake.play(this.camera!);
+        lightUpPillar.play(Services.Scene!.getMaterialByName("PillarTop") as PBRMaterial, pillarColor);
         if (payload.deathBar.owner == this.player1 && this.player2!.score < 5) {
             this.player2!.scoreUp();
         }
