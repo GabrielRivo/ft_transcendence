@@ -14,6 +14,8 @@ export interface GameFinishedEvent {
 
     hitPlayer1: number;
     hitPlayer2: number;
+
+    isTournamentFinal: boolean;
 }
 
 export interface GameScoreUpdatedEvent {

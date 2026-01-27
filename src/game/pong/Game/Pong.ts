@@ -321,6 +321,7 @@ class Pong extends Game {
             timestamp: this.services.TimeService!.getTimestamp(),
             hitPlayer1: this.player1?.hitCount || 0,
             hitPlayer2: this.player2?.hitCount || 0,
+            isTournamentFinal: false
         };
         this.gameService.publishGameFinished(gameFinishedEvent);
         console.log(`[Game] Ending game instance ${this.id}, reason: ${reason}, winner: ${winnerId}`);
