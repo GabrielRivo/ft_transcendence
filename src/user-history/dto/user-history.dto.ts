@@ -64,10 +64,6 @@ export class CreateUserHistoryDto {
 	@IsNumber({ message: 'need the value for 2' })
 	gain_player2: number;
 
-	@IsNumber({ message: 'need a number' })
-	@Minimum(0, {message : 'negative id'})
-	tournament_id?: number | null;
-
 	@IsBoolean({ message: 'need a boolean' })
 	is_final?: boolean;
 }

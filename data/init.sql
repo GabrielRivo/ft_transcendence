@@ -14,9 +14,6 @@ CREATE TABLE IF NOT EXISTS user_stats (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
--- INSERT OR IGNORE INTO user_stats (user_id)
--- VALUES (1), (2), (3);
-
 
 CREATE TABLE IF NOT EXISTS game_history (
     game_id TEXT NOT NULL,
@@ -31,28 +28,7 @@ CREATE TABLE IF NOT EXISTS game_history (
     game_type TEXT NOT NULL CHECK(game_type IN ('tournament', 'ranked')),
     gain_player1 INTEGER,
     gain_player2 INTEGER,
-    tournament_id INTEGER,
     tournament_won INTEGER DEFAULT 0,
     is_final INTEGER NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id)
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE TABLE IF NOT EXISTS tournament (
-    tournament_id INTEGER PRIMARY KEY,
-    status TEXT DEFAULT 'pending',
-    winner_id INTEGER,
-    players_number INTEGER NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS tournament_players (
-    tournament_id INTEGER,
-    user_id INTEGER,
-    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (tournament_id, user_id),
-    FOREIGN KEY (tournament_id) REFERENCES tournament(tournament_id),
-    FOREIGN KEY (user_id) REFERENCES users_stats(id)
-);
-INSERT OR IGNORE INTO tournament (tournament_id, status, players_number)
-VALUES (900, 'started', 4);
-

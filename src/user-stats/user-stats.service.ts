@@ -81,8 +81,19 @@ export class UserStatsService {
 
 	updateStats(current: UserStatsValues, match: any): UserStatsValues {
 		const n = current.total_games + 1;
-		const newWins = current.wins + (match.win ? 1 : 0);
+		let newWins: number = 0
+		if (current.user_id == match.winner_id)
+			newWins = 1
+		//const newWins = current.wins + (match.win ? 1 : 0);
 		const newLosses = current.losses + (match.loss ? 1 : 0);
+		const newTournament = current.tournament_played + (match.game_type == "tournament" ? 1 : 0 && match.loss ? 1 : 0);
+
+		console.log("new T = ", newTournament);
+		console.log("new win = ", match.win ? 1 : 0)
+		console.log("winner = ", match.winner_id)
+		console.log("is t= ", match.game_type);
+		console.log("is defeat", match.loss ? 1 : 0)
+		const newTournamentWin = current.tournament_won + (match.game_type == "tournament" ? 1 : 0 && match.win ? 1 : 0 && match.is_final ? 1 : 0);
 		return {
 			user_id: current.user_id,
 			elo: current.elo + match.elo_gain,
@@ -90,8 +101,8 @@ export class UserStatsService {
 			wins: newWins,
 			losses: newLosses,
 			winrate: this.get_win_rate(newWins, newLosses, n),
-			tournament_played: current.tournament_played + (match.isTournament ? 1 : 0),
-			tournament_won: current.tournament_won + (match.wonTournament ? 1 : 0),
+			tournament_played: newTournament,
+			tournament_won: newTournamentWin,
 			average_score: Math.round((current.average_score * current.total_games + match.score) / n),
 			average_game_duration_in_seconde: Math.round(
 				(current.average_game_duration_in_seconde * current.total_games + match.duration) / n,

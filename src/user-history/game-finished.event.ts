@@ -1,6 +1,7 @@
 export interface GameFinishedEvent {
 	eventName: 'game.finished';
 	gameId: string;
+	gameType: "tournament" | "ranked" | "friend";
 	player1Id: string;
 	player2Id: string;
 	score1: number;
