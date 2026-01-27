@@ -10,16 +10,10 @@ export interface ChatMessage {
 	created_at: string;
 }
 
-export interface RoomUser {
-	userId: number;
-	username: string;
-}
-
 export interface ChatState {
 	connected: boolean;
 	currentRoom: string;
 	messages: ChatMessage[];
-	roomUsers: RoomUser[];
 }
 
 interface HistoryMessage {
@@ -35,7 +29,6 @@ export function useChat() {
 	const [connected, setConnected] = useState(false);
 	const [currentRoom, setCurrentRoom] = useState('hub');
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
-	const [roomUsers, setRoomUsers] = useState<RoomUser[]>([]);
 	const isConnectingRef = useRef(false);
 
 	// Connecter au chat quand l'utilisateur est authentifié
@@ -112,18 +105,6 @@ export function useChat() {
 			setMessages(formattedHistory.reverse());
 		};
 
-		const handleRoomUsersUpdate = (data: { roomId: string; users: RoomUser[] }) => {
-			if (data.roomId === currentRoom) {
-				setRoomUsers(data.users);
-			}
-		};
-
-		const handleRoomUsers = (data: { roomId: string; users: RoomUser[] }) => {
-			if (data.roomId === currentRoom) {
-				setRoomUsers(data.users);
-			}
-		};
-
 		const handleInvalidateHistory = () => {
 			console.log('[useChat] Received invalidate_history event - Refreshing hub history');
 			if (currentRoom === 'hub') {
@@ -137,8 +118,6 @@ export function useChat() {
 		chatSocket.on('hub_history', handleHubHistory);
 		chatSocket.on('private_history', handlePrivateHistory);
 		chatSocket.on('group_history', handleGroupHistory);
-		chatSocket.on('room_users_update', handleRoomUsersUpdate);
-		chatSocket.on('room_users', handleRoomUsers);
 		chatSocket.on('invalidate_history', handleInvalidateHistory);
 
 		if (chatSocket.connected) {
@@ -153,8 +132,6 @@ export function useChat() {
 			chatSocket.off('hub_history', handleHubHistory);
 			chatSocket.off('private_history', handlePrivateHistory);
 			chatSocket.off('group_history', handleGroupHistory);
-			chatSocket.off('room_users_update', handleRoomUsersUpdate);
-			chatSocket.off('room_users', handleRoomUsers);
 			chatSocket.off('invalidate_history', handleInvalidateHistory);
 		};
 	}, [currentRoom]);
@@ -184,9 +161,6 @@ export function useChat() {
 			chatSocket.emit('join_room', { roomId });
 			setCurrentRoom(roomId);
 			setMessages([]);
-
-			// Demander les utilisateurs de la room
-			chatSocket.emit('get_room_users', { roomId });
 
 			// Demander l'historique si c'est le hub
 			if (roomId === 'hub') {
@@ -223,9 +197,6 @@ export function useChat() {
 			chatSocket.emit('join_room', { roomId });
 			setCurrentRoom(roomId);
 			setMessages([]);
-
-			// Demander les utilisateurs de la room
-			chatSocket.emit('get_room_users', { roomId });
 		},
 		[connected, currentRoom],
 	);
@@ -234,7 +205,6 @@ export function useChat() {
 		connected,
 		currentRoom,
 		messages,
-		roomUsers,
 		sendMessage,
 		joinRoom,
 		joinPrivateRoom,

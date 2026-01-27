@@ -202,8 +202,8 @@ export function StatisticsGeneralPage() {
 
 				{/* Pie Chart - Taux de victoire */}
 				<div className="flex flex-col items-center rounded-lg border border-green-500/30 bg-slate-900/50 p-4 lg:col-span-2">
-					<p className="font-pirulen mb-2 text-sm tracking-wider text-green-400">Winrate : {stats.winRate}%</p>
-					<WinRatePieChart winRate={stats.winRate} />
+					<p className="font-pirulen mb-2 text-sm tracking-wider text-green-400">Winrate : {stats.winRate.toFixed(2)}%</p>
+					<WinRatePieChart winRate={Math.round(stats.winRate)} />
 				</div>
 
 				{/* Tournois */}

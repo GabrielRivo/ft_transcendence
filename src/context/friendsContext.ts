@@ -21,6 +21,7 @@ export interface FriendsContextType {
 	pendingInvitations: PendingInvitation[];
 	loading: boolean;
 	error: string | null;
+	isOnline: (friendId: number) => boolean;
 	refreshFriends: () => Promise<void>;
 	refreshPendingInvitations: () => Promise<void>;
 	sendFriendInvite: (otherId: number) => Promise<boolean>;

@@ -1,6 +1,8 @@
 import { createElement, useState } from 'my-react';
 import { Friend } from '../../../hook/useFriends';
 import { Group } from '../../../hook/useGroups';
+import { useOnlineUsers } from '../../../hook/useOnlineUsers';
+import { useBlockedUsers } from '../../../hook/useBlockedUsers';
 import { UserItem } from './UserItem';
 import { GroupItem } from './GroupItem';
 import { AddFriendModal } from './modals/AddFriendModal';
@@ -34,6 +36,8 @@ export function ChatSidebarPanel({
 	onSelectGroup,
 	onRemoveFriend,
 }: ChatSidebarPanelProps) {
+	const { isOnline, getUser } = useOnlineUsers();
+	const { isBlocked, blockUser, unblockUser } = useBlockedUsers();
 	const [showMenu, setShowMenu] = useState(false);
 	const [showAddFriendModal, setShowAddFriendModal] = useState(false);
 	const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
@@ -92,12 +96,22 @@ export function ChatSidebarPanel({
 						<div className="text-gray-500">No friends</div>
 					) : (
 						<div className="flex flex-col gap-3">
-							{friends.map((friend) => (
+							{friends.map((friend) => {
+								// Utiliser le cache OnlineUsers pour le statut, le username et l'avatar à jour
+								const onlineUser = getUser(friend.id);
+								const friendIsOnline = isOnline(friend.id);
+								const displayName = onlineUser?.username || friend.username;
+								const displayAvatar = onlineUser?.avatar || null;
+								const friendIsBlocked = isBlocked(friend.id);
+								
+								return (
 								<UserItem
 									key={friend.id}
-									name={friend.username}
-									isOnline={true}
+									name={displayName}
+									avatar={displayAvatar}
+									isOnline={friendIsOnline}
 									isFriend={true}
+									isBlocked={friendIsBlocked}
 									isSelected={currentRoom.includes(String(friend.id))}
 									onClick={() => onSelectFriend(friend.id)}
 									contextMenuCallbacks={{
@@ -112,7 +126,7 @@ export function ChatSidebarPanel({
 												}),																	
 											}).then(data => data.json()).then(data => {
 												toast(data.message, data.success ? 'success' : 'error')
-											}).catch(e => {
+											}).catch(() => {
 												toast('Network error', 'error')
 											})
 											console.log('Défier', friend.username)
@@ -136,25 +150,18 @@ export function ChatSidebarPanel({
 											}
 											console.log('Delete friend', friend.username)
 										},
-										onBlock: () => {
-											fetchWithAuth(`/api/user/friend-management/block`, {
-												method: 'POST',
-												headers: {
-													'Content-Type': 'application/json',
-												},
-												body: JSON.stringify({
-													otherId: friend.id
-												}),
-											}).then(data => data.json()).then(data => {
-												toast(data.message, data.success ? 'success' : 'error')
-											}).catch(e => {
-												toast('Network error', 'error')
-											})
-											console.log('Bloquer', friend.username)
+										onBlock: async () => {
+											const success = await blockUser(friend.id);
+											toast(success ? 'User blocked' : 'Failed to block user', success ? 'success' : 'error');
+										},
+										onUnblock: async () => {
+											const success = await unblockUser(friend.id);
+											toast(success ? 'User unblocked' : 'Failed to unblock user', success ? 'success' : 'error');
 										},
 									}}
 								/>
-							))}
+								);
+							})}
 						</div>
 					)}
 				</div>

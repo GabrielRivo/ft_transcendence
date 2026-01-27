@@ -241,7 +241,7 @@ export function ProfileSlugPage() {
 					{/* Win Rate */}
 					<div className="rounded-lg border border-cyan-500/30 bg-slate-900/50 p-6 text-center">
 						<h3 className="font-pirulen text-xs tracking-wider text-cyan-500">WINRATE</h3>
-						<p className="mt-2 text-4xl font-bold text-cyan-400">{profile.stats.winrate ?? 'N/A'}%</p>
+						<p className="mt-2 text-4xl font-bold text-cyan-400">{profile.stats.winrate?.toFixed(2) ?? 'N/A'}%</p>
 					</div>
 
 					{/* ELO */}

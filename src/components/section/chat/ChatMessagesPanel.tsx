@@ -1,7 +1,9 @@
-import { createElement, useState, useRef, useEffect } from 'my-react';
+import { createElement, useState, useRef, useEffect, useMemo } from 'my-react';
 import { ChatMessage } from '../../../hook/useChat';
 import { useAuth } from '../../../hook/useAuth';
 import { useFriends } from '../../../hook/useFriends';
+import { useOnlineUsers } from '../../../hook/useOnlineUsers';
+import { useBlockedUsers } from '../../../hook/useBlockedUsers';
 import { Modal } from '../../ui/modal';
 import { Users } from '../../ui/icon/users';
 import { TournamentInvite } from './TournamentInvite';
@@ -27,11 +29,32 @@ export function ChatMessagesPanel({
 }: ChatMessagesPanelProps) {
 	const { user } = useAuth();
 	const { friends } = useFriends();
+	const { getUser, fetchMissingUsers } = useOnlineUsers();
+	const { isBlocked } = useBlockedUsers();
 	const scrollRef = useRef<HTMLDivElement | null>(null);
 	const [inputValue, setInputValue] = useState('');
 	const [showInviteModal, setShowInviteModal] = useState(false);
 	const [selectedUserIds, setSelectedUserIds] = useState<number[]>([]);
+	const [revealedMessages, setRevealedMessages] = useState<Record<number, boolean>>({});
 
+	// Collecter les userIds des messages pour lesquels on n'a pas d'info utilisateur
+	const missingUserIds = useMemo(() => {
+		const ids = new Set<number>();
+		for (const msg of messages) {
+			// Ignorer les messages système et l'utilisateur actuel
+			if (msg.userId !== -1 && msg.userId !== user?.id && !getUser(msg.userId)) {
+				ids.add(msg.userId);
+			}
+		}
+		return Array.from(ids);
+	}, [messages, user?.id, getUser]);
+
+	// Fetch les profils des utilisateurs manquants quand les messages changent
+	useEffect(() => {
+		if (missingUserIds.length > 0) {
+			fetchMissingUsers(missingUserIds);
+		}
+	}, [missingUserIds, fetchMissingUsers]);
 
 	useEffect(() => {
 		if (scrollRef.current) {
@@ -101,6 +124,20 @@ export function ChatMessagesPanel({
 					<div className="flex flex-col gap-1">
 						{messages.map((msg, index) => {
 							const isOwn = msg.userId === user?.id;
+							const isSystem = msg.userId === -1 || msg.username === 'System';
+							const isBlockedUser = !isOwn && !isSystem && isBlocked(msg.userId);
+							const isRevealed = revealedMessages[index] === true;
+							// Utiliser le cache OnlineUsers pour récupérer le username à jour, avec fallback
+							// Pour l'utilisateur actuel, utiliser user.username de useAuth() en priorité
+							const cachedUser = getUser(msg.userId);
+							const displayUsername = isOwn 
+								? (user?.username || cachedUser?.username || msg.username)
+								: (cachedUser?.username || msg.username || `User #${msg.userId}`);
+							
+							const handleRevealMessage = () => {
+								setRevealedMessages(prev => ({ ...prev, [index]: true }));
+							};
+
 							return (
 								<div
 									key={`${msg.created_at}-${index}`}
@@ -110,34 +147,44 @@ export function ChatMessagesPanel({
 									<div className="flex gap-2">
 										<span className="opacity-50 select-none">[{formatTime(msg.created_at)}]</span>
 										<span>
-											{msg.userId === -1 || msg.username === 'System' ? (
+											{isSystem ? (
 												<span className="font-bold text-yellow-400">SYSTEM</span>
 											) : (
-												<span className={`font-bold ${isOwn ? 'text-cyan-400' : ''}`}>{msg.username}</span>
+												<span className={`font-bold ${isOwn ? 'text-cyan-400' : ''} ${isBlockedUser ? 'text-gray-500' : ''}`}>{displayUsername}</span>
 											)}
 											{` >_`}
 										</span>
 									</div>
 									<div className="break-words">
-										{(() => {
-											const joinMatch = msg.msgContent.match(/\[JOIN_TOURNAMENT:([a-zA-Z0-9-]+)\]/);
-											if (joinMatch) {
-												const tournamentId = joinMatch[1];
-												const cleanContent = msg.msgContent.replace(/\[JOIN_TOURNAMENT:[a-zA-Z0-9-]+\]/, '');
-												return (
-													<div className="flex flex-col gap-2">
-														<span>{cleanContent}</span>
-														<TournamentInvite
-															tournamentId={tournamentId}
-															onJoin={(id) => {
-																if (onJoinTournament) onJoinTournament(id);
-															}}
-														/>
-													</div>
-												);
-											}
-											return <p>{msg.msgContent}</p>;
-										})()}
+										{isBlockedUser && !isRevealed ? (
+											<div
+												onClick={handleRevealMessage}
+												className="cursor-pointer select-none rounded bg-gray-800/50 px-2 py-1 text-gray-500 italic transition-colors hover:bg-gray-700/50 hover:text-gray-400"
+											>
+												<span className="blur-[3px]">Message masqué</span>
+												<span className="ml-2 text-xs opacity-70">[Cliquer pour révéler]</span>
+											</div>
+										) : (
+											(() => {
+												const joinMatch = msg.msgContent.match(/\[JOIN_TOURNAMENT:([a-zA-Z0-9-]+)\]/);
+												if (joinMatch) {
+													const tournamentId = joinMatch[1];
+													const cleanContent = msg.msgContent.replace(/\[JOIN_TOURNAMENT:[a-zA-Z0-9-]+\]/, '');
+													return (
+														<div className="flex flex-col gap-2">
+															<span className={isBlockedUser ? 'text-gray-400' : ''}>{cleanContent}</span>
+															<TournamentInvite
+																tournamentId={tournamentId}
+																onJoin={(id) => {
+																	if (onJoinTournament) onJoinTournament(id);
+																}}
+															/>
+														</div>
+													);
+												}
+												return <p className={isBlockedUser ? 'text-gray-400' : ''}>{msg.msgContent}</p>;
+											})()
+										)}
 									</div>
 								</div>
 							);

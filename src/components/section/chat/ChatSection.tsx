@@ -5,10 +5,10 @@ import { useFriends } from '../../../hook/useFriends';
 import { useGroups } from '../../../hook/useGroups';
 import { ChatSidebarPanel } from './ChatSidebarPanel';
 import { ChatMessagesPanel } from './ChatMessagesPanel';
-import { ChatRoomUsersPanel } from './ChatRoomUsersPanel';
+import { OnlineUsersPanel } from './OnlineUsersPanel';
 
 export function ChatSection() {
-	const { connected, currentRoom, messages, roomUsers, sendMessage, joinRoom, joinPrivateRoom, joinGroupRoom } =
+	const { connected, currentRoom, messages, sendMessage, joinRoom, joinPrivateRoom, joinGroupRoom } =
 		useChat();
 	const { friends, loading: friendsLoading, removeFriend } = useFriends();
 	const { groups, loading: groupsLoading } = useGroups();
@@ -82,9 +82,9 @@ export function ChatSection() {
 				/>
 			</div>
 
-			{/* Room Users */}
+			{/* Online Users */}
 			<div className="ff-dashboard-panel-enter ff-dashboard-panel-enter--delay-0 col-span-1 h-full min-h-0">
-				<ChatRoomUsersPanel roomUsers={roomUsers} currentRoom={currentRoom} />
+				<OnlineUsersPanel />
 			</div>
 		</div>
 	);

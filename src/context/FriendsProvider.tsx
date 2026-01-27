@@ -1,6 +1,7 @@
 import { createElement, useState, useEffect, useCallback, useRef, Element } from 'my-react';
 import { FriendsContext, Friend, PendingInvitation, FriendInviteResult } from './friendsContext';
 import { useAuth } from '../hook/useAuth';
+import { useOnlineUsers } from '../hook/useOnlineUsers';
 import { userSocket } from '../libs/socket';
 import { fetchWithAuth } from '../libs/fetchWithAuth';
 
@@ -12,6 +13,7 @@ interface FriendsProviderProps {
 
 export function FriendsProvider({ children }: FriendsProviderProps) {
 	const { isAuthenticated, user } = useAuth();
+	const { isOnline } = useOnlineUsers();
 	const [friends, setFriends] = useState<Friend[]>([]);
 	const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -292,6 +294,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 				pendingInvitations,
 				loading,
 				error,
+				isOnline,
 				refreshFriends: fetchFriends,
 				refreshPendingInvitations: fetchPendingInvitations,
 				sendFriendInvite,

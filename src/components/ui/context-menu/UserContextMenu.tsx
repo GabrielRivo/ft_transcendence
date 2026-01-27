@@ -14,6 +14,7 @@ export interface UserContextMenuCallbacks {
 	onProfile?: () => void;
 	onToggleFriend?: () => void;
 	onBlock?: () => void;
+	onUnblock?: () => void;
 }
 
 export interface UserContextMenuProps {
@@ -21,6 +22,7 @@ export interface UserContextMenuProps {
 	position: { x: number; y: number };
 	onClose: () => void;
 	isFriend?: boolean;
+	isBlocked?: boolean;
 	callbacks: UserContextMenuCallbacks;
 }
 
@@ -57,7 +59,7 @@ function Divider() {
 	return <div className="my-1 h-px bg-cyan-500/20"></div>;
 }
 
-export function UserContextMenu({ isOpen, position, onClose, isFriend = false, callbacks }: UserContextMenuProps) {
+export function UserContextMenu({ isOpen, position, onClose, isFriend = false, isBlocked = false, callbacks }: UserContextMenuProps) {
 	const [adjustedPosition, setAdjustedPosition] = useState(position);
 	// const menuIdRef = useRef(Math.random().toString(36).substr(2, 9));
 
@@ -153,7 +155,11 @@ export function UserContextMenu({ isOpen, position, onClose, isFriend = false, c
 					label={isFriend ? 'Remove friends': 'Add as friend'}
 					onClick={() => handleAction(callbacks.onToggleFriend)}
 				/>
-				<MenuItem label="Block" onClick={() => handleAction(callbacks.onBlock)} variant="danger" />
+				<MenuItem 
+					label={isBlocked ? 'Unblock' : 'Block'} 
+					onClick={() => handleAction(isBlocked ? callbacks.onUnblock : callbacks.onBlock)} 
+					variant="danger" 
+				/>
 			</div>
 		</div>,
 		document.body,
