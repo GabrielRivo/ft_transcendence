@@ -1,7 +1,7 @@
 import { createElement, useState, useEffect, useRef, useCallback, useMemo } from 'my-react';
 import { useNavigate } from 'my-react-router';
 import type { Element } from 'my-react';
-import { GameContext, GameMode, GameScores } from './gameContext';
+import { GameContext, EndingScreenData, GameMode, GameScores } from './gameContext';
 import Game from '../libs/pong/Game/index';
 import Services from '../libs/pong/Game/Services/Services';
 import { useToast } from '@/hook/useToast';
@@ -31,6 +31,8 @@ export function GameProvider({ children }: GameProviderProps) {
 
 	const currentModeRef = useRef<GameMode>('background');
 
+
+	// Handler for score updates
 	const handleScoreUpdate = useCallback((event: {
 		player1Score: number;
 		player2Score: number;
@@ -42,13 +44,23 @@ export function GameProvider({ children }: GameProviderProps) {
 			scoreToWin: event.scoreToWin,
 		});
 	}, []);
-
 	const handleScoreUpdateRef = useRef(handleScoreUpdate);
-
 	useEffect(() => {
 		handleScoreUpdateRef.current = handleScoreUpdate;
 	}, [handleScoreUpdate]);
 
+
+	// Handler for game ending
+	const handleEndingScreen = useCallback((event: EndingScreenData) => {
+		console.log('[GameProvider] Game ended:', event);
+	}, []);
+	const handleEndingScreenRef = useRef(handleEndingScreen);
+	useEffect(() => {
+		handleEndingScreenRef.current = handleEndingScreen;
+	}, [handleEndingScreen]);
+
+
+	
 	useEffect(() => {
 		if (isInitializedRef.current || !canvasRef.current) {
 			return;
@@ -64,6 +76,10 @@ export function GameProvider({ children }: GameProviderProps) {
 
 			Services.EventBus?.on('Game:ScoreUpdated', (event: GameScores) => {
 				handleScoreUpdateRef.current(event);
+			});
+
+			Services.EventBus?.on('Game:EndingScreen', (event: EndingScreenData) => {
+				handleEndingScreenRef.current(event);
 			});
 
 			Services.EventBus?.on('Game:Ended', () => {

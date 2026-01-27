@@ -9,6 +9,16 @@ export interface GameScores {
 	scoreToWin: number;
 }
 
+export interface EndingScreenData {
+	winnerId: string | null;
+	reason: 'score_limit' | 'surrender' | 'disconnection' | 'timeout' | null;
+	player1Id: string;
+	player2Id: string;
+	score1: number;
+	score2: number;
+	winning: boolean;
+}
+
 export interface GameContextType {
 	mode: GameMode;
 	setMode: (mode: GameMode, gameId?: string | null, metadata?: { type?: string; tournamentId?: string; tournamentType?: string; playersCount?: string }) => void;
@@ -18,6 +28,7 @@ export interface GameContextType {
 	gameId: string | null;
 	scores: GameScores;
 	isInitialized: boolean;
+	endingScreen: EndingScreenData;
 }
 
 export const GameContext = createContext<GameContextType | null>(null);

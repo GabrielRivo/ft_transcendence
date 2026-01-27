@@ -55,18 +55,6 @@ class PongLocal extends Game {
     drawScene() : void  {
         if (this.isDisposed || !Services.Scene) return;
 
-        this.glowLayer = new GlowLayer("glow", Services.Scene, {
-			blurKernelSize: 32,
-			mainTextureRatio: 0.25
-		});
-		this.glowLayer.intensity = 0.3;
-
-        this.player1 = new Player(1);
-        this.player2 = new Player(2);
-        if (this.isDisposed || !Services.Scene) return;
-        this.walls = [new Wall(), new Wall()];
-        this.walls.forEach(wall => Services.Scene!.addMesh(wall.model));
-        //this.ball = new Ball();
         const camera: ArcRotateCamera = new ArcRotateCamera("Camera", 0, Math.PI / 4, 11, Vector3.Zero(), Services.Scene);
         camera.inputs.attached.mousewheel.detachControl(); 
         camera.attachControl(Services.Canvas, true);
@@ -82,6 +70,19 @@ class PongLocal extends Game {
 
         const zoomEffect = new ZoomEffect(22, 11);
         zoomEffect.play(camera);
+
+        this.glowLayer = new GlowLayer("glow", Services.Scene, {
+			blurKernelSize: 32,
+			mainTextureRatio: 0.25
+		});
+		this.glowLayer.intensity = 0.3;
+
+        this.player1 = new Player(1);
+        this.player2 = new Player(2);
+        if (this.isDisposed || !Services.Scene) return;
+        this.walls = [new Wall(), new Wall()];
+        this.walls.forEach(wall => Services.Scene!.addMesh(wall.model));
+        //this.ball = new Ball();
 
 
         //var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
@@ -320,7 +321,7 @@ class PongLocal extends Game {
                 Services.Scene!.debugLayer.hide();
             } else {
                 Services.Scene!.debugLayer.show().catch((err) => {
-                    console.error("Impossible de lancer l'inspecteur.", err);
+                    console.error("Impossible to launch the inspector.", err);
                 });
             }
         }

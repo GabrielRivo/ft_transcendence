@@ -207,7 +207,7 @@ class PongOnline extends Game {
                 console.log("Ping timeout");
                 socket.off("pong", onPong);
                 return reject("Ping timeout");
-            }, 2000);
+            }, 1000);
             const onPong = () => {
                 console.log(`Ping: ${performance.now() - time} ms`);
                 clearTimeout(timeoutId);
@@ -452,10 +452,23 @@ class PongOnline extends Game {
         Services.Engine!.runRenderLoop(this.renderLoop);
     }
 
+    private lastPingTime: number = 0;
     private renderLoop = () => {
         //console.log("renderLoop online");
         if (this.isDisposed) return;
         this.predictionManager!.predictionUpdate();
+        
+        if (Services.TimeService!.getTimestamp() - this.lastPingTime > 5000) {
+            try {
+                this.pingServer().then((result) => {
+                    Services.EventBus!.emit("Game:LatencyUpdate", result);
+                });
+            } catch (error) {
+                console.warn("Error pinging server:", error);
+                Services.EventBus!.emit("Game:LatencyUpdate", 999);
+            }
+            this.lastPingTime = Services.TimeService!.getTimestamp();
+        }
         // this.player1!.update();
         // this.player2!.update();
         // this.ball!.update();
@@ -538,7 +551,7 @@ class PongOnline extends Game {
             Services.Scene!.debugLayer.hide();
         } else {
             Services.Scene!.debugLayer.show().catch((err) => {
-                console.error("Impossible de lancer l'inspecteur.", err);
+                console.error("Impossible to launch the inspector.", err);
             });
         }
     }
