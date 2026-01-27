@@ -97,12 +97,22 @@ export class UserStatsService {
 		let elog: number = 0;
 		let newTournament = 0;
 		let newTournamentWin = 0;
+		let newscore = 0;
+		console.log("match = ", match)
+		console.log("match.score= ", match.score)
+		console.log("match.match.duration = ", match.duration)
 		if (match.game_type == "ranked")
 		{
 			if (current.user_id == match.player1_id)
+			{
+				newscore = match.score_player1
 				elog = match.gain_player1
+			}
 			else
+			{
+				newscore = match.score_player2
 				elog = match.gain_player2
+			}
 			if (elog == null)
 				elog = 0
 		}
@@ -123,6 +133,21 @@ export class UserStatsService {
 			if (match.game_type == "tournament")
 				newTournament = 1;
 		}
+		
+
+// 		game_id: 'fafe7169-2f20-4744-92e2-94a052cbbe71',
+// transcendence-stats  |   player1_id: 2,
+// transcendence-stats  |   player2_id: 1,
+// transcendence-stats  |   score_player1: 0,
+// transcendence-stats  |   score_player2: 5,
+// transcendence-stats  |   hit_player1: 0,
+// transcendence-stats  |   hit_player2: 0,
+// transcendence-stats  |   winner_id: 1,
+// transcendence-stats  |   duration_seconds: 1619.364335160004,
+// transcendence-stats  |   game_type: 'ranked',
+// transcendence-stats  |   gain_player1: -23,
+// transcendence-stats  |   gain_player2: 27,
+// transcendence-stats  |   is_final: 0
 
 		return {
 			user_id: current.user_id,
@@ -133,9 +158,9 @@ export class UserStatsService {
 			winrate: this.get_win_rate(newWins, newLosses, n),
 			tournament_played: current.tournament_played + newTournament,
 			tournament_won: current.tournament_won + newTournamentWin,
-			average_score: Math.round((current.average_score * current.total_games + match.score) / n),
+			average_score: Math.round((current.average_score * current.total_games + newscore) / n),
 			average_game_duration_in_seconde: Math.round(
-				(current.average_game_duration_in_seconde * current.total_games + match.duration) / n,
+				(current.average_game_duration_in_seconde * current.total_games + match.duration_seconds) / n,
 			),
 		};
 	}
