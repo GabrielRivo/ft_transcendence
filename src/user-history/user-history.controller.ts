@@ -1,6 +1,5 @@
-import { Body, BodySchema, Controller, Get, Inject, Param, Post } from 'my-fastify-decorators';
+import { Controller, Get, Inject, Param } from 'my-fastify-decorators';
 import { EventPattern, Payload } from 'my-fastify-decorators-microservices';
-import { CreateUserHistoryDto, CreateUserHistorySchema } from './dto/user-history.dto.js';
 import { type GameFinishedEvent } from './game-finished.event.js';
 import { UserHistoryService } from './user-history.service.js';
 import { UserStatsService } from '../user-stats/user-stats.service.js'
@@ -59,38 +58,9 @@ export class UserHistoryController {
 		console.error("Error while saving", error);
 		}
 	}
-    
-	// @Inject(RabbitMQClient)
-	// private rabbitMq!= RabbitMQClient{}
-
-	// @EventPattern('tournament.created')
-    // async handleTournamentCreated(@Payload() data: TournamentCreatedPayload) {
-    // console.log('[TournamentConsumer] Received tournament.created event:', data);
-
-	@Post('/add')
-	@BodySchema(CreateUserHistorySchema)
-	add_match_to_history(@Body() data: CreateUserHistoryDto) {
-		return this.userHistoryService.add_match_to_history(
-			data.game_id,
-			data.player1_id,
-			data.player2_id,
-			data.score_player1,
-			data.score_player2,
-			data.hit_player1,
-			data.hit_player2,
-			data.gain_player1,
-			data.gain_player2,
-			data.winner_id,
-			data.duration_seconds,
-			data.game_type,
-			data.is_final,
-		);
-	}
 
 	@Get('/user/:userId')
 	getHistory(@Param('userId') userId: number) {
-		// const is_empty = this.userHistoryService.get_user_matches(userId);
-		// if (is_empty.length == 0) return [];
 		return this.userHistoryService.get_user_matches(userId);
 	}
 }

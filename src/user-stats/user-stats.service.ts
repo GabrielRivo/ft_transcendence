@@ -55,7 +55,7 @@ export class UserStatsService {
 	}
 		catch (error) {
 			if (error instanceof NotFoundException) throw error;
-			console.error("Database error", error);
+				console.error("Database error", error);
 			throw new InternalServerErrorException("Internal Database Error");
 		}
 	}

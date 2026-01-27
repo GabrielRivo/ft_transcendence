@@ -1,5 +1,5 @@
 import Database, { Statement } from 'better-sqlite3';
-import { BadRequestException, Inject, InjectPlugin, Service } from 'my-fastify-decorators';
+import { BadRequestException, Inject, InjectPlugin, InternalServerErrorException, NotFoundException, Service } from 'my-fastify-decorators';
 import { UserStatsService } from '../user-stats/user-stats.service.js';
 
 const addMatchHistoryStatement: string = 
@@ -189,8 +189,9 @@ export class UserHistoryService {
 		try {
 			return this.statementGet.all(userId, userId);
 		} catch (error) {
-			console.error('ERREUR SQLITE :', error);
-			throw error;
+			if (error instanceof NotFoundException) throw error;
+				console.error("Database error", error);
+			throw new InternalServerErrorException("Internal Database Error");
 		}
 	}
 	async get_ranked_number(userId: number){
