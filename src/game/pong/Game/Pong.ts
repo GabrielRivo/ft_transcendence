@@ -299,15 +299,18 @@ class Pong extends Game {
     endGame(reason: 'score_limit' | 'surrender' | 'disconnection' | 'timeout'): void {
         let winnerId: string | null = null;
 
-        if (reason === 'disconnection' && this.player1!.score < 5 && this.player2!.score < 5) {
-            winnerId = this.p1Socket?.connected ? this.p1Id : this.p2Socket?.connected ? this.p2Id : null;
-            if (winnerId === null)
-                winnerId = Math.random() < 0.5 ? this.p1Id : this.p2Id;
-        }
-        else if (this.player1!.score > this.player2!.score) {
+        if (this.player1!.score > this.player2!.score)
             winnerId = this.p1Id;
-        } else if (this.player2!.score > this.player1!.score) {
+        else if (this.player2!.score > this.player1!.score)
             winnerId = this.p2Id;
+        else
+            winnerId = Math.random() < 0.5 ? this.p1Id : this.p2Id;
+
+
+        if (reason === 'disconnection' && this.player1!.score < 5 && this.player2!.score < 5) {
+            const disconnectionWinnerId = this.p1Socket?.connected ? this.p1Id : this.p2Socket?.connected ? this.p2Id : null;
+            if (disconnectionWinnerId)
+                winnerId = disconnectionWinnerId;
         }
 
         let gameFinishedEvent: GameFinishedEvent = {
