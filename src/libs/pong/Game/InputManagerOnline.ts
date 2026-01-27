@@ -79,6 +79,7 @@ class InputManager {
                 break;
         }
     }
+    
 
     public processLastInputs(player: Player) {
         const lastPlayerDirection = player.paddle.getDirection();
