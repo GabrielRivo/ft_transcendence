@@ -33,6 +33,7 @@ import {
 	GlowLayer,
 	Mesh,
 	ImportMeshAsync,
+	AbstractMesh,
 } from '@babylonjs/core';
 import '@babylonjs/loaders/glTF';
 import Services from '../Services/Services';
@@ -105,6 +106,8 @@ class PongBackground extends Game {
 
 	isDisposed: boolean = false;
 	private glowLayer?: GlowLayer;
+
+	private backgroundMeshes: AbstractMesh[] = [];
 
 	// -------------------------------------------------------------------------
 	// Constructor
@@ -236,9 +239,9 @@ class PongBackground extends Game {
         // Load 3D background model from cache
         if (this.isDisposed || !Services.Scene) return;
         try {
-            const meshes = await Services.AssetCache.loadModel('pong-background', '/models/pong.glb', Services.Scene);
+            this.backgroundMeshes = await Services.AssetCache.loadModel('pong-background', '/models/pong.glb', Services.Scene);
             if (this.isDisposed) return; // Check again after async operation
-            meshes.forEach(mesh => {
+            this.backgroundMeshes.forEach(mesh => {
                 mesh.isPickable = false;
             });
         } catch (e) {
@@ -398,6 +401,9 @@ class PongBackground extends Game {
 		this.player2?.dispose();
 		this.ball?.dispose();
 		this.walls?.forEach((wall) => wall.dispose());
+
+		this.backgroundMeshes.forEach((mesh) => mesh.dispose());
+		this.backgroundMeshes = [];
 
 		// Remove event listeners
 		Services.EventBus!.off('DeathBarHit', this.onDeathBarHit);
