@@ -91,7 +91,7 @@ export const ToastProvider = ({ children }: { children?: Element }) => {
 			{children}
 			{createPortal(
 				<FragmentComponent>
-					<div className="pointer-events-none fixed right-6 bottom-6 z-50 flex flex-col gap-3">
+					<div className="pointer-events-none fixed right-6 bottom-6 z-500 flex flex-col gap-3">
 						{toasts.map((t) => (
 							<ToastItem key={t.id} toast={t} onClose={removeToast} />
 						))}

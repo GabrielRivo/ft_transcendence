@@ -31,7 +31,7 @@ export function TournamentLobby({
 
     return (
         <CardStyle2 className="flex h-full w-full max-w-3xl flex-col justify-between overflow-hidden">
-            <div className="flex w-full flex-col gap-6">
+            <div className="flex w-full flex-col gap-2">
                 {/* Header */}
                 <div className="flex flex-col items-center">
                     <h3 className="font-pirulen text-xl tracking-widest text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">

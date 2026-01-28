@@ -92,8 +92,7 @@ export function TournamentPlayersPage() {
 
 	return (
 		<div className="relative size-full">
-			<div className="relative z-10 flex h-full flex-col items-center justify-center gap-10 p-4">
-				<h2 className="text-4xl font-bold text-white font-pirulen tracking-widest">Play</h2>
+			<div className="relative z-10 flex h-full flex-col items-center justify-center py-4 px-2 overflow-auto">
 				{!createdTournamentId ? (
 					<TournamentCreation
 						tournamentType={tournamentType}
