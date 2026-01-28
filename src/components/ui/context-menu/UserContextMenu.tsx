@@ -9,7 +9,6 @@ export function closeAllUserContextMenus() {
 
 export interface UserContextMenuCallbacks {
 	onChallenge?: () => void;
-	onInviteTournament?: () => void;
 	onStatistics?: () => void;
 	onProfile?: () => void;
 	onToggleFriend?: () => void;
@@ -140,12 +139,11 @@ export function UserContextMenu({ isOpen, position, onClose, isFriend = false, i
 		<div
 			onClick={handleMenuClick}
 			onContextMenu={(e: MouseEvent) => e.preventDefault()}
-			className="animate-context-menu-enter fixed z-[100] min-w-[180px] overflow-hidden rounded-lg border border-cyan-500/30 bg-slate-950/95 shadow-[0_0_20px_rgba(6,182,212,0.2)] backdrop-blur-xl"
+			className="animate-context-menu-enter fixed z-100 min-w-[180px] overflow-hidden rounded-lg border border-cyan-500/30 bg-slate-950/95 shadow-[0_0_20px_rgba(6,182,212,0.2)] backdrop-blur-xl"
 			style={`left: ${adjustedPosition.x}px; top: ${adjustedPosition.y}px;`}
 		>
 			<div className="py-1">
 				{/* <MenuItem label="Challenge" onClick={() => handleAction(callbacks.onChallenge)} /> */}
-				<MenuItem label="Invit to tournament" onClick={() => handleAction(callbacks.onInviteTournament)} />
 				<Divider />
 				<MenuItem label="Stats" onClick={() => handleAction(callbacks.onStatistics)} />
 				<MenuItem label="Profil" onClick={() => handleAction(callbacks.onProfile)} />

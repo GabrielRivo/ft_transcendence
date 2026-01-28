@@ -74,9 +74,6 @@ export function OnlineUsersPanel() {
 											toast('Network error', 'error', 3000)
 										})
 									},
-									onInviteTournament: () => {
-										console.log('Inviter au tournoi', onlineUser.username)
-									},
 									onStatistics: () => {
 										navigate(`/statistics/general/${onlineUser.userId}`)
 									},
