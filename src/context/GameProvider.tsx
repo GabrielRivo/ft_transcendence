@@ -20,7 +20,6 @@ export function GameProvider({ children }: GameProviderProps) {
 	const [error, setError] = useState<string | null>(null);
 	const [isInitialized, setIsInitialized] = useState(false);
 	const [gameId, setGameId] = useState<string | null>(null);
-	const { toast } = useToast();
 	const navigate = useNavigate();
 	const [scores, setScores] = useState<GameScores>({
 		player1Score: 0,
@@ -71,7 +70,6 @@ export function GameProvider({ children }: GameProviderProps) {
 				console.log('[GameProvider] Event payload - gameType:', event?.gameType, 'tournamentId:', event?.tournamentId);
 
 				setModeState('background');
-				toast('Game ended', 'warning');
 
 				// Use gameType from the event payload (set by PongOnline from gameJoined WebSocket event)
 				const gameType = event?.gameType;

@@ -38,7 +38,7 @@ export function TournamentCreation({ tournamentType, playersCount, onTournamentC
         const validation = validate(payload);
         if (!validation.valid) {
             setErrors(validation.errors);
-            toast('Please fix the errors', 'warning');
+            toast('Please fix the errors', 'warning', 3000);
             return;
         }
 
@@ -54,18 +54,18 @@ export function TournamentCreation({ tournamentType, playersCount, onTournamentC
             // Check for Active Tournament Redirection
             if ((result as any).activeTournamentId) {
                 const activeId = (result as any).activeTournamentId;
-                toast('You are already in an active tournament. Redirecting...', 'info');
+                toast('You are already in an active tournament. Redirecting...', 'info', 3000);
                 onTournamentCreated(activeId);
                 setIsSubmitting(false);
                 return;
             }
 
-            toast(result.error || 'Tournament creation failed', 'error');
+            toast(result.error || 'Tournament creation failed', 'error', 3000);
             setIsSubmitting(false);
             return;
         }
 
-        toast('Tournament created', 'success');
+        toast('Tournament created', 'success', 3000);
         setIsSubmitting(false);
         onTournamentCreated(result.data.id);
     };

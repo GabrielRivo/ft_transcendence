@@ -1,4 +1,4 @@
-import { createElement, useEffect, Fragment } from 'my-react';
+import { createElement, useEffect, FragmentComponent } from 'my-react';
 import type { Element } from 'my-react';
 import { ChatSection } from '../components/section/chat/ChatSection';
 import { Link, useNavigate, useRouter } from 'my-react-router';
@@ -30,12 +30,12 @@ function Menu() {
 		<nav className="flex h-14 w-full shrink-0 items-center justify-center gap-8 pb-12">
 			<NavLink path="/play" label="Play" />
 			{!user?.isGuest && (
-				<Fragment>
+				<FragmentComponent>
 					{/* <span>|</span> */}
 					<NavLink path="/profile" label="Profile" />
 					{/* <span>|</span> */}
 					<NavLink path="/statistics/general" label="Stats" />
-				</Fragment>
+				</FragmentComponent>
 			)}
 			{/* <span>|</span> */}
 

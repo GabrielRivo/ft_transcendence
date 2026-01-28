@@ -59,9 +59,9 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 												otherId: roomUser.userId
 											}),
 										}).then(data => data.json()).then(data => {
-											toast(data.message, data.success ? 'success' : 'error')
+											toast(data.message, data.success ? 'success' : 'error', 3000)
 										}).catch(e => {
-											toast('Network error', 'error')
+											toast('Network error', 'error', 3000)
 										})
 										console.log('Défier', roomUser.username)
 									},
@@ -85,9 +85,9 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 												otherId: roomUser.userId
 											}),
 										}).then(data => data.json()).then(data => {
-											toast(data.message, data.success ? 'success' : 'error')
-										}).catch(() => {
-											toast('Network error', 'error')
+											toast(data.message, data.success ? 'success' : 'error', 3000)
+										}).catch(e => {
+											toast('Network error', 'error', 3000)
 										})
 									},
 									onBlock: () => {
@@ -100,9 +100,9 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 												otherId: roomUser.userId
 											}),
 										}).then(data => data.json()).then(data => {
-											toast(data.message, data.success ? 'success' : 'error')
+											toast(data.message, data.success ? 'success' : 'error', 3000)
 										}).catch(e => {
-											toast('Network error', 'error')
+											toast('Network error', 'error', 3000)
 										})
 										console.log('Block', roomUser.username)
 									},

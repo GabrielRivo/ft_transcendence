@@ -135,8 +135,7 @@ export function useTournament(): UseTournamentReturn {
         if (tournamentSocket.connected) {
             console.log('[useTournament] Emitting listen_tournament');
             tournamentSocket.emit('listen_tournament', {
-                tournamentId: id,
-                displayName: 'Guest'
+                tournamentId: id
             });
         }
     }, []);

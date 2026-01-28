@@ -14,7 +14,7 @@ function formatDate(dateStr: string): string {
 }
 
 function formatDuration(seconds: number): string {
-	const minutes = Math.floor(seconds / 60);
+	const minutes = Math.floor(seconds);
 	return `${minutes}`;
 }
 

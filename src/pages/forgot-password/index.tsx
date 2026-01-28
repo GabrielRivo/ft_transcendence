@@ -60,7 +60,7 @@ export function ForgotPassword() {
 		const result = validateEmail({ email });
 		if (!result.valid) {
 			setErrors(result.errors);
-			toast('Please fix errors', 'warning');
+			toast('Please fix errors', 'warning', 3000);
 			return;
 		}
 
@@ -74,14 +74,14 @@ export function ForgotPassword() {
 			});
 
 			if (response.ok) {
-				toast('Reset code sent to your email', 'success');
+				toast('Reset code sent to your email', 'success', 3000);
 				setShowOTPModal(true);
 			} else {
 				const data = await response.json();
-				toast(data.message || 'Failed to send reset code', 'error');
+				toast(data.message || 'Failed to send reset code', 'error', 3000);
 			}
 		} catch {
-			toast('An error has occurred', 'error');
+			toast('An error has occurred', 'error', 3000);
 		} finally {
 			setIsLoading(false);
 		}
