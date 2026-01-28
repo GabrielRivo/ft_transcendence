@@ -41,8 +41,8 @@ export class SqliteTournamentRepository extends TournamentRepository {
 
       if (tournament.version === 0) {
         result = this.db.prepare(`
-          INSERT INTO tournaments (id, name, size, owner_id, status, visibility, winner_id, version)
-          VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+          INSERT INTO tournaments (id, name, size, owner_id, status, visibility, winner_id, invite_code, version)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
         `).run(
           tournament.id,
           tournament.name,
@@ -51,13 +51,14 @@ export class SqliteTournamentRepository extends TournamentRepository {
           tournament.status,
           tournament.visibility,
           tournament.winner ? tournament.winner.id : null,
+          tournament.inviteCode,
         );
 
         (tournament as any)._version = 1;
       } else {
         result = this.db.prepare(`
           UPDATE tournaments
-          SET    name = ?, size = ?, owner_id = ?, status = ?, visibility = ?, winner_id = ?, version = version + 1
+          SET    name = ?, size = ?, owner_id = ?, status = ?, visibility = ?, winner_id = ?, invite_code = ?, version = version + 1
           WHERE id = ? AND version = ?
         `).run(
           tournament.name,
@@ -66,6 +67,7 @@ export class SqliteTournamentRepository extends TournamentRepository {
           tournament.status,
           tournament.visibility,
           tournament.winner ? tournament.winner.id : null,
+          tournament.inviteCode,
           tournament.id,
           tournament.version
         );
@@ -177,6 +179,7 @@ export class SqliteTournamentRepository extends TournamentRepository {
     const winner = row.winner_id ? participantsMap.get(row.winner_id) || null : null;
 
     const visibility = (row.visibility ?? 'PUBLIC') as TournamentVisibility;
+    const inviteCode = row.invite_code ?? '';
 
     return Tournament.reconstitute({
       id: row.id,
@@ -184,6 +187,7 @@ export class SqliteTournamentRepository extends TournamentRepository {
       size: row.size as TournamentSize,
       ownerId: row.owner_id,
       visibility,
+      inviteCode,
       status: row.status as TournamentStatus,
       participants,
       matches,
@@ -262,12 +266,14 @@ export class SqliteTournamentRepository extends TournamentRepository {
     return tournamentRows.map(t => {
       const winner = t.winner_id ? globalParticipantsMap.get(t.winner_id) || null : null;
       const visibility = (t.visibility ?? 'PUBLIC') as TournamentVisibility;
+      const inviteCode = t.invite_code ?? '';
       return Tournament.reconstitute({
         id: t.id,
         name: t.name,
         size: t.size as TournamentSize,
         ownerId: t.owner_id,
         visibility,
+        inviteCode,
         status: t.status as TournamentStatus,
         participants: participantsByTournamentId.get(t.id) || [],
         matches: matchesByTournamentId.get(t.id) || [],

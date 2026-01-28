@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomInt, randomUUID } from "crypto";
 import { Match } from "./match.js";
 import { Participant } from "../value-objects/participant.js";
 import { RecordedEvent } from "../events/base-event.js";
@@ -32,6 +32,14 @@ export type TournamentSize = (typeof TOURNAMENT_SIZES)[number];
 export const TOURNAMENT_VISIBILITIES = ['PUBLIC', 'PRIVATE'] as const;
 export type TournamentVisibility = (typeof TOURNAMENT_VISIBILITIES)[number];
 
+/**
+ * Generates a 6-digit invite code for tournaments
+ * Uses crypto.randomInt for secure random number generation
+ */
+function generateInviteCode(): string {
+    return randomInt(100000, 1000000).toString();
+}
+
 export class Tournament {
     private _participants: Participant[] = [];
     private _matches: Match[] = [];
@@ -46,7 +54,8 @@ export class Tournament {
         public readonly name: string,
         public readonly size: TournamentSize,
         public readonly ownerId: string,
-        public readonly visibility: TournamentVisibility
+        public readonly visibility: TournamentVisibility,
+        public readonly inviteCode: string = generateInviteCode()
     ) {
         this.validateConfiguration();
         this.addRecordedEvent(new TournamentCreatedEvent(this.id, this.name, this.size, this.ownerId, this.visibility));
@@ -113,12 +122,12 @@ export class Tournament {
     public static reconstitute(
         data: {
             id: string, name: string, size: TournamentSize, ownerId: string,
-            visibility: TournamentVisibility,
+            visibility: TournamentVisibility, inviteCode: string,
             status: TournamentStatus, participants: Participant[], matches: Match[],
             winner: Participant | null, version: number,
         }
     ): Tournament {
-        const tournament = new Tournament(data.id, data.name, data.size, data.ownerId, data.visibility);
+        const tournament = new Tournament(data.id, data.name, data.size, data.ownerId, data.visibility, data.inviteCode);
         tournament._status = data.status;
         tournament._participants = [...data.participants];
         tournament._matches = [...data.matches];

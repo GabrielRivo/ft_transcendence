@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS tournaments (
     visibility TEXT NOT NULL DEFAULT 'PUBLIC',
     status TEXT NOT NULL,
     winner_id TEXT,
+    invite_code TEXT NOT NULL,
     version INTEGER NOT NULL DEFAULT 0
 );
 

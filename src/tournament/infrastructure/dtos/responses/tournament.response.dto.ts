@@ -46,8 +46,8 @@ class MatchResponseDto {
 
 @AdditionalProperties(false)
 export class TournamentResponseDto {
-    @IsString()
-    id: string;
+	@IsString()
+	id: string;
 
 	@IsString()
 	name: string;
@@ -63,6 +63,9 @@ export class TournamentResponseDto {
 
 	@IsEnum(['PUBLIC', 'PRIVATE'])
 	visibility: TournamentVisibility;
+
+	@IsString()
+	inviteCode: string;
 
 	@IsArray({ itemType: ParticipantResponseDto })
 	participants: ParticipantResponseDto[];
