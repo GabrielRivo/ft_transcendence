@@ -39,13 +39,11 @@ import {
 	MessageBody,
 	JWTBody,
 	BodySchema,
-	Body,
 } from 'my-fastify-decorators';
 import { Socket } from 'socket.io';
 import { GameService } from './game.service.js';
 import { GameConnectionError, type JwtPayload } from './types.js';
 import { PlayerInputDto, PlayerInputSchema } from "./game.dto.js";
-import { PlayerInputData } from './pong/globalType.js';
 
 /**
  * Extended Socket type with typed data property for game sessions.
