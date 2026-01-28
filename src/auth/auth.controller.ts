@@ -1,5 +1,6 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import {
+	BadRequestException,
 	Body,
 	BodySchema,
 	Controller,
@@ -15,31 +16,24 @@ import {
 	Req,
 	Res,
 	UnauthorizedException,
-	UseGuards,
+	UseGuards
 } from 'my-fastify-decorators';
 
 import config from '../config.js';
 import { AuthService, AuthTokens, JwtPayload } from './auth.service.js';
 import { DbExchangeService } from './dbExchange.service.js';
 
+import { ChangeEmailDto, ChangeEmailSchema } from './dto/changeEmail.dto.js';
+import { ChangePasswordDto, ChangePasswordSchema } from './dto/changePassword.dto.js';
+import { ForgotPasswordDto, ForgotPasswordSchema } from './dto/forgotPassword.dto.js';
 import { LoginDto, LoginSchema } from './dto/login.dto.js';
 import { RegisterDto, RegisterSchema } from './dto/register.dto.js';
+import { ResetPasswordDto, ResetPasswordSchema } from './dto/resetPassword.dto.js';
 import { SetUsernameDto, SetUsernameSchema } from './dto/setUsername.dto.js';
 import { TwoFAVerifyDto, TwoFAVerifySchema } from './dto/twofa.dto.js';
-import { ForgotPasswordDto, ForgotPasswordSchema } from './dto/forgotPassword.dto.js';
 import { VerifyResetOtpDto, VerifyResetOtpSchema } from './dto/verifyResetOtp.dto.js';
-import { ResetPasswordDto, ResetPasswordSchema } from './dto/resetPassword.dto.js';
-import { ChangePasswordDto, ChangePasswordSchema } from './dto/changePassword.dto.js';
-import { ChangeEmailDto, ChangeEmailSchema } from './dto/changeEmail.dto.js';
 
 import { RabbitMQClient } from 'my-fastify-decorators-microservices';
-import {
-	base32ToBuffer,
-	bufferToBase32,
-	generateTOTPSecret,
-	getTOTP,
-	linkTOTPSecret,
-} from '../utils/crypto.js';
 import { AuthGuard } from './guards/auth.guard.js';
 import type { ProviderKeys } from './providers.js';
 import { providers } from './providers.js';
@@ -199,6 +193,7 @@ export class AuthController {
 	// 	return this.dbExchangeService.getAllUsers();
 	// }
 
+	// Warning: a delete plus tard
 	@Get('/user-by-username/:username')
 	async getUserByUsername(@Param('username') username: string) {
 		const user = await this.dbExchangeService.getUserByUsername(username);
@@ -208,6 +203,7 @@ export class AuthController {
 		return { id: user.id, username: user.username };
 	}
 
+	// Warning: a delete plus tard
 	@Get('/user-by-id/:id')
 	async getUserById(@Param('id') id: number) {
 		const user = await this.dbExchangeService.getUserById(id);
@@ -217,6 +213,7 @@ export class AuthController {
 		return { id: user.id, username: user.username };
 	}
 
+	// Warning: a delete plus tard
 	@Get('/user-is-exist/:id')
 	async isExist(@Param('id') id: number) {
 		const user = await this.dbExchangeService.getUserById(id);
@@ -242,19 +239,19 @@ export class AuthController {
 		res.redirect(providers[provider].authorizationUrl);
 	}
 
-	@Get('/test/totp/generate')
-	async generateTOTPSecret() {
-		const secret = generateTOTPSecret();
-		return {
-			secret: bufferToBase32(secret),
-			link: linkTOTPSecret(secret, 'MyApp', 'MyLabel'),
-		};
-	}
+	// @Get('/test/totp/generate')
+	// async generateTOTPSecret() {
+	// 	const secret = generateTOTPSecret();
+	// 	return {
+	// 		secret: bufferToBase32(secret),
+	// 		link: linkTOTPSecret(secret, 'MyApp', 'MyLabel'),
+	// 	};
+	// }
 
-	@Get('/test/totp/get')
-	async verifyTOTP(@Query('buffer') buffer: string) {
-		return { code: getTOTP(base32ToBuffer(buffer), 6, 30, 'sha1') };
-	}
+	// @Get('/test/totp/get')
+	// async verifyTOTP(@Query('buffer') buffer: string) {
+	// 	return { code: getTOTP(base32ToBuffer(buffer), 6, 30, 'sha1') };
+	// }
 
 	// ---------------------- 2FA Endpoints ----------------------
 
@@ -363,7 +360,16 @@ export class AuthController {
 		@Req() req: AuthenticatedRequest,
 		@Res() res: FastifyReply,
 	) {
-		const tokens = await this.authService.updateUsername(req.user.id, dto.username);
+		const username = dto.username.trim();
+
+		if (username === '') {
+			throw new BadRequestException('Username cannot be empty');
+		}
+
+		if (username.length < 3) {
+			throw new BadRequestException('Username must be at least 3 characters long');
+		}
+		const tokens = await this.authService.updateUsername(req.user.id, username);
 		this.setAuthCookies(res, tokens);
 		return { success: true, message: 'Username updated successfully' };
 	}

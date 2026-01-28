@@ -7,12 +7,12 @@ import {
 } from 'my-fastify-decorators';
 import config from '../config.js';
 import {
-	hashPassword,
-	verifyPassword,
-	generateTOTPSecret,
-	bufferToBase32,
 	base32ToBuffer,
+	bufferToBase32,
+	generateTOTPSecret,
+	hashPassword,
 	linkTOTPSecret,
+	verifyPassword,
 	verifyTOTP,
 } from '../utils/crypto.js';
 import { DbExchangeService } from './dbExchange.service.js';
@@ -323,6 +323,18 @@ export class AuthService {
 
 
 	async addUsername(userId: number, username: string): Promise<AuthTokens> {
+		username = username.trim();
+
+		if (username === '') {
+			throw new BadRequestException('Username cannot be empty');
+		}
+
+		if (username.length < 3) {
+			throw new BadRequestException('Username must be at least 3 characters long');
+		}
+		
+		// console.log(userId, username);
+
 		if (await this.dbExchange.getUserByUsername(username)) {
 			throw new UnauthorizedException('Username already exists');
 		}
@@ -524,6 +536,17 @@ export class AuthService {
 	}
 
 	async updateUsername(userId: number, newUsername: string): Promise<AuthTokens> {
+		newUsername = newUsername.trim();
+
+		if (newUsername === '') {
+			throw new BadRequestException('Username cannot be empty');
+		}
+
+		if (newUsername.length < 3) {
+			throw new BadRequestException('Username must be at least 3 characters long');
+		}
+		
+		
 		const existingUser = await this.dbExchange.getUserByUsername(newUsername);
 		if (existingUser && existingUser.id !== userId) {
 			throw new UnauthorizedException('Username already exists');
