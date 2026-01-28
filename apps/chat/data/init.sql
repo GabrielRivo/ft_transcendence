@@ -1,0 +1,86 @@
+
+CREATE TABLE IF NOT EXISTS friends (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER NOT NULL,
+    otherId INTEGER NOT NULL,
+    status TEXT CHECK(status IN ('pending', 'accepted')) NOT NULL DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_friends_symmetry ON friends ((MIN(userId, otherId)), (MAX(userId, otherId)));
+
+CREATE TABLE IF NOT EXISTS blocklist (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER NOT NULL,
+    otherId INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT no_self_block CHECK (userId <> otherId)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_block_unique ON blocklist (userId, otherId);
+
+CREATE TABLE IF NOT EXISTS matchHistory (
+    gameId INTEGER PRIMARY KEY,
+    userId1 INTEGER NOT NULL, 
+    userId2 INTEGER NOT NULL,
+    scoreUser1 INTEGER NOT NULL,
+    scoreUser2 INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS generalChatHistory(
+    msgId INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId INTEGER,
+    username VARCHAR(255 ) DEFAULT 'Unknown',
+    msgContent VARCHAR(5000),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS privateChatHistory(
+    msgId INTEGER PRIMARY KEY AUTOINCREMENT,
+    userId1 INTEGER NOT NULL,
+    userId2 INTEGER NOT NULL,
+    senderId INTEGER NOT NULL,
+    msgContent VARCHAR(5000),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS privateGroup ( --delete
+    groupId INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    ownerId INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS groupMembers (
+    groupId INTEGER NOT NULL,
+    userId INTEGER NOT NULL,
+    joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (groupId, userId),
+    FOREIGN KEY (groupId) REFERENCES privateGroup(groupId) ON DELETE CASCADE
+);
+
+
+CREATE TABLE IF NOT EXISTS groupChatHistory(
+    msgId INTEGER PRIMARY KEY,
+    groupId INTEGER NOT NULL,
+    userId INTEGER,
+    msgContent VARCHAR(5000),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (groupId) REFERENCES privateGroup(groupId) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS tournamentChatHistory(
+    chatId INTEGER PRIMARY KEY,
+    msgId INTEGER NOT NULL,
+    userId INTEGER NOT NULL,
+    msgContent VARCHAR(5000),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS tournamentChatLink(
+    tournamentId INTEGER PRIMARY KEY,
+    chatId INTEGER NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
