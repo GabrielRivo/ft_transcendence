@@ -9,6 +9,10 @@ import rabbitmqPlugin from './plugins/rabbitmq-plugin.js';
 
 const app = Fastify({ logger: true, routerOptions: { ignoreTrailingSlash: true } });
 
+app.get('/health', async () => {
+	return { status: 'ok' };
+});
+
 const AjvCtor: any = (Ajv as any).default ?? Ajv;
 const addAjvErrors: any = (ajvErrors as any).default ?? ajvErrors;
 const ajv = new AjvCtor({ allErrors: true, $data: true, messages: true, coerceTypes: true } as any);

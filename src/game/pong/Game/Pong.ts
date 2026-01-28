@@ -79,7 +79,7 @@ class Pong extends Game {
         this.services.Scene = new Scene(this.services.Engine!);
         this.services.Dimensions = new Vector2(this.width, this.height);
 
-        this.inputManager = new InputManager(this.services, this);
+        this.inputManager = new InputManager(this);
         this.truthManager = new TruthManager(this.services, this);
 
         this.services.EventBus!.on("DeathBarHit", this.onDeathBarHit);

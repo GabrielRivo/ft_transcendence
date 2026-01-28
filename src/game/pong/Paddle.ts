@@ -1,5 +1,5 @@
 
-import {Vector3, Mesh, MeshBuilder, StandardMaterial, Color3, PickingInfo, Quaternion} from "@babylonjs/core";
+import { Vector3, MeshBuilder, StandardMaterial, Color3 } from "@babylonjs/core";
 import Services from "./Services/Services.js";
 import { OwnedMesh } from "./globalType.js";
 import Ball from "./Ball.js";
@@ -14,27 +14,27 @@ class Paddle {
     trigger3: OwnedMesh<Paddle>;
     direction: Vector3 = new Vector3(0, 0, 0);
     modelDirection: Vector3 = new Vector3(0, 1, 0).normalize();
-    speed : number = 4;
+    speed: number = 4;
     owner: any;
 
     constructor(services: Services, owner?: any) {
         this.services = services;
-        this.model = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15});
+        this.model = MeshBuilder.CreateBox("paddle", { size: 0.15, width: 1.2, height: 0.15 });
 
-        let subPaddle : OwnedMesh;
-        for (let i=0; i < 5; i++) {
-            subPaddle = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 - (i+1)*0.1 , height: 0.15});
+        let subPaddle: OwnedMesh;
+        for (let i = 0; i < 5; i++) {
+            subPaddle = MeshBuilder.CreateBox("paddle", { size: 0.15, width: 1.2 - (i + 1) * 0.1, height: 0.15 });
             subPaddle.parent = this.model;
             subPaddle.owner = this;
             this.services.Collision!.add(subPaddle);
             subPaddle.visibility = 0;
         }
 
-        this.trigger1 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
-        this.trigger2 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
-        this.trigger3 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
+        this.trigger1 = MeshBuilder.CreateBox("paddleTrigger", { size: 0.15, width: 7, height: 0.15 });
+        this.trigger2 = MeshBuilder.CreateBox("paddleTrigger", { size: 0.15, width: 7, height: 0.15 });
+        this.trigger3 = MeshBuilder.CreateBox("paddleTrigger", { size: 0.15, width: 7, height: 0.15 });
 
-		// this.model = MeshBuilder.CreateBox("paddle", {size: 0.30, width: 5.0 , height: 0.30});
+        // this.model = MeshBuilder.CreateBox("paddle", {size: 0.30, width: 5.0 , height: 0.30});
         let material = new StandardMaterial("playerMat", this.services.Scene);
         material.emissiveColor = new Color3(0.8, 0, 0.2);
         this.model.material = material;
@@ -61,20 +61,20 @@ class Paddle {
     setDirection(direction: Vector3) {
         this.direction = direction;
     }
-	getDirection() : Vector3 {
-		return this.direction.clone();
-	}
+    getDirection(): Vector3 {
+        return this.direction.clone();
+    }
     setModelDirection(modelDirection: Vector3) {
         this.modelDirection = modelDirection;
         this.model.setDirection(modelDirection);
     }
-	getModelDirection() : Vector3 {
-		return this.modelDirection;
-	}
+    getModelDirection(): Vector3 {
+        return this.modelDirection;
+    }
 
-    getPosition() : Vector3 {
-		return this.model.position.clone();
-	}
+    getPosition(): Vector3 {
+        return this.model.position.clone();
+    }
     setPosition(position: Vector3) {
         this.model.position.copyFrom(position);
     }
@@ -97,25 +97,25 @@ class Paddle {
 
     move(deltaT: number) {
         deltaT = deltaT / 1000;
-        const basePos : Vector3 = this.model.position.clone();
-        const distance : number = this.speed * deltaT;
-        const displacement : Vector3 = this.direction.scale(distance);
-        let newPos : Vector3 = basePos.add(displacement);
+        const basePos: Vector3 = this.model.position.clone();
+        const distance: number = this.speed * deltaT;
+        const displacement: Vector3 = this.direction.scale(distance);
+        let newPos: Vector3 = basePos.add(displacement);
 
         const playerBox = this.model.getBoundingInfo().boundingBox.extendSize;
         const maxX = this.services.Dimensions!.x / 2 - playerBox.x;
-        
+
         newPos.x = Math.min(Math.max(newPos.x, -maxX), maxX);
         this.model.position.copyFrom(newPos);
     }
-    
-    onBallHit(ball: Ball) {
-        let abstractPaddlePos : Vector3 = new Vector3(this.model.position.x, 0, this.model.position.z).add(this.modelDirection.scale(-0.225));
-        let abstractBallPos : Vector3 = new Vector3(ball.position.x, 0, ball.position.z);
-        let newDir : Vector3 = abstractBallPos.subtract(abstractPaddlePos).normalize();
 
-        let angle : number = Math.acos(Vector3.Dot(this.modelDirection, newDir));
-        let cross : number = this.modelDirection.x * newDir.z - this.modelDirection.z * newDir.x;
+    onBallHit(ball: Ball) {
+        let abstractPaddlePos: Vector3 = new Vector3(this.model.position.x, 0, this.model.position.z).add(this.modelDirection.scale(-0.225));
+        let abstractBallPos: Vector3 = new Vector3(ball.position.x, 0, ball.position.z);
+        let newDir: Vector3 = abstractBallPos.subtract(abstractPaddlePos).normalize();
+
+        let angle: number = Math.acos(Vector3.Dot(this.modelDirection, newDir));
+        let cross: number = this.modelDirection.x * newDir.z - this.modelDirection.z * newDir.x;
         angle = cross >= 0 ? angle : -angle;
 
 

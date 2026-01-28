@@ -1,5 +1,5 @@
 
-import { Mesh, Vector3 } from "@babylonjs/core";
+import { Vector3 } from "@babylonjs/core";
 
 class MathUtils {
     static reflectVector(toreflect: Vector3, normal: Vector3): Vector3 {
@@ -12,14 +12,14 @@ class MathUtils {
     }
 
     static rotateOnXZ(forward: Vector3, angle: number) {
-    const cos = Math.cos(angle);
-    const sin = Math.sin(angle);
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
 
-    const x = forward.x * cos - forward.z * sin;
-    const z = forward.x * sin + forward.z * cos;
+        const x = forward.x * cos - forward.z * sin;
+        const z = forward.x * sin + forward.z * cos;
 
-    return new Vector3(x, 0, z).normalize();
-}
+        return new Vector3(x, 0, z).normalize();
+    }
 }
 
 export default MathUtils;

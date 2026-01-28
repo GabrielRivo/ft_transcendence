@@ -1,11 +1,9 @@
-
-import { Vector3 } from "@babylonjs/core";
 import Services from "../Services/Services.js";
 import History from "../Utils/History.js";
 import type { GameState, PlayerDirectionData } from "../globalType.js";
 import Pong from "./Pong.js";
 import InputManager from "../InputManager.js";
-import Player, { NONE } from "../Player.js";
+import Player from "../Player.js";
 
 class TruthManager {
     private game: Pong;
@@ -26,7 +24,7 @@ class TruthManager {
         this.inputManager = this.game.inputManager!;
         this.p1InputBuffer = this.inputManager.getP1InputBuffer();
         this.p2InputBuffer = this.inputManager.getP2InputBuffer();
-        
+
         this.services = services;
         this.serverGameStateHistory = new History<GameState>(60);
 
@@ -38,7 +36,7 @@ class TruthManager {
     }
 
     resetLastFrameTime(): void {
-        this.lastFrameTime =this.services.TimeService!.getTimestamp();
+        this.lastFrameTime = this.services.TimeService!.getTimestamp();
     }
 
     private getGameState(game: Pong): GameState {
@@ -86,17 +84,17 @@ class TruthManager {
     // }
 
     public computeState(lastFrameTime: number, currentTime: number)/*: GameState*/ {
-        const p1 : Player = this.game.player1!;
-        const p2 : Player = this.game.player2!;
+        const p1: Player = this.game.player1!;
+        const p2: Player = this.game.player2!;
         const ball = this.game.ball!;
 
         let p1Inputs = this.p1InputBuffer.getStatesInRange(lastFrameTime, currentTime);
         let p2Inputs = this.p2InputBuffer.getStatesInRange(lastFrameTime, currentTime);
-        
+
         let p1Index = 0;
         let p2Index = 0;
 
-        let deltaT : number;
+        let deltaT: number;
 
         /*let firstInputP1 = this.p1InputBuffer.getClosestState(lastFrameTime, 3000);
             if (firstInputP1) {
@@ -146,9 +144,9 @@ class TruthManager {
             }
 
             deltaT = nextEventTime - lastFrameTime;
-            
+
             if (deltaT > 0) {
-                ball.update(nextEventTime, deltaT, p1.paddle, p2.paddle, lastFrameTime);
+                ball.update(nextEventTime, deltaT, p1.paddle, p2.paddle);
                 p1.update(deltaT);
                 p2.update(deltaT);
             }
@@ -167,7 +165,7 @@ class TruthManager {
 
         deltaT = currentTime - lastFrameTime;
         if (deltaT > 0) {
-            ball.update(currentTime, deltaT, p1.paddle, p2.paddle, lastFrameTime);
+            ball.update(currentTime, deltaT, p1.paddle, p2.paddle);
             p1.update(deltaT);
             p2.update(deltaT);
         }
@@ -179,7 +177,7 @@ class TruthManager {
         this.services.TimeService!.update();
         const game = this.game;
         const time = this.services.TimeService!.getTimestamp();
-        
+
         this.deltaT = time - this.lastFrameTime;
 
         if (this.deltaT >= this.frameDuration) {
@@ -190,7 +188,7 @@ class TruthManager {
             // this.computePlayerInputs(this.game.player2!, p2Inputs, this.lastFrameTime, time);
 
             this.computeState(this.lastFrameTime, time);
-            
+
             //game.player1!.update(this.deltaT);
             //game.player2!.update(this.deltaT);
             //game.ball!.update(this.deltaT, game.player1!.paddle, game.player2!.paddle);
@@ -201,7 +199,7 @@ class TruthManager {
             this.game.sendGameState();
 
             this.serverGameStateHistory.addState(this.getGameState(game));
-            
+
             //console.log("Gamestate at time ", time, ": ", this.getGameState(game));
 
             this.lastFrameTime = time;

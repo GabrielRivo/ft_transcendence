@@ -1,9 +1,7 @@
 
-import {Vector3, Mesh, MeshBuilder, StandardMaterial, Color3, Color4 } from "@babylonjs/core";
-import Game from "./Game/Game.js";
+import { Vector3 } from "@babylonjs/core";
 import DeathBar from "./DeathBar.js";
 import Paddle from "./Paddle.js";
-import { OwnedMesh } from "./globalType.js";
 import Services from "./Services/Services.js";
 
 let idDefault = 0;
@@ -25,13 +23,13 @@ type input = {
 
 class Player {
     private services: Services;
-    
+
     id: string;
     paddle: Paddle;
     deathBar: DeathBar;
     direction: Vector3 = new Vector3(0, 0, 0);
-    input: input = {left: false, right: false};
-    speed : number = 7;
+    input: input = { left: false, right: false };
+    speed: number = 7;
     score: number = 0;
 
     hitCount: number = 0;
@@ -64,7 +62,7 @@ class Player {
     setPaddleDirection(direction: Vector3) {
         this.paddle.setDirection(direction);
     }
-    setPaddleDirectionFromKeyboard(direction : Movement, isPressed : boolean) {
+    setPaddleDirectionFromKeyboard(direction: Movement, isPressed: boolean) {
         if (this.input[direction] === isPressed)
             return;
         this.input[direction] = isPressed;
@@ -82,11 +80,11 @@ class Player {
         this.paddle.setDirection(this.direction);
     }
 
-    scoreUp(value ?: number) {
+    scoreUp(value?: number) {
         this.score += value ?? 1;
         //console.log("Player " + this.id + " score: " + this.score);
     }
-    scoreDown(value ?: number) {
+    scoreDown(value?: number) {
         this.score -= value ?? 1;
         //console.log("Player " + this.id + " score: " + this.score);
     }
