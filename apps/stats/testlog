@@ -1,0 +1,12 @@
+
+negative  for game_id / sans game id / doublons 
+negative id for player1_id / user doesn't exist / sans user id
+negative score / sans score
+negative winner_id / unmatch / sans winner id
+negative game duration / sans game duration
+false game type / sans game type
+
+
+
+sans tournament id : on peut enregistrer une partie en mode tournois OK 
+is final fait planter s'il n'est pas là OK

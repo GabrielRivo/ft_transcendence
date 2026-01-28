@@ -1,0 +1,180 @@
+### -----------------------
+### SECTION LECTURE (GET)
+### -----------------------
+
+### Get stats player 1
+GET http://localhost:3000/stats/user/1
+Accept: application/json
+
+### Get stats player 2
+GET http://localhost:3000/stats/user/2
+Accept: application/json
+
+### Get player history
+GET http://localhost:3000/match-history/user/1
+Accept: application/json
+
+
+### Register a match (Standard Ranked - No Tournament)
+POST http://localhost:3000/match-history/add
+Content-Type: application/json
+
+{
+    "game_id" : 1,
+    "player1_id": 1,
+    "player2_id": 2,
+    "score_player1": 8,
+    "score_player2": 5,
+    "winner_id" : 1,
+    "duration_seconds" : 500,
+    "game_type" : "ranked",
+    "tournament_id": -1,
+    "is_final": false
+}
+
+
+### Register a match (Ranked - Player 2 Wins)
+POST http://localhost:3000/match-history/add
+Content-Type: application/json
+
+{
+    "game_id" : 4,
+    "player1_id": 2,
+    "player2_id": 3,
+    "score_player1": 8,
+    "score_player2": 5,
+    "winner_id" : 2,
+    "duration_seconds" : 500,
+    "game_type" : "ranked",
+    "tournament_id": -1,
+    "is_final": false
+}
+
+### Register a match (Ranked - Revanche)
+POST http://localhost:3000/match-history/add
+Content-Type: application/json
+
+{
+    "game_id" : 1,
+    "player1_id": 2,
+    "player2_id": 1,
+    "score_player1": 8,
+    "score_player2": 5,
+    "winner_id" : 2,
+    "duration_seconds" : 500,
+    "game_type" : "ranked",
+    "hit_player1": 6,
+    "hit_player2": 8, 
+    "gain_player1" : 52,
+    "gain_player2" : 5,
+    "is_final": false
+}
+
+### Register a match Ranked needs gain value(!ranked + gain)
+POST http://localhost:3000/match-history/add
+Content-Type: application/json
+
+{
+    "tournament_id": 900,
+    "game_id" : 1,
+    "player1_id": 2,
+    "player2_id": 1,
+    "score_player1": 1,
+    "score_player2": 5,
+    "winner_id" : 2,
+    "duration_seconds" : 500,
+    "game_type" : "tournament",
+    "hit_player1": 6,
+    "hit_player2": 8, 
+    "gain_player1" : 52,
+    "gain_player2" : 5,
+    "is_final": false
+}
+
+### Register a match (true)
+POST http://localhost:3000/match-history/add
+Content-Type: application/json
+
+{
+    "game_id" : 5,
+    "player1_id": 1,
+    "player2_id": 2,
+    "score_player1": 0,
+    "score_player2": 2,
+    "winner_id" : 2,
+    "duration_seconds" : 3600,
+    "game_type" : "ranked",
+    "hit_player1": 6,
+    "hit_player2": 8, 
+    "gain_player1" : 52,
+    "gain_player2" : 5,
+    "is_final": false
+}
+
+### Register a match (Tournament - Not Final)
+POST http://localhost:3000/match-history/add
+Content-Type: application/json
+
+{
+    "tournament_id": 90,
+    "game_id" : 103,
+    "player1_id": 1,
+    "player2_id": 2,
+    "score_player1": 11,
+    "score_player2": 5,
+    "winner_id" : 1,
+    "duration_seconds" : 300,
+    "game_type" : "tournament",
+    "tournament_id": 900,
+    "is_final": false
+}
+
+### Register a match (Tournament - FINAL)
+POST http://localhost:3000/match-history/add
+Content-Type: application/json
+
+{
+    "game_id": 60,
+    "player1_id": 1,
+    "player2_id": 2,
+    "score_player1": 11,
+    "score_player2": 9,
+    "winner_id": 1,
+    "duration_seconds": 300,
+    "game_type": "tournament",
+    "tournament_id": 900,
+    "is_final": true
+}
+
+### Register a match false tournament
+POST http://localhost:3000/match-history/add
+Content-Type: application/json
+
+{
+    "game_id": 600,
+    "player1_id": 1,
+    "player2_id": 2,
+    "score_player1": 11,
+    "score_player2": 9,
+    "winner_id": 1,
+    "duration_seconds": 300,
+    "game_type": "tournament",
+    "tournament_id": 90,
+    "is_final": true
+}
+
+### mumuse
+POST http://localhost:3000/match-history/add
+Content-Type: application/json
+
+{
+    "game_id": 3458555,
+    "player1_id": 1,
+    "player2_id": 2,
+    "score_player1": 1,
+    "score_player2": 90,
+    "winner_id": 2,
+    "duration_seconds": 1,
+    "game_type": "ranked"
+
+}
