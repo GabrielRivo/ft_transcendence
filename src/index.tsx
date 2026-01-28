@@ -107,6 +107,8 @@ export function Router({ groups, NoFound }: { groups: RouteGroup[], NoFound?: El
 
       const result = findMatch(groups, []);
 
+      // console.log("Matched Route :", result?.matchedRoute ? result.matchedRoute.path : "None");
+
       return result || { matchedRoute: null, matchedParams: {}, layouts: [] };
   }, [currentPath, groups]);
 
