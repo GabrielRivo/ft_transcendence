@@ -89,7 +89,7 @@ function ErrorOverlay({ message, onRetry }: { message: string; onRetry: () => vo
 					className="group relative overflow-hidden rounded-lg border-2 border-cyan-500 bg-cyan-500/10 px-8 py-3 font-bold text-cyan-400 transition-all duration-300 hover:bg-cyan-500/30 hover:text-white hover:shadow-[0_0_20px_rgba(34,211,238,0.4)]"
 				>
 					<span className="relative z-10">TRY AGAIN</span>
-					<div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
+					<div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-cyan-500/20 to-transparent transition-transform duration-500 group-hover:translate-x-full" />
 				</button>
 
 				{/* Additional info */}
