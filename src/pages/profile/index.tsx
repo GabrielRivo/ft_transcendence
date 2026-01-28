@@ -569,7 +569,7 @@ export function ProfilePage() {
 													disabled={!user?.email || user?.email == ''}
 													value={currentPassword}
 													onInput={(e: Event) => setCurrentPassword((e.target as HTMLInputElement).value)}
-													placeholder="Current passeword"
+													placeholder="Current password"
 													className="w-full rounded-sm border border-white/10 bg-transparent p-2 text-sm text-white outline-none focus:border-purple-500/50"
 												/>
 												<input
@@ -577,7 +577,7 @@ export function ProfilePage() {
 													disabled={!user?.email || user?.email == ''}
 													value={newPassword}
 													onInput={(e: Event) => setNewPassword((e.target as HTMLInputElement).value)}
-													placeholder="New passeword"
+													placeholder="New password"
 													className="w-full rounded-sm border border-white/10 bg-transparent p-2 text-sm text-white outline-none focus:border-purple-500/50"
 												/>
 												<input

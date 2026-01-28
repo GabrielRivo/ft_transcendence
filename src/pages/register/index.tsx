@@ -95,7 +95,7 @@ export function Register() {
 									htmlFor="password"
 									className="font-pirulen text-xs tracking-wider text-gray-400 transition-colors group-focus-within:text-white"
 								>
-									Passeword
+									Password
 								</label>
 								<input
 									type="password"
@@ -113,7 +113,7 @@ export function Register() {
 									htmlFor="confirmPassword"
 									className="font-pirulen text-xs tracking-wider text-gray-400 transition-colors group-focus-within:text-white"
 								>
-									Confirme passeword
+									Confirm password
 								</label>
 								<input
 									type="password"

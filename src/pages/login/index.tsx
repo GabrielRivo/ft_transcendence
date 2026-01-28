@@ -41,7 +41,7 @@ export function Login() {
 				toast('Connection success', 'success');
 				navigate('/play');
 			} else {
-				toast('Mail or passeword incorrect', 'error');
+				toast('Mail or password incorrect', 'error');
 			}
 		} catch {
 			toast('An error has occurred', 'error');
@@ -103,7 +103,7 @@ export function Login() {
 							</div>
 							<div className="mt-4 flex flex-col justify-center gap-2">
 								<Link to="/forgot-password" className="text-secondary hover:text-neon-blue">
-									Forgot passeword
+									Forgot password
 								</Link>
 								<ButtonStyle4 type="submit">{isLoading ? 'CONNEXION...' : 'Connect'}</ButtonStyle4>
 								<ButtonStyle3 onClick={handleClickReturn}>Return</ButtonStyle3>
