@@ -39,9 +39,9 @@ async function dbConnector(fastify: FastifyInstance) {
 				.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
 				.all() as { name: string }[];
 
-			console.log('\n--- DATABASE VISUALIZER ---');
+			// console.log('\n--- DATABASE VISUALIZER ---');
 			tables.forEach((table) => {
-				console.log(`\nTable: ${table.name}`);
+				// console.log(`\nTable: ${table.name}`);
 				const rows = db.prepare(`SELECT * FROM ${table.name}`).all();
 				if (rows.length > 0) {
 					console.table(rows);
@@ -51,10 +51,10 @@ async function dbConnector(fastify: FastifyInstance) {
 					}[];
 					const emptyRow = columns.reduce((acc, col) => ({ ...acc, [col.name]: '<vide>' }), {});
 					console.table([emptyRow]);
-					console.log('(Table vide)');
+					// console.log('(Table vide)');
 				}
 			});
-			console.log('-------------------------------\n');
+			// console.log('-------------------------------\n');
 		}
 	} catch (error) {
 		// console.error(error);

@@ -138,7 +138,7 @@ export class UserHistoryService {
 			console.error('[AddHistory', `Player ${player2_id} doesn't exist`)
 			return ;
 		}
-		console.log("winner = ", winner_id)
+		// console.log("winner = ", winner_id)
 		const finalStatus = game_type === 'ranked' ? false : is_final;
 	
 		const p1Stats = {
