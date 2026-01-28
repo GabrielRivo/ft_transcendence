@@ -1,0 +1,28 @@
+{
+  "name": "my-react-router",
+  "version": "0.1.0",
+  "description": "My React",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "my-react": "workspace:*"
+  },
+  "files": [
+    "dist",
+    "src/types"
+  ],
+  "license": "MIT"
+}
