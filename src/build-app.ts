@@ -15,6 +15,10 @@ export function buildApp(options: { dbPath?: string } = {}) {
 		},
 	});
 
+	app.get('/health', async () => {
+		return { status: 'ok' };
+	});
+
 	const addAjvErrors = ajvErrors.default;
 	const ajv = new Ajv.default({ allErrors: true, $data: true, messages: true, coerceTypes: true });
 	addAjvErrors.default(ajv);

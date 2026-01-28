@@ -1,0 +1,77 @@
+# =============================================================================
+# Stage 1: Builder - Installation des dépendances et compilation
+# =============================================================================
+FROM node:24-alpine AS builder
+
+# Build tools pour better-sqlite3
+RUN apk add --no-cache python3 make g++ git
+
+# Installation pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Copie des fichiers de dépendances (layer cache)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/my-fastify-decorators/package.json ./packages/my-fastify-decorators/
+COPY packages/my-class-validator/package.json ./packages/my-class-validator/
+COPY packages/my-fastify-decorators-microservices/package.json ./packages/my-fastify-decorators-microservices/
+COPY apps/stats/package.json ./apps/stats/
+
+# Installation des dépendances
+RUN pnpm install --frozen-lockfile
+
+# Copie et build des packages
+COPY packages/my-fastify-decorators ./packages/my-fastify-decorators
+COPY packages/my-class-validator ./packages/my-class-validator
+COPY packages/my-fastify-decorators-microservices ./packages/my-fastify-decorators-microservices
+RUN pnpm --filter my-fastify-decorators run build
+RUN pnpm --filter my-class-validator run build
+RUN pnpm --filter my-fastify-decorators-microservices run build
+
+# Copie et build de l'application
+COPY apps/stats ./apps/stats
+RUN pnpm --filter stats run build
+
+# Prune dev dependencies
+ENV CI=true
+# RUN pnpm prune --prod
+
+# =============================================================================
+# Stage 2: Production - Image minimale
+# =============================================================================
+FROM node:24-alpine AS production
+
+# Labels OCI
+LABEL org.opencontainers.image.title="ft_transcendence Stats Service"
+LABEL org.opencontainers.image.description="Stats microservice in production mode"
+LABEL org.opencontainers.image.authors="ft_transcendence team"
+
+# Créer un utilisateur non-root
+RUN addgroup -g 1001 appgroup && adduser -u 1001 -G appgroup -s /bin/sh -D appuser
+
+WORKDIR /app/apps/stats
+
+# Copie des artefacts du builder
+COPY --from=builder --chown=appuser:appgroup /app/node_modules /app/node_modules
+COPY --from=builder --chown=appuser:appgroup /app/packages /app/packages
+COPY --from=builder --chown=appuser:appgroup /app/apps/stats/dist ./dist
+COPY --from=builder --chown=appuser:appgroup /app/apps/stats/package.json ./
+COPY --from=builder --chown=appuser:appgroup /app/apps/stats/node_modules ./node_modules
+COPY --from=builder --chown=appuser:appgroup /app/apps/stats/data ./data
+
+# Créer le dossier db avec les bonnes permissions
+RUN mkdir -p db && chown -R appuser:appgroup db
+
+# Variables d'environnement
+ENV NODE_ENV=production
+
+# Utilisateur non-root
+USER appuser
+
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
+CMD ["node", "dist/src/index.js"]
