@@ -118,6 +118,10 @@ export interface CreateGameInput {
 	 * Type of the game (e.g., 'ranked', 'friend').
 	 */
 	type: 'local' | 'tournament' | 'ranked' | 'friend';
+
+	tournamentId?: string;
+
+	isFinal?: boolean;
 }
 
 // =============================================================================
@@ -286,6 +290,8 @@ export class GameService {
 				player1Id: input.player1Id,
 				player2Id: input.player2Id,
 				type: input.type,
+				tournamentId: input.tournamentId,
+				isFinal: input.isFinal,
 			}),
 		});
 
