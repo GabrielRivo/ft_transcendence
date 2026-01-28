@@ -115,19 +115,19 @@ export function useGroups() {
 	}, []);
 
 	// Ajouter un membre au groupe
-	const addMember = useCallback(async (groupId: number, userId: number): Promise<GroupResult> => {
+	const addMember = useCallback(async (groupId: number, otherId: number): Promise<GroupResult> => {
 		if (!user || user?.isGuest) return { success: false, message: 'Not authenticated' };
 
 		try {
-			const response = await fetchWithAuth(`${API_BASE}/add-member`, {
+			const response = await fetchWithAuth(`${API_BASE}/add_user`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({
 					groupId,
-					userId,
-					inviterId: user.id,
+					userId: user.id,
+					otherId,
 				}),
 			});
 
@@ -143,7 +143,7 @@ export function useGroups() {
 		if (!user || user?.isGuest) return { success: false, message: 'Not authenticated' };
 
 		try {
-			const response = await fetchWithAuth(`${API_BASE}/remove-member`, {
+			const response = await fetchWithAuth(`${API_BASE}/remove_member`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ export function useGroups() {
 				body: JSON.stringify({
 					groupId,
 					userId: user.id,
-					removerId: user.id,
+					otherId: user.id,
 				}),
 			});
 

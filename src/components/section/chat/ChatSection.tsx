@@ -6,13 +6,14 @@ import { useGroups } from '../../../hook/useGroups';
 import { ChatSidebarPanel } from './ChatSidebarPanel';
 import { ChatMessagesPanel } from './ChatMessagesPanel';
 import { OnlineUsersPanel } from './OnlineUsersPanel';
+import { useToast } from '@hook/useToast';
 
 export function ChatSection() {
 	const { connected, currentRoom, messages, sendMessage, joinRoom, joinPrivateRoom, joinGroupRoom } =
 		useChat();
 	const { friends, loading: friendsLoading, removeFriend } = useFriends();
-	const { groups, loading: groupsLoading } = useGroups();
-
+	const { groups, loading: groupsLoading, addMember, leaveGroup } = useGroups();
+	const { toast } = useToast();
 	const handleSelectHub = () => {
 		joinRoom('hub');
 	};
@@ -29,8 +30,7 @@ export function ChatSection() {
 
 	const handleJoinTournament = async (tournamentId: string) => {
 		try {
-			// const { fetchJsonWithAuth } = await import('@libs/fetchWithAuth');
-			const { fetchJsonWithAuth } = await import('../../../libs/fetchWithAuth'); // Try relative path just in case, or keep alias if it works
+			const { fetchJsonWithAuth } = await import('../../../libs/fetchWithAuth');
 			const response = await fetchJsonWithAuth(`/api/tournament/${tournamentId}/join`, {
 				method: 'POST',
 				body: JSON.stringify({}),
@@ -51,7 +51,6 @@ export function ChatSection() {
 
 	return (
 		<div className="ff-dashboard-chat-safe grid h-full w-full origin-left -rotate-y-12 grid-cols-6 gap-1 p-4 transform-3d">
-			{/* Sidebar - Amis/Groupes */}
 			<div className="ff-dashboard-panel-enter ff-dashboard-panel-enter--delay-2 col-span-1 h-full min-h-0">
 				<ChatSidebarPanel
 					currentRoom={currentRoom}
@@ -74,9 +73,22 @@ export function ChatSection() {
 					connected={connected}
 					onSendMessage={sendMessage}
 					isGroup={currentRoom.startsWith('group_')}
-					onInviteUser={(userId) => {
-						// TODO: Implémenter l'invitation au groupe
-						console.log('Invite user:', userId);
+					onInviteUser={async (userId) => {
+						if (!currentRoom.startsWith('group_')) return;
+						const groupId = parseInt(currentRoom.replace('group_', ''), 10);
+						const result = await addMember(groupId, userId);
+						toast(result.message || (result.success ? 'Invitation envoyée' : 'Erreur'), 
+							result.success ? 'success' : 'error', 3000);
+					}}
+					onLeaveGroup={async () => {
+						if (!currentRoom.startsWith('group_')) return;
+						const groupId = parseInt(currentRoom.replace('group_', ''), 10);
+						const result = await leaveGroup(groupId);
+						toast(result.message || (result.success ? 'Vous avez quitté le groupe' : 'Erreur'), 
+							result.success ? 'success' : 'error', 3000);
+						if (result.success) {
+							joinRoom('hub');
+						}
 					}}
 					onJoinTournament={handleJoinTournament}
 				/>
