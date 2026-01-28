@@ -49,6 +49,12 @@ class BadGatewayException extends HttpException {
 	}
 }
 
+class TooManyRequestsException extends HttpException {
+	constructor(message = 'Too Many Requests', payload?: unknown) {
+		super(message, 429, payload);
+	}
+}
+
 class BadRequestException extends HttpException {
 	constructor(message = 'Bad Request', payload?: unknown) {
 		super(message, 400, payload);
@@ -353,7 +359,11 @@ export class AuthService {
 
 		const expiresAt = new Date(Date.now() + config.jwt.refreshTokenRotation).toISOString();
 
-		await this.dbExchange.storeRefreshToken(userId, refreshToken, expiresAt);
+		try {
+			await this.dbExchange.storeRefreshToken(userId, refreshToken, expiresAt);
+		} catch (error) {
+			throw new TooManyRequestsException('Stop Spamming refresh Token Generation !');
+		}
 
 		return { accessToken, refreshToken };
 	}

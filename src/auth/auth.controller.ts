@@ -7,8 +7,7 @@ import {
 	Delete,
 	Get,
 	Inject,
-	InjectPlugin,
-	NotFoundException,
+	JWTBody,
 	Param,
 	Patch,
 	Post,
@@ -21,7 +20,6 @@ import {
 
 import config from '../config.js';
 import { AuthService, AuthTokens, JwtPayload } from './auth.service.js';
-import { DbExchangeService } from './dbExchange.service.js';
 
 import { ChangeEmailDto, ChangeEmailSchema } from './dto/changeEmail.dto.js';
 import { ChangePasswordDto, ChangePasswordSchema } from './dto/changePassword.dto.js';
@@ -34,7 +32,6 @@ import { SetUsernameDto, SetUsernameSchema } from './dto/setUsername.dto.js';
 import { TwoFAVerifyDto, TwoFAVerifySchema } from './dto/twofa.dto.js';
 import { VerifyResetOtpDto, VerifyResetOtpSchema } from './dto/verifyResetOtp.dto.js';
 
-import { RabbitMQClient } from 'my-fastify-decorators-microservices';
 import { AuthGuard } from './guards/auth.guard.js';
 import type { ProviderKeys } from './providers.js';
 import { providers } from './providers.js';
@@ -48,13 +45,6 @@ interface AuthenticatedRequest extends FastifyRequest {
 export class AuthController {
 	@Inject(AuthService)
 	private authService!: AuthService;
-
-	@InjectPlugin('mq')
-	private mq!: RabbitMQClient;
-
-	// Warning: a delete plus tard
-	@Inject(DbExchangeService)
-	private dbExchangeService!: DbExchangeService;
 
 	private setAuthCookies(res: FastifyReply, tokens: AuthTokens): void {
 		res.setCookie(config.accessTokenName, tokens.accessToken, {
@@ -76,8 +66,10 @@ export class AuthController {
 
 	@Post('/register')
 	@BodySchema(RegisterSchema)
-	async register(@Body() dto: RegisterDto, @Res() res: FastifyReply) {
-		console.log("A");
+	async register(@Body() dto: RegisterDto, @Res() res: FastifyReply, @JWTBody() jwt: { id : number}) {
+		if (jwt?.id) {
+			throw new UnauthorizedException('User already logged in');
+		}
 		const tokens = await this.authService.register(dto);
 		this.setAuthCookies(res, tokens);
 		return { success: true, message: 'Registration successful' };
@@ -85,7 +77,13 @@ export class AuthController {
 
 	@Post('/login')
 	@BodySchema(LoginSchema)
-	async login(@Body() dto: LoginDto, @Res() res: FastifyReply) {
+	async login(@Body() dto: LoginDto, @Res() res: FastifyReply, @JWTBody() jwt: { id : number}) {
+		// pas besoin de reelement check le guard, valide ou pas si le mec ce fait passer pour connecter ben il est connecter cela n'aura aucun impact server...
+		if (jwt?.id) {
+			throw new UnauthorizedException('User already logged in');
+		}
+		// Je pourrais faire un guard...
+
 		const tokens = await this.authService.login(dto);
 		this.setAuthCookies(res, tokens);
 		return { success: true, message: 'Login successful' };
@@ -93,7 +91,10 @@ export class AuthController {
 
 	@Post('/guest')
 	@BodySchema(GuestSchema)
-	async guest(@Body() dto: GuestDto, @Res() res: FastifyReply) {
+	async guest(@Body() dto: GuestDto, @Res() res: FastifyReply, @JWTBody() jwt: { id : number}) {
+		if (jwt?.id) {
+			throw new UnauthorizedException('User already logged in');
+		}
 		const tokens = await this.authService.createGuest(dto.username);
 		this.setAuthCookies(res, tokens);
 		return { success: true, message: 'Guest login successful' };
@@ -145,12 +146,6 @@ export class AuthController {
 		res.header('X-User-Email', payload.email || '');
 
 		return { valid: true };
-	}
-
-	@Get('/send-mail')
-	async sendMail() {
-		this.mq.emit('user_created', { email: 'test@test.com' }, 'mail_queue');
-		return { success: true, message: 'Mail sent' };
 	}
 
 	@Get('/me')
@@ -233,42 +228,6 @@ export class AuthController {
 		return { success: true, message: 'Username set successfully' };
 	}
 
-	// //warning: dangereux faire attention
-	// @Get('/users')
-	// async getAllUsers() {
-	// 	return this.dbExchangeService.getAllUsers();
-	// }
-
-	// Warning: a delete plus tard
-	@Get('/user-by-username/:username')
-	async getUserByUsername(@Param('username') username: string) {
-		const user = await this.dbExchangeService.getUserByUsername(username);
-		if (!user) {
-			throw new NotFoundException('User not found');
-		}
-		return { id: user.id, username: user.username };
-	}
-
-	// Warning: a delete plus tard
-	@Get('/user-by-id/:id')
-	async getUserById(@Param('id') id: number) {
-		const user = await this.dbExchangeService.getUserById(id);
-		if (!user) {
-			throw new NotFoundException('Id not found');
-		}
-		return { id: user.id, username: user.username };
-	}
-
-	// Warning: a delete plus tard
-	@Get('/user-is-exist/:id')
-	async isExist(@Param('id') id: number) {
-		const user = await this.dbExchangeService.getUserById(id);
-		if (!user) {
-			return { exist: false };
-		}
-		return { exist: true };
-	}
-
 	@Get('/:provider/callback')
 	async callback(
 		@Param('provider') provider: ProviderKeys,
@@ -285,25 +244,14 @@ export class AuthController {
 		res.redirect(providers[provider].authorizationUrl);
 	}
 
-	// @Get('/test/totp/generate')
-	// async generateTOTPSecret() {
-	// 	const secret = generateTOTPSecret();
-	// 	return {
-	// 		secret: bufferToBase32(secret),
-	// 		link: linkTOTPSecret(secret, 'MyApp', 'MyLabel'),
-	// 	};
-	// }
-
-	// @Get('/test/totp/get')
-	// async verifyTOTP(@Query('buffer') buffer: string) {
-	// 	return { code: getTOTP(base32ToBuffer(buffer), 6, 30, 'sha1') };
-	// }
-
 	// ---------------------- 2FA Endpoints ----------------------
 
 	@Post('/2fa/enable')
 	@UseGuards(AuthGuard)
 	async enable2FA(@Req() req: AuthenticatedRequest) {
+		if (req.user.isGuest || req.user.provider !== 'email') {
+			throw new UnauthorizedException('You cannot enable 2FA');
+		}
 		const { link, secret } = await this.authService.enable2FA(req.user.id, req.user.email);
 		return { success: true, link, secret };
 	}
@@ -317,6 +265,9 @@ export class AuthController {
 		@Req() req: AuthenticatedRequest,
 		@Res() res: FastifyReply,
 	) {
+		if (req.user.isGuest || req.user.provider !== 'email') {
+			throw new UnauthorizedException('You cannot verify 2FA setup');
+		}
 		const tokens = await this.authService.verify2FASetup(req.user.id, dto.code);
 		this.setAuthCookies(res, tokens);
 		return { success: true, message: '2FA enabled successfully' };
@@ -353,6 +304,10 @@ export class AuthController {
 	@Delete('/2fa')
 	@UseGuards(AuthGuard)
 	async disable2FA(@Req() req: AuthenticatedRequest, @Res() res: FastifyReply) {
+		if (req.user.isGuest || req.user.provider !== 'email') {
+			throw new UnauthorizedException('You cannot disable 2FA');
+		}
+		
 		const tokens = await this.authService.disable2FA(
 			req.user.id,
 			req.user.twoFAVerified || false,
@@ -394,6 +349,9 @@ export class AuthController {
 		@Body() dto: ChangePasswordDto,
 		@Req() req: AuthenticatedRequest,
 	) {
+		if (req.user.isGuest || req.user.provider !== 'email') {
+			throw new UnauthorizedException('You cannot update your password');
+		}
 		await this.authService.changePassword(req.user.id, dto.currentPassword, dto.newPassword);
 		return { success: true, message: 'Password changed successfully' };
 	}
@@ -406,6 +364,9 @@ export class AuthController {
 		@Req() req: AuthenticatedRequest,
 		@Res() res: FastifyReply,
 	) {
+		if (req.user.isGuest || req.user.provider !== 'email') {
+			throw new UnauthorizedException('You cannot update your username');
+		}
 		const username = dto.username.trim();
 
 		if (username === '') {
@@ -428,6 +389,9 @@ export class AuthController {
 		@Req() req: AuthenticatedRequest,
 		@Res() res: FastifyReply,
 	) {
+		if (req.user.isGuest || req.user.provider !== 'email') {
+			throw new UnauthorizedException('You cannot update your email');
+		}
 		const tokens = await this.authService.updateEmail(req.user.id, dto.email);
 		this.setAuthCookies(res, tokens);
 		return { success: true, message: 'Email updated successfully' };
