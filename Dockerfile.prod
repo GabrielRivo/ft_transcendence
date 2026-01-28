@@ -57,27 +57,12 @@ COPY --from=builder --chown=appuser:appgroup /app/node_modules ./node_modules
 COPY --from=builder --chown=appuser:appgroup /app/packages ./packages
 COPY --from=builder --chown=appuser:appgroup /app/apps/worker-mail/dist ./apps/worker-mail/dist
 COPY --from=builder --chown=appuser:appgroup /app/apps/worker-mail/package.json ./apps/worker-mail/
+COPY --from=builder --chown=appuser:appgroup /app/apps/worker-mail/node_modules ./apps/worker-mail/node_modules
 
 # Variables d'environnement
 ENV NODE_ENV=production
 
 # Utilisateur non-root
 USER appuser
-
-# Pas de port EXPOSE car c'est un worker qui consomme RabbitMQ
-# EXPOSE 3000
-
-# Healthcheck différent car pas de port HTTP (sauf si on ajoute un serveur fastify juste pour healthcheck ?)
-# En général les workers ont un healthcheck basé sur un fichier ou un ping process
-# Mais attendons, le code source du worker-mail a-t-il un serveur fastify ?
-# Regardons package.json: "dependencies": { "my-fastify-decorators": "workspace:*", ... }
-# Il semble utiliser fastify decorators, donc il doit avoir un serveur HTTP démarré, souvent sur le port 3000 par défaut.
-# Dans Dockerfile.dev (step 11), il n'y a PAS de HEALTHCHECK défini.
-# Dans docker-compose.yaml (step 6), ligne 314, il n'y a PAS de healthcheck défini pour worker-mail.
-# Donc je ne vais pas mettre de healthcheck HTTP pour l'instant pour éviter de bloquer si pas de serveur.
-# Ou juste un process check simple.
-# Mais pour être safe et cohérent, si pas de healthcheck prévu, on n'en met pas ou un simple "true".
-# Le worker tourne en continu.
-# Je vais omettre le HEALTHCHECK pour worker-mail pour l'instant vu qu'il n'expose pas forcément de port.
 
 CMD ["node", "apps/worker-mail/dist/src/index.js"]
