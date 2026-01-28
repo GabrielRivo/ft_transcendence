@@ -1,4 +1,4 @@
-import { createElement, useState, useRef, useEffect, useMemo } from 'my-react';
+import { createElement, useState, useRef, useEffect, useMemo, Fragment } from 'my-react';
 import { ChatMessage } from '../../../hook/useChat';
 import { useAuth } from '../../../hook/useAuth';
 import { useFriends } from '../../../hook/useFriends';
@@ -15,6 +15,7 @@ interface ChatMessagesPanelProps {
 	onSendMessage: (content: string) => void;
 	isGroup?: boolean;
 	onInviteUser?: (userId: number) => void;
+	onLeaveGroup?: () => void;
 	onJoinTournament?: (tournamentId: string) => void;
 }
 
@@ -25,6 +26,7 @@ export function ChatMessagesPanel({
 	onSendMessage,
 	isGroup = false,
 	onInviteUser,
+	onLeaveGroup,
 	onJoinTournament
 }: ChatMessagesPanelProps) {
 	const { user } = useAuth();
@@ -98,13 +100,22 @@ export function ChatMessagesPanel({
 				<span>{getRoomTitle()}</span>
 				<div className="flex items-center gap-3">
 					{isGroup && (
-						<button
-							onClick={() => setShowInviteModal(true)}
-							className="rounded p-1 text-purple-400 transition-colors hover:bg-purple-500/20 hover:text-white"
-							title="Add friends"
-						>
-							<Users size={18} />
-						</button>
+						<Fragment>
+							<button
+								onClick={() => setShowInviteModal(true)}
+								className="rounded p-1 text-purple-400 transition-colors hover:bg-purple-500/20 hover:text-white"
+								title="Add friends"
+							>
+								<Users size={18} />
+							</button>
+							<button
+								onClick={onLeaveGroup}
+								className="rounded px-2 py-1 text-xs font-bold text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300"
+								title="Quitter le groupe"
+							>
+								Quitter
+							</button>
+						</Fragment>
 					)}
 					<span className={`${connected ? 'animate-pulse text-green-500' : 'text-red-500'}`}>
 						● {connected ? 'LIVE' : 'OFFLINE'}
