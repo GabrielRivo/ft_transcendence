@@ -43,7 +43,7 @@ class ServicesSingleton {
             this.Engine.dispose();
         }
         
-        console.log('[Services] Initializing services...' + this.initNbr++);
+       //  console.log('[Services] Initializing services...' + this.initNbr++);
         this.Canvas = canvas;
         this.Canvas?.addEventListener('wheel', (e) => {
         }, { passive: true });
@@ -64,7 +64,7 @@ class ServicesSingleton {
     }
 
     disposeServices() {
-        console.log('[Services] Disposing services...');
+       //  console.log('[Services] Disposing services...');
         this.Scene?.dispose();
         this.Engine?.dispose();
         this.EventBus?.clear();

@@ -62,7 +62,7 @@ export function useChat() {
 	useEffect(() => {
 		const handleConnect = () => {
 			setConnected(true);
-			console.log('Chat socket connected');
+			// console.log('Chat socket connected');
 			// Demander l'historique du hub
 			chatSocket.emit('get_hub_history');
 		};
@@ -70,7 +70,7 @@ export function useChat() {
 		const handleDisconnect = () => {
 			setConnected(false);
 			isConnectingRef.current = false;
-			console.log('Chat socket disconnected');
+		// 	console.log('Chat socket disconnected');
 		};
 
 		const handleMessage = (msg: ChatMessage) => {
@@ -111,7 +111,7 @@ export function useChat() {
 		};
 
 		const handleInvalidateHistory = () => {
-			console.log('[useChat] Received invalidate_history event - Refreshing hub history');
+			// console.log('[useChat] Received invalidate_history event - Refreshing hub history');
 			if (currentRoom === 'hub') {
 				chatSocket.emit('get_hub_history');
 			}
@@ -126,7 +126,7 @@ export function useChat() {
 		chatSocket.on('invalidate_history', handleInvalidateHistory);
 
 		if (chatSocket.connected) {
-			console.log('Chat socket already connected on mount');
+		// 	console.log('Chat socket already connected on mount');
 			setConnected(true);
 		}
 

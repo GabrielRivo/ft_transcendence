@@ -59,25 +59,25 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 												otherId: roomUser.userId
 											}),
 										}).then(data => data.json()).then(data => {
-											toast(data.message, data.success ? 'success' : 'error')
+											toast(data.message, data.success ? 'success' : 'error', 3000)
 										}).catch(e => {
-											toast('Network error', 'error')
+											toast('Network error', 'error', 3000)
 										})
-										console.log('Défier', roomUser.username)
+										// console.log('Défier', roomUser.username)
 									},
 									onInviteTournament: () => {
-										console.log('Inviter au tournoi', roomUser.username)
+										// console.log('Inviter au tournoi', roomUser.username)
 									},
 									onStatistics: () => {
 										navigate(`/statistics/general/${roomUser.userId}`)
 									},
 									onProfile: () => {
 										navigate(`/profile/${roomUser.userId}`)
-										console.log('Profil', roomUser.username)
+										// console.log('Profil', roomUser.username)
 									},
 									onToggleFriend: () => {
-										fetchWithAuth(`/api/user/friend-management/invite`, {
-											method: 'POST',
+										fetchWithAuth(`/api/user/friend-management/friend`, {
+											method: 'DELETE',
 											headers: {
 												'Content-Type': 'application/json',
 											},
@@ -85,11 +85,10 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 												otherId: roomUser.userId
 											}),
 										}).then(data => data.json()).then(data => {
-											toast(data.message, data.success ? 'success' : 'error')
+											toast(data.message, data.success ? 'success' : 'error', 3000)
 										}).catch(e => {
-											toast('Network error', 'error')
+											toast('Network error', 'error', 3000)
 										})
-										console.log('Add friend', roomUser.username)
 									},
 									onBlock: () => {
 										fetchWithAuth(`/api/user/friend-management/block`, {
@@ -101,11 +100,11 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 												otherId: roomUser.userId
 											}),
 										}).then(data => data.json()).then(data => {
-											toast(data.message, data.success ? 'success' : 'error')
+											toast(data.message, data.success ? 'success' : 'error', 3000)
 										}).catch(e => {
-											toast('Network error', 'error')
+											toast('Network error', 'error', 3000)
 										})
-										console.log('Block', roomUser.username)
+										// console.log('Block', roomUser.username)
 									},
 								}}
 							/>

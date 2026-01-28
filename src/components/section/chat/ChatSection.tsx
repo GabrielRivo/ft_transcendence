@@ -36,16 +36,16 @@ export function ChatSection() {
 				body: JSON.stringify({}),
 			});
 			if (response.ok && response.data) {
-				console.log('Joined tournament successfully', response.data);
+				// console.log('Joined tournament successfully', response.data);
 				const tournament = response.data as any;
 				const type = tournament.visibility.toLowerCase();
 				const size = tournament.size;
 				navigate(`/play/tournament/${type}/${size}?id=${tournament.id}`);
 			} else {
-				console.error('Failed to join tournament:', response.error);
+				// console.error('Failed to join tournament:', response.error);
 			}
 		} catch (error) {
-			console.error('Error joining tournament:', error);
+			// console.error('Error joining tournament:', error);
 		}
 	};
 
@@ -76,7 +76,7 @@ export function ChatSection() {
 					isGroup={currentRoom.startsWith('group_')}
 					onInviteUser={(userId) => {
 						// TODO: Implémenter l'invitation au groupe
-						console.log('Invite user:', userId);
+						// console.log('Invite user:', userId);
 					}}
 					onJoinTournament={handleJoinTournament}
 				/>

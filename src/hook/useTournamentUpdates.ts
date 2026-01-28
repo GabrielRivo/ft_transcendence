@@ -141,7 +141,7 @@ const handlePlayerJoined = (data: PlayerJoinedEvent) => {
     processedEvents.add(eventKey);
     cleanupEvent(eventKey);
 
-    console.log('[TournamentUpdates] PlayerJoined:', tournamentId, playerId);
+    // console.log('[TournamentUpdates] PlayerJoined:', tournamentId, playerId);
 
     const subscribers = tournamentSubscribers.get(tournamentId);
     if (subscribers) {
@@ -165,7 +165,7 @@ const handlePlayerLeft = (data: PlayerLeftEvent) => {
     processedEvents.add(eventKey);
     cleanupEvent(eventKey);
 
-    console.log('[TournamentUpdates] PlayerLeft:', tournamentId, data.playerId);
+    // console.log('[TournamentUpdates] PlayerLeft:', tournamentId, data.playerId);
 
     const subscribers = tournamentSubscribers.get(tournamentId);
     if (subscribers) {
@@ -189,7 +189,7 @@ const handleTournamentStarted = (data: TournamentStartedEvent) => {
     processedEvents.add(eventKey);
     cleanupEvent(eventKey);
 
-    console.log('[TournamentUpdates] TournamentStarted:', tournamentId);
+   //  console.log('[TournamentUpdates] TournamentStarted:', tournamentId);
 
     const subscribers = tournamentSubscribers.get(tournamentId);
     if (subscribers) {
@@ -205,7 +205,7 @@ const handleMatchStarted = (data: MatchStartedEvent) => {
     const tournamentId = data.aggregateId;
     if (!tournamentId) return;
 
-    console.log('[TournamentUpdates] MatchStarted:', tournamentId, data.payload?.matchId);
+    // console.log('[TournamentUpdates] MatchStarted:', tournamentId, data.payload?.matchId);
 
     const subscribers = tournamentSubscribers.get(tournamentId);
     if (subscribers) {
@@ -221,7 +221,7 @@ const handleMatchFinished = (data: MatchFinishedEvent) => {
     const tournamentId = data.aggregateId;
     if (!tournamentId) return;
 
-    console.log('[TournamentUpdates] MatchFinished:', tournamentId, data.payload?.matchId);
+    // console.log('[TournamentUpdates] MatchFinished:', tournamentId, data.payload?.matchId);
 
     const subscribers = tournamentSubscribers.get(tournamentId);
     if (subscribers) {
@@ -234,14 +234,14 @@ const handleMatchFinished = (data: MatchFinishedEvent) => {
 };
 
 const handleMatchScoreUpdated = (data: MatchScoreUpdatedEvent) => {
-    console.log('[TournamentUpdates] Received match_score_updated raw:', data);
+    // console.log('[TournamentUpdates] Received match_score_updated raw:', data);
     const tournamentId = data.aggregateId;
     if (!tournamentId) {
         console.warn('[TournamentUpdates] No aggregateId in match_score_updated event');
         return;
     }
 
-    console.log('[TournamentUpdates] MatchScoreUpdated:', tournamentId, data.payload?.matchId);
+   //  console.log('[TournamentUpdates] MatchScoreUpdated:', tournamentId, data.payload?.matchId);
 
     const subscribers = tournamentSubscribers.get(tournamentId);
     if (subscribers) {
@@ -271,7 +271,7 @@ const handleBracketUpdated = (data: BracketUpdatedEvent) => {
     const tournamentId = data.aggregateId;
     if (!tournamentId) return;
 
-    console.log('[TournamentUpdates] BracketUpdated:', tournamentId);
+    // console.log('[TournamentUpdates] BracketUpdated:', tournamentId);
 
     const subscribers = tournamentSubscribers.get(tournamentId);
     if (subscribers) {
@@ -295,7 +295,7 @@ const handleTournamentFinished = (data: TournamentFinishedEvent) => {
     processedEvents.add(eventKey);
     cleanupEvent(eventKey);
 
-    console.log('[TournamentUpdates] TournamentFinished:', tournamentId, 'Winner:', data.winnerId);
+    // console.log('[TournamentUpdates] TournamentFinished:', tournamentId, 'Winner:', data.winnerId);
 
     const subscribers = tournamentSubscribers.get(tournamentId);
     if (subscribers) {
@@ -311,7 +311,7 @@ const registerGlobalHandlers = () => {
     if (globalHandlersRegistered) return;
     globalHandlersRegistered = true;
 
-    console.log('[TournamentUpdates] Registering global socket handlers');
+    // console.log('[TournamentUpdates] Registering global socket handlers');
 
     tournamentSocket.on('PlayerJoined', handlePlayerJoined);
     tournamentSocket.on('PlayerLeft', handlePlayerLeft);
@@ -360,7 +360,7 @@ export function useTournamentUpdates() {
         // Cancel pending disconnect if any (re-joining within the grace period)
         let wasPendingDisconnect = false;
         if (tournamentDisconnectTimeouts.has(tournamentId)) {
-            console.log('[TournamentUpdates] Cancelling pending disconnect for:', tournamentId);
+           //  console.log('[TournamentUpdates] Cancelling pending disconnect for:', tournamentId);
             clearTimeout(tournamentDisconnectTimeouts.get(tournamentId));
             tournamentDisconnectTimeouts.delete(tournamentId);
             wasPendingDisconnect = true;
@@ -371,16 +371,16 @@ export function useTournamentUpdates() {
 
         // Emit to server to join the room only if we are the first subscriber and not just cancelling a disconnect
         if (isFirstSubscriber && !wasPendingDisconnect) {
-            console.log('[TournamentUpdates] Emitting listen_tournament for:', tournamentId);
+          //   console.log('[TournamentUpdates] Emitting listen_tournament for:', tournamentId);
             tournamentSocket.emit('listen_tournament', { tournamentId });
         }
 
-        console.log('[TournamentUpdates] Subscribed to tournament:', tournamentId, 'Total subscribers:', subscribers.size);
+       //  console.log('[TournamentUpdates] Subscribed to tournament:', tournamentId, 'Total subscribers:', subscribers.size);
 
         // Return unsubscribe function
         return () => {
             subscribers.delete(subscription);
-            console.log('[TournamentUpdates] Unsubscribed from tournament:', tournamentId, 'Remaining:', subscribers.size);
+          //   console.log('[TournamentUpdates] Unsubscribed from tournament:', tournamentId, 'Remaining:', subscribers.size);
 
             if (subscribers.size === 0) {
                 // Debounce the leave event to prevent flickering on re-renders
@@ -392,7 +392,7 @@ export function useTournamentUpdates() {
                     tournamentSubscribers.delete(tournamentId);
                     tournamentDisconnectTimeouts.delete(tournamentId);
                     // Emit to server to leave the room if no more subscribers
-                    console.log('[TournamentUpdates] Emitting leave_tournament for:', tournamentId);
+                //     console.log('[TournamentUpdates] Emitting leave_tournament for:', tournamentId);
                     tournamentSocket.emit('leave_tournament', { tournamentId });
                 }, 100); // 100ms grace period
 

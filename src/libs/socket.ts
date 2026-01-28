@@ -30,7 +30,7 @@ export const userSocket: Socket = io(SOCKET_BASE_URL, {
 
 export const matchmakingSocket: Socket = io(SOCKET_BASE_URL, {
 	...DEFAULT_SOCKET_OPTIONS,
-	path: '/api/matchmaking/',
+	path: '/api/matchmaking/ws',
 });
 
 export const tournamentSocket: Socket = io(SOCKET_BASE_URL, {

@@ -129,38 +129,38 @@ export function ChatSidebarPanel({
 													otherId: friend.id
 												}),																	
 											}).then(data => data.json()).then(data => {
-												toast(data.message, data.success ? 'success' : 'error')
+												toast(data.message, data.success ? 'success' : 'error', 3000)
 											}).catch(() => {
-												toast('Network error', 'error')
+												toast('Network error', 'error', 3000)
 											})
-											console.log('Défier', friend.username)
+											// console.log('Défier', friend.username)
 										},
 										onInviteTournament: () => {
-											console.log('Inviter au tournoi', friend.username)
+											// console.log('Inviter au tournoi', friend.username)
 										},
 										onStatistics: () => {
 											navigate(`/statistics/${friend.id}`)
 										},
 										onProfile: () => {
 											navigate(`/profile/${friend.id}`)
-											console.log('Profil', friend.username)
+											// console.log('Profil', friend.username)
 										},
 										onToggleFriend: async () => {
 											const success = await onRemoveFriend(friend.id);
 											if (success) {
-												toast('Friend removed successfully', 'success');
+												toast('Friend removed successfully', 'success', 3000);
 											} else {
-												toast('Failed to remove friend', 'error');
+												toast('Failed to remove friend', 'error', 3000);
 											}
-											console.log('Delete friend', friend.username)
+											// console.log('Delete friend', friend.username)
 										},
 										onBlock: async () => {
 											const success = await blockUser(friend.id);
-											toast(success ? 'User blocked' : 'Failed to block user', success ? 'success' : 'error');
+											toast(success ? 'User blocked' : 'Failed to block user', success ? 'success' : 'error', 3000);
 										},
 										onUnblock: async () => {
 											const success = await unblockUser(friend.id);
-											toast(success ? 'User unblocked' : 'Failed to unblock user', success ? 'success' : 'error');
+											toast(success ? 'User unblocked' : 'Failed to unblock user', success ? 'success' : 'error', 3000);
 										},
 									}}
 								/>

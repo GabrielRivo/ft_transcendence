@@ -1,4 +1,4 @@
-import { createElement, useEffect, Fragment } from 'my-react';
+import { createElement, useEffect, FragmentComponent } from 'my-react';
 import type { Element } from 'my-react';
 import { ChatSection } from '../components/section/chat/ChatSection';
 import { Link, useNavigate, useRouter } from 'my-react-router';
@@ -30,12 +30,12 @@ function Menu() {
 		<nav className="flex h-14 w-full shrink-0 items-center justify-center gap-8 pb-12">
 			<NavLink path="/play" label="Play" />
 			{!user?.isGuest && (
-				<Fragment>
+				<FragmentComponent>
 					{/* <span>|</span> */}
 					<NavLink path="/profile" label="Profile" />
 					{/* <span>|</span> */}
 					<NavLink path="/statistics/general" label="Stats" />
-				</Fragment>
+				</FragmentComponent>
 			)}
 			{/* <span>|</span> */}
 
@@ -76,7 +76,7 @@ function useActiveTournamentRedirect() {
 	useEffect(() => {
 		if (!user || !router.path.startsWith('/play')) return;
 
-		console.log('[DashboardLayout] Checking for active tournament...');
+		// console.log('[DashboardLayout] Checking for active tournament...');
 		fetch('/api/tournament/active', {
 			method: 'GET',
 			credentials: 'include',
@@ -106,7 +106,7 @@ function useActiveTournamentRedirect() {
 					const currentId = currentUrl.searchParams.get('id');
 
 					if (currentUrl.pathname !== targetPath || currentId !== tournamentId) {
-						console.log(`[DashboardLayout] Redirecting to active tournament: ${targetPath}?id=${tournamentId}`);
+						(`[DashboardLayout] Redirecting to active tournament: ${targetPath}?id=${tournamentId}`);
 						navigate(`${targetPath}?id=${tournamentId}`);
 					}
 				}

@@ -11,7 +11,7 @@ import { useToast } from '@hook/useToast';
 export function OnlineUsersPanel() {
 	const { onlineUsers, loading } = useOnlineUsers();
 	const { user } = useAuth();
-	const { friends } = useFriends();
+	const { friends, refreshFriends } = useFriends();
 	const { isBlocked, blockUser, unblockUser } = useBlockedUsers();
 	const navigate = useNavigate();
 	const { toast } = useToast();
@@ -69,13 +69,13 @@ export function OnlineUsersPanel() {
 												otherId: onlineUser.userId
 											}),
 										}).then(data => data.json()).then(data => {
-											toast(data.message, data.success ? 'success' : 'error')
+											toast(data.message, data.success ? 'success' : 'error', 3000)
 										}).catch(() => {
-											toast('Network error', 'error')
+											toast('Network error', 'error', 3000)
 										})
 									},
 									onInviteTournament: () => {
-										console.log('Inviter au tournoi', onlineUser.username)
+										// console.log('Inviter au tournoi', onlineUser.username)
 									},
 									onStatistics: () => {
 										navigate(`/statistics/general/${onlineUser.userId}`)
@@ -84,27 +84,46 @@ export function OnlineUsersPanel() {
 										navigate(`/profile/${onlineUser.userId}`)
 									},
 									onToggleFriend: () => {
-										fetchWithAuth(`/api/user/friend-management/invite`, {
-											method: 'POST',
-											headers: {
-												'Content-Type': 'application/json',
-											},
-											body: JSON.stringify({
-												otherId: onlineUser.userId
-											}),
-										}).then(data => data.json()).then(data => {
-											toast(data.message, data.success ? 'success' : 'error')
-										}).catch(() => {
-											toast('Network error', 'error')
-										})
+										if (isFriend) {
+											fetchWithAuth(`/api/user/friend-management/friend`, {
+												method: 'DELETE',
+												headers: {
+													'Content-Type': 'application/json',
+												},
+												body: JSON.stringify({
+													otherId: onlineUser.userId
+												}),
+											}).then(data => data.json()).then(data => {
+												toast(data.message, data.success ? 'success' : 'error')
+												if (data.success) {
+													refreshFriends();
+												}
+											}).catch(() => {
+												toast('Network error', 'error')
+											})
+										} else {
+											fetchWithAuth(`/api/user/friend-management/invite`, {
+												method: 'POST',
+												headers: {
+													'Content-Type': 'application/json',
+												},
+												body: JSON.stringify({
+													otherId: onlineUser.userId
+												}),
+											}).then(data => data.json()).then(data => {
+												toast(data.message, data.success ? 'success' : 'error', 3000)
+											}).catch(() => {
+												toast('Network error', 'error', 3000)
+											})
+										}
 									},
 									onBlock: async () => {
 										const success = await blockUser(onlineUser.userId);
-										toast(success ? 'User blocked' : 'Failed to block user', success ? 'success' : 'error');
+										toast(success ? 'User blocked' : 'Failed to block user', success ? 'success' : 'error', 3000);
 									},
 									onUnblock: async () => {
 										const success = await unblockUser(onlineUser.userId);
-										toast(success ? 'User unblocked' : 'Failed to unblock user', success ? 'success' : 'error');
+										toast(success ? 'User unblocked' : 'Failed to unblock user', success ? 'success' : 'error', 3000);
 									},
 								}}
 							/>

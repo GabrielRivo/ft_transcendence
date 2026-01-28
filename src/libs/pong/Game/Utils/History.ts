@@ -35,7 +35,7 @@ class History<T extends ITimestamped> {
         const lastState = this.history[lastIndex];
 
         if (lastState && state.timestamp < lastState.timestamp) {
-            console.log("Inserting out-of-order state into history.");
+           //  console.log("Inserting out-of-order state into history.");
             let checkIndex = lastIndex;
             let checkState = this.history[checkIndex];
 

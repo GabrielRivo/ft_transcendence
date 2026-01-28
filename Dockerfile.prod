@@ -18,6 +18,7 @@ COPY packages/my-react-router/package.json ./packages/my-react-router/
 COPY packages/my-class-validator/package.json ./packages/my-class-validator/
 COPY apps/frontend/package.json ./apps/frontend/
 
+
 # Installation
 RUN pnpm install --frozen-lockfile
 

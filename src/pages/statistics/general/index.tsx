@@ -27,7 +27,7 @@ function WinRatePieChart({ winRate }: { winRate: number }) {
 	const { user } = useAuth();
 	const navigate = useNavigate();
 	const { toast } = useToast();
-	
+
 	useEffect(() => {
 		if (user?.isGuest) {
 			toast('Please have an account to use all features', 'error');
@@ -38,8 +38,8 @@ function WinRatePieChart({ winRate }: { winRate: number }) {
 	useEffect(() => {
 		if (!chartRef.current) return;
 
-		if (chartInstance.current) {
-			chartInstance.current.destroy();
+		if (chartInstanceRef.current) {
+			chartInstanceRef.current.destroy();
 		}
 
 		const options: ApexOptions = {
@@ -91,12 +91,12 @@ function WinRatePieChart({ winRate }: { winRate: number }) {
 
 		const chart = new ApexCharts(chartRef.current, options);
 		chart.render();
-		chartInstance.current = chart;
+		chartInstanceRef.current = chart;
 
 		return () => {
-			if (chartInstance.current) {
-				chartInstance.current.destroy();
-				chartInstance.current = null;
+			if (chartInstanceRef.current) {
+				chartInstanceRef.current.destroy();
+				chartInstanceRef.current = null;
 			}
 		};
 	}, [winRate]);
@@ -192,7 +192,7 @@ export function StatisticsGeneralPage() {
 				{/* Histogramme Elo */}
 				<div className="rounded-lg border border-cyan-500/30 bg-slate-900/50 p-4 lg:col-span-2">
 					<div className="mb-2">
-						<h3 className="font-pirulen text-sm tracking-wider text-cyan-400">Elo :</h3>  
+						<h3 className="font-pirulen text-sm tracking-wider text-cyan-400">Elo :</h3>
 					</div>
 					<EloHistogram userElo={stats.elo} allPlayersData={stats.allPlayersElo} />
 				</div>

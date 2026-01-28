@@ -133,7 +133,7 @@ export function ProfileSlugPage() {
 
 	const handleAddFriend = async () => {
 		if (!profile) return;
-		console.log('add friend', profile.id);
+		// console.log('add friend', profile.id);
 		sendFriendInvite(profile.id);
 	};
 

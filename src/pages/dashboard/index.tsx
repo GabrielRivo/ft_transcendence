@@ -11,7 +11,7 @@ export function Dashboard() {
 
 	const handleLogout = () => {
 		logout().then(() => {
-			toast('Déconnexion réussie', 'success');
+			toast('Déconnexion réussie', 'success', 3000);
 			navigate('/');
 		});
 	};

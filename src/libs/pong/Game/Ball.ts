@@ -336,7 +336,7 @@ class Ball {
                     return false;
                 }
                 this.moving = false;
-                console.log("No radial impact found!");
+               //  console.log("No radial impact found!");
             }
         }
         return false;
@@ -428,7 +428,7 @@ class Ball {
                 impact = pickingInfoClone(hit);
                 if (!impact)
                 {
-                    console.log("Failed to clone PickingInfo!");
+                   //  console.log("Failed to clone PickingInfo!");
                     return null;
                 }
 
@@ -485,9 +485,10 @@ class Ball {
 
     bounce(hitInfo: PickingInfo) {
         let normal : Vector3 | null = hitInfo.getNormal(true);
-        if (!normal)
-            console.log("No normal found for bounce!");
-        else
+        if (normal)
+            
+        //  console.log("No normal found for bounce!");
+        // else
         {
             this.setDir(MathUtils.reflectVector(this.direction, normal));
             Services.EventBus!.emit("BallBounce", {ball : this});

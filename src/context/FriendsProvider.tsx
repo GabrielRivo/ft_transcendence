@@ -91,14 +91,14 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 		if (!isAuthenticated || !user || user?.isGuest) return;
 
 		const handleFriendRequest = (data: { senderId: number; senderUsername: string }) => {
-			console.log('[FriendsProvider] friend_request received:', data);
+			// console.log('[FriendsProvider] friend_request received:', data);
 			setPendingInvitations((prev) => {
-				console.log('[FriendsProvider] prev pendingInvitations:', prev);
+				// console.log('[FriendsProvider] prev pendingInvitations:', prev);
 				if (prev.some((inv) => inv.senderId === data.senderId)) {
-					console.log('[FriendsProvider] Already in pending, skipping');
+					// console.log('[FriendsProvider] Already in pending, skipping');
 					return prev;
 				}
-				console.log('[FriendsProvider] Adding new pending invitation');
+				// console.log('[FriendsProvider] Adding new pending invitation');
 				return [
 					...prev,
 					{

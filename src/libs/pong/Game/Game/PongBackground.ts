@@ -128,7 +128,7 @@ class PongBackground extends Game {
 	 * set up user input handlers (AI controls both paddles).
 	 */
 	initialize(): void {
-		console.log('[PongBackground] Initializing background game');
+		// console.log('[PongBackground] Initializing background game');
 		// Initialize time service for delta time calculations
 
 		Services.TimeService!.initialize();
@@ -280,7 +280,7 @@ class PongBackground extends Game {
 	 * Starts the background game animation.
 	 */
 	start(): void {
-		console.log('[PongBackground] Starting background animation');
+		// ('[PongBackground] Starting background animation');
 		this.run();
 	}
 
@@ -387,7 +387,7 @@ class PongBackground extends Game {
 	 */
 	dispose(): void {
 		this.isDisposed = true;
-		console.log('[PongBackground] Disposing background game');
+		// console.log('[PongBackground] Disposing background game');
 
 		// Stop render loop
 		Services.Engine!.stopRenderLoop(this.renderLoop);

@@ -42,15 +42,15 @@ export function Authentification() {
 			const success = await loginAsGuest(guestUsername.trim());
 
 			if (success) {
-				toast('Connected as guest', 'success');
+				toast('Connected as guest', 'success', 3000);
 				navigate('/play');
 			} else {
 				setError('Username already exists');
-				toast('Username already taken', 'error');
+				toast('Username already taken', 'error', 3000);
 			}
 		} catch {
 			setError('An error occurred');
-			toast('An error has occurred', 'error');
+			toast('An error has occurred', 'error', 3000);
 		} finally {
 			setIsLoading(false);
 		}
