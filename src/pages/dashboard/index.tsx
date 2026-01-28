@@ -31,7 +31,7 @@ export function Dashboard() {
 						</p>
 					)}
 				</div>
-				<ButtonStyle3 onClick={handleLogout}>Deconnexion</ButtonStyle3>
+				<ButtonStyle3 onClick={handleLogout}>logout</ButtonStyle3>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

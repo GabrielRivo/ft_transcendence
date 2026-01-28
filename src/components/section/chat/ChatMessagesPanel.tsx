@@ -159,8 +159,8 @@ export function ChatMessagesPanel({
 												onClick={handleRevealMessage}
 												className="cursor-pointer select-none rounded bg-gray-800/50 px-2 py-1 text-gray-500 italic transition-colors hover:bg-gray-700/50 hover:text-gray-400"
 											>
-												<span className="blur-[3px]">Message masqué</span>
-												<span className="ml-2 text-xs opacity-70">[Cliquer pour révéler]</span>
+												<span className="blur-[3px]">Hidden message</span>
+												<span className="ml-2 text-xs opacity-70">[Clic to reveal]</span>
 											</div>
 										) : (
 											(() => {
@@ -281,7 +281,7 @@ export function ChatMessagesPanel({
 							disabled={selectedUserIds.length === 0}
 							className="w-full rounded bg-purple-500/20 px-4 py-2 text-sm font-bold text-purple-400 transition-colors hover:bg-purple-500/30 disabled:cursor-not-allowed disabled:opacity-50"
 						>
-							Envoyer
+							Send
 						</button>
 					</div>
 				</Modal>

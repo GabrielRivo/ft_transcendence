@@ -116,7 +116,7 @@ export function StatisticsHistoricPage() {
 				const historyRes = await api.get<MatchHistory[]>(`/api/stats/match-history/user/${user.id}`);
 
 				if (historyRes.error || !historyRes.data) {
-					setError(historyRes.error || 'Impossible de charger l\'historique');
+					setError(historyRes.error || 'Impossible to load history');
 					setLoading(false);
 					return;
 				}
@@ -139,7 +139,7 @@ export function StatisticsHistoricPage() {
 				await Promise.all(
 					Array.from(opponentIds).map(async (id) => {
 						const res = await api.get<UserInfo>(`/api/user/profile/${id}`);
-						usernameMap.set(id, res.data?.username || `Joueur #${id}`);
+						usernameMap.set(id, res.data?.username || `Player #${id}`);
 					})
 				);
 
@@ -151,7 +151,7 @@ export function StatisticsHistoricPage() {
 					return {
 						id: m.game_id,
 						date: formatDate(m.created_at),
-						opponent: usernameMap.get(opponentId) || `Joueur #${opponentId}`,
+						opponent: usernameMap.get(opponentId) || `Player #${opponentId}`,
 						myScore: isPlayer1 ? m.score_player1 : m.score_player2,
 						opponentScore: isPlayer1 ? m.score_player2 : m.score_player1,
 						isWin: m.winner_id === user.id,
@@ -166,7 +166,7 @@ export function StatisticsHistoricPage() {
 					setSelectedMatchId(transformedMatches[0].id);
 				}
 			} catch (err) {
-				setError('Erreur lors du chargement de l\'historique');
+				setError('Error while loading history');
 			} finally {
 				setLoading(false);
 			}
@@ -178,7 +178,7 @@ export function StatisticsHistoricPage() {
 	if (loading) {
 		return (
 			<div className="flex h-full w-full items-center justify-center">
-				<p className="font-pirulen text-cyan-400">Chargement de l'historique...</p>
+				<p className="font-pirulen text-cyan-400">Loading history...</p>
 			</div>
 		);
 	}

@@ -113,7 +113,7 @@ export function Register() {
 									htmlFor="confirmPassword"
 									className="font-pirulen text-xs tracking-wider text-gray-400 transition-colors group-focus-within:text-white"
 								>
-									Confirme passeword
+									Confirm passeword
 								</label>
 								<input
 									type="password"

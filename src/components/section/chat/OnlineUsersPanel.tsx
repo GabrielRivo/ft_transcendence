@@ -25,7 +25,7 @@ export function OnlineUsersPanel() {
 			</div>
 			<div className="flex flex-col gap-3 overflow-y-auto p-4 text-xs [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-red-500/50 [&::-webkit-scrollbar-track]:bg-slate-800/30">
 				{loading ? (
-					<div className="text-center text-gray-500">Chargement...</div>
+					<div className="text-center text-gray-500">Loading...</div>
 				) : usersArray.length === 0 ? (
 					<div className="text-center text-gray-500">No user</div>
 				) : (

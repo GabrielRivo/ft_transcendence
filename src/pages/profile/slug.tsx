@@ -115,7 +115,7 @@ export function ProfileSlugPage() {
 					});
 				}
 			} catch (err) {
-				setError('Une erreur est survenue');
+				setError('Error occured');
 				console.error(err);
 			}
 

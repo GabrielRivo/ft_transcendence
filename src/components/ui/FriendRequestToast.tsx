@@ -51,7 +51,7 @@ function FriendRequestToastItem({ invitation, onAccept, onDecline, onClose }: Fr
 					disabled={loading}
 					className="flex-1 rounded-lg border border-white/10 py-2 text-sm font-medium text-gray-300 transition-colors hover:bg-white/5 disabled:opacity-50"
 				>
-					Refuser
+					Refuse
 				</button>
 				<button
 					onClick={handleAccept}

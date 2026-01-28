@@ -12,7 +12,7 @@ export function Home() {
 	return (
 		<div className="text-neon-blue">
 			<ButtonStyle1 onClick={handleClick} duration={500}>
-				Commencer
+				Start
 			</ButtonStyle1>
 		</div>
 	);
