@@ -55,7 +55,7 @@ export function MatchmakingPage() {
 
 			{/* Header with back button */}
 			<div className="relative z-10 flex items-center justify-between p-6">
-				<ButtonStyle3 onClick={handleBack}>← Retour</ButtonStyle3>
+				<ButtonStyle3 onClick={handleBack}>← Return</ButtonStyle3>
 			</div>
 
 			{/* Main content */}
@@ -66,9 +66,9 @@ export function MatchmakingPage() {
 			{/* Footer with instructions */}
 			<div className="relative z-10 p-6 text-center text-xs text-gray-500">
 				<p>
-					Le matchmaking vous met en relation avec des joueurs de niveau similaire.
+					Matchmaking connects you with players of a similar skill level.
 					<br />
-					Vous avez 15 secondes pour accepter un match trouvé.
+					You have 15 seconds to accept a match found.
 				</p>
 			</div>
 		</div>

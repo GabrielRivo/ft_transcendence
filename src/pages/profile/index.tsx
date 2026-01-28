@@ -152,7 +152,7 @@ export function ProfilePage() {
 		});
 
 		if (result.ok) {
-			toast('Bio mise à jour', 'success');
+			toast('Bio updated', 'success');
 			setIsEditingBio(false);
 		} else {
 			toast(result.error || 'Error during backup', 'error');

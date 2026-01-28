@@ -122,12 +122,12 @@ export function StatisticsHistoricPageSlug() {
 				]);
 
 				if (historyRes.error || !historyRes.data) {
-					setError(historyRes.error || 'Impossible de charger l\'historique');
+					setError(historyRes.error || 'Impossible to load history');
 					setLoading(false);
 					return;
 				}
 
-				const targetUsername = userInfoRes.data?.username || `Joueur #${targetUserId}`;
+				const targetUsername = userInfoRes.data?.username || `Player #${targetUserId}`;
 				setUsername(targetUsername);
 
 				const rawMatches = historyRes.data;
@@ -148,7 +148,7 @@ export function StatisticsHistoricPageSlug() {
 				await Promise.all(
 					Array.from(opponentIds).map(async (id) => {
 						const res = await api.get<UserInfo>(`/api/user/profile/${id}`);
-						usernameMap.set(id, res.data?.username || `Joueur #${id}`);
+						usernameMap.set(id, res.data?.username || `Player #${id}`);
 					})
 				);
 
@@ -160,7 +160,7 @@ export function StatisticsHistoricPageSlug() {
 					return {
 						id: m.game_id,
 						date: formatDate(m.created_at),
-						opponent: usernameMap.get(opponentId) || `Joueur #${opponentId}`,
+						opponent: usernameMap.get(opponentId) || `Player #${opponentId}`,
 						myScore: isPlayer1 ? m.score_player1 : m.score_player2,
 						opponentScore: isPlayer1 ? m.score_player2 : m.score_player1,
 						isWin: m.winner_id === targetUserId,
@@ -175,7 +175,7 @@ export function StatisticsHistoricPageSlug() {
 					setSelectedMatchId(transformedMatches[0].id);
 				}
 			} catch (err) {
-				setError('Erreur lors du chargement de l\'historique');
+				setError('Error while loading history');
 			} finally {
 				setLoading(false);
 			}

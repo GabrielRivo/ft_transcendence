@@ -39,21 +39,21 @@ function parseErrors(errors: Ajv['errors']): ValidationError[] {
 		switch (err.keyword) {
 			case 'required':
 				field = err.params?.missingProperty || field;
-				message = `Ce champ est requis`;
+				message = `This field is requiered`;
 				break;
 			case 'minLength':
-				message = `Minimum ${err.params?.limit} caractères requis`;
+				message = `Minimum ${err.params?.limit} characters required`;
 				break;
 			case 'maxLength':
-				message = `Maximum ${err.params?.limit} caractères autorisés`;
+				message = `Maximum ${err.params?.limit} characters required`;
 				break;
 			case 'format':
 				if (err.params?.format === 'email') {
-					message = 'Email invalide';
+					message = 'Invalid mail';
 				}
 				break;
 			case 'type':
-				message = `Type invalide (attendu: ${err.params?.type})`;
+				message = `Invalid type (expected: ${err.params?.type})`;
 				break;
 		}
 
