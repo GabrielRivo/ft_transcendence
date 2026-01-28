@@ -135,9 +135,6 @@ export function ChatSidebarPanel({
 											})
 											// console.log('Défier', friend.username)
 										},
-										onInviteTournament: () => {
-											// console.log('Inviter au tournoi', friend.username)
-										},
 										onStatistics: () => {
 											navigate(`/statistics/${friend.id}`)
 										},

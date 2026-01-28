@@ -65,9 +65,6 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 										})
 										// console.log('Défier', roomUser.username)
 									},
-									onInviteTournament: () => {
-										// console.log('Inviter au tournoi', roomUser.username)
-									},
 									onStatistics: () => {
 										navigate(`/statistics/general/${roomUser.userId}`)
 									},
