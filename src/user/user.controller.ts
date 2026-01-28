@@ -27,7 +27,7 @@ export class UserController {
 
 	@Get('/profile/:userId')
 	@ResponseSchema(200, ReadProfileDtoSchemaResponse)
-	async get_profile(@Param('userId') userId: string): Promise<ReadProfileDtoResponse> {
+	async get_profile(@Param('userId') userId: number): Promise<ReadProfileDtoResponse> {
 		return this.userService.get_profile(userId);
 	}
 
