@@ -147,6 +147,7 @@ class Pong extends Game {
             player2Score: this.player2!.score,
             message: `Joined game ${this.id} successfully!`,
             player: playerNbr,
+            gameType: this.gameType,
             tournamentId: this.tournamentId,
             isFinal: this.isFinal
         });
