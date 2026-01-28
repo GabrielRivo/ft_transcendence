@@ -1,5 +1,5 @@
 import 'reflect-metadata';
-import { createElement, useState, useRef, useEffect, Fragment } from 'my-react';
+import { createElement, useState, useRef, useEffect } from 'my-react';
 import { ButtonStyle4 } from '../../components/ui/button/style4';
 import { ButtonStyle3 } from '../../components/ui/button/style3';
 import { CardStyle2 } from '../../components/ui/card/style2';
@@ -9,29 +9,24 @@ import { useValidation, ValidationError } from '../../hook/useValidation';
 import { ForgotPasswordSchema, VerifyResetOtpSchema, ResetPasswordSchema } from '../../dto';
 import { Modal } from '../../components/ui/modal';
 
-function InputPassword({ value, onChange, type, title = '',error = false }: { value: string; onChange: (value: string) => void; type: string; title?: string; error?: string | boolean}) {
+function InputPassword({ value, onChange, type, title = '', error = false, inputRef }: { value: string; onChange: (value: string) => void; type: string; title?: string; error?: string | boolean; inputRef?: any }) {
 	return (
-		<Fragment>
-			<div className="group flex flex-col gap-2">
-				<label className="font-pirulen text-xs tracking-wider text-gray-400 transition-colors group-focus-within:text-white">
-					{title}
-				</label>
-				<input
-					type={type}
-					value={value}
-					onInput={(e: Event) => onChange((e.target as HTMLInputElement).value)}
-					className="focus:border-neon-blue w-full rounded-sm border border-white/10 bg-transparent p-3 text-sm text-white transition-all duration-300 outline-none placeholder:text-gray-600 focus:bg-white/5"
-					placeholder="••••••••"
-				/>
-				{error && <span className="text-xs text-red-400">{error}</span>}
-			</div>
-		</Fragment>
+		<div className="group flex flex-col gap-2">
+			<label className="font-pirulen text-xs tracking-wider text-gray-400 transition-colors group-focus-within:text-white">
+				{title}
+			</label>
+			<input
+				ref={inputRef}
+				type={type}
+				value={value}
+				onInput={(e: Event) => onChange((e.target as HTMLInputElement).value)}
+				className="focus:border-neon-blue w-full rounded-sm border border-white/10 bg-transparent p-3 text-sm text-white transition-all duration-300 outline-none placeholder:text-gray-600 focus:bg-white/5"
+				placeholder="••••••••"
+			/>
+			{error && <span className="text-xs text-red-400">{error}</span>}
+		</div>
 	);
 }
-
-
-
-
 
 export function ForgotPassword() {
 	const [email, setEmail] = useState('');
@@ -43,7 +38,7 @@ export function ForgotPassword() {
 	const [showOTPModal, setShowOTPModal] = useState(false);
 	const [showResetModal, setShowResetModal] = useState(false);
 
-	const newPasswordRef = useRef<HTMLInputElement>(null);
+	const newPasswordRef = useRef<HTMLInputElement | null>(null);
 
 	useEffect(() => {
 		if (showResetModal && newPasswordRef.current) {
@@ -251,7 +246,7 @@ export function ForgotPassword() {
 			{showResetModal && (
 				<Modal onClose={() => setShowResetModal(false)} title="Reset Password" variant="cyan">
 					<form className="flex flex-col gap-6" onSubmit={handleSubmitReset}>
-						<InputPassword value={newPassword} onChange={setNewPassword} type="password" title="New Password" error={passwordError} />
+						<InputPassword inputRef={newPasswordRef} value={newPassword} onChange={setNewPassword} type="password" title="New Password" error={passwordError} />
 						<InputPassword value={confirmPassword} onChange={setConfirmPassword} type="password" title="Confirm Password" error={false} />
 						<div className="mt-4 flex flex-col justify-center gap-2">
 							<ButtonStyle4 type="submit">{isLoading ? 'RESETTING...' : 'Reset password'}</ButtonStyle4>

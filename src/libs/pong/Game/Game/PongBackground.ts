@@ -127,6 +127,7 @@ class PongBackground extends Game {
 	initialize(): void {
 		console.log('[PongBackground] Initializing background game');
 		// Initialize time service for delta time calculations
+
 		Services.TimeService!.initialize();
 
 		// Create the Babylon.js scene
@@ -149,21 +150,32 @@ class PongBackground extends Game {
 	drawScene(): void {
 		if (this.isDisposed || !Services.Scene) return;
 
-		// Set up glow effect layer for neon aesthetics
+		//add 100 mesh to the scene to test performance
+		// for (let i = 0; i < 20; i++) {
+		// 	const box = MeshBuilder.CreateBox(`box${i}`, { size: 0.1 }, Services.Scene);
+		// 	box.position = new Vector3(
+		// 		(Math.random() - 0.5) * this.width,
+		// 		Math.random() * 2 + 0.1,
+		// 		(Math.random() - 0.5) * this.height,
+		// 	);
+		// 	const boxMaterial = new StandardMaterial(`boxMat${i}`, Services.Scene);
+		// 	boxMaterial.diffuseColor = new Color3(Math.random(), Math.random(), Math.random());
+		// 	box.material = boxMaterial;
+		// }
+
+
 		this.glowLayer = new GlowLayer('glow', Services.Scene, {
 			blurKernelSize: 32,
 			mainTextureRatio: 0.25,
 		});
 		this.glowLayer.intensity = 0.3;
 
-		// Create game objects
 		this.player1 = new Player(1);
 		this.player2 = new Player(2);
 		this.walls = [new Wall(), new Wall()];
-		this.walls.forEach((wall) => Services.Scene!.addMesh(wall.model));
-		//this.ball = new Ball();
+		this.walls.forEach((wall) => Services.Scene!.addMesh(wall.model))
 
-		// Set up camera with slightly elevated angle for background view
+
 		this.camera = new ArcRotateCamera(
 			'Camera',
 			0,
@@ -174,10 +186,7 @@ class PongBackground extends Game {
 		);
 		const blackScreen = new BlackScreenEffect(1, 0);
         blackScreen.play();
-		// Don't attach controls - this is a background, not interactive
-		// this.camera.attachControl(Services.Canvas, true);
 
-		// Create ground plane
 		const ground = MeshBuilder.CreateBox(
 			'ground',
 			{ width: this.width, height: this.height, depth: 0.1 },
@@ -191,8 +200,6 @@ class PongBackground extends Game {
 		groundMaterial.diffuseColor = new Color3(0.4, 0.4, 0.4);
 		ground.material = groundMaterial;
 
-		// Position game objects
-		//this.ball.setFullPos(new Vector3(0, 0.125, 0));
 		this.player1.paddle.setHitboxDirection(new Vector3(0, 0, 1));
         this.player2.paddle.setHitboxDirection(new Vector3(0, 0, -1));
 
@@ -397,9 +404,10 @@ class PongBackground extends Game {
 
 		// Dispose Babylon.js scene
 		if (Services.Scene) {
-			Services.Scene!.stopAllAnimations();
-			this.camera!.animations = [];
-			Services.Scene!.dispose();
+			Services.Scene?.stopAllAnimations();
+			this.camera?.detachControl();
+			this.camera?.dispose();
+			Services.Scene?.dispose();
 
 			this.camera = undefined;
 			Services.Scene = undefined;

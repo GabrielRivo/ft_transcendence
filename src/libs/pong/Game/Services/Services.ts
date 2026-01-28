@@ -48,9 +48,7 @@ class ServicesSingleton {
         this.Canvas?.addEventListener('wheel', (e) => {
         }, { passive: true });
 
-        this.Engine = new Engine(this.Canvas, true, {
-            
-        });
+        this.Engine = new Engine(this.Canvas, true, {});
         const pixelRatio = window.devicePixelRatio || 1;
         this.Engine!.setHardwareScalingLevel(1 / pixelRatio);
         this.EventBus = EventBus.getInstance();

@@ -552,9 +552,10 @@ class PongOnline extends Game {
         socket.offAny(this.onServerLog);
         socket.disconnect();
 
-        Services.Scene!.stopAllAnimations();
-        this.camera!.animations = [];
-        Services.Scene!.dispose();
+        Services.Scene?.stopAllAnimations();
+        this.camera?.detachControl();
+        this.camera?.dispose();
+        Services.Scene?.dispose();
 
         this.camera = undefined;
         Services.Scene = undefined;

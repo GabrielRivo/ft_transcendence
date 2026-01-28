@@ -20,22 +20,22 @@ class Paddle {
     private visualOffset: Vector3 = new Vector3(0, 0, 0);
 
     constructor(owner: any, nbr: number) {
-        this.model = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15});
+        this.model = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15}, Services.Scene);
 
-        this.hitbox = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15});
+        this.hitbox = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 , height: 0.15}, Services.Scene);
 
         let subPaddle : OwnedMesh;
         for (let i=0; i < 5; i++) {
-            subPaddle = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 - (i+1)*0.1 , height: 0.15});
+            subPaddle = MeshBuilder.CreateBox("paddle", {size: 0.15, width: 1.2 - (i+1)*0.1 , height: 0.15}, Services.Scene);
             subPaddle.parent = this.hitbox;
             subPaddle.owner = this;
             Services.Collision!.add(subPaddle);
             subPaddle.visibility = 0;
         }
 
-        this.trigger1 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
-        this.trigger2 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
-        this.trigger3 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15});
+        this.trigger1 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15}, Services.Scene);
+        this.trigger2 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15}, Services.Scene);
+        this.trigger3 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15}, Services.Scene);
 		// this.hitbox = MeshBuilder.CreateBox("paddle", {size: 0.30, width: 5.0 , height: 0.30});
         let material: StandardMaterial;
         if (nbr === 1) {

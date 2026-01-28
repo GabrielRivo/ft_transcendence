@@ -11,7 +11,7 @@ class Wall {
     
     constructor(model?: Mesh) {
         let black : Color4 = new Color4(0, 0, 0, 1);
-        this.model = model ?? MeshBuilder.CreateBox("wall", {height: 0.5, width: 0.2, depth: Services.Dimensions!.y});
+        this.model = model ?? MeshBuilder.CreateBox("wall", {height: 0.5, width: 0.2, depth: Services.Dimensions!.y}, Services.Scene);
         // let material = new StandardMaterial("wallMat", Services.Scene);
         // material.emissiveColor = new Color3(1, 1, 1);
         // this.model.material = material;

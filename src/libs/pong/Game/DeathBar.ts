@@ -10,7 +10,7 @@ class DeathBar {
 
     constructor(model?: Mesh, owner?: any) {
         let black : Color4 = new Color4(0, 0, 0, 1);
-        this.model = model ?? MeshBuilder.CreateBox("deathBar", {size: 0.1, width: 7 , height: 0.1});
+        this.model = model ?? MeshBuilder.CreateBox("deathBar", {size: 0.1, width: 7 , height: 0.1}, Services.Scene);
         let material = new StandardMaterial("deathBarMat", Services.Scene);
         material.emissiveColor = new Color3(1, 1, 1);
         this.model.material = material;

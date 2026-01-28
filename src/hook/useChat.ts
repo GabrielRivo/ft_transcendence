@@ -2,6 +2,11 @@ import { useState, useEffect, useCallback, useRef } from 'my-react';
 import { chatSocket } from '../libs/socket';
 import { useAuth } from './useAuth';
 
+export interface RoomUser {
+	userId: number;
+	username: string;
+}
+
 export interface ChatMessage {
 	userId: number;
 	username: string;

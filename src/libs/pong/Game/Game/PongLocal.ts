@@ -1,4 +1,4 @@
-import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, PBRMaterial } from "@babylonjs/core";
+import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, PBRMaterial, Engine } from "@babylonjs/core";
 import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector"; //A ENLEVER
 
@@ -14,8 +14,6 @@ import BlackScreenEffect from "../Effects/BlackScreenEffect";
 import CameraShakeEffect from "../Effects/CameraShakeEffect";
 import ZoomEffect from "../Effects/ZoomEffect";
 import LightUpEffect from "../Effects/LightUpEffect";
-
-import { socket } from "../../../socket";
 
 class PongLocal extends Game {
 
@@ -37,6 +35,7 @@ class PongLocal extends Game {
 
     initialize(): void {
         Services.TimeService!.initialize();
+        
         Services.Scene = new Scene(Services.Engine!);
         Services.Dimensions = new Vector2(this.width, this.height);
         window.addEventListener("keydown", this.showDebugLayer);
@@ -82,18 +81,6 @@ class PongLocal extends Game {
         if (this.isDisposed || !Services.Scene) return;
         this.walls = [new Wall(), new Wall()];
         this.walls.forEach(wall => Services.Scene!.addMesh(wall.model));
-        //this.ball = new Ball();
-
-
-        //var light2: SpotLight = new SpotLight("spotLight", new Vector3(0, 10, 0), new Vector3(0, -1, 0), Math.PI / 2, 20, Services.Scene);
-        //light2.intensity = 0;
-
-		// const hemiLight = new HemisphericLight("hemiLight", new Vector3(0, 1, 0), Services.Scene);
-
-		// hemiLight.intensity = 0.30;
-		// //hemiLight.diffuse = new Color3(0.5, 0.6, 1);
-		// hemiLight.diffuse = new Color3(0.5, 0.5, 0.5);
-		// hemiLight.groundColor = new Color3(0, 0, 0);
 
         const ground = MeshBuilder.CreateBox("ground", {width: this.width, height: this.height, depth: 0.1}, Services.Scene);
         ground.position = new Vector3(0, -0.05, 0);
@@ -104,7 +91,6 @@ class PongLocal extends Game {
         groundMaterial.diffuseColor = new Color3(0.4, 0.4, 0.4);
         ground.material = groundMaterial;
 
-        //this.ball.setFullPos(new Vector3(0, 0.125, 0));
         this.player1.paddle.setHitboxDirection(new Vector3(0, 0, 1));
         this.player2.paddle.setHitboxDirection(new Vector3(0, 0, -1));
 
@@ -144,7 +130,8 @@ class PongLocal extends Game {
             });
         } catch (e) {
             if (!this.isDisposed) {
-                console.error('[PongOnline] Failed to load pong.glb:', e);
+                console.warn('[PongOnline] Failed to load pong.glb:', e);
+                this.endGame();
             }
         }
         let ballMesh : Mesh | undefined = undefined;
@@ -158,7 +145,8 @@ class PongLocal extends Game {
             ballMesh = ballMeshs[0]! as Mesh;
         } catch (e) {
             if (!this.isDisposed) {
-                console.error('[PongOnline] Failed to load pong.glb:', e);
+                console.warn('[PongOnline] Failed to load ball.glb:', e);
+                this.endGame();
             }
         }
         if (this.isDisposed || !Services.Scene) return;
@@ -261,13 +249,13 @@ class PongLocal extends Game {
 
     stop() {
         Services.EventBus!.emit("UI:MenuStateChange", "loading");
+        Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
         Services.Engine!.stopRenderLoop(this.renderLoop);
         Services.Engine!.runRenderLoop(this.stoppedRenderLoop);
     }
 
-    stoppedRenderLoop() : void {
+    stoppedRenderLoop = () : void => {
         if (this.isDisposed) return;
-        console.log("ds");
         Services.Scene!.render();
     }
 
@@ -290,9 +278,6 @@ class PongLocal extends Game {
         this.glowLayer?.dispose();
         this.glowLayer = undefined;
 
-        // Services.SocketService!.disconnect();
-        socket.disconnect();
-
         this.player1?.dispose();
         this.player2?.dispose();
         this.ball?.dispose();
@@ -302,10 +287,10 @@ class PongLocal extends Game {
         Services.EventBus!.off("BallBounce", this.onBallBounce);
         Services.EventBus!.off("PaddleHitBall", this.onPaddleHitBall);
 
-        Services.Scene!.stopAllAnimations();
-        this.camera!.animations = [];
-        Services.Scene!.dispose();
-
+        Services.Scene?.stopAllAnimations();
+        this.camera?.detachControl();
+        this.camera?.dispose();
+        Services.Scene?.dispose();
         this.camera = undefined;
         Services.Scene = undefined;
         Services.Dimensions = undefined;

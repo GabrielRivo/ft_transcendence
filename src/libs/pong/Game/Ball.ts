@@ -35,7 +35,7 @@ class Ball {
 
     constructor() {
         let white : Color4 = new Color4(1, 1, 1, 1);
-        this.model = MeshBuilder.CreateSphere("ball", { diameter: this.diameter});
+        this.model = MeshBuilder.CreateSphere("ball", { diameter: this.diameter}, Services.Scene);
         if (!this.model.rotationQuaternion) {
             this.model.rotationQuaternion = new Quaternion();
         }
