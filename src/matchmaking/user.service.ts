@@ -25,7 +25,7 @@ const UserEloResponseSchema = generateSchema(UserEloDto);
 
 @Service()
 export class UserService {
-	private readonly userServiceUrl = process.env.USER_SERVICE_URL || 'http://localhost:3001';
+	private readonly statsServiceUrl = process.env.STATS_SERVICE_URL || 'http://stats:3000';
 
 	/**
 	 * Point d'entrée public pour récupérer l'Elo.
@@ -51,7 +51,7 @@ export class UserService {
 	})
 	@ValidateResult(UserEloResponseSchema)
 	protected async fetchUserEloDto(userId: string): Promise<UserEloDto> {
-		const targetUrl = `${this.userServiceUrl}/users/${userId}/elo`;
+		const targetUrl = `${this.statsServiceUrl}/elo/${userId}`;
 
 		console.debug(`[UserService] [fetchUserEloDto] GET ${targetUrl}`);
 
