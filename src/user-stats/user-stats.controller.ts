@@ -23,12 +23,17 @@ export class UserStatsController {
 
 	@Get('/user/:userId')
 	async get_stats(@Param('userId') userId: string) {
-			return await this.statsService.getGlobalStats(Number(userId));
+		return await this.statsService.getGlobalStats(Number(userId));
 	}
 
 	@Get('/all-elos')
 	getAllElos() {
 		return this.statsService.getAllElos();
+	}
+
+	@Get('/elo/:userId')
+	async get_elo(@Param('userId') userId: string) {
+		return await this.statsService.getGlobalStats(Number(userId));
 	}
 
 	@Get('/user/small/:userId')

@@ -24,6 +24,7 @@ export class UserStatsService {
 	private statementGetAllElos!: Statement<[]>;
 	private statementRegisterUser!: Statement;
 	private statementChangeUsername!: Statement;
+	private statementGetUserElo!: Statement<number>;
 
 
 	onModuleInit() {
@@ -43,6 +44,7 @@ export class UserStatsService {
 
 		this.statementRegisterUser = this.db.prepare(`INSERT INTO user_stats (user_id) VALUES (@user_id)`)
 		this.statementChangeUsername = this.db.prepare(`UPDATE user_stats SET username = @username WHERE user_id = @user_id`)
+		this.statementGetUserElo = this.db.prepare(`SELECT elo FROM user_stats WHERE user_id = @user_id`)
 	}
  
 	async getGlobalStats(userId: number) {
@@ -98,9 +100,6 @@ export class UserStatsService {
 		let newTournament = 0;
 		let newTournamentWin = 0;
 		let newscore = 0;
-		console.log("match = ", match)
-		console.log("match.score= ", match.score)
-		console.log("match.match.duration = ", match.duration)
 		if (match.game_type == "ranked")
 		{
 			if (current.user_id == match.player1_id)
@@ -116,7 +115,6 @@ export class UserStatsService {
 			if (elog == null)
 				elog = 0
 		}
-	
 		if (current.user_id == match.winner_id)
 		{
 			newWins += 1;
@@ -133,22 +131,6 @@ export class UserStatsService {
 			if (match.game_type == "tournament")
 				newTournament = 1;
 		}
-		
-
-// 		game_id: 'fafe7169-2f20-4744-92e2-94a052cbbe71',
-// transcendence-stats  |   player1_id: 2,
-// transcendence-stats  |   player2_id: 1,
-// transcendence-stats  |   score_player1: 0,
-// transcendence-stats  |   score_player2: 5,
-// transcendence-stats  |   hit_player1: 0,
-// transcendence-stats  |   hit_player2: 0,
-// transcendence-stats  |   winner_id: 1,
-// transcendence-stats  |   duration_seconds: 1619.364335160004,
-// transcendence-stats  |   game_type: 'ranked',
-// transcendence-stats  |   gain_player1: -23,
-// transcendence-stats  |   gain_player2: 27,
-// transcendence-stats  |   is_final: 0
-
 		return {
 			user_id: current.user_id,
 			elo: current.elo + elog,
@@ -180,5 +162,10 @@ export class UserStatsService {
 		};
 		const nextStats = this.updateStats(current, matchData);
 		return this.statementUserStats.run(nextStats);
+		
 	}
+	getUserElo(userId: number) {
+		return this.statementGetUserElo.get(userId);
+	}
+	
 }

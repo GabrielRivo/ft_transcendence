@@ -11,4 +11,5 @@ export interface GameFinishedEvent {
 	timestamp: number;
 	hitPlayer1: number;
 	hitPlayer2: number;
+	isTournamentFinal: boolean;
 }

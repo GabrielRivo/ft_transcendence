@@ -15,19 +15,16 @@ export class UserHistoryController {
     
 	@EventPattern('user.created')
 	async userCreated(@Payload() event : { id : number}) {
-		console.log("Event user.created", event)
 		this.userStatsService.registerUser(event.id);
 	}
 
 	@EventPattern('user.updated.username')
 	async userUpdatedUsername(@Payload() event : { id : number, username : string}) {
-		console.log('Event user Updated Username', event)
 		this.userStatsService.updateUserName(event.id, event.username);
 	}
 
 	@EventPattern('game.finished')
 	async handleGameFinished(@Payload() event: GameFinishedEvent) {
-		console.log("Event launched", event)
 		let gain1 = null
 		let gain2 = null
 		if (event.gameType == "ranked")
@@ -37,7 +34,6 @@ export class UserHistoryController {
 			gain2 = await this.userHistoryService.calcElo(parseInt(event.player2Id), parseInt(event.player1Id), 
 						event.score2, event.score1);
 		}
-
 		try {
 			await this.userHistoryService.add_match_to_history(
 				event.gameId,
@@ -52,7 +48,7 @@ export class UserHistoryController {
 				parseInt(event.winnerId ?? "-1"),
 				event.timestamp / 1000 * 60, 
 				event.gameType,
-				false
+				event.isTournamentFinal
 			);
 		} catch (error) {
 		console.error("Error while saving", error);

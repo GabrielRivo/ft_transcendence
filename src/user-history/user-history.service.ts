@@ -1,5 +1,5 @@
 import Database, { Statement } from 'better-sqlite3';
-import { BadRequestException, Inject, InjectPlugin, InternalServerErrorException, NotFoundException, Service } from 'my-fastify-decorators';
+import { Inject, InjectPlugin, InternalServerErrorException, NotFoundException, Service } from 'my-fastify-decorators';
 import { UserStatsService } from '../user-stats/user-stats.service.js';
 
 const addMatchHistoryStatement: string = 
@@ -64,9 +64,6 @@ export class UserHistoryService {
 			this.statementAddMatchtoHistory.run(match);
 			this.userStatsService.updateUserGlobalStats(p1.user_id, match);
 			this.userStatsService.updateUserGlobalStats(p2.user_id, match);
-			if (isFinal) {
-				// incrementer ici les victoires de tournoi
-			}
 		});
 	}
 
@@ -180,9 +177,6 @@ export class UserHistoryService {
 		};
 
 		this.statementMatchTransaction(matchData, p1Stats, p2Stats, is_final)
-		// return (
-		// 	{ message: 'Match registered' }
-		// );
 	}
 
 	get_user_matches(userId: number) {
