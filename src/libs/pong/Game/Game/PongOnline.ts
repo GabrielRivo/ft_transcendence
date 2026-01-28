@@ -1,4 +1,4 @@
-import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, SetValueAction, Camera, PBRMaterial } from "@babylonjs/core";
+import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, SetValueAction, Camera, PBRMaterial, AbstractMesh } from "@babylonjs/core";
 import "@babylonjs/core/Debug/debugLayer";
 import "@babylonjs/inspector";
 
@@ -45,6 +45,8 @@ class PongOnline extends Game {
     private connectionTimeoutId?: NodeJS.Timeout;
 
     private cameraAnimating: boolean = false;
+
+    private backgroundMeshes: AbstractMesh[] = [];
 
     constructor() {
         super();
@@ -137,9 +139,9 @@ class PongOnline extends Game {
         // Load 3D background model from cache
         if (this.isDisposed || !Services.Scene) return;
         try {
-            const meshes = await Services.AssetCache.loadModel('pong-background', '/models/pong.glb', Services.Scene);
+            this.backgroundMeshes = await Services.AssetCache.loadModel('pong-background', '/models/pong.glb', Services.Scene);
             if (this.isDisposed) return; // Check again after async operation
-            meshes.forEach(mesh => {
+            this.backgroundMeshes.forEach(mesh => {
                 mesh.isPickable = false;
             });
         } catch (e) {
@@ -534,6 +536,10 @@ class PongOnline extends Game {
         this.player2?.dispose();
         this.ball?.dispose();
         this.walls?.forEach(wall => wall.dispose());
+
+        this.backgroundMeshes.forEach((mesh) => mesh.dispose());
+        this.backgroundMeshes = [];
+
         this.inputManager?.dispose();
         Services.EventBus!.off("DeathBarHit", this.onDeathBarHit);
         Services.EventBus!.off("BallBounce", this.onBallBounce);
