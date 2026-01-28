@@ -133,11 +133,11 @@ export const LocalGame = () => {
 
 	// Switch to local mode on mount, back to background on unmount
 	useEffect(() => {
-		console.log('[LocalGamePage] Mounting - switching to local mode');
+		// console.log('[LocalGamePage] Mounting - switching to local mode');
 		setMode('local');
 
 		return () => {
-			console.log('[LocalGamePage] Unmounting - switching back to background mode');
+		// 	console.log('[LocalGamePage] Unmounting - switching back to background mode');
 			setMode('background');
 		};
 	}, [setMode]);
@@ -154,7 +154,7 @@ export const LocalGame = () => {
 	 * Handles exit action - switches back to background mode and navigates to play menu.
 	 */
 	const handleExit = () => {
-		console.log('[LocalGamePage] Exit clicked - switching to background mode');
+		// console.log('[LocalGamePage] Exit clicked - switching to background mode');
 		setMode('background');
 		navigate('/play');
 	};

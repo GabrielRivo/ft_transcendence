@@ -54,15 +54,15 @@ function ModalHeader({ title, onClose, variant }: ModalHeaderProps) {
 	const hoverBg = variant === 'cyan' ? 'hover:bg-cyan-500/20' : 'hover:bg-purple-500/20';
 
 	const handleClose = (e: MouseEvent) => {
-		console.log('[Modal] X button clicked!', e);
+		// console.log('[Modal] X button clicked!', e);
 		e.preventDefault();
 		e.stopPropagation();
 		if (onClose) {
-			console.log('[Modal] Calling onClose...');
+			// console.log('[Modal] Calling onClose...');
 			onClose();
-			console.log('[Modal] onClose called');
+			// console.log('[Modal] onClose called');
 		} else {
-			console.error('[Modal] onClose is undefined!');
+			// console.error('[Modal] onClose is undefined!');
 		}
 	};
 

@@ -53,7 +53,7 @@ export function GameProvider({ children }: GameProviderProps) {
 			return;
 		}
 
-		console.log('[GameProvider] Initializing game services...');
+		// console.log('[GameProvider] Initializing game services...');
 		isInitializedRef.current = true;
 
 		try {
@@ -66,8 +66,8 @@ export function GameProvider({ children }: GameProviderProps) {
 			});
 
 			Services.EventBus?.on('Game:Ended', (event: { gameType?: string; tournamentId?: string }) => {
-				console.log('[GameProvider] Game:Ended event received!', event);
-				console.log('[GameProvider] Event payload - gameType:', event?.gameType, 'tournamentId:', event?.tournamentId);
+			// 	console.log('[GameProvider] Game:Ended event received!', event);
+			// 	console.log('[GameProvider] Event payload - gameType:', event?.gameType, 'tournamentId:', event?.tournamentId);
 
 				setModeState('background');
 
@@ -75,13 +75,13 @@ export function GameProvider({ children }: GameProviderProps) {
 				const gameType = event?.gameType;
 				const eventTournamentId = event?.tournamentId;
 
-				console.log('[GameProvider] Extracted from event - gameType:', gameType, 'tournamentId:', eventTournamentId);
+				// console.log('[GameProvider] Extracted from event - gameType:', gameType, 'tournamentId:', eventTournamentId);
 
 				if (gameType === 'ranked') {
-					console.log('[GameProvider] gameType is ranked, navigating to /play');
+					// console.log('[GameProvider] gameType is ranked, navigating to /play');
 					navigate('/play');
 				} else if (gameType === 'tournament' && eventTournamentId) {
-					console.log('[GameProvider] gameType is tournament, fetching tournament details...');
+					// console.log('[GameProvider] gameType is tournament, fetching tournament details...');
 					// Fetch tournament details from API to get tournamentType and playersCount
 					fetch(`/api/tournament/${eventTournamentId}`, {
 						method: 'GET',
@@ -94,7 +94,7 @@ export function GameProvider({ children }: GameProviderProps) {
 								const tournamentType = tournament.visibility.toLowerCase();
 								const playersCount = tournament.size;
 								const targetUrl = `/play/tournament/${tournamentType}/${playersCount}?id=${eventTournamentId}`;
-								console.log('[GameProvider] Navigating to tournament page:', targetUrl);
+							// 	console.log('[GameProvider] Navigating to tournament page:', targetUrl);
 								navigate(targetUrl);
 							} else {
 								console.warn('[GameProvider] Could not fetch tournament details, falling back to /play');
@@ -107,7 +107,7 @@ export function GameProvider({ children }: GameProviderProps) {
 						});
 				}
 				else {
-					console.log('[GameProvider] Unknown gameType:', gameType, '- defaulting to /play');
+					// console.log('[GameProvider] Unknown gameType:', gameType, '- defaulting to /play');
 					// Default fallback - navigate to /play for any game type
 					navigate('/play');
 				}
@@ -117,9 +117,9 @@ export function GameProvider({ children }: GameProviderProps) {
 			Game.Services.GameService!.startGame();
 
 			setIsLoading(false);
-			console.log('[GameProvider] Services initialized, background game started');
+			// console.log('[GameProvider] Services initialized, background game started');
 		} catch (err) {
-			console.error('[GameProvider] Failed to initialize services:', err);
+			// console.error('[GameProvider] Failed to initialize services:', err);
 			setError(err instanceof Error ? err.message : 'Failed to initialize game engine');
 			setIsLoading(false);
 			isInitializedRef.current = false;
@@ -131,16 +131,16 @@ export function GameProvider({ children }: GameProviderProps) {
 		// Always store metadata FIRST, before any early returns
 		// This ensures metadata is preserved even on duplicate setMode calls
 		if (metadata) {
-			console.log('[GameProvider] Storing metadata:', JSON.stringify(metadata));
+			// console.log('[GameProvider] Storing metadata:', JSON.stringify(metadata));
 			gameMetadataRef.current = metadata;
 		}
 
 		if (currentModeRef.current === newMode) {
-			console.log('[GameProvider] Mode already set to:', newMode);
+		// 	console.log('[GameProvider] Mode already set to:', newMode);
 			return;
 		}
 
-		console.log('[GameProvider] Switching mode from', currentModeRef.current, 'to', newMode);
+		// console.log('[GameProvider] Switching mode from', currentModeRef.current, 'to', newMode);
 		currentModeRef.current = newMode;
 		setModeState(newMode);
 
@@ -179,13 +179,13 @@ export function GameProvider({ children }: GameProviderProps) {
 				setTimeout(() => {
 					if (canvasRef.current) {
 						canvasRef.current.focus();
-						console.log('[GameProvider] Canvas focused for keyboard input');
+					// 	console.log('[GameProvider] Canvas focused for keyboard input');
 					}
 				}, 100);
 			}
 
 			setIsLoading(false);
-			console.log('[GameProvider] Mode switched successfully to:', newMode);
+		// 	console.log('[GameProvider] Mode switched successfully to:', newMode);
 		} catch (err) {
 			console.error('[GameProvider] Failed to switch mode:', err);
 			setError(err instanceof Error ? err.message : 'Failed to switch game mode');

@@ -76,7 +76,7 @@ function useActiveTournamentRedirect() {
 	useEffect(() => {
 		if (!user || !router.path.startsWith('/play')) return;
 
-		console.log('[DashboardLayout] Checking for active tournament...');
+		// console.log('[DashboardLayout] Checking for active tournament...');
 		fetch('/api/tournament/active', {
 			method: 'GET',
 			credentials: 'include',
@@ -106,7 +106,7 @@ function useActiveTournamentRedirect() {
 					const currentId = currentUrl.searchParams.get('id');
 
 					if (currentUrl.pathname !== targetPath || currentId !== tournamentId) {
-						console.log(`[DashboardLayout] Redirecting to active tournament: ${targetPath}?id=${tournamentId}`);
+						(`[DashboardLayout] Redirecting to active tournament: ${targetPath}?id=${tournamentId}`);
 						navigate(`${targetPath}?id=${tournamentId}`);
 					}
 				}

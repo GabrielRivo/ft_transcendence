@@ -75,7 +75,7 @@ export function OnlineUsersPanel() {
 										})
 									},
 									onInviteTournament: () => {
-										console.log('Inviter au tournoi', onlineUser.username)
+										// console.log('Inviter au tournoi', onlineUser.username)
 									},
 									onStatistics: () => {
 										navigate(`/statistics/general/${onlineUser.userId}`)

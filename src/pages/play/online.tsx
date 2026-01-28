@@ -49,7 +49,7 @@ export function OnlinePlayPage() {
 				const tournamentType = data.visibility?.toLowerCase() || 'public'; // Default to public if undefined, though it should be there
 				const playersCount = data.size;
 				if (!tournamentSocket.connected) {
-					console.log('[TournamentGuest] Connecting tournament socket...');
+					// console.log('[TournamentGuest] Connecting tournament socket...');
 					tournamentSocket.connect();
 				}
 				navigate(`/play/tournament/${tournamentType}/${playersCount}?id=${data.id}`);

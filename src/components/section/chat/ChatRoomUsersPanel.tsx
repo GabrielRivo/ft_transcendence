@@ -63,17 +63,17 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 										}).catch(e => {
 											toast('Network error', 'error', 3000)
 										})
-										console.log('Défier', roomUser.username)
+										// console.log('Défier', roomUser.username)
 									},
 									onInviteTournament: () => {
-										console.log('Inviter au tournoi', roomUser.username)
+										// console.log('Inviter au tournoi', roomUser.username)
 									},
 									onStatistics: () => {
 										navigate(`/statistics/general/${roomUser.userId}`)
 									},
 									onProfile: () => {
 										navigate(`/profile/${roomUser.userId}`)
-										console.log('Profil', roomUser.username)
+										// console.log('Profil', roomUser.username)
 									},
 									onToggleFriend: () => {
 										fetchWithAuth(`/api/user/friend-management/friend`, {
@@ -104,7 +104,7 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 										}).catch(e => {
 											toast('Network error', 'error', 3000)
 										})
-										console.log('Block', roomUser.username)
+										// console.log('Block', roomUser.username)
 									},
 								}}
 							/>

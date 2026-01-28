@@ -64,14 +64,14 @@ class TimeService {
     }
     public setTimestamp(timestamp: number): void {
         const offset = timestamp - this.timestamp;
-        console.log("Setting timestamp, offset is ", offset);
+      //   console.log("Setting timestamp, offset is ", offset);
         this.offset += offset;
         this.timestamp = timestamp;
         this.tLast = performance.now();
     }
 
     public getRealTimestamp(): number {
-        console.log("Offset is ", this.offset);
+      //   console.log("Offset is ", this.offset);
         return performance.now() - this.t0 + this.offset;
     }
 }

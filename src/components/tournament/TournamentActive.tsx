@@ -31,7 +31,7 @@ export function TournamentActive({ tournament }: TournamentActiveProps) {
                 }));
             },
             onBracketUpdated: () => {
-                console.log('Bracket updated event received in ActiveTournament');
+                // console.log('Bracket updated event received in ActiveTournament');
             }
         });
     }, [tournament.id, subscribeToTournament]);

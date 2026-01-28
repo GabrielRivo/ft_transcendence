@@ -190,7 +190,7 @@ class PongOnline extends Game {
 
 
         socket.once("connect", () => {
-            console.log("Connected to server, starting Pong game.");
+           //  console.log("Connected to server, starting Pong game.");
             this.serverState = "connected";
             this.processGameState();
         });
@@ -204,12 +204,12 @@ class PongOnline extends Game {
 
             socket.emit("ping");
             const timeoutId = setTimeout(() => {
-                console.log("Ping timeout");
+            //     console.log("Ping timeout");
                 socket.off("pong", onPong);
                 return reject("Ping timeout");
             }, 1000);
             const onPong = () => {
-                console.log(`Ping: ${performance.now() - time} ms`);
+             //    console.log(`Ping: ${performance.now() - time} ms`);
                 clearTimeout(timeoutId);
                 return resolve(performance.now() - time);
             };
@@ -240,7 +240,7 @@ class PongOnline extends Game {
         const sum = validPings.reduce((a, b) => a + b, 0);
         const average = Math.round(sum / validPings.length);
 
-        console.log(`Measured latency: ${average} ms (over ${validPings.length} successful attempts)`);
+        // console.log(`Measured latency: ${average} ms (over ${validPings.length} successful attempts)`);
         return average;
     }
 
@@ -250,10 +250,10 @@ class PongOnline extends Game {
             let measuringTime = performance.now();
             const latency: number = await this.measureLatency();
             measuringTime = performance.now() - measuringTime;
-            console.log(`Time taken to measure latency: ${measuringTime} ms`);
+           //  console.log(`Time taken to measure latency: ${measuringTime} ms`);
             Services.TimeService!.initialize();
             Services.TimeService!.setTimestamp(serverTimestamp + (latency / 2) + measuringTime + timeAheadOfServ);
-            console.log("Time synchronized to:", serverTimestamp, " ahead by ", timeAheadOfServ, " with latency compensation of", latency / 2, "ms. New timestamp:", Services.TimeService!.getTimestamp());
+           //  console.log("Time synchronized to:", serverTimestamp, " ahead by ", timeAheadOfServ, " with latency compensation of", latency / 2, "ms. New timestamp:", Services.TimeService!.getTimestamp());
         } catch (error) {
             console.error("Error synchronizing time with server:", error);
             this.onServerLostConnection();
@@ -261,8 +261,8 @@ class PongOnline extends Game {
         socket.once("latencyTest", (payload: any) => {
             Services.TimeService!.update();
             const clienttime = Services.TimeService!.getTimestamp();
-            console.log("Latency test from server:", payload);
-            console.log("Current client timestamp:", clienttime, " with a real timestamp of ", Services.TimeService!.getRealTimestamp(), " difference : ", clienttime - payload.timestamp);
+           //  console.log("Latency test from server:", payload);
+           //  console.log("Current client timestamp:", clienttime, " with a real timestamp of ", Services.TimeService!.getRealTimestamp(), " difference : ", clienttime - payload.timestamp);
         });
     }
 
@@ -270,7 +270,7 @@ class PongOnline extends Game {
         socket.off("connect_error", this.onServerLostConnection);
         socket.off("disconnect", this.onServerLostConnection);
 
-        console.log("Lost connection to server, attempting to reconnect...");
+       //  console.log("Lost connection to server, attempting to reconnect...");
         this.serverState = "disconnected";
         //this.gameJoined = false;
         this.gameState = "waiting";
@@ -281,11 +281,11 @@ class PongOnline extends Game {
             this.endGame();
         }, 8000);
         socket.once("connect", () => {
-            console.log("Reconnected to server, resuming game.");
+           //  console.log("Reconnected to server, resuming game.");
             clearTimeout(this.connectionTimeoutId);
             socket.on("connect_error", this.onServerLostConnection);
             socket.on("disconnect", this.onServerLostConnection);
-            console.log("Resuming game after reconnection.");
+            // console.log("Resuming game after reconnection.");
             this.serverState = "connected";
             //this.processGameState();
         });
@@ -296,14 +296,14 @@ class PongOnline extends Game {
 
     private onGameJoined = (payload: any): void => {
 
-        console.log("Game joined with payload:", payload, " timestamp:", performance.now());
+        // console.log("Game joined with payload:", payload, " timestamp:", performance.now());
         if (payload.gameType) {
             this.gameType = payload.gameType;
-            console.log("Game type received:", this.gameType);
+           //  console.log("Game type received:", this.gameType);
         }
         if (payload.tournamentId) {
             this.tournamentId = payload.tournamentId;
-            console.log("Tournament ID received:", this.tournamentId);
+          //   console.log("Tournament ID received:", this.tournamentId);
         }
         if (!this.gameJoined) {
             this.camera!.attachControl(Services.Canvas, true);
@@ -350,13 +350,13 @@ class PongOnline extends Game {
 
     private onGameStarted = (payload: any): void => {
         this.gameState = "playing";
-        console.log("Game started by server with payload:", payload, " timestamp:", performance.now());
+       //  console.log("Game started by server with payload:", payload, " timestamp:", performance.now());
         this.synchronizeTimeWithServer(payload.timestamp);
         this.processGameState();
     }
 
     private onGameEnded = (payload: any): void => {
-        console.log("Game ended by server:", payload);
+        // console.log("Game ended by server:", payload);
         this.endGame();
     }
 
@@ -388,13 +388,13 @@ class PongOnline extends Game {
 
         cameraShake.play(this.camera!);
         lightUpPillar.play(Services.Scene!.getMaterialByName("PillarTop") as PBRMaterial, pillarColor);
-        console.log("Score update from server:", payload);
+       //  console.log("Score update from server:", payload);
         this.player1!.setScore(payload.player1Score);
         this.player2!.setScore(payload.player2Score);
         Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: this.player1!.score, player2Score: this.player2!.score, scoreToWin: 5 });
 
         if (this.player1!.score == 5 || this.player2!.score == 5) {
-            console.log("Game over detected from score update.");
+           //  console.log("Game over detected from score update.");
         }
     }
 
@@ -438,7 +438,7 @@ class PongOnline extends Game {
             Services.EventBus!.emit("UI:MenuStateChange", "off");
             this.currentGameState = "playing";
             if (this.gameJoined === false) {
-                console.log("Game state is playing but gameJoined is false. Setting clientPlayer to player1 by default.");
+              //   console.log("Game state is playing but gameJoined is false. Setting clientPlayer to player1 by default.");
                 this.clientPlayer = this.player1;
             }
             this.run();
@@ -455,7 +455,7 @@ class PongOnline extends Game {
     }
 
     run() {
-        console.log("Game running.");
+       //  console.log("Game running.");
         this.isDisposed = false;
         Services.TimeService!.update();
         this.predictionManager!.resetLastFrameTime();
@@ -487,7 +487,7 @@ class PongOnline extends Game {
     }
 
     stop() {
-        console.log("Game stopped.");
+        // console.log("Game stopped.");
         Services.Engine!.stopRenderLoop(this.renderLoop);
         Services.Engine!.runRenderLoop(this.stoppedRenderLoop);
     }
@@ -517,7 +517,7 @@ class PongOnline extends Game {
     }
 
     dispose(): void {
-        console.log("Disposing Pong game instance.");
+      //   console.log("Disposing Pong game instance.");
         this.isDisposed = true;
 
         this.connectionTimeoutId && clearTimeout(this.connectionTimeoutId);

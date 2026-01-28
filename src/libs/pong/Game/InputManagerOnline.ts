@@ -150,7 +150,7 @@ class InputManager {
                     break;
                 }
             }
-            console.log("Input recorded");
+         //    console.log("Input recorded");
         });
     }
 
@@ -202,7 +202,7 @@ class InputManager {
                 }
             }
         });
-        console.log("Input recorded");
+       //  console.log("Input recorded");
     }
 
     public dispose() {

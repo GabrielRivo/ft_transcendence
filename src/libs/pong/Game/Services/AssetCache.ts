@@ -17,7 +17,7 @@ class AssetCacheSingleton {
     public downloadPromises: Map<string, Promise<CachedAsset>> = new Map();
 
     private constructor() {
-        console.log('[AssetCache] Service initialized');
+       //  console.log('[AssetCache] Service initialized');
     }
 
     public static getInstance(): AssetCacheSingleton {
@@ -33,10 +33,10 @@ class AssetCacheSingleton {
         if (!cached) {
             const existingPromise = this.downloadPromises.get(key);
             if (existingPromise) {
-                console.log(`[AssetCache] Waiting for pending download: ${key}`);
+              //   console.log(`[AssetCache] Waiting for pending download: ${key}`);
                 cached = await existingPromise;
             } else {
-                console.log(`[AssetCache] Downloading: ${key} from ${url}`);
+               //  console.log(`[AssetCache] Downloading: ${key} from ${url}`);
                 const downloadPromise = this.downloadAndCache(key, url);
                 this.downloadPromises.set(key, downloadPromise);
 
@@ -47,7 +47,7 @@ class AssetCacheSingleton {
                 }
             }
         } else {
-            console.log(`[AssetCache] Using cached file: ${key} (${this.formatSize(cached.size)})`);
+          //   console.log(`[AssetCache] Using cached file: ${key} (${this.formatSize(cached.size)})`);
         }
 
         return this.loadFromBlob(cached, scene);
@@ -55,24 +55,24 @@ class AssetCacheSingleton {
 
     public async preload(key: string, url: string): Promise<void> {
         if (this.cache.has(key)) {
-            console.log(`[AssetCache] Already cached: ${key}`);
+          //   console.log(`[AssetCache] Already cached: ${key}`);
             return;
         }
 
         const existingPromise = this.downloadPromises.get(key);
         if (existingPromise) {
-            console.log(`[AssetCache] Preload already in progress: ${key}`);
+          //   console.log(`[AssetCache] Preload already in progress: ${key}`);
             await existingPromise;
             return;
         }
 
-        console.log(`[AssetCache] Preloading: ${key}`);
+      //   console.log(`[AssetCache] Preloading: ${key}`);
         const downloadPromise = this.downloadAndCache(key, url);
         this.downloadPromises.set(key, downloadPromise);
 
         try {
             await downloadPromise;
-            console.log(`[AssetCache] Preload complete: ${key}`);
+         //    console.log(`[AssetCache] Preload complete: ${key}`);
         } finally {
             this.downloadPromises.delete(key);
         }
@@ -87,7 +87,7 @@ class AssetCacheSingleton {
         if (cached) {
             URL.revokeObjectURL(cached.blobUrl);
             this.cache.delete(key);
-            console.log(`[AssetCache] Removed from cache: ${key}`);
+           //  console.log(`[AssetCache] Removed from cache: ${key}`);
         }
     }
 
@@ -97,7 +97,7 @@ class AssetCacheSingleton {
         });
         this.cache.clear();
         this.downloadPromises.clear();
-        console.log('[AssetCache] Cache cleared');
+     //    console.log('[AssetCache] Cache cleared');
     }
 
 
@@ -126,7 +126,7 @@ class AssetCacheSingleton {
         const blobUrl = URL.createObjectURL(blob);
         
         const downloadTime = performance.now() - startTime;
-        console.log(`[AssetCache] Downloaded ${key} (${this.formatSize(blob.size)}) in ${downloadTime.toFixed(0)}ms`);
+       //  console.log(`[AssetCache] Downloaded ${key} (${this.formatSize(blob.size)}) in ${downloadTime.toFixed(0)}ms`);
 
         const cached: CachedAsset = {
             blob,

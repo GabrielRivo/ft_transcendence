@@ -123,7 +123,7 @@ export const Game = () => {
 
 	// Switch to online mode on mount, back to background on unmount
 	useEffect(() => {
-		console.log('[GamePage] Mounting - switching to online mode with gameId:', urlGameId);
+		// console.log('[GamePage] Mounting - switching to online mode with gameId:', urlGameId);
 
 		// Pass metadata to GameProvider (used for display purposes, redirection is handled via WebSocket events)
 		const metadata = {
@@ -135,7 +135,7 @@ export const Game = () => {
 		setMode('online', urlGameId, metadata);
 
 		return () => {
-			console.log('[GamePage] Unmounting - switching back to background mode');
+		// 	console.log('[GamePage] Unmounting - switching back to background mode');
 			setMode('background');
 		};
 	}, [setMode, urlGameId, type, tournamentId, tournamentType, playersCount]);
@@ -152,7 +152,7 @@ export const Game = () => {
 	 * Handles exit action - switches back to background mode and navigates to dashboard.
 	 */
 	const handleExit = async () => {
-		console.log('[GamePage] Exit clicked - surrendering game');
+		// console.log('[GamePage] Exit clicked - surrendering game');
 
 		try {
 			// Call surrender endpoint
@@ -165,7 +165,7 @@ export const Game = () => {
 				body: JSON.stringify({}),
 			});
 
-			console.log('[GamePage] Surrender successful - switching to background mode');
+			// console.log('[GamePage] Surrender successful - switching to background mode');
 		} catch (err) {
 			console.error('[GamePage] Failed to surrender game', err);
 		} finally {
