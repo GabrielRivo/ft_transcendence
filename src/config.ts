@@ -36,7 +36,7 @@ const config = {
 		keyLength: 64,
 		saltLength: 16,
 	},
-	redirectUri: 'http://localhost:8080',
+	redirectUri: process.env.HOST || 'http://localhost:8080',
 	accessTokenName: process.env.ACCESS_TOKEN_NAME || 'access_token',
 	refreshTokenName: process.env.REFRESH_TOKEN_NAME || 'refresh_token',
 };

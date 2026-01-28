@@ -197,13 +197,22 @@ export class AuthController {
 
 	@Post('/logout')
 	async logout(@Req() req: FastifyRequest, @Res() res: FastifyReply) {
-		const refreshToken = (req.cookies as Record<string, string | undefined>)[
-			config.refreshTokenName
-		];
+		const refreshToken = (req.cookies as Record<string, string>)[config.refreshTokenName];
+		const accessToken = (req.cookies as Record<string, string>)[config.accessTokenName];
+
+		let payload;
+		if (accessToken) {
+			payload = this.authService.verifyAccessToken(accessToken);
+		}
 
 		if (refreshToken) {
 			await this.authService.logout(refreshToken);
 		}
+
+		if (payload && payload?.isGuest) {
+			await this.authService.deleteAccount(payload.id);
+		}
+			
 		this.clearAuthCookies(res);
 
 		return { success: true, message: 'Logged out' };
