@@ -30,7 +30,19 @@ export function SetUsername() {
 		setErrors([]);
 
 		// Validate with AJV
-		const result = validate({ username });
+		const usernameValue = username.trim();
+
+		if (usernameValue === '') {
+			setErrors([{ field: 'username', message: 'Username cannot be empty' }]);
+			return;
+		}
+
+		if (usernameValue.length < 3) {
+			setErrors([{ field: 'username', message: 'Username must be at least 3 characters long' }]);
+			return;
+		}
+
+		const result = validate({ username: usernameValue });
 		if (!result.valid) {
 			setErrors(result.errors);
 			return;
@@ -39,10 +51,10 @@ export function SetUsername() {
 		setIsLoading(true);
 
 		try {
-			const success = await setUsername(username);
+			const success = await setUsername(usernameValue);
 
 			if (success) {
-				toast('Username successfully set!', 'success');
+				// toast('Username successfully set!', 'success');
 				navigate('/play');
 			} else {
 				toast('This username is already in use or invalid', 'error');

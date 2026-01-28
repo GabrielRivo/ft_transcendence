@@ -4,6 +4,8 @@ import ApexCharts, { ApexOptions } from 'apexcharts';
 import { useAuth } from '../../../hook/useAuth';
 import { api } from '../../../hook/useFetch';
 import { UserStats } from '../../../types/stats';
+import { useNavigate } from 'my-react-router';
+import { useToast } from '@/hook/useToast';
 
 interface GeneralStatsDisplay {
 	username: string;
@@ -21,7 +23,17 @@ interface GeneralStatsDisplay {
 
 function WinRatePieChart({ winRate }: { winRate: number }) {
 	const chartRef = useRef<HTMLDivElement | null>(null);
-	const chartInstance = useRef<ApexCharts | null>(null);
+	const chartInstanceRef = useRef<ApexCharts | null>(null);
+	const { user } = useAuth();
+	const navigate = useNavigate();
+	const { toast } = useToast();
+	
+	useEffect(() => {
+		if (user?.isGuest) {
+			toast('Please have an account to use all features', 'error');
+			navigate('/play');
+		}
+	}, [user?.isGuest]);
 
 	useEffect(() => {
 		if (!chartRef.current) return;

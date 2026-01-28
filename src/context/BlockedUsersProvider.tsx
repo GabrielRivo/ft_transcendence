@@ -17,7 +17,7 @@ export function BlockedUsersProvider({ children }: BlockedUsersProviderProps) {
 
 	// Fetch initial blocked users list
 	const fetchBlockedUsers = useCallback(async () => {
-		if (!isAuthenticated || !user || user.noUsername) {
+		if (!isAuthenticated || !user || user.noUsername || user?.isGuest) {
 			setBlockedUsers(new Set());
 			setLoading(false);
 			return;
@@ -40,7 +40,7 @@ export function BlockedUsersProvider({ children }: BlockedUsersProviderProps) {
 
 	// Socket event handlers
 	useEffect(() => {
-		if (!isAuthenticated || !user) return;
+		if (!isAuthenticated || !user || user?.isGuest) return;
 
 		const handleUserBlocked = (data: { blockedUserId: number }) => {
 			setBlockedUsers((prev) => {
@@ -65,7 +65,7 @@ export function BlockedUsersProvider({ children }: BlockedUsersProviderProps) {
 			userSocket.off('user_blocked', handleUserBlocked);
 			userSocket.off('user_unblocked', handleUserUnblocked);
 		};
-	}, [isAuthenticated, user?.id]);
+	}, [isAuthenticated, user?.id, user?.isGuest]);
 
 	// Initial data fetch
 	useEffect(() => {
@@ -81,7 +81,7 @@ export function BlockedUsersProvider({ children }: BlockedUsersProviderProps) {
 
 	const blockUser = useCallback(
 		async (otherId: number): Promise<boolean> => {
-			if (!user) return false;
+			if (!user || user?.isGuest) return false;
 
 			try {
 				const response = await fetchWithAuth(`${API_BASE}/block`, {
@@ -109,12 +109,12 @@ export function BlockedUsersProvider({ children }: BlockedUsersProviderProps) {
 				return false;
 			}
 		},
-		[user],
+		[user?.id, user?.isGuest],
 	);
 
 	const unblockUser = useCallback(
 		async (otherId: number): Promise<boolean> => {
-			if (!user) return false;
+			if (!user || user?.isGuest) return false;
 
 			try {
 				const response = await fetchWithAuth(`${API_BASE}/block`, {
@@ -142,7 +142,7 @@ export function BlockedUsersProvider({ children }: BlockedUsersProviderProps) {
 				return false;
 			}
 		},
-		[user?.id],
+		[user?.id, user?.isGuest],
 	);
 
 	return (

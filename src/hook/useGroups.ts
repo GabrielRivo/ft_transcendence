@@ -26,7 +26,7 @@ export function useGroups() {
 
 	// Récupérer la liste des groupes
 	const fetchGroups = useCallback(async () => {
-		if (!isAuthenticated || !user || user.noUsername) {
+		if (!isAuthenticated || !user || user.noUsername || user?.isGuest) {
 			setGroups([]);
 			setLoading(false);
 			return;
@@ -50,7 +50,7 @@ export function useGroups() {
 		} finally {
 			setLoading(false);
 		}
-	}, [isAuthenticated, user?.id, user?.noUsername]);
+	}, [isAuthenticated, user?.id, user?.noUsername, user?.isGuest]);
 
 	// Charger les données initiales
 	useEffect(() => {
@@ -72,7 +72,7 @@ export function useGroups() {
 
 	// Créer un groupe
 	const createGroup = useCallback(async (name: string): Promise<GroupResult> => {
-		if (!user) return { success: false, message: 'Not authenticated' };
+		if (!user || user?.isGuest) return { success: false, message: 'Not authenticated' };
 
 		try {
 			const response = await fetchWithAuth(`${API_BASE}/create`, {
@@ -97,7 +97,7 @@ export function useGroups() {
 		} catch {
 			return { success: false, message: 'Network error' };
 		}
-	}, [user?.id, fetchGroups]);
+	}, [user?.id, fetchGroups, user?.isGuest]);
 
 	// Obtenir les détails d'un groupe
 	const getGroup = useCallback(async (groupId: number): Promise<Group | null> => {
@@ -116,7 +116,7 @@ export function useGroups() {
 
 	// Ajouter un membre au groupe
 	const addMember = useCallback(async (groupId: number, userId: number): Promise<GroupResult> => {
-		if (!user) return { success: false, message: 'Not authenticated' };
+		if (!user || user?.isGuest) return { success: false, message: 'Not authenticated' };
 
 		try {
 			const response = await fetchWithAuth(`${API_BASE}/add-member`, {
@@ -136,11 +136,11 @@ export function useGroups() {
 		} catch {
 			return { success: false, message: 'Network error' };
 		}
-	}, [user?.id]);
+	}, [user?.id, user?.isGuest]);
 
 	// Quitter un groupe
 	const leaveGroup = useCallback(async (groupId: number): Promise<GroupResult> => {
-		if (!user) return { success: false, message: 'Not authenticated' };
+		if (!user || user?.isGuest) return { success: false, message: 'Not authenticated' };
 
 		try {
 			const response = await fetchWithAuth(`${API_BASE}/remove-member`, {
@@ -165,11 +165,11 @@ export function useGroups() {
 		} catch {
 			return { success: false, message: 'Network error' };
 		}
-	}, [user?.id]);
+	}, [user?.id, user?.isGuest]);
 
 	// Supprimer un groupe (owner seulement)
 	const deleteGroup = useCallback(async (groupId: number): Promise<GroupResult> => {
-		if (!user) return { success: false, message: 'Not authenticated' };
+		if (!user || user?.isGuest) return { success: false, message: 'Not authenticated' };
 
 		try {
 			const response = await fetchWithAuth(`${API_BASE}/group`, {
@@ -193,7 +193,7 @@ export function useGroups() {
 		} catch {
 			return { success: false, message: 'Network error' };
 		}
-	}, [user?.id]);
+	}, [user?.id, user?.isGuest]);
 
 	return {
 		groups,

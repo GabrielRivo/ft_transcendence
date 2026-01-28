@@ -119,7 +119,7 @@ export function ChatMessagesPanel({
 				
 			>
 				{messages.length === 0 ? (
-					<div className="flex h-full items-center justify-center text-gray-500">No message</div>
+					<div className="flex h-full items-center justify-center text-gray-500">{user?.isGuest ? 'Please have an account to use all features' : 'No message'}</div>
 				) : (
 					<div className="flex flex-col gap-1">
 						{messages.map((msg, index) => {
@@ -127,8 +127,6 @@ export function ChatMessagesPanel({
 							const isSystem = msg.userId === -1 || msg.username === 'System';
 							const isBlockedUser = !isOwn && !isSystem && isBlocked(msg.userId);
 							const isRevealed = revealedMessages[index] === true;
-							// Utiliser le cache OnlineUsers pour récupérer le username à jour, avec fallback
-							// Pour l'utilisateur actuel, utiliser user.username de useAuth() en priorité
 							const cachedUser = getUser(msg.userId);
 							const displayUsername = isOwn 
 								? (user?.username || cachedUser?.username || msg.username)

@@ -16,10 +16,12 @@
 //
 // =============================================================================
 
-import { createElement } from 'my-react';
+import { createElement, useEffect } from 'my-react';
 import { useNavigate } from 'my-react-router';
 import { Matchmaking } from '../../components/matchmaking';
 import { ButtonStyle3 } from '../../components/ui/button/style3';
+import { useAuth } from '@/hook/useAuth';
+import { useToast } from '@/hook/useToast';
 
 /**
  * Matchmaking page component.
@@ -29,10 +31,19 @@ import { ButtonStyle3 } from '../../components/ui/button/style3';
  */
 export function MatchmakingPage() {
 	const navigate = useNavigate();
+	const { user } = useAuth();
+	const { toast } = useToast();
 
 	const handleBack = () => {
 		navigate('/play');
 	};
+
+	useEffect(() => {
+		if (user?.isGuest) {
+			toast('Please have an account to use all features', 'error');
+			navigate('/play');
+		}
+	}, [user?.isGuest]);
 
 	return (
 		<div className="relative flex min-h-full flex-col text-white">

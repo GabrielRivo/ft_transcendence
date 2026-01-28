@@ -2,6 +2,8 @@ import { createElement, useState, useEffect } from 'my-react';
 import { useAuth } from '../../../hook/useAuth';
 import { api } from '../../../hook/useFetch';
 import { MatchHistory, TransformedMatch, UserInfo } from '../../../types/stats';
+import { useNavigate } from 'my-react-router';
+import { useToast } from '@/hook/useToast';
 
 function formatDate(dateStr: string): string {
 	const date = new Date(dateStr);
@@ -88,10 +90,20 @@ function MatchDetails({ match, username }: { match: TransformedMatch; username: 
 
 export function StatisticsHistoricPage() {
 	const { user } = useAuth();
+	const navigate = useNavigate();
+	const { toast } = useToast();
 	const [matches, setMatches] = useState<TransformedMatch[]>([]);
 	const [selectedMatchId, setSelectedMatchId] = useState<number>(0);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+
+
+	useEffect(() => {
+		if (user?.isGuest) {
+			toast('Please have an account to use all features', 'error');
+			navigate('/play');
+		}
+	}, [user?.isGuest]);
 
 	useEffect(() => {
 		async function fetchHistory() {

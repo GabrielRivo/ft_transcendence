@@ -12,6 +12,7 @@ import { Add } from '@icon/add';
 import { useNavigate } from 'my-react-router';
 import { useToast } from '@hook/useToast'; 
 import { fetchWithAuth } from '@libs/fetchWithAuth';
+import { useAuth } from '@/hook/useAuth';
 
 interface ChatSidebarPanelProps {
 	currentRoom: string;
@@ -42,7 +43,8 @@ export function ChatSidebarPanel({
 	const [showAddFriendModal, setShowAddFriendModal] = useState(false);
 	const [showCreateGroupModal, setShowCreateGroupModal] = useState(false);
 	const { toast } = useToast()
-
+	const { user } = useAuth();
+	
 	const navigate = useNavigate();
 	const handleAddFriend = () => {
 		setShowMenu(false);
@@ -63,7 +65,9 @@ export function ChatSidebarPanel({
 				{/* Hub */}
 				<div className="border-b border-cyan-500/20 pb-3">
 					<div className="mb-2 text-[10px] text-gray-500 uppercase">General</div>
-					<UserItem name="Hub" isOnline={true} isSelected={currentRoom === 'hub'} onClick={onSelectHub} />
+					{!user?.isGuest && (
+						<UserItem name="Hub" isOnline={true} isSelected={currentRoom === 'hub'} onClick={onSelectHub} />
+					)}
 				</div>
 
 				{/* Groupes */}
@@ -171,6 +175,7 @@ export function ChatSidebarPanel({
 			<div className="relative shrink-0 border-t border-cyan-500/20 p-3">
 				<button
 					onClick={() => setShowMenu(!showMenu)}
+					disabled={user?.isGuest || false}
 					className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-linear-to-r from-cyan-500/20 to-teal-500/20 text-sm font-bold tracking-wider text-cyan-400 transition-all hover:from-cyan-500/30 hover:to-teal-500/30"
 				>
 					<Add className="text-cyan-400" />

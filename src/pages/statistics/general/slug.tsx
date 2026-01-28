@@ -1,9 +1,11 @@
 import { createElement, useEffect, useRef, useState } from 'my-react';
-import { useParams } from 'my-react-router';
+import { useNavigate, useParams } from 'my-react-router';
 import EloHistogram from '@ui/charts/EloHistogram';
 import ApexCharts, { ApexOptions } from 'apexcharts';
 import { api } from '../../../hook/useFetch';
 import { UserStats, UserInfo } from '../../../types/stats';
+import { useToast } from '@/hook/useToast';
+import { useAuth } from '@/hook/useAuth';
 
 interface GeneralStatsDisplay {
 	username: string;
@@ -22,6 +24,16 @@ interface GeneralStatsDisplay {
 function WinRatePieChart({ winRate }: { winRate: number }) {
 	const chartRef = useRef<HTMLDivElement | null>(null);
 	const chartInstance = useRef<ApexCharts | null>(null);
+	const { user } = useAuth();
+	const navigate = useNavigate();
+	const { toast } = useToast();
+	
+	useEffect(() => {
+		if (user?.isGuest) {
+			toast('Please have an account to use all features', 'error');
+			navigate('/play');
+		}
+	}, [user?.isGuest]);
 
 	useEffect(() => {
 		if (!chartRef.current) return;

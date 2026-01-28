@@ -50,6 +50,13 @@ export function ProfileSlugPage() {
 	const [profile, setProfile] = useState<UserProfile | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	
+	useEffect(() => {
+		if (user?.isGuest) {
+			toast('Please have an account to use all features', 'error');
+			navigate('/play');
+		}
+	}, [user?.isGuest]);
 
 	useEffect(() => {
 		if (!username) {

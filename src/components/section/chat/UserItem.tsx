@@ -1,5 +1,6 @@
 import { createElement, useState, useRef, useEffect, useCallback, FragmentComponent } from 'my-react';
 import { UserContextMenu, UserContextMenuCallbacks, closeAllUserContextMenus } from '@ui/context-menu';
+// import { useGame } from '@hook/useGame';
 
 export interface UserItemProps {
 	key?: number | string;
@@ -33,7 +34,18 @@ export function UserItem({
 		x: 0,
 		y: 0,
 	});
+	// const { mode } = useGame();
 
+
+	// useEffect(() => {
+	// 	if (mode === 'online') {
+	// 		closeAllUserContextMenus();
+	// 	}
+	// 	return () => {
+	// 		closeAllUserContextMenus();
+	// 	}
+	// }, [mode]);
+	
 	const handleContextMenu = useCallback(
 		(e: MouseEvent) => {
 			if (!contextMenuCallbacks) return;
@@ -49,6 +61,10 @@ export function UserItem({
 					y: e.clientY,
 				});
 			}, 0);
+
+			setTimeout(() => {
+				closeAllUserContextMenus();
+			}, 10000);
 		},
 		[contextMenuCallbacks],
 	);
@@ -71,6 +87,16 @@ export function UserItem({
 		[handleContextMenu, contextMenuCallbacks],
 	);
 
+	useEffect(() => {
+		return () => {
+			setContextMenu({
+				isOpen: false,
+				x: 0,
+				y: 0,
+			});
+			closeAllUserContextMenus();
+		};
+	}, []);
 	// Cleanup au démontage
 	useEffect(() => {
 		return () => {
@@ -106,7 +132,7 @@ export function UserItem({
 							{name.charAt(0).toUpperCase()}
 						</div>
 					)}
-					{!isRightPanel && isOnline !== undefined && (
+					{!isRightPanel && name !== 'Hub' && isOnline !== undefined && (
 						<div
 							className={`absolute right-0 bottom-0 size-3 rounded-full ${isOnline ? 'bg-green-500' : 'bg-gray-500'}`}
 						></div>

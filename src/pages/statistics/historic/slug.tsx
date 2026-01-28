@@ -1,7 +1,9 @@
 import { createElement, useState, useEffect } from 'my-react';
-import { useParams } from 'my-react-router';
+import { useNavigate, useParams } from 'my-react-router';
 import { api } from '../../../hook/useFetch';
 import { MatchHistory, TransformedMatch, UserInfo } from '../../../types/stats';
+import { useToast } from '@/hook/useToast';
+import { useAuth } from '@/hook/useAuth';
 
 function formatDate(dateStr: string): string {
 	const date = new Date(dateStr);
@@ -90,6 +92,16 @@ export function StatisticsHistoricPageSlug() {
 	const [username, setUsername] = useState<string>('');
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const { user } = useAuth();
+	const navigate = useNavigate();
+	const { toast } = useToast();
+
+	useEffect(() => {
+		if (user?.isGuest) {
+			toast('Please have an account to use all features', 'error');
+			navigate('/play');
+		}
+	}, [user?.isGuest]);
 
 	useEffect(() => {
 		async function fetchHistory() {

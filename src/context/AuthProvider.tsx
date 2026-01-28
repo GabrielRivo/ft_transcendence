@@ -83,16 +83,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
 							const data = await retryResponse.json();
 							if (data.authenticated && data.user) {
 								setIsAuthenticated(true);
-								setUser({
-									id: data.user.id,
-									email: data.user.email,
-									username: data.user.username || '',
-									noUsername: data.user.noUsername || false,
-									suggestedUsername: data.user.suggestedUsername || undefined,
-									twoFA: data.user.twoFA || false,
-									twoFAVerified: data.user.twoFAVerified || false,
-								});
-								return;
+							setUser({
+								id: data.user.id,
+								email: data.user.email,
+								username: data.user.username || '',
+								noUsername: data.user.noUsername || false,
+								suggestedUsername: data.user.suggestedUsername || undefined,
+								twoFA: data.user.twoFA || false,
+								twoFAVerified: data.user.twoFAVerified || false,
+								isGuest: data.user.isGuest || false,
+							});
+							return;
 							}
 						}
 					}
@@ -114,6 +115,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 				suggestedUsername: data.user.suggestedUsername || undefined,
 				twoFA: data.user.twoFA || false,
 				twoFAVerified: data.user.twoFAVerified || false,
+				isGuest: data.user.isGuest || false,
 			});
 		} else {
 			setIsAuthenticated(false);
@@ -158,6 +160,28 @@ export function AuthProvider({ children }: AuthProviderProps) {
 				},
 				credentials: 'include',
 				body: JSON.stringify({ email, password }),
+			});
+
+			if (!response.ok) {
+				return false;
+			}
+
+			await checkAuth();
+			return true;
+		} catch {
+			return false;
+		}
+	}, [checkAuth]);
+
+	const loginAsGuest = useCallback(async (username: string): Promise<boolean> => {
+		try {
+			const response = await fetch(`${API_BASE}/guest`, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				credentials: 'include',
+				body: JSON.stringify({ username }),
 			});
 
 			if (!response.ok) {
@@ -255,12 +279,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
 			loading,
 			login,
 			register,
+			loginAsGuest,
 			logout,
 			checkAuth,
 			setUsername,
 			verify2FA,
 		}),
-		[isAuthenticated, user, loading, login, register, logout, checkAuth, setUsername, verify2FA]
+		[isAuthenticated, user, loading, login, register, loginAsGuest, logout, checkAuth, setUsername, verify2FA]
 	);
 
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

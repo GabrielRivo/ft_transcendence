@@ -22,7 +22,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 
 	// Connect socket when authenticated
 	useEffect(() => {
-		if (isAuthenticated && user && !user.noUsername) {
+		if (isAuthenticated && user && !user.noUsername && !user?.isGuest) {
 			isConnectingRef.current = true;
 
 			userSocket.auth = {
@@ -42,7 +42,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 	}, [isAuthenticated, user]);
 
 	const fetchFriends = useCallback(async () => {
-		if (!isAuthenticated || !user || user.noUsername) {
+		if (!isAuthenticated || !user || user.noUsername || user?.isGuest) {
 			setFriends([]);
 			setLoading(false);
 			return;
@@ -66,10 +66,10 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 		} finally {
 			setLoading(false);
 		}
-	}, [isAuthenticated, user?.id, user?.noUsername]);
+	}, [isAuthenticated, user?.id, user?.noUsername, user?.isGuest]);
 
 	const fetchPendingInvitations = useCallback(async () => {
-		if (!isAuthenticated || !user || user.noUsername) {
+		if (!isAuthenticated || !user || user.noUsername || user?.isGuest) {
 			setPendingInvitations([]);
 			return;
 		}
@@ -84,11 +84,11 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 		} catch {
 			// Silently fail
 		}
-	}, [isAuthenticated, user?.id, user?.noUsername]);
+	}, [isAuthenticated, user?.id, user?.noUsername, user?.isGuest]);
 
 	// Socket event handlers
 	useEffect(() => {
-		if (!isAuthenticated || !user) return;
+		if (!isAuthenticated || !user || user?.isGuest) return;
 
 		const handleFriendRequest = (data: { senderId: number; senderUsername: string }) => {
 			console.log('[FriendsProvider] friend_request received:', data);
@@ -132,7 +132,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 			userSocket.off('friend_accepted', handleFriendAccepted);
 			userSocket.off('friend_removed', handleFriendRemoved);
 		};
-	}, [isAuthenticated, user?.id]);
+	}, [isAuthenticated, user?.id, user?.isGuest]);
 
 	// Initial data fetch
 	useEffect(() => {
@@ -142,7 +142,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 
 	const sendFriendInviteByUsername = useCallback(
 		async (targetUsername: string): Promise<FriendInviteResult> => {
-			if (!user) return { success: false, message: 'Not authenticated' };
+			if (!user || user?.isGuest) return { success: false, message: 'Not authenticated' };
 
 			try {
 				const response = await fetchWithAuth(`${API_BASE}/invite-by-username`, {
@@ -163,12 +163,12 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 				return { success: false, message: 'Network error' };
 			}
 		},
-		[user?.id, user?.username],
+		[user?.id, user?.username, user?.isGuest],
 	);
 
 	const sendFriendInvite = useCallback(
 		async (otherId: number): Promise<boolean> => {
-			if (!user) return false;
+			if (!user || user?.isGuest) return false;
 
 			try {
 				const response = await fetchWithAuth(`${API_BASE}/invite`, {
@@ -189,12 +189,12 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 				return false;
 			}
 		},
-		[user],
+		[user?.id, user?.isGuest],
 	);
 
 	const acceptFriendInvite = useCallback(
 		async (senderId: number, senderUsername?: string): Promise<boolean> => {
-			if (!user) return false;
+			if (!user || user?.isGuest) return false;
 
 			const username = senderUsername || pendingInvitations.find((inv) => inv.senderId === senderId)?.senderUsername || '';
 
@@ -226,12 +226,12 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 				return false;
 			}
 		},
-		[user?.id, pendingInvitations],
+		[user?.id, pendingInvitations, user?.isGuest],
 	);
 
 	const declineFriendInvite = useCallback(
 		async (senderId: number): Promise<boolean> => {
-			if (!user) return false;
+			if (!user || user?.isGuest) return false;
 
 			try {
 				const response = await fetchWithAuth(`${API_BASE}/friend`, {
@@ -255,12 +255,12 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 				return false;
 			}
 		},
-		[user?.id],
+		[user?.id, user?.isGuest],
 	);
 
 	const removeFriend = useCallback(
 		async (friendId: number): Promise<boolean> => {
-			if (!user) return false;
+			if (!user || user?.isGuest) return false;
 
 			try {
 				const response = await fetchWithAuth(`${API_BASE}/friend`, {
@@ -284,7 +284,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 				return false;
 			}
 		},
-		[user?.id],
+		[user?.id, user?.isGuest],
 	);
 
 	return (

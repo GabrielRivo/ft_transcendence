@@ -1,5 +1,5 @@
 import { createElement, useState, useRef, useEffect } from 'my-react';
-import { Link } from 'my-react-router';
+import { Link, useNavigate } from 'my-react-router';
 import { useAuth } from '../../hook/useAuth';
 import { useToast } from '../../hook/useToast';
 import { ButtonStyle3 } from '../../components/ui/button/style3';
@@ -30,7 +30,8 @@ interface TwoFactorSetupResponse {
 export function ProfilePage() {
 	const { user, checkAuth } = useAuth();
 	const { toast } = useToast();
-
+	const navigate = useNavigate();
+	
 	// Avatar state
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -67,6 +68,12 @@ export function ProfilePage() {
 	const [deleteConfirmText, setDeleteConfirmText] = useState('');
 	const [isDeleting, setIsDeleting] = useState(false);
 
+	useEffect(() => {
+		if (user?.isGuest) {
+			toast('Please have an account to use all features', 'error');
+			navigate('/play');
+		}
+	}, [user?.isGuest]);
 	// Fetch profile data
 	useEffect(() => {
 		const fetchProfile = async () => {
@@ -155,18 +162,25 @@ export function ProfilePage() {
 
 	// Username handler
 	const handleUpdateUsername = async () => {
-		if (!newUsername || newUsername.length < 3) {
+		const usernameValue = newUsername.trim();
+
+		if (usernameValue === '') {
+			toast('Username cannot be empty', 'warning');
+			return;
+		}
+
+		if (!usernameValue || usernameValue.length < 3) {
 			toast('Username must be at least 3 characters long', 'warning');
 			return;
 		}
-		if (newUsername.length > 20) {
+		if (usernameValue.length > 20) {
 			toast('Username must be at most 20 characters long', 'warning');
 			return;
 		}
 
 		const result = await fetchJsonWithAuth('/api/auth/username', {
 			method: 'PATCH',
-			body: JSON.stringify({ username: newUsername }),
+			body: JSON.stringify({ username: usernameValue }),
 		});
 
 		if (result.ok) {

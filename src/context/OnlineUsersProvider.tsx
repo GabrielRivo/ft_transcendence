@@ -19,7 +19,7 @@ export function OnlineUsersProvider({ children }: OnlineUsersProviderProps) {
 
 	// Fetch initial online users
 	const fetchOnlineUsers = useCallback(async () => {
-		if (!isAuthenticated || !user || user.noUsername) {
+		if (!isAuthenticated || !user || user.noUsername || user?.isGuest) {
 			setOnlineUsers(new Map());
 			setLoading(false);
 			return;
@@ -50,11 +50,11 @@ export function OnlineUsersProvider({ children }: OnlineUsersProviderProps) {
 		} finally {
 			setLoading(false);
 		}
-	}, [isAuthenticated, user?.id, user?.noUsername]);
+	}, [isAuthenticated, user?.id, user?.noUsername, user?.isGuest]);
 
 	// Socket event handlers
 	useEffect(() => {
-		if (!isAuthenticated || !user || user.noUsername) return;
+		if (!isAuthenticated || !user || user.noUsername || user?.isGuest) return;
 
 		const handleUserOnline = (data: { userId: number; username: string; avatar: string | null }) => {
 			setOnlineUsers((prev) => {
@@ -127,7 +127,7 @@ export function OnlineUsersProvider({ children }: OnlineUsersProviderProps) {
 			userSocket.off('avatar_deleted', handleAvatarUpdated);
 			userSocket.off('username_updated', handleUsernameUpdated);
 		};
-	}, [isAuthenticated, user?.id, user?.noUsername]);
+	}, [isAuthenticated, user?.id, user?.noUsername, user?.isGuest]);
 
 	// Initial fetch when authenticated
 	useEffect(() => {
@@ -146,7 +146,7 @@ export function OnlineUsersProvider({ children }: OnlineUsersProviderProps) {
 
 	// Fetch les profils des utilisateurs manquants (ni online, ni dans le cache offline)
 	const fetchMissingUsers = useCallback(async (userIds: number[]): Promise<void> => {
-		if (!isAuthenticated || userIds.length === 0) return;
+		if (!isAuthenticated || userIds.length === 0 || user?.isGuest) return;
 
 		// Filtrer les ids qui ne sont pas déjà dans online, offline, ou en cours de fetch
 		const missingIds = userIds.filter(id => 
@@ -186,7 +186,7 @@ export function OnlineUsersProvider({ children }: OnlineUsersProviderProps) {
 			// Retirer de la liste des fetches en cours
 			missingIds.forEach(id => fetchingRef.current.delete(id));
 		}
-	}, [isAuthenticated, onlineUsers, offlineUsersCache]);
+	}, [isAuthenticated, onlineUsers, offlineUsersCache, user?.id, user?.isGuest]);
 
 	return (
 		<OnlineUsersContext.Provider

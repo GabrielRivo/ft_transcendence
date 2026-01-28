@@ -1,9 +1,8 @@
-import { createElement, useEffect } from 'my-react';
+import { createElement, useEffect, Fragment } from 'my-react';
 import type { Element } from 'my-react';
 import { ChatSection } from '../components/section/chat/ChatSection';
 import { Link, useNavigate, useRouter } from 'my-react-router';
 import { useAuth } from '@/hook/useAuth';
-import { useToast } from '@/hook/useToast';
 
 function Info() {
 	return <div className="flex h-4 w-full shrink-0 items-center justify-center"></div>;
@@ -25,26 +24,24 @@ function NavLink({ path, label, className = 'text-white/80' }: { path: string; l
 }
 
 function Menu() {
-	const { logout } = useAuth();
-	const navigate = useNavigate();
-	const { toast } = useToast();
-
-	// const handleLogout = () => {
-	// 	navigate('/logout');
-	// };
+	const { user } = useAuth();
 
 	return (
 		<nav className="flex h-14 w-full shrink-0 items-center justify-center gap-8 pb-12">
 			<NavLink path="/play" label="Play" />
+			{!user?.isGuest && (
+				<Fragment>
+					{/* <span>|</span> */}
+					<NavLink path="/profile" label="Profile" />
+					{/* <span>|</span> */}
+					<NavLink path="/statistics/general" label="Stats" />
+				</Fragment>
+			)}
 			{/* <span>|</span> */}
-			<NavLink path="/profile" label="Profile" />
-			{/* <span>|</span> */}
-			<NavLink path="/statistics/general" label="Stats" />
-			{/* <span>|</span> */}
+
 			<Link className="font-pirulen text-cyan-500 hover:text-white/80" to="/logout">
 				Logout
 			</Link>
-			{/* <NavLink path="/deconnexion" label="Deconnexion" className="text-cyan-500" /> */}
 		</nav>
 	);
 }
@@ -108,8 +105,6 @@ function useActiveTournamentRedirect() {
 					const currentUrl = new URL(window.location.href);
 					const currentId = currentUrl.searchParams.get('id');
 
-					// Redirect if we are not already on the specific tournament page
-					// or if the ID doesn't match
 					if (currentUrl.pathname !== targetPath || currentId !== tournamentId) {
 						console.log(`[DashboardLayout] Redirecting to active tournament: ${targetPath}?id=${tournamentId}`);
 						navigate(`${targetPath}?id=${tournamentId}`);

@@ -400,18 +400,18 @@ class PongOnline extends Game {
 
     private onBallBounce = (payload: any): void => {
         if (this.cameraAnimating) return;
-        let modifier = payload.ball.getSpeed() / 3;
-        let duration = 15;
-        let magnitude = 0.02 + 0.035 * modifier;
+        const modifier = payload.ball.getSpeed() / 3;
+        const duration = 15;
+        const magnitude = 0.02 + 0.035 * modifier;
         const cameraShake = new CameraShakeEffect(magnitude, duration);
         cameraShake.play(this.camera!);
     }
 
     private onPaddleHitBall = (payload: any): void => {
         if (this.cameraAnimating) return;
-        let modifier = payload.ball.getSpeed() / 3;
-        let duration = 25;
-        let magnitude = 0.03 + 0.055 * modifier;
+        const modifier = payload.ball.getSpeed() / 3;
+        const duration = 25;
+        const magnitude = 0.03 + 0.055 * modifier;
         const cameraShake = new CameraShakeEffect(magnitude, duration);
         cameraShake.play(this.camera!);
     }

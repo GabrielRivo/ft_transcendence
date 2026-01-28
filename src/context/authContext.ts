@@ -8,6 +8,7 @@ export interface User {
 	suggestedUsername?: string;
 	twoFA?: boolean;
 	twoFAVerified?: boolean;
+	isGuest?: boolean;
 }
 
 export interface AuthContextType {
@@ -16,6 +17,7 @@ export interface AuthContextType {
 	loading: boolean;
 	login: (email: string, password: string) => Promise<boolean>;
 	register: (email: string, password: string) => Promise<boolean>;
+	loginAsGuest: (username: string) => Promise<boolean>;
 	logout: () => Promise<void>;
 	checkAuth: () => Promise<void>;
 	setUsername: (username: string) => Promise<boolean>;
