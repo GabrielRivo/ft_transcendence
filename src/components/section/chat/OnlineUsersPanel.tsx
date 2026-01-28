@@ -11,7 +11,7 @@ import { useToast } from '@hook/useToast';
 export function OnlineUsersPanel() {
 	const { onlineUsers, loading } = useOnlineUsers();
 	const { user } = useAuth();
-	const { friends } = useFriends();
+	const { friends, refreshFriends } = useFriends();
 	const { isBlocked, blockUser, unblockUser } = useBlockedUsers();
 	const navigate = useNavigate();
 	const { toast } = useToast();
@@ -84,19 +84,38 @@ export function OnlineUsersPanel() {
 										navigate(`/profile/${onlineUser.userId}`)
 									},
 									onToggleFriend: () => {
-										fetchWithAuth(`/api/user/friend-management/invite`, {
-											method: 'POST',
-											headers: {
-												'Content-Type': 'application/json',
-											},
-											body: JSON.stringify({
-												otherId: onlineUser.userId
-											}),
-										}).then(data => data.json()).then(data => {
-											toast(data.message, data.success ? 'success' : 'error')
-										}).catch(() => {
-											toast('Network error', 'error')
-										})
+										if (isFriend) {
+											fetchWithAuth(`/api/user/friend-management/friend`, {
+												method: 'DELETE',
+												headers: {
+													'Content-Type': 'application/json',
+												},
+												body: JSON.stringify({
+													otherId: onlineUser.userId
+												}),
+											}).then(data => data.json()).then(data => {
+												toast(data.message, data.success ? 'success' : 'error')
+												if (data.success) {
+													refreshFriends();
+												}
+											}).catch(() => {
+												toast('Network error', 'error')
+											})
+										} else {
+											fetchWithAuth(`/api/user/friend-management/invite`, {
+												method: 'POST',
+												headers: {
+													'Content-Type': 'application/json',
+												},
+												body: JSON.stringify({
+													otherId: onlineUser.userId
+												}),
+											}).then(data => data.json()).then(data => {
+												toast(data.message, data.success ? 'success' : 'error')
+											}).catch(() => {
+												toast('Network error', 'error')
+											})
+										}
 									},
 									onBlock: async () => {
 										const success = await blockUser(onlineUser.userId);

@@ -1,4 +1,4 @@
-import { createElement, createPortal, useEffect, useState, useRef } from 'my-react';
+import { createElement, createPortal, useEffect, useState } from 'my-react';
 
 // Événement global pour fermer tous les menus contextuels
 const CLOSE_ALL_CONTEXT_MENUS_EVENT = 'closeAllUserContextMenus';
@@ -49,7 +49,6 @@ function MenuItem({  label, onClick, variant = 'default' }: MenuItemProps) {
 			onClick={handleClick}
 			className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-all duration-150 ${variantClasses}`}
 		>
-			{/* <span className="text-base">{icon}</span> */}
 			<span className="font-medium">{label}</span>
 		</button>
 	);
@@ -145,7 +144,7 @@ export function UserContextMenu({ isOpen, position, onClose, isFriend = false, i
 			style={`left: ${adjustedPosition.x}px; top: ${adjustedPosition.y}px;`}
 		>
 			<div className="py-1">
-				<MenuItem label="Challenge" onClick={() => handleAction(callbacks.onChallenge)} />
+				{/* <MenuItem label="Challenge" onClick={() => handleAction(callbacks.onChallenge)} /> */}
 				<MenuItem label="Invit to tournament" onClick={() => handleAction(callbacks.onInviteTournament)} />
 				<Divider />
 				<MenuItem label="Stats" onClick={() => handleAction(callbacks.onStatistics)} />

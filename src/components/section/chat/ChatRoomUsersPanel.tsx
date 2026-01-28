@@ -76,8 +76,8 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 										console.log('Profil', roomUser.username)
 									},
 									onToggleFriend: () => {
-										fetchWithAuth(`/api/user/friend-management/invite`, {
-											method: 'POST',
+										fetchWithAuth(`/api/user/friend-management/friend`, {
+											method: 'DELETE',
 											headers: {
 												'Content-Type': 'application/json',
 											},
@@ -86,10 +86,9 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 											}),
 										}).then(data => data.json()).then(data => {
 											toast(data.message, data.success ? 'success' : 'error')
-										}).catch(e => {
+										}).catch(() => {
 											toast('Network error', 'error')
 										})
-										console.log('Add friend', roomUser.username)
 									},
 									onBlock: () => {
 										fetchWithAuth(`/api/user/friend-management/block`, {
