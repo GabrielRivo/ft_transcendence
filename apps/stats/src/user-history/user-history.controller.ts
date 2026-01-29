@@ -23,6 +23,12 @@ export class UserHistoryController {
 		this.userStatsService.updateUserName(event.id, event.username);
 	}
 
+	@EventPattern('user.deleted')
+	async handleUserDeleted(@Payload() event: { id: number }) {
+		this.userHistoryService.anonymizeGameHistory(event.id);
+		this.userStatsService.removeUserStats(event.id);
+	}
+
 	@EventPattern('game.finished')
 	async handleGameFinished(@Payload() event: GameFinishedEvent) {
 		let gain1 = null

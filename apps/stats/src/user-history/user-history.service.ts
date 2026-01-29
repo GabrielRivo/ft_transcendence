@@ -50,14 +50,24 @@ export class UserHistoryService {
 	private statementisGameIdValid!: Statement;
 	private statementIsUserExists!: Statement;
 	private statementMatchTransaction!: (match: any, p1: any, p2: any, isFinal: any) => void;
+	private statementMatchTransaction!: (match: any, p1: any, p2: any, isFinal: any) => void;
 	private statementGetRankedNumber!: Statement<{userId: number}>;
+
+	private statementUpdatePlayer1!: Statement;
+	private statementUpdatePlayer2!: Statement;
+	private statementUpdateWinner!: Statement;
 
 	onModuleInit() {
 		this.statementAddMatchtoHistory = this.db.prepare(addMatchHistoryStatement);
 		this.statementGet = this.db.prepare(getMatchHistory);
 		this.statementisGameIdValid = this.db.prepare(isGameIdValid);
 		this.statementIsUserExists = this.db.prepare(isUserExists);
+		this.statementIsUserExists = this.db.prepare(isUserExists);
 		this.statementGetRankedNumber = this.db.prepare(countRanked);
+
+		this.statementUpdatePlayer1 = this.db.prepare(`UPDATE game_history SET player1_id = 0 WHERE player1_id = ?`);
+		this.statementUpdatePlayer2 = this.db.prepare(`UPDATE game_history SET player2_id = 0 WHERE player2_id = ?`);
+		this.statementUpdateWinner = this.db.prepare(`UPDATE game_history SET winner_id = 0 WHERE winner_id = ?`);
 
 
 		this.statementMatchTransaction = this.db.transaction((match, p1, p2) => {
@@ -191,5 +201,11 @@ export class UserHistoryService {
 		const newElo = p1Stats.elo + kfactor * (( 0.5 + diffScore / 10)- hope);
 		const res = newElo - p1Stats.elo
 		return Math.round(res);
+	}
+
+	anonymizeGameHistory(userId: number) {
+		this.statementUpdatePlayer1.run(userId);
+		this.statementUpdatePlayer2.run(userId);
+		this.statementUpdateWinner.run(userId);
 	}
 }
