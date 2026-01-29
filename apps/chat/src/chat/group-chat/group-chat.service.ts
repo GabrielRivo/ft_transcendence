@@ -68,6 +68,10 @@ export class GroupChatService {
 	private statementSaveGroupMessage: Statement<{ groupId: number, userId: number, msgContent: string }>;
 	private statementFindGroupByNameAndOwner: Statement<{ ownerId: number, name: string }>;
 
+	private statementDeleteGroupMembersByUser!: Statement<{ userId: number }>;
+	private statementDeleteGroupMessagesByUser!: Statement<{ userId: number }>;
+	private statementDeleteGroupsByOwner!: Statement<{ ownerId: number }>;
+
 	onModuleInit() {
 		this.statementCreateGroup = this.db.prepare(CreateGroup);
 		this.statementAddMember = this.db.prepare(AddMember);
@@ -80,6 +84,16 @@ export class GroupChatService {
 		this.statemenGetGroupHistory = this.db.prepare(GetGrpHistory);
 		this.statementSaveGroupMessage = this.db.prepare(SaveGroupMessage);
 		this.statementFindGroupByNameAndOwner = this.db.prepare(FindGroupByNameAndOwner);
+
+		this.statementDeleteGroupMembersByUser = this.db.prepare(
+			`DELETE FROM groupMembers WHERE userId = @userId`
+		);
+		this.statementDeleteGroupMessagesByUser = this.db.prepare(
+			`DELETE FROM groupChatHistory WHERE userId = @userId`
+		);
+		this.statementDeleteGroupsByOwner = this.db.prepare(
+			`DELETE FROM privateGroup WHERE ownerId = @ownerId`
+		);
 	}
 
 	createGroup(ownerId: number, name: string): { success: boolean; message: string; groupId?: number } {
@@ -204,6 +218,12 @@ export class GroupChatService {
 
 	saveGroupMessage(groupId: number, userId: number, content: string) {
 		return this.statementSaveGroupMessage.run({ groupId, userId, msgContent: content });
+	}
+
+	deleteUserFromGroups(userId: number) {
+		this.statementDeleteGroupMembersByUser.run({ userId });
+		this.statementDeleteGroupMessagesByUser.run({ userId });
+		this.statementDeleteGroupsByOwner.run({ ownerId: userId });
 	}
 }
 

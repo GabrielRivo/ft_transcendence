@@ -8,6 +8,7 @@ export class GeneralChatService {
 	private statementSaveGeneral !: Statement<{ userId: number, username: string, msgContent: string }>;
 	private statementGetGeneralHistory !: Statement<[]>;
 	private statementGetAllGeneralHistory !: Statement<[]>;
+	private statementDeleteMessagesByUser !: Statement<{ userId: number }>;
 
 	onModuleInit() {
 		this.statementSaveGeneral = this.db.prepare(
@@ -17,9 +18,13 @@ export class GeneralChatService {
 			`SELECT * FROM generalChatHistory ORDER BY created_at DESC LIMIT 50`
 		);
 		this.statementGetAllGeneralHistory = this.db.prepare(
-			`SELECT * FROM generalChatHistory ORDER BY created_at DESC LIMIT 100`);
+			`SELECT * FROM generalChatHistory ORDER BY created_at DESC LIMIT 100`
+		);
 		this.statementDeleteTournamentMessage = this.db.prepare(
 			`DELETE FROM generalChatHistory WHERE userId = -1 AND msgContent LIKE ?`
+		);
+		this.statementDeleteMessagesByUser = this.db.prepare(
+			`DELETE FROM generalChatHistory WHERE userId = @userId`
 		);
 	}
 	private statementDeleteTournamentMessage!: Statement<[string]>;
@@ -55,5 +60,9 @@ export class GeneralChatService {
 
 	getAllGeneralHistory() {
 		return this.statementGetAllGeneralHistory.all();
+	}
+
+	deleteMessagesByUserId(userId: number) {
+		return this.statementDeleteMessagesByUser.run({ userId });
 	}
 }

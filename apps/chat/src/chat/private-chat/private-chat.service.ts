@@ -27,7 +27,12 @@ export class PrivateChatService {
 			WHERE (userId1 = @user1 AND userId2 = @user2) 
 				OR (userId2 = @user1 AND userId1 = @user2)
 		`);
+
+		this.statementDeleteMessagesByUser = this.db.prepare(
+			`DELETE FROM privateChatHistory WHERE userId1 = @userId OR userId2 = @userId`
+		);
 	}
+	private statementDeleteMessagesByUser!: Statement<{ userId: number }>;
 
 	async createPrivateRoom(userId1 : number, userId2 : number) {
 	const response = await fetch(`${FRIEND_URL}/social/is_friend`, {
@@ -64,5 +69,9 @@ export class PrivateChatService {
 	}
 	async removePrivateChat(userId1: number, userId2: number): Promise<void> {
 		this.statementDeleteConversation.run({ user1: userId1, user2: userId2 });
+	}
+
+	deleteMessagesByUserId(userId: number) {
+		return this.statementDeleteMessagesByUser.run({ userId });
 	}
 }
