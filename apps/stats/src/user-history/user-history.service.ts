@@ -206,6 +206,14 @@ export class UserHistoryService {
 		const hope = 1 / (1 + Math.pow(10, diffElo / 400));
 		const newElo = p1Stats.elo + kfactor * (( 0.5 + diffScore / 10)- hope);
 		const res = newElo - p1Stats.elo
-		return Math.round(res);
+		let result = Math.round(res)
+		if (result == 0)
+		{
+			if (winner_id == player_id)
+				result = 1
+			else 
+				result = -1
+		} 
+		return result;
 	}
 }
