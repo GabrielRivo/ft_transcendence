@@ -181,9 +181,25 @@ export class UserHistoryService {
 		const row = this.statementGetRankedNumber.get({ userId }) as { count: number } | undefined;
 		return row?.count ?? 0;
 	}
-	
-	async calcElo(player_id: number, opponent_id: number, score_player1: number, score_player2: number)
+
+	checkLeaver(score1: number, score2: number)
 	{
+		if (score1 == score2)
+			return true
+		if (score1 != 5 && score2 != 5)
+			return true
+		return false
+	}
+	
+	async calcElo(player_id: number, opponent_id: number, score_player1: number, score_player2: number, winner_id: number)
+	{
+		if (this.checkLeaver(score_player1, score_player2) == true)
+		{
+			if (winner_id == player_id)
+				return (6)
+			else 
+				return (-20) 
+		}
 		const p1Stats = await this.userStatsService.getGlobalStats(player_id);
 		const p2Stats = await this.userStatsService.getGlobalStats(opponent_id);
 		const nb = await this.get_ranked_number(player_id);
@@ -199,7 +215,15 @@ export class UserHistoryService {
 		const hope = 1 / (1 + Math.pow(10, diffElo / 400));
 		const newElo = p1Stats.elo + kfactor * (( 0.5 + diffScore / 10)- hope);
 		const res = newElo - p1Stats.elo
-		return Math.round(res);
+		let result = Math.round(res)
+		if (result == 0)
+		{
+			if (winner_id == player_id)
+				result = 1
+			else 
+				result = -1
+		} 
+		return result;
 	}
 
 	anonymizeGameHistory(userId: number) {

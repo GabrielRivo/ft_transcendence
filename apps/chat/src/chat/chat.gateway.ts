@@ -108,7 +108,7 @@ export class ChatGateway {
 
 		const { roomId } = data;
 		const previousRoom = client.data.currentRoom;
-		if (previousRoom && previousRoom !== 'hub' && previousRoom !== roomId) {
+		if (previousRoom && previousRoom !== roomId) {
 			client.leave(previousRoom);
 			await this.broadcastRoomUsers(client, previousRoom);
 		}
@@ -207,7 +207,6 @@ export class ChatGateway {
 			roomId: roomId,
 			created_at: new Date().toISOString(),
 		};
-
 		client.nsp.in(roomId).emit('message', messageData);
 	}
 
@@ -256,12 +255,10 @@ export class ChatGateway {
 				client.emit('error', { message: 'invalid group id' });
 			this.groupChatServie.saveGroupMessage(groupId, user?.id, content);
 		}
-		
 
 		if (targetRoom === 'hub') {
 			await this.generalChatService.saveGeneralMessage(user.id, user.username, content);
 		}
-
 		client.nsp.in(targetRoom).emit('message', messageData);
 	}
 }

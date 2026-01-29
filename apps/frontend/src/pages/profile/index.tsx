@@ -7,6 +7,10 @@ import { ButtonStyle4 } from '../../components/ui/button/style4';
 import { Modal } from '../../components/ui/modal';
 import { fetchJsonWithAuth, fetchWithAuth } from '../../libs/fetchWithAuth';
 import { ButtonStyle2 } from '@/components/ui/button/style2';
+import { useValidation, ValidationError } from '../../hook/useValidation';
+import { ProfileSchema } from '@/dto/updateProfile.dto'
+
+
 
 interface UserStats {
 	wins: number;
@@ -32,6 +36,9 @@ export function ProfilePage() {
 	const { toast } = useToast();
 	const navigate = useNavigate();
 	
+	// DTO Validation
+	const { validate : validateBio, getFieldError} = useValidation(ProfileSchema);
+
 	// Avatar state
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
@@ -146,6 +153,13 @@ export function ProfilePage() {
 	// Bio handlers
 	const handleSaveBio = async () => {
 		setIsSavingBio(true);
+		
+		const validation = validateBio({ bio })
+		if (!validation.valid && validation.errors) {
+			toast(getFieldError(validation.errors, 'bio') || 'Invalid bio!', 'error', 1000);
+			return;
+		}
+
 		const result = await fetchJsonWithAuth('/api/user/bio', {
 			method: 'PUT',
 			body: JSON.stringify({ bio }),
@@ -163,6 +177,12 @@ export function ProfilePage() {
 	// Username handler
 	const handleUpdateUsername = async () => {
 		const usernameValue = newUsername.trim();
+
+		const validation = validateBio({ username : usernameValue })
+		if (!validation.valid && validation.errors) {
+			toast(getFieldError(validation.errors, 'username') || 'Username not valid!', 'error', 1000);
+			return;
+		}
 
 		if (usernameValue === '') {
 			toast('Username cannot be empty', 'warning');
@@ -195,6 +215,13 @@ export function ProfilePage() {
 
 	// Email handler
 	const handleUpdateEmail = async () => {
+
+		const validation = validateBio({ mail : newEmail })
+		if (!validation.valid && validation.errors) {
+			toast(getFieldError(validation.errors, 'mail') || 'Invalid mail!', 'error', 1000);
+		return;
+		}
+
 		if (!newEmail) {
 			toast('Please enter an email', 'warning');
 			return;
@@ -216,6 +243,12 @@ export function ProfilePage() {
 
 	// Password handler
 	const handleUpdatePassword = async () => {
+		const validation = validateBio({ password : newPassword })
+		if (!validation.valid && validation.errors) {
+			toast(getFieldError(validation.errors, 'password') || 'Invalid password!', 'error', 1000);
+			return;
+		}
+
 		if (newPassword !== confirmPassword) {
 			toast('The passwords do not match', 'error');
 			return;
@@ -245,7 +278,8 @@ export function ProfilePage() {
 	};
 
 	// 2FA handlers
-	const handleSetup2FA = async () => {
+	const handleSetup2FA = async () => { // need a dto??
+
 		setIsSettingUp2FA(true);
 		const result = await fetchJsonWithAuth<TwoFactorSetupResponse>('/api/auth/2fa/enable', {
 			method: 'POST',
@@ -263,6 +297,12 @@ export function ProfilePage() {
 	};
 
 	const handleVerify2FA = async () => {
+		const validation = validateBio({ password : totpCode })
+		if (!validation.valid && validation.errors) {
+			toast(getFieldError(validation.errors, 'totpCode') || 'Invalid totpCode!', 'error', 1000);
+			return;
+		}
+		
 		if (totpCode.length !== 6) {
 			toast('The code must contain 6 digits', 'warning');
 			return;
@@ -285,7 +325,7 @@ export function ProfilePage() {
 		}
 	};
 
-	const handleDisable2FA = async () => {
+	const handleDisable2FA = async () => { //need a dto??
 		const result = await fetchJsonWithAuth('/api/auth/2fa', {
 			method: 'DELETE',
 			body: JSON.stringify({}),
@@ -301,6 +341,12 @@ export function ProfilePage() {
 
 	// Delete account handler
 	const handleDeleteAccount = async () => {
+		const validation = validateBio({ password : deleteConfirmText })
+		if (!validation.valid && validation.errors) {
+			toast(getFieldError(validation.errors, 'deleteConfirmText') || 'Invalid deleteConfirmText!', 'error', 1000);
+			return;
+		}
+
 		if (deleteConfirmText !== 'DELETE') {
 			toast('Please type DELETE to confirm', 'warning');
 			return;

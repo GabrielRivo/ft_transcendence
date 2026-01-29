@@ -127,7 +127,8 @@ export function UserItem({
 							className="size-12 rounded-full object-cover"
 						/>
 					) : (
-						<div className="flex size-12 items-center justify-center rounded-full bg-slate-800 text-lg font-bold">
+
+						<div className="flex size-12 items-center justify-center rounded-full bg-slate-800 text-lg font-bold border-2 border-transparent dark:md:hover:border-fuchsia-600">
 							{name?.charAt(0).toUpperCase()}
 						</div>
 					)}

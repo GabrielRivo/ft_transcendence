@@ -46,6 +46,5 @@ export class UserStatsController {
 			throw new NotFoundException(`User "${userId}" not found`);
 		return await this.statsService.getGlobalStats(userId);
 	}
-
 }
 
