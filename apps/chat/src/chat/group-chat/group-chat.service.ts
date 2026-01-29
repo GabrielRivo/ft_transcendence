@@ -141,7 +141,7 @@ export class GroupChatService {
 		if (otherId != userId) {
 			return { success: false, message: "You don't have permission to remove this member" };
 		}
-		
+
 		const result = this.statementRemoveMember.run({ groupId, userId: otherId });
 		if (result.changes === 0) {
 			return { success: false, message: "User is not a member" };
@@ -200,20 +200,7 @@ export class GroupChatService {
 	}
 
 	async getGroupHistory(groupId: number, userId: number) {
-		const rows = this.statemenGetGroupHistory.all({ groupId, userId }) as any[];
-		const filteredHistory = [];
-		for (const msg of rows) {
-			const res = await fetch(`${BLOCK_URL}/friend-management/block?userId=${userId}&otherId=${msg.userId}`);
-			if (!res.ok) {
-				return { success: false, message: "User is blocked" };
-			} else {
-				const data = await res.json() as { isBlocked: boolean };
-				if (data.isBlocked === false) {
-					filteredHistory.push(msg);
-				}
-			}
-		}
-		return filteredHistory;
+		return this.statemenGetGroupHistory.all({ groupId, userId }) as any[];
 	}
 
 	saveGroupMessage(groupId: number, userId: number, content: string) {
