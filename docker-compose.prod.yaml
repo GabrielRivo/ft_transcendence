@@ -7,6 +7,7 @@ services:
     image: rabbitmq:3-management-alpine
     container_name: transcendence-rabbitmq
     restart: unless-stopped
+    mem_limit: 512m
     ports:
       - "5672:5672"
       - "15672:15672"

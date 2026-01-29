@@ -7,6 +7,7 @@ import { StartRoundUseCase } from '../../application/use-cases/start-round.use-c
 
 import { SocketTournamentEventsPublisher } from '../publishers/socket-tournament-events.publisher.js';
 import { CompositeTournamentEventsPublisher } from '../publishers/composite-tournament-events.publisher.js';
+import { LiveScoreService } from '../services/live-score.service.js';
 
 const READY_TIME_SEC = 30;
 
@@ -27,6 +28,9 @@ export class TournamentEventsController {
     @Inject(CompositeTournamentEventsPublisher)
     private compositePublisher!: CompositeTournamentEventsPublisher;
 
+    @Inject(LiveScoreService)
+    private liveScoreService!: LiveScoreService;
+
     @EventPattern('game.finished')
     async handleGameFinished(@Payload() event: GameFinishedEvent) {
         try {
@@ -36,6 +40,7 @@ export class TournamentEventsController {
             }
 
             tournament.updateMatchScore(event.gameId, event.score1, event.score2, event.winnerId);
+            this.liveScoreService.removeMatch(tournament.id, event.gameId);
 
             await this.repository.save(tournament);
             await this.compositePublisher.publishAll(tournament.getRecordedEvents());
@@ -61,6 +66,7 @@ export class TournamentEventsController {
         try {
             const tournament = await this.repository.findByMatchId(event.gameId);
             if (tournament) {
+                this.liveScoreService.updateScore(tournament.id, event.gameId, event.score1, event.score2);
                 this.socketPublisher.publish({
                     eventName: 'match_score_updated' as any,
                     aggregateId: tournament.id,
