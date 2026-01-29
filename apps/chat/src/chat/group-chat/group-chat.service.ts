@@ -69,7 +69,7 @@ export class GroupChatService {
 	private statementFindGroupByNameAndOwner: Statement<{ ownerId: number, name: string }>;
 
 	private statementDeleteGroupMembersByUser!: Statement<{ userId: number }>;
-	private statementDeleteGroupMessagesByUser!: Statement<{ userId: number }>;
+	private statementAnonymizeGroupMessagesByUser!: Statement<{ userId: number }>;
 	private statementDeleteGroupsByOwner!: Statement<{ ownerId: number }>;
 
 	onModuleInit() {
@@ -88,8 +88,8 @@ export class GroupChatService {
 		this.statementDeleteGroupMembersByUser = this.db.prepare(
 			`DELETE FROM groupMembers WHERE userId = @userId`
 		);
-		this.statementDeleteGroupMessagesByUser = this.db.prepare(
-			`DELETE FROM groupChatHistory WHERE userId = @userId`
+		this.statementAnonymizeGroupMessagesByUser = this.db.prepare(
+			`UPDATE groupChatHistory SET userId = 0 WHERE userId = @userId`
 		);
 		this.statementDeleteGroupsByOwner = this.db.prepare(
 			`DELETE FROM privateGroup WHERE ownerId = @ownerId`
@@ -220,10 +220,10 @@ export class GroupChatService {
 		return this.statementSaveGroupMessage.run({ groupId, userId, msgContent: content });
 	}
 
+
 	deleteUserFromGroups(userId: number) {
 		this.statementDeleteGroupMembersByUser.run({ userId });
-		this.statementDeleteGroupMessagesByUser.run({ userId });
+		this.statementAnonymizeGroupMessagesByUser.run({ userId });
 		this.statementDeleteGroupsByOwner.run({ ownerId: userId });
 	}
 }
-

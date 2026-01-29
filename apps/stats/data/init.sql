@@ -26,6 +26,17 @@ VALUES (
     0
 );
 
+INSERT OR IGNORE INTO user_stats (
+    user_id, 
+    username, 
+    elo
+)
+VALUES (
+    0,
+    '[Deleted User]',
+    0
+);
+
 CREATE TABLE IF NOT EXISTS game_history (
     game_id TEXT NOT NULL,
     player1_id INTEGER NOT NULL,

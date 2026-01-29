@@ -23,8 +23,8 @@ export class ChatConsumer {
 	async handleUserDeleted(@Payload() payload: UserDeletedPayload) {
 		const { id } = payload;
 
-		await this.generalChatService.deleteMessagesByUserId(id);
-		await this.privateChatService.deleteMessagesByUserId(id);
+		this.generalChatService.anonymizeMessagesByUserId(id);
+		this.privateChatService.deleteMessagesByUserId(id);
 		this.groupChatService.deleteUserFromGroups(id);
 	}
 }

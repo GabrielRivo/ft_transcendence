@@ -7,8 +7,8 @@ export class GeneralChatService {
 	private db !: Database.Database;
 	private statementSaveGeneral !: Statement<{ userId: number, username: string, msgContent: string }>;
 	private statementGetGeneralHistory !: Statement<[]>;
+	private statementAnonymizeMessagesByUser !: Statement<{ userId: number }>;
 	private statementGetAllGeneralHistory !: Statement<[]>;
-	private statementDeleteMessagesByUser !: Statement<{ userId: number }>;
 
 	onModuleInit() {
 		this.statementSaveGeneral = this.db.prepare(
@@ -23,9 +23,10 @@ export class GeneralChatService {
 		this.statementDeleteTournamentMessage = this.db.prepare(
 			`DELETE FROM generalChatHistory WHERE userId = -1 AND msgContent LIKE ?`
 		);
-		this.statementDeleteMessagesByUser = this.db.prepare(
-			`DELETE FROM generalChatHistory WHERE userId = @userId`
+		this.statementAnonymizeMessagesByUser = this.db.prepare(
+			`UPDATE generalChatHistory SET userId = 0, username = '[Deleted User]' WHERE userId = @userId`
 		);
+
 	}
 	private statementDeleteTournamentMessage!: Statement<[string]>;
 	async saveGeneralMessage(userId: number, username: string, content: string) {
@@ -62,7 +63,8 @@ export class GeneralChatService {
 		return this.statementGetAllGeneralHistory.all();
 	}
 
-	deleteMessagesByUserId(userId: number) {
-		return this.statementDeleteMessagesByUser.run({ userId });
+	anonymizeMessagesByUserId(userId: number) {
+
+		return this.statementAnonymizeMessagesByUser.run({ userId });
 	}
 }

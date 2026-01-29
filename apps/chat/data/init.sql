@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS generalChatHistory(
     msgId INTEGER PRIMARY KEY AUTOINCREMENT,
     userId INTEGER,
     username VARCHAR(255 ) DEFAULT 'Unknown',
-    msgContent VARCHAR(5000),
+    msgContent VARCHAR(500),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS privateChatHistory(
     userId1 INTEGER NOT NULL,
     userId2 INTEGER NOT NULL,
     senderId INTEGER NOT NULL,
-    msgContent VARCHAR(5000),
+    msgContent VARCHAR(500),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

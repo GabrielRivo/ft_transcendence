@@ -16,6 +16,9 @@ CREATE TABLE IF NOT EXISTS profiles (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS idx_profiles_username ON profiles (username) WHERE username != '';
 
+INSERT OR IGNORE INTO profiles (userId, username, bio, avatar, avatar_provider, self_hosted, created_at, updated_at)
+VALUES (0, '[Deleted User]', 'Deleted user', NULL, NULL, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
 -- --------------------------------------------------------
 -- Table: friends
 -- --------------------------------------------------------
