@@ -1,10 +1,7 @@
-import { Body, BodySchema, Controller, Delete, Get, Inject, JWTBody, Param, Post, Query, QuerySchema } from 'my-fastify-decorators';
+import { Body, BodySchema, Controller, Delete, Get, Inject, JWTBody, Post, Query, QuerySchema } from 'my-fastify-decorators';
 import { BlockManagementService } from './block-management.service.js';
-import { AddFriendDto, AddFriendSchema } from './dto/addFriend.dto.js';
 import { InviteByUsernameDto, InviteByUsernameSchema } from './dto/inviteByUsername.dto.js';
 import { FriendManagementService } from './friend-management.service.js';
-
-
 import { FriendManagementDto, FriendManagementSchema } from './dto/addFriend.dto.js';
 
 @Controller('/friend-management')
@@ -66,13 +63,13 @@ export class FriendManagementController {
 
 	@Post('/accept')
 	@BodySchema(FriendManagementSchema)
-	async accept_invitation(@Body() data: AddFriendDto, @JWTBody() user: { id: number; username: string }) {
+	async accept_invitation(@Body() data: FriendManagementDto, @JWTBody() user: { id: number; username: string }) {
 		return this.friend_managementService.acceptInvitation(user.id, data.otherId, user.username);
 	}
 
 	@Delete('/accept')
 	@BodySchema(FriendManagementSchema)
-	async decline_invitation(@Body() data: AddFriendDto, @JWTBody() user: { id: number; username: string }) {
+	async decline_invitation(@Body() data: FriendManagementDto, @JWTBody() user: { id: number; username: string }) {
 		return this.friend_managementService.declineInvitation(user.id, data.otherId, user.username);
 	}
 
@@ -117,6 +114,7 @@ export class FriendManagementController {
 		return { blockedIds: this.blockService.getBlockedUsers(user.id) };
 	}
 
+	/*
 	@Post('/challenge')
 	@BodySchema(FriendManagementSchema)
 	async send_challenge(@Body() data: FriendManagementDto, @JWTBody() user: { id: number; username: string }) {
@@ -144,16 +142,17 @@ export class FriendManagementController {
 		return this.friend_managementService.getChallenge(user.id, targetId, user.username);
 	}
 
-	@Post('/accept_challenge') // adapter front
+	@Post('/accept_challenge')
 	@BodySchema(FriendManagementSchema)
 	async accept_challenge(@Body() data: FriendManagementDto, @JWTBody() user: { id: number; username: string }) {
 		return await this.friend_managementService.acceptChallenge(user.id, data.otherId, user.username);
 	}
 
-	@Post('/delete_match') // adapter front
+	@Post('/delete_match')
 	@BodySchema(FriendManagementSchema)
 	async delete_match(@Body() data: FriendManagementDto, @JWTBody() user: { id: number }) {
 		return this.friend_managementService.deleteMatch(user.id, data.otherId);
 	}
+	*/
 }
 
