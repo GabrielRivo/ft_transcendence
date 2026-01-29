@@ -32,7 +32,6 @@ class TruthManager {
         this.frameDuration = Math.floor(1000 / this.fps - 1);
         this.lastFrameTime = services.TimeService!.getTimestamp();
         this.deltaT = 0;
-
     }
 
     resetLastFrameTime(): void {
@@ -58,31 +57,6 @@ class TruthManager {
         };
     }
 
-    /*private setGameState(game: Pong, state: GameState): void {
-        game.player1!.paddle.setPosition(state.p1.pos);
-        game.player1!.paddle.setDirection(state.p1.dir);
-        game.player2!.paddle.setPosition(state.p2.pos);
-        game.player2!.paddle.setDirection(state.p2.dir);
-        game.ball!.setFullPos(state.ball.pos);
-        game.ball!.setDir(state.ball.dir);
-        game.ball!.setSpeed(state.ball.speed);
-    }*/
-
-    // public computePlayerInputs(player: Player, inputs : PlayerDirectionData[], lastFrameTime: number, currentTime: number): void {
-    //     let deltaT : number;
-
-    //     for (let input of inputs) {
-    //         deltaT = input.timestamp - lastFrameTime;
-    //         player.update(deltaT);
-    //         this.inputManager.setPlayerDirection(player, input);
-    //         lastFrameTime = input.timestamp;
-    //     }
-    //     deltaT = currentTime - lastFrameTime;
-    //     if (deltaT > 0)
-    //         player.update(deltaT);
-    //     player.paddle.model.computeWorldMatrix(true);
-    // }
-
     public computeState(lastFrameTime: number, currentTime: number)/*: GameState*/ {
         const p1: Player = this.game.player1!;
         const p2: Player = this.game.player2!;
@@ -95,21 +69,6 @@ class TruthManager {
         let p2Index = 0;
 
         let deltaT: number;
-
-        /*let firstInputP1 = this.p1InputBuffer.getClosestState(lastFrameTime, 3000);
-            if (firstInputP1) {
-                this.inputManager.setPlayerDirection(p1, firstInputP1);
-            }
-            else {
-                this.inputManager.setPlayerDirection(p1, { timestamp: lastFrameTime, direction: NONE });
-            }
-            let firstInputP2 = this.p2InputBuffer.getClosestState(lastFrameTime, 3000);
-            if (firstInputP2) {
-                this.inputManager.setPlayerDirection(p2, firstInputP2);
-            }
-            else {
-                this.inputManager.setPlayerDirection(p2, { timestamp: lastFrameTime, direction: NONE });
-        }*/ //NOT NEEDED BECAUSE ALREADY SET IN PREVIOUS FRAME ON SERVER
 
         while (p1Index < p1Inputs.length || p2Index < p2Inputs.length) {
             const p1NextInput = p1Inputs[p1Index];

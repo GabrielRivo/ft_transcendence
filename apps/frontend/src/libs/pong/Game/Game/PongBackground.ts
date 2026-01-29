@@ -15,7 +15,7 @@ import BlackScreenEffect from '../Effects/BlackScreenEffect';
 // -----------------------------------------------------------------------------
 
 const CAMERA_ROTATION_SPEED = 0.0005;
-const AI_SPEED = 0.3;
+const AI_SPEED = 0.15;
 const AI_REACTION_THRESHOLD = 0.1;
 
 class PongBackground extends Game {

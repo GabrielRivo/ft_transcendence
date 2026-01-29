@@ -94,14 +94,12 @@ class Ball {
         if (side == 1) {
             angle += Math.PI;
         }
-        //let angle: number = Math.PI;
         this.setDir(new Vector3(Math.sin(angle), 0, Math.cos(angle)));
         return this.direction;
     }
 
 	startDirectionRandom() {
-        let angle : number = (Math.random() * Math.PI / 2) - (Math.PI / 4); // + ou moin PI pour le sens
-        //let angle : number = Math.PI;
+        let angle : number = (Math.random() * Math.PI / 2) - (Math.PI / 4);
 		this.setDir(new Vector3(Math.sin(angle), 0, Math.cos(angle)));
         this.setModelDir(this.direction);
     }
@@ -144,7 +142,6 @@ class Ball {
             this.startDirection(side);
         else
             this.setDir(direction);
-        //this.totalDistance = 0;
         this.setSpeed(3);
         this.setPos(new Vector3(0, 0.125, 0));
         this.setModelPos(this.position);
@@ -156,10 +153,10 @@ class Ball {
 
         this.generateTImeoutId = setTimeout(() => {
             this.model.visibility = 1;
-            this.generateEffect.play(this.model);
             this.model.getChildMeshes().forEach(mesh => {
                 mesh.isVisible = true;
             });
+            this.generateEffect.play(this.model);
         }, 1500);
     }
 
