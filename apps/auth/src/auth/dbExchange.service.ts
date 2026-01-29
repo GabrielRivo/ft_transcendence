@@ -6,7 +6,7 @@ import { ProviderKeys } from './providers.js';
 export class DbExchangeService {
 	private existingPrepare: Statement<{ email: string }>;
 	private addUserPrepare: Statement<{ email: string; password_hash: string }>;
-	private getUserByEmailPrepare: Statement<{ email: string, }>;
+	private getUserByEmailPrepare: Statement<{ email: string }>;
 	private getUserByIdPrepare: Statement<{ id: number }>;
 	private storeRefreshTokenPrepare: Statement<{
 		user_id: number;
@@ -47,6 +47,11 @@ export class DbExchangeService {
 	private deleteUserPrepare: Statement<{ userId: number }>;
 	private updateEmailByIdPrepare: Statement<{ userId: number; email: string }>;
 
+	// Cleanup
+	private deleteExpiredTokensPrepare: Statement<Record<string, never>>;
+	private deleteExpiredOTPsPrepare: Statement<Record<string, never>>;
+	private cleanupInterval: NodeJS.Timeout;
+
 	@InjectPlugin('db')
 	private db!: Database;
 
@@ -79,8 +84,12 @@ export class DbExchangeService {
 			'SELECT * FROM refresh_tokens WHERE token = @token',
 		);
 		this.getAllUsersPrepare = this.db.prepare('SELECT * FROM users');
-		this.updateUsernamePrepare = this.db.prepare('UPDATE users SET username = @username WHERE id = @userId');
-		this.getUserByUsernamePrepare = this.db.prepare('SELECT * FROM users WHERE username = @username');
+		this.updateUsernamePrepare = this.db.prepare(
+			'UPDATE users SET username = @username WHERE id = @userId',
+		);
+		this.getUserByUsernamePrepare = this.db.prepare(
+			'SELECT * FROM users WHERE username = @username',
+		);
 		this.addGuestUserPrepare = this.db.prepare(
 			"INSERT INTO users (username, password_hash, provider) VALUES (@username, '', 'guest')",
 		);
@@ -132,6 +141,37 @@ export class DbExchangeService {
 		this.updateEmailByIdPrepare = this.db.prepare(
 			'UPDATE users SET email = @email WHERE id = @userId',
 		);
+
+		// Cleanup prepared statements
+		this.deleteExpiredTokensPrepare = this.db.prepare(
+			"DELETE FROM refresh_tokens WHERE expires_at < datetime('now')",
+		);
+		this.deleteExpiredOTPsPrepare = this.db.prepare(
+			"DELETE FROM password_reset_otp WHERE datetime(created_at, '+10 minutes') < datetime('now')",
+		);
+
+		// Start cleanup interval (every 1 hour)
+		this.cleanupInterval = setInterval(
+			() => {
+				this.runCleanup();
+			},
+			1000 * 60 * 60,
+		);
+	}
+
+	onModuleDestroy() {
+		if (this.cleanupInterval) {
+			clearInterval(this.cleanupInterval);
+		}
+	}
+
+	private runCleanup() {
+		try {
+			this.deleteExpiredTokensPrepare.run({});
+			this.deleteExpiredOTPsPrepare.run({});
+		} catch (err) {
+			console.error('Cleanup failed:', err);
+		}
 	}
 
 	async existing(email: string) {
