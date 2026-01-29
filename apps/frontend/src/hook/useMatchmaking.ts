@@ -278,42 +278,20 @@ export function useMatchmaking(): UseMatchmakingReturn {
 		// --- Connection Events ---
 
 		const handleConnect = () => {
-			console.info('[useMatchmaking] Connected to matchmaking service');
 			setConnected(true);
 			setStatus('IDLE');
 			setError(null);
 		};
 
 		const handleDisconnect = () => {
-			console.info('[useMatchmaking] Disconnected from matchmaking service');
 			setConnected(false);
 			setStatus('IDLE');
 			setCurrentProposal(null);
 			stopAcceptanceTimer();
-			// Reset connection guard to allow reconnection attempts
 			isConnectingRef.current = false;
 		};
 
 		const handleConnectError = async (err: Error) => {
-			console.error('[useMatchmaking] Connection error:', err.message);
-
-			// Si l'erreur est liée à l'authentification, tenter un refresh
-			/* if (isAuthError(err)) {
-				console.info('[useMatchmaking] Auth error detected, attempting token refresh...');
-				const refreshed = await refreshAndReconnectSockets();
-
-				if (refreshed) {
-					// Token refreshé, retenter la connexion
-					console.info('[useMatchmaking] Token refreshed, retrying connection...');
-					setTimeout(() => {
-						if (!matchmakingSocket.connected) {
-							matchmakingSocket.connect();
-						}
-					}, 500);
-					return;
-				}
-			} */
-
 			setConnected(false);
 			setStatus('ERROR');
 			setError(`Connection failed: ${err.message}`);
@@ -323,13 +301,11 @@ export function useMatchmaking(): UseMatchmakingReturn {
 		// --- Queue Events ---
 
 		const handleQueueJoined = (data: { userId: string; elo: number; timestamp: number }) => {
-			console.info('[useMatchmaking] Joined queue:', data);
 			setStatus('SEARCHING');
 			setError(null);
 		};
 
 		const handleQueueLeft = (data: { userId: string; timestamp: number }) => {
-			console.info('[useMatchmaking] Left queue:', data);
 			setStatus('IDLE');
 		};
 
@@ -340,14 +316,12 @@ export function useMatchmaking(): UseMatchmakingReturn {
 		// --- Match Events ---
 
 		const handleMatchProposal = (proposal: MatchProposal) => {
-			console.info('[useMatchmaking] Match proposal received:', proposal);
 			setStatus('MATCH_FOUND');
 			setCurrentProposal(proposal);
 			startAcceptanceTimer(proposal.expiresAt);
 		};
 
 		const handleMatchConfirmed = (data: MatchConfirmedData) => {
-			console.info('[useMatchmaking] Match confirmed:', data);
 			setStatus('MATCH_CONFIRMED');
 			setConfirmedMatch(data);
 			setCurrentProposal(null);
@@ -355,14 +329,9 @@ export function useMatchmaking(): UseMatchmakingReturn {
 		};
 
 		const handleMatchCancelled = (data: { reason: string; matchId: string }) => {
-			console.info('[useMatchmaking] Match cancelled:', data);
-
-			// Reset to appropriate state based on reason
 			if (data.reason === 'opponent_declined') {
-				// Player was innocent, they'll be re-queued automatically
 				setStatus('SEARCHING');
 			} else if (data.reason === 'penalty_applied') {
-				// Player was penalized
 				setStatus('IDLE');
 				setError('You have been penalized for not responding in time.');
 			} else {
@@ -374,8 +343,6 @@ export function useMatchmaking(): UseMatchmakingReturn {
 		};
 
 		const handleMatchFailed = (data: { matchId: string; reason: string; errorCode: string; message: string }) => {
-			console.error('[useMatchmaking] Match failed:', data);
-			// Players are re-queued automatically by the server
 			setStatus('SEARCHING');
 			setCurrentProposal(null);
 			stopAcceptanceTimer();
@@ -385,10 +352,8 @@ export function useMatchmaking(): UseMatchmakingReturn {
 		// --- Error Events ---
 
 		const handleError = (data: ServerError) => {
-			console.error('[useMatchmaking] Server error:', data);
 			setError(data.message);
 
-			// Reset to IDLE on critical errors
 			if (
 				data.message.includes('banned') ||
 				data.message.includes('already in queue') ||
@@ -411,12 +376,7 @@ export function useMatchmaking(): UseMatchmakingReturn {
 		matchmakingSocket.on('match_failed', handleMatchFailed);
 		matchmakingSocket.on('error', handleError);
 
-		// IMPORTANT: Check if socket is already connected when handlers are attached.
-		// This handles the case where the component mounts after the socket has already
-		// connected (e.g., after HMR or fast navigation), preventing the button from
-		// staying disabled because the 'connect' event was missed.
 		if (matchmakingSocket.connected) {
-			console.info('[useMatchmaking] Socket already connected on mount');
 			setConnected(true);
 			setStatus('IDLE');
 			setError(null);
@@ -447,20 +407,15 @@ export function useMatchmaking(): UseMatchmakingReturn {
 	 * The server will use the ELO stored in the session.
 	 */
 	const joinQueue = useCallback(() => {
-		console.info('[useMatchmaking] joinQueue called - connected:', connected, 'status:', status);
-
 		if (!connected) {
-			console.warn('[useMatchmaking] Cannot join queue: not connected');
 			setError('Not connected to matchmaking service');
 			return;
 		}
 
 		if (status !== 'IDLE') {
-			console.warn('[useMatchmaking] Cannot join queue: invalid status', status);
 			return;
 		}
 
-		console.info('[useMatchmaking] Joining queue...');
 		matchmakingSocket.emit('join_queue', {});
 	}, [connected, status]);
 
@@ -473,11 +428,9 @@ export function useMatchmaking(): UseMatchmakingReturn {
 		}
 
 		if (status !== 'SEARCHING') {
-			console.warn('[useMatchmaking] Cannot leave queue: not searching');
 			return;
 		}
 
-		console.info('[useMatchmaking] Leaving queue...');
 		matchmakingSocket.emit('leave_queue');
 		setStatus('IDLE');
 	}, [connected, status]);
@@ -491,11 +444,9 @@ export function useMatchmaking(): UseMatchmakingReturn {
 		}
 
 		if (status !== 'MATCH_FOUND') {
-			console.warn('[useMatchmaking] Cannot accept match: invalid status');
 			return;
 		}
 
-		console.info('[useMatchmaking] Accepting match:', currentProposal.matchId);
 		matchmakingSocket.emit('accept_match', { matchId: currentProposal.matchId });
 		setStatus('WAITING_OPPONENT');
 	}, [connected, currentProposal, status]);
@@ -510,11 +461,9 @@ export function useMatchmaking(): UseMatchmakingReturn {
 		}
 
 		if (status !== 'MATCH_FOUND' && status !== 'WAITING_OPPONENT') {
-			console.warn('[useMatchmaking] Cannot decline match: invalid status');
 			return;
 		}
 
-		console.info('[useMatchmaking] Declining match:', currentProposal.matchId);
 		matchmakingSocket.emit('decline_match', { matchId: currentProposal.matchId });
 		setStatus('IDLE');
 		setCurrentProposal(null);

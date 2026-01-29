@@ -95,19 +95,12 @@ class PredictionManager {
         const speedDiffBall = Math.abs(prediction.ball.speed - truth.ball.speed);
 
         if (posDiffP1 > 0.1) {
-            //// console.log(`Player 1 position prediction error: ${posDiffP1}`);
-            //// console.log("Truth pos:", truth.p1.pos, " Predicted pos:", prediction.p1.pos);
             this.game.player1!.paddle.reconcile(prediction.p1.pos, truth.p1.pos);
         }
         if (posDiffP2 > 0.1) {
             this.game.player2!.paddle.reconcile(prediction.p2.pos, truth.p2.pos);
-            //// console.log(`Player 2 position prediction error: ${posDiffP2}`);
         }
         if (posDiffBall > 0.1 || dirDiffBall > 0.1 || speedDiffBall > 0.1) {
-            /*console.warn(`⚠️ RECONCILIATION BALL predicted : ${prediction.ball.pos} real : ${truth.ball.pos} ⚠️`);
-            // console.log(`- Pos Diff: ${posDiffBall.toFixed(4)} ${posDiffBall > 0.1 ? '❌' : '✅'}`);
-            // console.log(`- Dir Diff: ${dirDiffBall.toFixed(4)} ${dirDiffBall > 0.1 ? '❌' : '✅'}`);
-            // console.log(`- Spd Diff: ${speedDiffBall.toFixed(4)} ${speedDiffBall > 0.1 ? '❌' : '✅'}`);*/
             this.game.ball!.reconcile(prediction.ball.pos, truth.ball.pos, truth.ball.dir, truth.ball.speed);
         }
     }
@@ -116,7 +109,6 @@ class PredictionManager {
         this.setGameState(this.game, baseFrame);
         const ball = this.game.ball!;
 
-        //// console.log("Truth Ball pos:", ball.getPosition());
         let p1Inputs = this.playerInputBuffer.getStatesInRange(lastFrameTime, currentTime);
         let p1Index = 0;
 
@@ -166,9 +158,6 @@ class PredictionManager {
             if (deltaT > 0) {
                 ball.update(nextEventTime, deltaT, this.game.player1!.paddle, this.game.player2!.paddle);
                 player.update(deltaT);
-                //// console.log("1 call HERE to start the ball");
-                //// console.log("Ball pos before update :", ball.getPosition());
-                //// console.log("Ball pos after update :", ball.getPosition());
             }
 
             if (processP1) {
@@ -187,16 +176,10 @@ class PredictionManager {
         if (deltaT > 0) {
             ball.update(currentTime, deltaT, this.game.player1!.paddle, this.game.player2!.paddle);
             player.update(deltaT);
-            //// console.log("1 call HERE to make it right");
-            //// console.log("Ball pos before final update :", ball.getPosition());
-            //// console.log("Ball pos after final update :", ball.getPosition());
         }
-        //// console.log("Truth Ball pos after computing :", ball.getPosition());
-        //// console.log("================================");
         return this.getGameState(this.game);
     }
 
-    //private test :boolean = false;
     public async predictionUpdate(): Promise<void> {
         Services.TimeService!.update();
         const game = this.game;
@@ -212,32 +195,18 @@ class PredictionManager {
                 this.inputManager.setPlayerDirection(this.game.clientPlayer!, latestPlayerDirection, true);
             }
 
-            //// console.log("Prediction Ball pos:", game.ball!.getPosition());
             game.ball!.update(time, Services.TimeService!.getDeltaTime(), game.player1!.paddle, game.player2!.paddle);
             game.player1!.update(Services.TimeService!.getDeltaTime());
             game.player2!.update(Services.TimeService!.getDeltaTime());
-
-            //// console.log("After update Ball pos:", game.ball!.getPosition());
             let predictionState = this.getGameState(game);
 
             let latestServerState = this.serverGameStateHistory.getLatestState();
             if (latestServerState) {
                 game.ball!.displayEffect = false;
-                //// console.log("COMPUTE at time : ", time);
                 let truthState = this.computeState(latestServerState, this.game.clientPlayer!, latestServerState.timestamp, time);
-                //// console.log("RECONCILE : ")
                 this.reconcileStates(predictionState, truthState);
                 game.ball!.displayEffect = true;
             }
-
-            //this.setGameState(game, predictionState);
-
-            // if (latestServerState)
-            // {
-            //     this.setGameState(game, latestServerState);
-            // }
-
-            //this.clientGameStateHistory.addState(this.getGameState(game));
 
             this.lastFrameTime = time;
         }

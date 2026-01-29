@@ -35,7 +35,6 @@ class History<T extends ITimestamped> {
         const lastState = this.history[lastIndex];
 
         if (lastState && state.timestamp < lastState.timestamp) {
-           //  // console.log("Inserting out-of-order state into history.");
             let checkIndex = lastIndex;
             let checkState = this.history[checkIndex];
 
@@ -94,14 +93,11 @@ class History<T extends ITimestamped> {
         timeDiff = targetTime - this.history[latestFrame]!.timestamp;
         if (timeDiff >= 0) {
             if (timeDiff > historyTime) {
-                //// console.log("Target time is too new.");
                 return null;
             }
-            //// console.log("Target time is newer than the latest state. Asked:", targetTime, " Latest:", this.history[latestFrame]!.timestamp);
             return this.history[latestFrame]!;
         }
         if (timeDiff < -historyTime) {
-            //// console.log("Target time is too old.");
             return null;
         }
 

@@ -12,11 +12,9 @@ export function registerValidators(ajv: Ajv) {
 			keyword: validator.keyword,
 			validate: isAsync
 				? async function (_schema: unknown, data: unknown) {
-						// // console.log(`[DEBUG] Async Validator '${validator.keyword}' received data:`, data);
 						return await (userValidate as any)(data);
 					}
 				: function (_schema: unknown, data: unknown) {
-						// // console.log(`[DEBUG] Sync Validator '${validator.keyword}' received data:`, data);
 						return (userValidate as any)(data);
 					},
 			async: isAsync,

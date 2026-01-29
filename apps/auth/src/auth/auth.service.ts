@@ -314,7 +314,6 @@ export class AuthService {
 			throw new UnauthorizedException(`${providers[provider].id} login failed 1`);
 
 		let userRes: Response | null = null;
-		// console.log(tokenData);
 		if (tokenData.token_type.toLowerCase() == 'bearer') {
 			userRes = await fetch(providers[provider].userInfoUrl, {
 				headers: { Authorization: `Bearer ${tokenData.access_token}` },
@@ -325,10 +324,8 @@ export class AuthService {
 
 		if (!userRes.ok) throw new BadGatewayException(`${providers[provider].id} login failed`);
 
-		// console.log(userRes);
 		const userData: UserData = (await userRes.json()) as UserData;
 		let user = await this.dbExchange.getUserByProviderId(provider, String(userData.id));
-		// console.log(user, userData, provider);
 
 		// Extraire le username suggéré du provider (login pour GitHub, username pour Discord)
 		const suggestedUsername = userData.login || userData.username || '';
@@ -379,8 +376,6 @@ export class AuthService {
 		if (username.length < 3) {
 			throw new BadRequestException('Username must be at least 3 characters long');
 		}
-		
-		// // console.log(userId, username);
 
 		if (await this.dbExchange.getUserByUsername(username)) {
 			throw new UnauthorizedException('Username already exists');
@@ -394,9 +389,7 @@ export class AuthService {
 
 		try {
 		this.users.publish('user.updated.username', { id: userId, username });
-		} catch (error) {
-			console.error('Error publishing user.updated.username', error);
-		}
+		} catch (error) { }
 		// Générer de nouveaux tokens avec le username
 		return this.generateTokens(user.id, user.email || '', username, 'email');
 	}
@@ -577,9 +570,7 @@ export class AuthService {
 
 		try {
 			this.users.publish('user.updated.password', { id: userId });
-		} catch (error) {
-			console.error('Error publishing user.updated.password', error);
-		}
+		} catch (error) {}
 	}
 
 	async updateUsername(userId: number, newUsername: string): Promise<AuthTokens> {
@@ -608,9 +599,7 @@ export class AuthService {
 
 		try {
 			this.users.publish('user.updated.username', { id: userId, username: newUsername });
-		} catch (error) {
-			console.error('Error publishing user.updated.username', error);
-		}
+		} catch (error) { }
 
 		const totpInfo = await this.dbExchange.getTOTPInfo(userId);
 		const has2FA = totpInfo?.totp_enabled === 1;
@@ -636,9 +625,7 @@ export class AuthService {
 
 		try {
 			this.users.publish('user.deleted', { id: userId });
-		} catch (error) {
-			console.error('Error publishing user.deleted', error);
-		}
+		} catch (error) { }
 	}
 
 	async updateEmail(userId: number, newEmail: string): Promise<AuthTokens> {
@@ -656,9 +643,7 @@ export class AuthService {
 
 		try {
 			this.users.publish('user.updated.email', { id: userId, email: newEmail });
-		} catch (error) {
-			console.error('Error publishing user.updated.email', error);
-		}
+		} catch (error) { }
 
 		const totpInfo = await this.dbExchange.getTOTPInfo(userId);
 		const has2FA = totpInfo?.totp_enabled === 1;

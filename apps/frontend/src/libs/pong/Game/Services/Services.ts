@@ -33,17 +33,14 @@ class ServicesSingleton {
     public initNbr = 0;
     init(canvas : HTMLCanvasElement) {
         if (this.GameService?.isRunning()) {
-            console.warn("[Services] Game is running. Disposing it before re-initializing services.");
             this.GameService.stopGame();
         }
 
         if (this.Engine) {
-            console.warn("[Services] Engine already exists. Disposing old one first.");
             this.Canvas?.remove();
             this.Engine.dispose();
         }
         
-       //  // console.log('[Services] Initializing services...' + this.initNbr++);
         this.Canvas = canvas;
         this.Canvas?.addEventListener('wheel', (e) => {
         }, { passive: true });
@@ -64,7 +61,6 @@ class ServicesSingleton {
     }
 
     disposeServices() {
-       //  // console.log('[Services] Disposing services...');
         this.Scene?.dispose();
         this.Engine?.dispose();
         this.EventBus?.clear();

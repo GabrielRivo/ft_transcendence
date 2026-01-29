@@ -37,10 +37,7 @@ async function rabbitmqPlugin(fastify: FastifyInstance) {
         try {
             await client.connect();
             await gameEventsSubscriber.listen();
-            // console.log('[Tournament] RabbitMQ client and game events subscriber connected');
-        } catch (err) {
-            console.error('RabbitMQ connection failed', err);
-        }
+        } catch (err) { }
     });
 
     fastify.addHook('onClose', async () => {

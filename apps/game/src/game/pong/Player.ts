@@ -55,7 +55,6 @@ class Player {
                 this.direction.x = 0;
                 break;
         }
-        //// console.log("Player " + this.id + " set direction to ", this.direction);
         this.paddle.setDirection(this.direction);
     }
 
@@ -82,15 +81,12 @@ class Player {
 
     scoreUp(value?: number) {
         this.score += value ?? 1;
-        //// console.log("Player " + this.id + " score: " + this.score);
     }
     scoreDown(value?: number) {
         this.score -= value ?? 1;
-        //// console.log("Player " + this.id + " score: " + this.score);
     }
     scoreReset() {
         this.score = 0;
-        //// console.log("Player " + this.id + " score: " + this.score);
     }
 
     update(deltaT: number) {

@@ -62,15 +62,12 @@ export function useChat() {
 	useEffect(() => {
 		const handleConnect = () => {
 			setConnected(true);
-			// // console.log('Chat socket connected');
-			// Demander l'historique du hub
 			chatSocket.emit('get_hub_history');
 		};
 
 		const handleDisconnect = () => {
 			setConnected(false);
 			isConnectingRef.current = false;
-		// 	// console.log('Chat socket disconnected');
 		};
 
 		const handleMessage = (msg: ChatMessage) => {
@@ -111,7 +108,6 @@ export function useChat() {
 		};
 
 		const handleInvalidateHistory = () => {
-			// // console.log('[useChat] Received invalidate_history event - Refreshing hub history');
 			if (currentRoom === 'hub') {
 				chatSocket.emit('get_hub_history');
 			}
@@ -126,7 +122,6 @@ export function useChat() {
 		chatSocket.on('invalidate_history', handleInvalidateHistory);
 
 		if (chatSocket.connected) {
-		// 	// console.log('Chat socket already connected on mount');
 			setConnected(true);
 		}
 
@@ -157,17 +152,13 @@ export function useChat() {
 		(roomId: string) => {
 			if (!connected) return;
 
-			// Quitter l'ancienne room (sauf hub)
 			if (currentRoom !== 'hub') {
 				chatSocket.emit('leave_room', { roomId: currentRoom });
 			}
-
-			// Rejoindre la nouvelle room
 			chatSocket.emit('join_room', { roomId });
 			setCurrentRoom(roomId);
 			setMessages([]);
 
-			// Demander l'historique si c'est le hub
 			if (roomId === 'hub') {
 				chatSocket.emit('get_hub_history');
 			}
@@ -193,12 +184,9 @@ export function useChat() {
 
 			const roomId = `group_${groupId}`;
 
-			// Quitter l'ancienne room (sauf hub)
 			if (currentRoom !== 'hub') {
 				chatSocket.emit('leave_room', { roomId: currentRoom });
 			}
-
-			// Rejoindre la room du groupe
 			chatSocket.emit('join_room', { roomId });
 			setCurrentRoom(roomId);
 			setMessages([]);

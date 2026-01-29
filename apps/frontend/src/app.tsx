@@ -23,6 +23,4 @@ if (root) {
 		</AuthProvider>,
 		root as HTMLElement,
 	);
-} else {
-	console.error('Element root not found!');
 }

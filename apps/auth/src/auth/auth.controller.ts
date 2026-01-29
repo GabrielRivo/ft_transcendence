@@ -148,7 +148,6 @@ export class AuthController {
 	async me(@Req() req: FastifyRequest) {
 		const accessToken = (req.cookies as Record<string, string>)[config.accessTokenName];
 
-		// console.log(accessToken);
 		if (!accessToken) {
 			return { authenticated: false, user: null };
 		}
@@ -217,7 +216,6 @@ export class AuthController {
 		@Req() req: AuthenticatedRequest,
 		@Res() res: FastifyReply,
 	) {
-		// // console.log(req.user);
 		const tokens = await this.authService.addUsername(req.user.id, dto.username);
 		this.setAuthCookies(res, tokens);
 

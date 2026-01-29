@@ -28,7 +28,6 @@ export class GeneralChatService {
 			return this.statementSaveGeneral.run({ userId, username, msgContent: content });
 		}
 		catch (e) {
-			// console.log(e)
 			return null;
 		}
 	}
@@ -37,20 +36,16 @@ export class GeneralChatService {
 		try {
 			const pattern = `%[JOIN_TOURNAMENT:${tournamentId}]%`;
 			const result = this.statementDeleteTournamentMessage.run(pattern);
-			// console.log(`[GeneralChatService] Attempting to delete message with pattern: ${pattern}. Changes: ${result.changes}`);
 			return result;
 		} catch (e) {
-			console.error('[GeneralChatService] Failed to delete tournament message:', e);
 			return null;
 		}
 	}
 
 		async getGeneralHistory() {
 		const rows = this.statementGetGeneralHistory.all() as any[];
-		// console.log(`[GeneralChatService] getGeneralHistory fetched ${rows.length} rows.`);
 		const tournamentMsgs = rows.filter(r => r.msgContent.includes('[JOIN_TOURNAMENT'));
 		if (tournamentMsgs.length > 0) {
-			// console.log(`[GeneralChatService] Found tournament messages in history:`, tournamentMsgs);
 		}
 		const history = []
 		for (const msg of rows) 

@@ -53,7 +53,6 @@ export class MatchHistoryService {
 		try {
 			return this.statementGet.all(userId, userId);
 		} catch (error) {
-			console.error("ERROR SQLITE :", error);
 			throw error;
 		}
 	}

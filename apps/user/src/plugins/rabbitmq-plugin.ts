@@ -33,9 +33,7 @@ async function rabbitmqPlugin(fastify: FastifyInstance) {
             // await client.connect();
             // await client2.connect();
             await server.listen()
-        } catch (err) {
-            console.error('RabbitMQ connection failed', err);
-        }
+        } catch (err) { }
     });
 
     fastify.addHook('onClose', async () => {

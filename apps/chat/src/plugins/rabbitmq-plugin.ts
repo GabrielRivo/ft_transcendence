@@ -23,10 +23,7 @@ async function rabbitmqPlugin(fastify: FastifyInstance) {
     fastify.ready(async () => {
         try {
             await server.listen();
-            // console.log('[RabbitMQPlugin] Chat Service Connected (Client & Server)');
-        } catch (err) {
-            console.error('RabbitMQ connection failed', err);
-        }
+        } catch (err) { }
     });
 
     fastify.addHook('onClose', async () => {

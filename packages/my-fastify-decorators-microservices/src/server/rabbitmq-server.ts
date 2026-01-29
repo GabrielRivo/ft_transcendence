@@ -62,14 +62,11 @@ export class RabbitMQServer {
 
             await this.setupQueueAndExchange(channel);
 
-            // console.log(`[Microservice] Connected to RabbitMQ queue: "${this.actualQueueName}"`);
-
             this.bindEvents();
 
             await channel.consume(this.actualQueueName, this.handleMessage.bind(this));
 
         } catch (error) {
-            console.error('[Microservice] Connection error:', error);
             throw error;
         }
     }
@@ -107,8 +104,6 @@ export class RabbitMQServer {
 
             const bindingKey = exchange.type === 'fanout' ? '' : '#';
             await channel.bindQueue(this.actualQueueName, exchange.name, bindingKey);
-            
-            // console.log(`[Microservice] Bound queue "${this.actualQueueName}" to exchange "${exchange.name}" (${exchange.type})`);
         } else {
             await channel.assertQueue(this.options.queue, {
                 durable: false,
@@ -135,8 +130,6 @@ export class RabbitMQServer {
                 const pattern = Reflect.getMetadata(MICROSERVICE_METADATA.eventPattern, prototype, methodName);
                 
                 if (pattern) {
-                    // console.log(`[Microservice] Mapped event "${pattern}" to ${instance.constructor.name}.${methodName}`);
-                    
                     const handlerWrapper = async (msg: ConsumeMessage | null, ch: Channel) => {
                         if (!msg) return;
 
@@ -172,7 +165,6 @@ export class RabbitMQServer {
                             ch.ack(msg);
 
                         } catch (err) {
-                            console.error(`Error handling pattern ${pattern}:`, err);
                             ch.nack(msg, false, false);
                         }
                     };
@@ -180,7 +172,6 @@ export class RabbitMQServer {
                     if (this.isWildcardPattern(pattern)) {
                         const regex = this.patternToRegex(pattern);
                         this.patternMatchers.push({ pattern, regex, handler: handlerWrapper });
-                        // console.log(`[Microservice] Registered wildcard pattern "${pattern}" -> ${regex}`);
                     } else {
                         this.handlers.set(pattern, handlerWrapper);
                     }
@@ -264,7 +255,6 @@ export class RabbitMQServer {
                 const content = JSON.parse(msg.content.toString());
                 pattern = content.pattern || content.event;
             } catch {
-                console.warn('[Microservice] No-JSON message received');
                 channel.nack(msg, false, false);
                 return;
             }
@@ -282,14 +272,12 @@ export class RabbitMQServer {
                         matchingHandlers[i](clonedMsg as any, channel);
                     }
                 } else {
-                    // console.log(`[Microservice] No handler for pattern "${effectivePattern}"`);
                     channel.ack(msg);
                 }
             } else {
                 channel.ack(msg);
             }
         } catch (e) {
-            console.error('[Microservice] Router error', e);
             channel.nack(msg, false, false);
         }
     }
@@ -298,8 +286,6 @@ export class RabbitMQServer {
         try {
             if (this.channel) await this.channel.close();
             if (this.connection) await this.connection.close();
-        } catch (e) {
-            console.warn('[Microservice] Error while closing connection', e);
-        }
+        } catch (e) { }
     }
 }

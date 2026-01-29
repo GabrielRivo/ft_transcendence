@@ -93,8 +93,6 @@ export class GameGateway {
 		@ConnectedSocket() client: GameSocket,
 		@JWTBody() user: JwtPayload | undefined,
 	): void {
-		const socketId = client.id;
-
 		// =====================================================================
 		// Step 1: Validate JWT Payload
 		// =====================================================================
@@ -108,13 +106,6 @@ export class GameGateway {
 		// =====================================================================
 
 		if (!user || typeof user.id !== 'number' || user.id <= 0) {
-			console.warn(
-				`[GameGateway] Connection rejected: Missing or invalid JWT payload | SocketId: ${socketId}`,
-				{
-					receivedPayload: user ? { id: user.id, hasUsername: !!user.username } : 'null',
-				},
-			);
-
 			client.emit('error', {
 				code: user ? GameConnectionError.INVALID_TOKEN : GameConnectionError.AUTH_REQUIRED,
 				message: user
@@ -164,27 +155,17 @@ export class GameGateway {
 		const result = this.gameService.connectPlayer(client);
 
 		if (result.success) {
-			// Player successfully connected to their game
-			// console.log(`[GameGateway] Player ${userId} connected to game ${result.gameId}`);
-
-			// IMPORTANT: Use 'game_connected' instead of 'connection' because
-			// 'connection' is a reserved Socket.IO event name and would not
-			// be delivered correctly to the client's event handlers.
 			client.emit('game_connected', {
 				status: 'connected',
 				gameId: result.gameId,
 				message: `Connected to game ${result.gameId}. Waiting for game to start...`,
 			})
 		} else {
-			// No pending game - inform client and disconnect
-			// console.log(`[GameGateway] Connection rejected for userId ${userId}: ${result.error}`);
-
 			client.emit('error', {
 				code: result.error,
 				message: result.message,
 			});
 
-			// Clean up and disconnect
 			this.playerSockets.delete(userId);
 			this.connectedCount--;
 			client.disconnect(true);

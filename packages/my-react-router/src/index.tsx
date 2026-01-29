@@ -68,8 +68,6 @@ export function Router({ groups, NoFound }: { groups: RouteGroup[], NoFound?: El
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
   const [query, setQuery] = useState(new URLSearchParams(window.location.search));
 
-  // // console.log("Router Render. Path:", currentPath);
-
   useEffect(() => {
     const onPopState = () => {
       setCurrentPath(window.location.pathname);
@@ -81,7 +79,6 @@ export function Router({ groups, NoFound }: { groups: RouteGroup[], NoFound?: El
 
   const push = (path: string) => {
     window.history.pushState({}, '', path);
-    // // console.log("Router PUSH:", window.location.pathname);
     setCurrentPath(window.location.pathname);
     setQuery(new URLSearchParams(window.location.search));
   };
@@ -106,8 +103,6 @@ export function Router({ groups, NoFound }: { groups: RouteGroup[], NoFound?: El
       }
 
       const result = findMatch(groups, []);
-
-      // // console.log("Matched Route :", result?.matchedRoute ? result.matchedRoute.path : "None");
 
       return result || { matchedRoute: null, matchedParams: {}, layouts: [] };
   }, [currentPath, groups]);

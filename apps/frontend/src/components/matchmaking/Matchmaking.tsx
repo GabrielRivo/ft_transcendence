@@ -328,14 +328,6 @@ export function Matchmaking() {
 		resetState,
 	} = useMatchmaking();
 
-	// Debug log pour diagnostiquer le problème du bouton désactivé
-	console.info('[Matchmaking] Render state - connected:', connected, 'status:', status, 'error:', error);
-	console.info('[Matchmaking] Queue stats:', queueStats);
-
-	// -------------------------------------------------------------------------
-	// Navigation Effect
-	// -------------------------------------------------------------------------
-
 	/**
 	 * Navigates to the game page when a match is confirmed.
 	 * Uses a small delay for the success animation to be visible.
@@ -449,11 +441,11 @@ export function Matchmaking() {
 						<button
 							onClick={joinQueue}
 							disabled={!connected}
-							className="group font-pirulen relative overflow-hidden rounded-xl border-2 border-cyan-500 bg-gradient-to-r from-cyan-500/10 to-purple-500/10 px-12 py-4 text-lg tracking-widest text-cyan-400 transition-all duration-300 hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] disabled:cursor-not-allowed disabled:opacity-50"
+							className="group font-pirulen relative overflow-hidden rounded-xl border-2 border-cyan-500 bg-linear-to-r from-cyan-500/10 to-purple-500/10 px-12 py-4 text-lg tracking-widest text-cyan-400 transition-all duration-300 hover:border-cyan-400 hover:shadow-[0_0_30px_rgba(34,211,238,0.3)] disabled:cursor-not-allowed disabled:opacity-50"
 						>
 							<span className="relative z-10">FIND MATCH</span>
 							{/* Animated gradient overlay */}
-							<div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+							<div className="absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-cyan-500/20 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
 						</button>
 
 						{/* Connection status */}
@@ -485,7 +477,7 @@ export function Matchmaking() {
 				{/* Header */}
 				<div className="mb-8 text-center">
 					<h1 className="font-pirulen text-2xl tracking-[0.2em] text-white">MATCHMAKING</h1>
-					<div className="mx-auto mt-2 h-[2px] w-16 bg-gradient-to-r from-transparent via-cyan-500 to-transparent" />
+					<div className="mx-auto mt-2 h-[2px] w-16 bg-linear-to-r from-transparent via-cyan-500 to-transparent" />
 				</div>
 
 				{/* Dynamic content based on status */}

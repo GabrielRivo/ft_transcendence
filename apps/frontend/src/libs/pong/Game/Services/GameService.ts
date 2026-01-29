@@ -52,12 +52,10 @@ class GameService {
     public launchGame(game: string): void {
         // Don't relaunch if same game type
         if (this.currentGameType === game && game === 'PongBackground') {
-           //  // console.log(`[GameService] Game ${game} already in background mode, skipping launch`);
             return;
         }
 
         this.stopGame();
-      //   // console.log(`[GameService] Launching game: ${game}`);
 
         if (game === "PongOnline") {
             this.currentGameType = 'PongOnline';
@@ -83,10 +81,7 @@ class GameService {
      */
     public startGame(): void {
         if (this.gameInstance) {
-           //  // console.log(`[GameService] Starting game: ${this.currentGameType}`);
             this.gameInstance.start();
-        } else {
-            console.error("[GameService] No game instance to start.");
         }
     }
 
@@ -95,7 +90,6 @@ class GameService {
      */
     public stopGame(): void {
         if (this.gameInstance) {
-           //  // console.log(`[GameService] Stopping game: ${this.currentGameType}`);
             this.gameInstance.dispose();
             this.gameInstance = null;
             this.currentGameType = null;
@@ -108,20 +102,14 @@ class GameService {
      */
     public switchMode(newGameType: GameType): void {
         if (this.currentGameType === newGameType) {
-            // // console.log(`[GameService] Already in mode ${newGameType}, skipping switch`);
             return;
         }
 
-       //  // console.log(`[GameService] Switching from ${this.currentGameType} to ${newGameType}`);
         this.launchGame(newGameType);
         this.startGame();
     }
 
     private onGameEnded = (payload: GameEnded): void => {
-       //  // console.log("Game " + payload.name + " ended.");
-       //  // console.log("Winning player ID:", payload.winnerId);
-       //  // console.log("Final Score:", payload.score);
-        // After game ends, switch back to background mode
         this.switchMode('PongBackground');
     }
 

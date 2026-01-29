@@ -72,19 +72,8 @@ export class MatchmakingGateway {
 	 * @param server - L'instance du serveur Socket.io
 	 */
 	public afterInit(server: Server): void {
-		console.info('[MatchmakingGateway] [afterInit] WebSocket Gateway initialized.', {
-			hasServer: !!server,
-			hasMatchmakingService: !!this.matchmakingService,
-		});
-
-		if (this.matchmakingService) {
+		if (this.matchmakingService)
 			this.matchmakingService.setServer(server);
-			console.info('[MatchmakingGateway] [afterInit] Server successfully set on MatchmakingService');
-		} else {
-			console.error(
-				'[MatchmakingGateway] [afterInit] CRITICAL: MatchmakingService is not available during init.',
-			);
-		}
 	}
 
 	/**
@@ -111,16 +100,10 @@ export class MatchmakingGateway {
 		@ConnectedSocket() socket: AuthenticatedSocket,
 		@JWTBody() user: JwtPayload,
 	): Promise<void> {
-		const socketId = socket.id;
-
 		// Step 1: Strict Guard - JWT must be valid and contain user identifier
 		// The 'id' field comes from the Auth Service (see apps/auth/src/auth/auth.service.ts)
 		// Note: We check for both 'id' existence and validity (must be a positive number)
 		if (!user || typeof user.id !== 'number' || user.id <= 0) {
-			console.warn(
-				`[MatchmakingGateway] [Connection] Rejected: Missing or invalid JWT payload | SocketId: ${socketId}`,
-				{ receivedPayload: user ? { id: user.id, hasUsername: !!user.username } : 'null' },
-			);
 			socket.disconnect(true);
 			return;
 		}
@@ -144,18 +127,7 @@ export class MatchmakingGateway {
 			// by all subsequent message handlers (join_queue, accept_match, etc.)
 			socket.data.userId = userId;
 			socket.data.elo = elo;
-
-			console.info(
-				`[MatchmakingGateway] [Connection] Client connected | UserId: ${userId} | ` +
-					`Username: ${user.username || 'N/A'} | Elo: ${elo} | SocketId: ${socketId}`,
-			);
 		} catch (error) {
-			// Connection failure - either User Service is down or returned invalid data
-			// We fail-fast to prevent degraded user experience
-			console.error(
-				`[MatchmakingGateway] [Connection] Critical error loading user data | UserId: ${userId}`,
-				error,
-			);
 			socket.disconnect(true);
 		}
 	}
@@ -171,9 +143,6 @@ export class MatchmakingGateway {
 		if (userId) {
 			// removePlayer est idempotente, on peut l'appeler sans risque
 			this.matchmakingService.removePlayer(userId);
-			console.debug(
-				`[MatchmakingGateway] [Disconnection] Session closed & cleaned | UserId: ${userId}`,
-			);
 		}
 	}
 
@@ -189,7 +158,6 @@ export class MatchmakingGateway {
 		const sessionElo = socket.data.elo;
 
 		if (!userId || sessionElo === undefined) {
-			console.error(`[MatchmakingGateway] [JoinQueue] Unauthenticated socket tried to join queue.`);
 			socket.disconnect(true);
 			return;
 		}
@@ -198,7 +166,6 @@ export class MatchmakingGateway {
 		const isValid = validateJoinQueue(payloadData);
 
 		if (!isValid) {
-			console.warn(`[MatchmakingGateway] [JoinQueue] Invalid payload from User ${userId}`);
 			socket.emit('error', {
 				message: 'Invalid payload',
 				details: validateJoinQueue.errors,
@@ -217,14 +184,7 @@ export class MatchmakingGateway {
 				elo: effectiveElo,
 				timestamp: Date.now(),
 			});
-
-			console.info(
-				`[MatchmakingGateway] [JoinQueue] Player joined | UserId: ${userId} | Elo: ${effectiveElo}`,
-			);
 		} catch (error: any) {
-			console.warn(
-				`[MatchmakingGateway] [JoinQueue] Failed | UserId: ${userId} | Reason: ${error.message}`,
-			);
 			socket.emit('error', { message: error.message });
 		}
 	}
@@ -239,7 +199,6 @@ export class MatchmakingGateway {
 		if (userId) {
 			this.matchmakingService.removePlayer(userId);
 			socket.emit('queue_left', { userId, timestamp: Date.now() });
-			console.info(`[MatchmakingGateway] [LeaveQueue] Player left manually | UserId: ${userId}`);
 		}
 	}
 
@@ -262,14 +221,7 @@ export class MatchmakingGateway {
 
 		try {
 			await this.matchmakingService.acceptMatch(userId, payloadData.matchId);
-			// Feedback immédiat au client qui a accepté (optionnel, l'event global suivra)
-			console.debug(
-				`[MatchmakingGateway] [AcceptMatch] Ack | UserId: ${userId} | MatchId: ${payloadData.matchId}`,
-			);
 		} catch (error: any) {
-			console.warn(
-				`[MatchmakingGateway] [AcceptMatch] Error | UserId: ${userId} | Reason: ${error.message}`,
-			);
 			socket.emit('error', { message: error.message });
 		}
 	}
@@ -293,13 +245,7 @@ export class MatchmakingGateway {
 
 		try {
 			await this.matchmakingService.declineMatch(userId, payloadData.matchId);
-			console.info(
-				`[MatchmakingGateway] [DeclineMatch] Processed | UserId: ${userId} | MatchId: ${payloadData.matchId}`,
-			);
 		} catch (error: any) {
-			console.warn(
-				`[MatchmakingGateway] [DeclineMatch] Error | UserId: ${userId} | Reason: ${error.message}`,
-			);
 			socket.emit('error', { message: error.message });
 		}
 	}

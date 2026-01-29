@@ -76,7 +76,6 @@ function useActiveTournamentRedirect() {
 	useEffect(() => {
 		if (!user || !router.path.startsWith('/play')) return;
 
-		// // console.log('[DashboardLayout] Checking for active tournament...');
 		fetch('/api/tournament/active', {
 			method: 'GET',
 			credentials: 'include',
@@ -97,7 +96,6 @@ function useActiveTournamentRedirect() {
 					const tournamentId = tournament.id;
 
 					if (!tournamentType || !playersCount) {
-						console.error('[DashboardLayout] Invalid tournament data for redirection', tournament);
 						return;
 					}
 
@@ -111,8 +109,6 @@ function useActiveTournamentRedirect() {
 					}
 				}
 			})
-			.catch((err) => {
-				console.error('[DashboardLayout] Failed to check active tournament', err);
-			});
+			.catch(() => {});
 	}, [router.path, user]);
 }

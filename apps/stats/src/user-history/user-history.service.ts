@@ -83,62 +83,43 @@ export class UserHistoryService {
 		is_final: boolean = false,
 	){
 
-		if (winner_id == -1) {
-			console.error('[AddHistory', 'Cancelled Game')
-			return ;
-		}
-		if (player1_id === player2_id) {
-			console.error('[AddHistory', 'Same ids')
-			return ;
-		}
-		if (score_player1 < 0 || score_player2 < 0) {
-			console.error('[AddHistory', 'Score < 0')
+		if (winner_id == -1 || player1_id == player2_id || score_player1 < 0 || score_player2 < 0) {
 			return ;
 		}
 
-		if (winner_id != player1_id && winner_id != player2_id && winner_id != null) {
-			console.error('[AddHistory', 'winner id doesn\'t match players id')
+		if (winner_id != player1_id && winner_id != player2_id) {
 			return ;
 		}
 		if (duration_seconds < 0) {
-			console.error('[AddHistory', 'Duration < 0')
 			return ;
 		}
 		const allowedTypes = ['tournament', 'ranked'];
 		if (!allowedTypes.includes(game_type)) {
-			console.error('[AddHistory', `Invalid game_type: ${game_type}. Must be 'tournament' or 'ranked'`)
 			return ;
 		}
 
 		const exists = this.statementisGameIdValid.get(game_id);
 		if (exists) {
-			console.error('[AddHistory', `Match ${game_id} already exist`)
 			return ;
 		}
 		if (game_type === 'ranked' && is_final) {
-			console.error('[AddHistory', "Ranked can't have final")
 			return ;
 		}
 		if (game_type === 'ranked' && (gain_player1 == null || gain_player2 == null)) {
-			console.error('[AddHistory', "Ranked needs gain value")
 			return ;
 		}
 		if (game_type != 'ranked' && (gain_player1 != null || gain_player2 != null)) {
-			console.error('[AddHistory', "Only ranked can modify the elo")
 			return ;
 		}
 		const player1Exists = this.statementIsUserExists.get(player1_id);
 		
 		if (!player1Exists) {
-			console.error('[AddHistory', `Player ${player1_id} doesn't exist`)
 			return ;
 		}
 		const player2Exists = this.statementIsUserExists.get(player2_id);
 		if (!player2Exists) {
-			console.error('[AddHistory', `Player ${player2_id} doesn't exist`)
 			return ;
 		}
-		// // console.log("winner = ", winner_id)
 		const finalStatus = game_type === 'ranked' ? false : is_final;
 	
 		const p1Stats = {
@@ -184,7 +165,6 @@ export class UserHistoryService {
 			return this.statementGet.all(userId, userId);
 		} catch (error) {
 			if (error instanceof NotFoundException) throw error;
-				console.error("Database error", error);
 			throw new InternalServerErrorException("Internal Database Error");
 		}
 	}

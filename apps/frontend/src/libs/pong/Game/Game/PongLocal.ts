@@ -132,7 +132,6 @@ class PongLocal extends Game {
             });
         } catch (e) {
             if (!this.isDisposed) {
-                console.warn('[PongOnline] Failed to load pong.glb:', e);
                 this.endGame();
             }
         }
@@ -147,7 +146,6 @@ class PongLocal extends Game {
             ballMesh = ballMeshs[0]! as Mesh;
         } catch (e) {
             if (!this.isDisposed) {
-                console.warn('[PongOnline] Failed to load ball.glb:', e);
                 this.endGame();
             }
         }
@@ -311,9 +309,7 @@ class PongLocal extends Game {
             if (Services.Scene!.debugLayer.isVisible()) {
                 Services.Scene!.debugLayer.hide();
             } else {
-                Services.Scene!.debugLayer.show().catch((err) => {
-                    console.error("Impossible to launch the inspector.", err);
-                });
+                Services.Scene!.debugLayer.show().catch(() => { });
             }
         }
     }

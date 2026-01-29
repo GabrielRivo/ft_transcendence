@@ -30,7 +30,6 @@ export function TournamentInvite({ tournamentId, onJoin }: TournamentInviteProps
 
         // Ensure socket is connected
         if (!tournamentSocket.connected) {
-            // // console.log('[TournamentInvite] Connecting tournament socket...');
             tournamentSocket.connect();
         }
 
@@ -51,7 +50,6 @@ export function TournamentInvite({ tournamentId, onJoin }: TournamentInviteProps
                 }
             } catch (e) {
                 if (isMounted) {
-                    console.error('Failed to fetch tournament invite details:', e);
                     setError(true);
                     setLoading(false);
                 }
@@ -77,7 +75,6 @@ export function TournamentInvite({ tournamentId, onJoin }: TournamentInviteProps
                     // Avoid duplicates
                     if (prev.participants.some((p) => p.id === playerId)) return prev;
 
-                    // // console.log(`[TournamentInvite] Updating participants for tournament ${tournamentId}`);
                     return {
                         ...prev,
                         participants: [...prev.participants, { id: playerId }]

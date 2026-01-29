@@ -25,14 +25,10 @@ export class PrivateChatController {
 				},
 				body : JSON.stringify({userId1 : user.id, userId2 })
 			});
-		if (!res.ok) {
-			console.error(`Error with friend service ${res.status}`);
-
-			} else {
-				const data = await res.json() as { isBlocked: boolean };
+		if (res.ok) {
+			const data = await res.json() as { isBlocked: boolean };
 
 			if (data.isBlocked === true) {
-				// console.log("Deleted history");
 				this.chatService.removePrivateChat(Number(user.id), Number(userId2));
 				return [];
 			}
@@ -49,9 +45,7 @@ export class PrivateChatController {
 				Number(payload.otherId)
 			);
 		}
-		catch(e) {
-			// console.log(e);
-		}
+		catch(e) { }
 		return { ok : true};
 	}
 }

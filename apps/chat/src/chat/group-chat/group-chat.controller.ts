@@ -43,7 +43,6 @@ export class GroupController {
 	@Post('/remove_member')
 	@BodySchema(GroupMemberSchema)
 	async remove_member(@Body() data: GroupMemberDto & { removerId: number }, @JWTBody() user: { id: number }) {
-		// console.log("remove user id :", data.otherId)
 		return this.groupService.removeMember(data.groupId, user.id, data.otherId);
 	}
 

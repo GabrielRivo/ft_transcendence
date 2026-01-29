@@ -92,8 +92,6 @@ export class GameController {
 
 		// Handle success - return 201 Created
 		if (result.success) {
-			// console.log(`[GameController] Game ${result.gameId} created successfully`);
-
 			res.status(201);
 			return {
 				success: true,
@@ -101,11 +99,6 @@ export class GameController {
 				message: 'Game created successfully',
 			};
 		}
-
-		// Handle failure - return 409 Conflict with specific error code
-		console.warn(
-			`[GameController] Failed to create game ${dto.gameId}: ${result.error} - ${result.message}`,
-		);
 
 		res.status(409);
 		return {

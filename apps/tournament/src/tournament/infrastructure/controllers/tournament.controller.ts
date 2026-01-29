@@ -56,7 +56,6 @@ export class TournamentController {
         @Body() body: CreateTournamentDto,
         @JWTBody() user: any
     ) {
-        // console.log('[Backend] Create tournament request:', { body, userId: user?.id });
         if (!user) throw new UnauthorizedException();
         const id = await this.createTournamentUseCase.execute(body, String(user.id), user.username);
         return { id };

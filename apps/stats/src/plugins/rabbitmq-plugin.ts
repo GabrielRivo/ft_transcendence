@@ -43,7 +43,7 @@ async function rabbitmqPlugin(fastify: FastifyInstance) {
             await server.listen()
 			await server2.listen()
         } catch (err) {
-            console.error('RabbitMQ connection failed', err);
+            throw err;
         }
     });
 

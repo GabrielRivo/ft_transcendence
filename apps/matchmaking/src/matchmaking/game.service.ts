@@ -71,18 +71,6 @@ const CreateGameErrorSchema = {
 /**
  * Combined JSON Schema for all possible Game Service responses.
  * Uses JSON Schema's oneOf for discriminated union based on the `success` field.
- *
- * @example
- * ```typescript
- * const response = await gameService.createGame(input);
- * if (response.success) {
- *   // TypeScript knows this is CreateGameSuccessDto
- *   // console.log(response.gameId);
- * } else {
- *   // TypeScript knows this is CreateGameErrorDto
- *   console.error(response.error, response.message);
- * }
- * ```
  */
 const CreateGameResponseSchema = {
 	oneOf: [CreateGameSuccessSchema, CreateGameErrorSchema],
@@ -124,63 +112,6 @@ export interface CreateGameInput {
 	isFinal?: boolean;
 }
 
-// =============================================================================
-// GAME SERVICE
-// =============================================================================
-
-/**
- * Service responsible for inter-service communication with the Game Service.
- *
- * This service encapsulates all HTTP calls to the Game Service, providing:
- * - Type-safe request/response handling via Zod schemas
- * - Automatic retry and fallback mechanisms via @Resilient decorator
- * - Response validation via @ValidateResult decorator
- * - Centralized logging for debugging and monitoring
- *
- * @remarks
- * ## Architecture Notes
- *
- * The GameService follows the same pattern as UserService for consistency:
- * 1. Public method (`createGame`) provides a clean API for consumers
- * 2. Protected method (`createGameRequest`) handles the actual HTTP call
- * 3. Decorators are applied in specific order for proper error handling
- *
- * ## Decorator Order (IMPORTANT)
- *
- * The decorator order matters for proper error handling:
- * 1. `@Resilient` (outer) - Catches network errors OR validation errors
- * 2. `@ValidateResult` (inner) - Validates response data, throws if invalid
- *
- * This order ensures that validation failures trigger the fallback mechanism.
- *
- * ## Environment Variables
- *
- * - `GAME_SERVICE_URL`: Base URL of the Game Service (e.g., http://game:3000)
- *
- * @example
- * ```typescript
- * // Inject the service
- * constructor(@Inject(GameService) private gameService: GameService) {}
- *
- * // Create a game after match confirmation
- * const result = await this.gameService.createGame({
- *   gameId: randomUUID(),
- *   player1Id: '123',
- *   player2Id: '456',
- * });
- *
- * if (result.success) {
- *   // TypeScript narrows to CreateGameSuccessDto
- *   // console.log(`Game ${result.gameId} created!`);
- * } else {
- *   // TypeScript narrows to CreateGameErrorDto
- *   console.error(`Error: ${result.error} - ${result.message}`);
- * }
- * ```
- *
- * @see UserService - Similar service for user data retrieval
- * @see MatchmakingService.finalizeMatch - Primary consumer of this service
- */
 @Service()
 export class GameService {
 	/**
@@ -208,21 +139,6 @@ export class GameService {
 	 * @returns Promise resolving to the creation result (success or error)
 	 *
 	 * @throws Never throws - Errors are caught by @Resilient and return a fallback
-	 *
-	 * @example
-	 * ```typescript
-	 * const result = await gameService.createGame({
-	 *   gameId: randomUUID(),
-	 *   player1Id: '123',
-	 *   player2Id: '456',
-	 * });
-	 *
-	 * if (result.success) {
-	 *   // console.log(`Game ${result.gameId} created!`);
-	 * } else {
-	 *   console.error(`Failed: ${result.error} - ${result.message}`);
-	 * }
-	 * ```
 	 */
 	public async createGame(input: CreateGameInput): Promise<CreateGameResponseDto> {
 		return this.createGameRequest(input);
@@ -271,12 +187,6 @@ export class GameService {
 	protected async createGameRequest(input: CreateGameInput): Promise<CreateGameResponseDto> {
 		// Endpoint: POST /games (as defined in GameController)
 		const targetUrl = `${this.gameServiceUrl}/games`;
-
-		console.info(
-			`[GameService] [createGameRequest] POST ${targetUrl} | ` +
-			`GameId: ${input.gameId} | P1: ${input.player1Id} | P2: ${input.player2Id}`,
-		);
-
 		const response = await fetch(targetUrl, {
 			method: 'POST',
 			headers: {
@@ -295,32 +205,13 @@ export class GameService {
 			}),
 		});
 
-		// Handle HTTP status codes:
-		// - 201 Created: Game created successfully -> parse JSON body
-		// - 409 Conflict: Game creation failed (valid business error) -> parse JSON body
-		// - Other errors: Network/server issues -> throw to trigger fallback
 		if (response.status === 201 || response.status === 409) {
-			// Both success and conflict responses have valid JSON bodies
-			// @ValidateResult will validate the structure against our schema
 			const data = (await response.json()) as CreateGameResponseDto;
-
-			if (data.success) {
-				console.info(`[GameService] [createGameRequest] Game created | GameId: ${data.gameId}`);
-			} else {
-				console.warn(
-					`[GameService] [createGameRequest] Game creation failed | ` +
-					`Error: ${data.error} | Message: ${data.message}`,
-				);
-			}
-
 			return data;
 		}
 
-		// Handle unexpected HTTP errors (5xx, 4xx other than 409)
 		const errorBody = await response.text().catch(() => 'Unable to read response body');
 		const errorMessage = `HTTP Error ${response.status}: ${response.statusText} | Body: ${errorBody}`;
-
-		console.error(`[GameService] [createGameRequest] ${errorMessage}`);
 		throw new Error(errorMessage);
 	}
 
@@ -330,12 +221,6 @@ export class GameService {
 	 * Useful for debugging and monitoring service mesh health.
 	 *
 	 * @returns Promise resolving to true if Game Service is reachable
-	 *
-	 * @example
-	 * ```typescript
-	 * const isHealthy = await gameService.isHealthy();
-	 * // console.log(`Game Service status: ${isHealthy ? 'UP' : 'DOWN'}`);
-	 * ```
 	 */
 	public async isHealthy(): Promise<boolean> {
 		try {
@@ -345,7 +230,6 @@ export class GameService {
 			});
 			return response.ok;
 		} catch (error) {
-			console.warn(`[GameService] [isHealthy] Game Service unreachable: ${error}`);
 			return false;
 		}
 	}

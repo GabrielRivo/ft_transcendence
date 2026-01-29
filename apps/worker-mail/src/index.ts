@@ -14,7 +14,6 @@ createWorker({
 		resend,
 		// Si tu utilises @InjectPlugin('db'), tu peux passer l'objet ici
 	},
-}).catch((err: any) => {
-	console.error(err);
+}).catch(() => {
 	process.exit(1);
 });

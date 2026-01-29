@@ -52,7 +52,6 @@ export class JoinGuestTournamentUseCase {
 
         // If tournament just started, triggers the timer
         if (!wasStarted && isStarted) {
-            // console.log(`[JoinGuestTournamentUseCase] Tournament ${tournament.id} started. Starting 30s timer.`);
             this.timer.start(tournament.id, READY_TIME_SEC, async () => {
                 await this.startRoundUseCase.execute(tournament.id);
             });

@@ -46,8 +46,6 @@ export class MatchHistoryRepository implements OnModuleInit {
    * Prépare les requêtes SQL pour garantir qu'elles sont prêtes avant le premier appel.
    */
   public onModuleInit(): void {
-    console.debug('[MatchHistoryRepository] [Lifecycle] Initializing repository and preparing statements...');
-
     try {
       this.createSessionStmt = this.db.prepare<SqlSessionParams>(`
         INSERT INTO matchmaking_sessions (
@@ -68,11 +66,8 @@ export class MatchHistoryRepository implements OnModuleInit {
           @metadata 
         )
       `);
-
-      console.info('[MatchHistoryRepository] [Lifecycle] SQL Statements prepared successfully.');
     } catch (error) {
-      console.error('[MatchHistoryRepository] [Lifecycle] Failed to prepare SQL statements.', error);
-      throw error; // Empêche le démarrage si la persistance est cassée
+      throw error;
     }
   }
 
@@ -82,11 +77,6 @@ export class MatchHistoryRepository implements OnModuleInit {
    * @throws Error si l'insertion échoue (ex: constrainte d'unicité violée).
    */
   public createSessionLog(session: SessionDto): void {
-    console.debug(
-      `[MatchHistoryRepository] [createSessionLog] Archiving session | MatchId: ${session.id} | Status: ${session.status}`
-    );
-
-    // Transformation des données métier vers le format de stockage (Mapping)
     const params: SqlSessionParams = {
       id: session.id,
       player_1_id: session.player1Id,
@@ -100,24 +90,8 @@ export class MatchHistoryRepository implements OnModuleInit {
     };
 
     try {
-      const result = this.createSessionStmt.run(params);
-
-      if (result.changes > 0) {
-        console.info(
-          `[MatchHistoryRepository] [createSessionLog] Session archived successfully | MatchId: ${session.id} | RowId: ${result.lastInsertRowid}`
-        );
-      } else {
-        console.warn(
-          `[MatchHistoryRepository] [createSessionLog] Statement ran but no rows were affected | MatchId: ${session.id}`
-        );
-      }
+      this.createSessionStmt.run(params);
     } catch (error) {
-      console.error(
-        `[MatchHistoryRepository] [createSessionLog] Database Error: Failed to insert session log | MatchId: ${session.id}`,
-        error
-      );
-      // On propage l'erreur pour que l'appelant sache que l'archivage a échoué
-      // (sauf si c'est du "Fire and Forget", l'appelant gérera le catch)
       throw error;
     }
   }

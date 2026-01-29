@@ -10,14 +10,10 @@ export class RabbitMQTournamentEventsPublisher extends TournamentEventsPublisher
     private readonly client!: RabbitMQClient;
 
     public async publish(event: RecordedEvent): Promise<void> {
-        // console.log(`[RabbitMQTournamentEventsPublisher] Publishing event: ${event.eventName}`);
         const routingKey = this.getRoutingKey(event.eventName as TournamentEventType);
-        // console.log(`[RabbitMQTournamentEventsPublisher] Routing key: ${routingKey}`);
         try {
             await this.client.publish(routingKey, event);
-            // console.log(`[RabbitMQTournamentEventsPublisher] Published successfully`);
         } catch (error) {
-            console.error(`[RabbitMQTournamentEventsPublisher] Failed to publish:`, error);
             throw error;
         }
     }

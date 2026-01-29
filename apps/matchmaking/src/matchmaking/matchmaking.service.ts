@@ -47,17 +47,12 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 
 	public onModuleInit(): void {
 		this.matchmakingInterval = setInterval(() => this.matchmakingLoop(), TICK_RATE_MS);
-		console.info(
-			`[MatchmakingService] [onModuleInit] Matchmaking loop started | TickRate: ${TICK_RATE_MS}ms`,
-		);
 	}
 
 	public onModuleDestroy(): void {
 		if (this.matchmakingInterval) {
 			clearInterval(this.matchmakingInterval);
-			// console.info('[MatchmakingService] [onModuleDestroy] Loop stopped.');
 		}
-		// Nettoyage des timeouts en cours lors de l'arrêt
 		for (const match of this.pendingMatches.values()) {
 			if (match.timeoutId) clearTimeout(match.timeoutId);
 		}
@@ -65,10 +60,6 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 
 	public setServer(server: Server) {
 		this.server = server;
-		console.info('[MatchmakingService] [setServer] Server instance set successfully', {
-			hasServer: !!server,
-			hasSockets: !!(server && server.sockets),
-		});
 	}
 
 	/**
@@ -81,37 +72,22 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		elo: number,
 		priority = false,
 	): Promise<void> {
-		// 1. Vérification des pénalités
 		const penalty = this.penaltyRepository.getActivePenalty(userId);
-		if (penalty) {
-			// console.warn(`[MatchmakingService] [addPlayer] User ${userId} is banned until ${penalty.expires_at}`);
-			throw new Error(`You are banned until ${penalty.expires_at}`);
-		}
+		if (penalty) throw new Error(`You are banned until ${penalty.expires_at}`);
 
-		// 2. Vérification des doublons (File Active + Matchs en attente)
 		if (this.activeQueue.has(userId)) {
-			// console.warn(`[MatchmakingService] [addPlayer] User ${userId} already in active queue.`);
 			throw new Error('User already in queue');
 		}
 		if (this.isUserInPendingMatch(userId)) {
-			// console.warn(`[MatchmakingService] [addPlayer] User ${userId} is already in a pending match process.`);
 			throw new Error('User already in a pending match');
 		}
 		if (this.activeSockets.has(socketId)) {
-			// console.warn(`[MatchmakingService] [addPlayer] Socket ${socketId} already active.`);
 			throw new Error('Socket already active');
 		}
 
-		// 3. Ajout
 		const player = createQueuedPlayer(userId, socketId, elo, priority);
 		this.activeQueue.set(userId, player);
 		this.activeSockets.add(socketId);
-
-		if (priority) {
-			console.info(`[MatchmakingService] [addPlayer] PRIORITY PLAYER ADDED: ${userId}`);
-		}
-
-		console.info(`[MatchmakingService] [addPlayer] Emitting queue stats: ${JSON.stringify(this.getQueueStats())}`);
 		this.emitQueueStats();
 	}
 
@@ -136,7 +112,6 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		if (player) {
 			this.activeSockets.delete(player.socketId);
 			this.activeQueue.delete(targetId);
-			// console.info(`[MatchmakingService] [removePlayer] Player removed successfully | UserId: ${targetId}`);
 			this.emitQueueStats();
 		}
 	}
@@ -168,16 +143,10 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		else throw new Error('User is not a participant in this match');
 
 		if (playerRef.status !== 'PENDING') {
-			console.debug(
-				`[MatchmakingService] [acceptMatch] Ignored duplicate accept | UserId: ${userId} | Status: ${playerRef.status}`,
-			);
 			return;
 		}
 
 		playerRef.status = 'ACCEPTED';
-		console.info(
-			`[MatchmakingService] [acceptMatch] Player accepted | MatchId: ${matchId} | UserId: ${userId}`,
-		);
 
 		// If both players have accepted, finalize the match and create the game
 		if (match.player1.status === 'ACCEPTED' && match.player2.status === 'ACCEPTED') {
@@ -197,10 +166,6 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		if (match.player1.userId !== userId && match.player2.userId !== userId) {
 			throw new Error('User is not a participant in this match');
 		}
-
-		console.info(
-			`[MatchmakingService] [declineMatch] User declined match | MatchId: ${matchId} | UserId: ${userId}`,
-		);
 
 		// Annulation du match avec UserId comme responsable
 		this.cancelMatch(match, [userId], 'declined');
@@ -242,10 +207,6 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		if (match.timeoutId) clearTimeout(match.timeoutId);
 		this.pendingMatches.delete(match.matchId);
 
-		console.info(
-			`[MatchmakingService] [finalizeMatch] BOTH READY. Creating game... | MatchId: ${match.matchId}`,
-		);
-
 		// Step 2: Archive the session start (non-blocking, failure is logged but not fatal)
 		// This creates a record for analytics and debugging purposes
 		try {
@@ -256,10 +217,7 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 				status: 'STARTED',
 				startedAt: Date.now(),
 			});
-		} catch (e) {
-			// Log the error but don't block the game - session logging is not critical
-			console.error(`[MatchmakingService] [finalizeMatch] Failed to create session log`, e);
-		}
+		} catch (e) {}
 
 		// Step 3: Call Game Service to create the game instance
 		// The GameService handles retries and returns a typed response
@@ -294,17 +252,7 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 	 * @param gameId - The created game's ID (usually same as matchId)
 	 */
 	private handleGameCreationSuccess(match: PendingMatch, gameId: string): void {
-		console.info(
-			`[MatchmakingService] [handleGameCreationSuccess] Game created successfully | ` +
-			`GameId: ${gameId} | P1: ${match.player1.userId} | P2: ${match.player2.userId}`,
-		);
-
-		if (!this.server) {
-			console.warn(
-				`[MatchmakingService] [handleGameCreationSuccess] No server instance - cannot notify players`,
-			);
-			return;
-		}
+		if (!this.server) return;
 
 		// Construct the success payload with all information needed by the frontend
 		const payload = {
@@ -341,11 +289,6 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		errorCode: string,
 		errorMessage: string,
 	): void {
-		console.error(
-			`[MatchmakingService] [handleGameCreationFailure] Failed to create game | ` +
-			`MatchId: ${match.matchId} | Error: ${errorCode} | Message: ${errorMessage}`,
-		);
-
 		// Notify both players of the failure
 		const failurePayload = {
 			matchId: match.matchId,
@@ -364,20 +307,8 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		const players = [match.player1, match.player2];
 
 		for (const player of players) {
-			console.info(
-				`[MatchmakingService] [handleGameCreationFailure] Re-queueing player with PRIORITY | ` +
-				`UserId: ${player.userId}`,
-			);
+			this.addPlayer(player.userId, player.socketId, player.elo, true);
 
-			// Use async re-queue with error handling to prevent one failure from blocking others
-			this.addPlayer(player.userId, player.socketId, player.elo, true).catch((err) => {
-				console.error(
-					`[MatchmakingService] [handleGameCreationFailure] Failed to re-queue user ${player.userId}`,
-					err,
-				);
-			});
-
-			// Notify the frontend that the player is back in queue
 			if (this.server) {
 				this.server.to(player.socketId).emit('queue_joined', {
 					userId: player.userId,
@@ -402,43 +333,21 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 
 		players.forEach((p) => {
 			if (guiltySet.has(p.userId)) {
-				// PÉNALITÉ pour les coupables
-				console.info(
-					`[MatchmakingService] [cancelMatch] Applying penalty | UserId: ${p.userId} | Reason: ${reason}`,
-				);
 				try {
 					this.penaltyRepository.addPenalty(
 						p.userId,
 						PENALTY_DURATION_SECONDS,
 						`Matchmaking abuse: ${reason}`,
 					);
-				} catch (e) {
-					console.error(
-						`[MatchmakingService] [cancelMatch] Failed to apply penalty to ${p.userId}`,
-						e,
-					);
-				}
+				} catch (e) {}
 
-				// Notification spécifique
 				if (this.server) {
 					this.server
 						.to(p.socketId)
 						.emit('match_cancelled', { reason: 'penalty_applied', matchId: match.matchId });
 				}
 			} else {
-				// PRIORITÉ pour les innocents (ceux qui ont accepté ou attendaient)
-				console.info(
-					`[MatchmakingService] [cancelMatch] Re-queueing innocent player with PRIORITY | UserId: ${p.userId}`,
-				);
-
-				// On remet le joueur dans la file active instantanément
-				// Note : On utilise un catch pour éviter qu'une erreur de re-queue ne plante tout le process
-				this.addPlayer(p.userId, p.socketId, p.elo, true).catch((err) => {
-					console.error(
-						`[MatchmakingService] [cancelMatch] Failed to re-queue user ${p.userId}`,
-						err,
-					);
-				});
+				this.addPlayer(p.userId, p.socketId, p.elo, true);
 
 				if (this.server) {
 					this.server
@@ -465,9 +374,6 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		const match = this.pendingMatches.get(matchId);
 		if (!match) return;
 
-		console.warn(`[MatchmakingService] [handleMatchTimeout] Match timed out | MatchId: ${matchId}`);
-
-		// Identifier les coupables : Ceux qui sont toujours en status 'PENDING'
 		const faultyUsers: string[] = [];
 		if (match.player1.status === 'PENDING') faultyUsers.push(match.player1.userId);
 		if (match.player2.status === 'PENDING') faultyUsers.push(match.player2.userId);
@@ -530,17 +436,9 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		}
 	}
 
-	/**
-	 * Déclenche le processus de proposition de match.
-	 * PERFORMANCE: Ne doit pas contenir de // console.log bloquants.
-	 */
 	private handleMatchFound(p1: QueuedPlayer, p2: QueuedPlayer): void {
 		const matchId = randomUUID();
 		const expiresAt = Date.now() + MATCH_ACCEPT_TIMEOUT_MS;
-
-		console.info(
-			`[MatchmakingService] [handleMatchFound] Match proposal created | MatchId: ${matchId} | P1: ${p1.userId} | P2: ${p2.userId}`,
-		);
 
 		// 1. Retrait de la file active
 		this.activeQueue.delete(p1.userId);
@@ -595,9 +493,6 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 
 	private emitQueueStats(): void {
 		const stats = this.getQueueStats();
-		if (this.server) {
-			console.info(`[MatchmakingService] [emitQueueStats] Emitting queue stats: ${JSON.stringify(stats)}`);
-			this.server.sockets.emit('queue_stats', stats);
-		}
+		if (this.server) this.server.sockets.emit('queue_stats', stats);
 	}
 }

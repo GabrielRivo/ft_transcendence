@@ -6,11 +6,6 @@ export class MailService {
 	@InjectPlugin('resend')
 	private resend!: Resend;
 
-	// sendWelcomeEmail(email: string) {
-	//     // console.log(`[EMAIL SENT] Welcome to ${email} !`);
-	//     return new Promise(resolve => setTimeout(resolve, 500));
-	// }
-
 	async sendOtpEmail(email: string, otp: string) {
 		const { data, error } = await this.resend.emails.send({
 			from: `${process.env.MAIL_FROM_NAME} <${process.env.MAIL_FROM}>`,

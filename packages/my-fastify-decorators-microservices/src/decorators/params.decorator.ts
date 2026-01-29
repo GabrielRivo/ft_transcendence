@@ -26,7 +26,6 @@ function createParamDecorator(type: MicroserviceParamType) {
 * Exemple:
 * @EventPattern('my-event')
 * handleEvent(@Payload() payload: any) {
-*   // console.log(payload);
 * }
 *
 *  Example of payload:
@@ -45,7 +44,7 @@ export const Payload = createParamDecorator(MicroserviceParamType.PAYLOAD);
 * Exemple:
 * @EventPattern('my-event')
 * handleEvent(@Ctx() ctx: any) {
-*   // console.log(ctx);
+*   // do smth...
 * }
 *
 * Content Execution Context:

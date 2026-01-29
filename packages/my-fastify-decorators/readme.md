@@ -185,8 +185,7 @@ export class ChatGateway {
   
   @SubscribeMessage('message')
   handleMessage(socket: Socket, payload: { content: string }) {
-    // console.log(`Message reçu de ${socket.id}:`, payload);
-    return { status: 'ok' }; // Renvoie un ack/réponse à l'émetteur
+    return { status: 'ok' };
   }
 }
 ```

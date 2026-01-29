@@ -63,11 +63,6 @@ class DIContainer {
 			// On va chercher directement app['db'] ou app['io']
 			// On utilise 'as any' car TypeScript ne peut pas savoir dynamiquement que 'db' existe
 			const pluginValue = (this.app as any)[pluginName as string];
-			
-			if (pluginValue === undefined) {
-				console.warn(`[DI] Warning: Plugin '${pluginName}' not found on Fastify instance.`);
-			}
-			
 			(newInstance as any)[propKey] = pluginValue;
 		}
 

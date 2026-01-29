@@ -64,21 +64,3 @@ vi.mock('socket.io-client', () => {
 		Socket: vi.fn(),
 	};
 });
-
-// -----------------------------------------------------------------------------
-// Console Noise Reduction
-// -----------------------------------------------------------------------------
-
-/**
- * Suppress specific console warnings during tests to reduce noise.
- * Comment out these lines to see all warnings during debugging.
- */
-const originalWarn = console.warn;
-console.warn = (...args: unknown[]) => {
-	// Filter out known warnings that are expected in tests
-	const message = args[0]?.toString() || '';
-	if (message.includes('[useMatchmaking]') || message.includes('[MatchmakingGateway]')) {
-		return;
-	}
-	originalWarn.apply(console, args);
-};

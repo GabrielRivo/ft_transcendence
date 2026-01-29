@@ -43,8 +43,6 @@ export function TournamentCreation({ tournamentType, playersCount, onTournamentC
         }
 
         setIsSubmitting(true);
-        // // console.log('[Frontend] Creating tournament with payload:', payload);
-
         const result = await fetchJsonWithAuth<CreateTournamentResponse>('/api/tournament/', {
             method: 'POST',
             body: JSON.stringify(payload),

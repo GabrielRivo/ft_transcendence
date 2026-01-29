@@ -53,7 +53,6 @@ export function buildApp(options: { dbPath?: string } = {}) {
 	});
 
 	app.setErrorHandler((error, _request, reply) => {
-		console.error('Global Error Handler:', error);
 		reply.send(error);
 	});
 

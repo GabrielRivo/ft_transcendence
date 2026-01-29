@@ -50,9 +50,7 @@ export class UserHistoryController {
 				event.gameType,
 				event.isTournamentFinal
 			);
-		} catch (error) {
-		console.error("Error while saving", error);
-		}
+		} catch (error) { }
 	}
 
 	@Get('/user/:userId')

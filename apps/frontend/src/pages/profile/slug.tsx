@@ -116,7 +116,7 @@ export function ProfileSlugPage() {
 				}
 			} catch (err) {
 				setError('Error occured');
-				console.error(err);
+				// .error(err);
 			}
 
 			setIsLoading(false);
@@ -127,13 +127,8 @@ export function ProfileSlugPage() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [username, friends, pendingInvitations]);
 
-	// useEffect(() => {
-	// 	// console.log(user, profile);
-	// }, [profile]);
-
 	const handleAddFriend = async () => {
 		if (!profile) return;
-		// // console.log('add friend', profile.id);
 		sendFriendInvite(profile.id);
 	};
 

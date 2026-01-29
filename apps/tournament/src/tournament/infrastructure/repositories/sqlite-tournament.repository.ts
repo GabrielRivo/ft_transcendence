@@ -14,7 +14,6 @@ export class SqliteTournamentRepository extends TournamentRepository {
   constructor() {
     super();
     container.register(TournamentRepository, this);
-    // console.log('[SqliteTournamentRepository] Registered as TournamentRepository');
   }
 
   public async save(tournament: Tournament): Promise<void> {

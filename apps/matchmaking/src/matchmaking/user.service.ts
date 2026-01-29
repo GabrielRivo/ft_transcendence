@@ -53,8 +53,6 @@ export class UserService {
 	protected async fetchUserEloDto(userId: string): Promise<UserEloDto> {
 		const targetUrl = `${this.statsServiceUrl}/elo/${userId}`;
 
-		console.debug(`[UserService] [fetchUserEloDto] GET ${targetUrl}`);
-
 		const response = await fetch(targetUrl, {
 			method: 'GET',
 			headers: { 'Content-Type': 'application/json' },

@@ -45,9 +45,7 @@ export function OnlineUsersProvider({ children }: OnlineUsersProviderProps) {
 				
 				setOnlineUsers(usersMap);
 			}
-		} catch (err) {
-			console.error('[OnlineUsersProvider] Failed to fetch online users:', err);
-		} finally {
+		} catch (err) { } finally {
 			setLoading(false);
 		}
 	}, [isAuthenticated, user?.id, user?.noUsername, user?.isGuest]);
@@ -180,10 +178,7 @@ export function OnlineUsersProvider({ children }: OnlineUsersProviderProps) {
 					});
 				}
 			}
-		} catch (err) {
-			console.error('[OnlineUsersProvider] Failed to fetch missing users:', err);
-		} finally {
-			// Retirer de la liste des fetches en cours
+		} catch (err) { } finally {
 			missingIds.forEach(id => fetchingRef.current.delete(id));
 		}
 	}, [isAuthenticated, onlineUsers, offlineUsersCache, user?.id, user?.isGuest]);

@@ -248,15 +248,11 @@ export class UserService {
 		} else {
 			this.stmtCreateProfile.run(userId);
 		}
-
-		// console.log(`[UserService] Profile initialized for user ${userId}`);
 	}
 
 	updateUsername(userId: number, username: string): void {
-		// this.getOrCreateProfile(userId);
 		this.stmtUpdateUsername.run(username, userId);
 		this.io.emit('username_updated', { userId, username });
-		// console.log(`[UserService] Username updated for user ${userId}: ${username}`);
 	}
 
 	getOnlineUsers(): OnlineUser[] {
@@ -284,13 +280,11 @@ export class UserService {
 				const filepath = path.join(IMAGES_DIR, filename);
 				if (fs.existsSync(filepath)) {
 					fs.unlinkSync(filepath);
-					// console.log(`[UserService] Deleted avatar file: ${filepath}`);
 				}
 			}
 		}
 
 		this.stmtDeleteProfile.run(userId);
-		// console.log(`[UserService] Profile deleted for user ${userId}`);
 	}
 
 	private getExtensionFromMimeType(mimeType: string): string {

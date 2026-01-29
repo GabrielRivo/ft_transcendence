@@ -8,14 +8,11 @@ export interface WorkerOptions {
 }
 
 export async function createWorker(options: WorkerOptions) {
-    // console.log('Starting Worker Process...');
-
     await bootstrapStandalone(options.module, options.globals);
 
     const server = new RabbitMQServer(options.rabbitMQ);
 
     const close = async () => {
-        // console.log('Shutting down worker...');
         await server.close();
         process.exit(0);
     };
@@ -24,5 +21,4 @@ export async function createWorker(options: WorkerOptions) {
     process.on('SIGTERM', close);
 
     await server.listen();
-    // console.log('Worker is running and waiting for messages.');
 }

@@ -15,7 +15,6 @@ function useActiveGameRedirect() {
 			return;
 		}
 
-		// // console.log('[AuthenticatedLayout] Checking for active game...');
 		fetch('/api/game/games/active', {
 			method: 'GET',
 			credentials: 'include',
@@ -31,7 +30,6 @@ function useActiveGameRedirect() {
 			})
 			.then((data) => {
 				if (data && data.gameId) {
-				// 	// console.log(`[AuthenticatedLayout] Active game found: ${data.gameId}. Redirecting...`);
 					const targetPath = `/game?id=${data.gameId}`;
 
 					// Avoid redundant navigation
@@ -41,9 +39,7 @@ function useActiveGameRedirect() {
 					}
 				}
 			})
-			.catch((err) => {
-				console.error('[AuthenticatedLayout] Failed to check active game', err);
-			});
+			.catch(() => {});
 	}, [router.path, user, navigate]);
 }
 import { AuthGuard } from '../components/guards';

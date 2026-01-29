@@ -17,17 +17,13 @@ export class StartRoundUseCase {
     public async execute(tournamentId: string): Promise<void> {
         const tournament = await this.repository.findById(tournamentId);
         if (!tournament) {
-            console.error(`[StartRoundUseCase] Tournament ${tournamentId} not found`);
             return;
         }
 
         const currentRound = tournament.getCurrentRound();
         if (!currentRound) {
-            // console.log(`[StartRoundUseCase] No active round for tournament ${tournamentId}`);
             return;
         }
-
-        // console.log(`[StartRoundUseCase] Starting Round ${currentRound} for tournament ${tournamentId}`);
 
         const matches = tournament.matches.filter(m => m.round === currentRound);
         const playableMatches = matches.filter(m => m.isReady() && m.status !== 'FINISHED');
@@ -37,10 +33,8 @@ export class StartRoundUseCase {
                 const totalRounds = Math.log2(tournament.size);
                 const isFinal = match.round === totalRounds;
 
-                // console.log(`[StartRoundUseCase] Requesting game creation for match ${match.id} (isFinal: ${isFinal})`);
                 await this.gameGateway.createGame(match.id, match.playerA!.id, match.playerB!.id, tournamentId, isFinal);
 
-                // Notify frontend to redirect
                 this.socketPublisher.publish({
                     eventName: 'match_started' as any,
                     aggregateId: tournamentId,
@@ -53,7 +47,7 @@ export class StartRoundUseCase {
                     }
                 } as any);
             } catch (error) {
-                console.error(`[StartRoundUseCase] Failed to start game for match ${match.id}`, error);
+                return;
             }
         }
     }

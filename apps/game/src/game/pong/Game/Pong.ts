@@ -69,7 +69,6 @@ class Pong extends Game {
         this.services = new Services();
 
         this.startingTimeout = setTimeout(() => {
-            // console.log(`[Game] Game ${this.id} starting timeout reached. Disposing game...`);
             this.endGame('disconnection');
         }, 20000);
     }
@@ -113,7 +112,6 @@ class Pong extends Game {
     }
 
     public async playerConnected(client: Socket) {
-        // console.log(`[Game] Player connected: ${client.data.userId} to game ${this.id}`);
         if (!this.nsp) {
             this.nsp = client.nsp;
         }
@@ -130,11 +128,8 @@ class Pong extends Game {
             clearTimeout(this.disconnectTimeout.get(client.data.userId)!);
             this.disconnectTimeout.delete(client.data.userId);
         }
-        //setTimeout(() => {
-        if (client.connected === false) {
-            // console.log(`[Game] Client ${client.data.userId} disconnected before the start.`);
+        if (client.connected === false)
             return;
-        }
         const playerNbr: number = this.p1Id === client.data.userId ? 1 : 2;
         if (playerNbr === 1)
             this.p1Ready = true;
@@ -179,11 +174,8 @@ class Pong extends Game {
         if (!this.disconnectTimeout.has(client.data.userId)) {
             this.disconnectTimeout.set(client.data.userId,
                 setTimeout(() => {
-                    if (this.p1Socket?.disconnected || this.p2Socket?.disconnected) {
-                        // console.log(`[Game] Timeout reached for client ${client.data.userId}. Disposing game ${this.id}...`);
+                    if (this.p1Socket?.disconnected || this.p2Socket?.disconnected)
                         this.endGame('disconnection');
-                        //this.dispose('disconnection', remainingPlayer);
-                    }
                 }, 10000)
             );
         }
@@ -260,19 +252,14 @@ class Pong extends Game {
     }
 
     run(message?: string) {
-        if (this.p1Socket?.connected === false || this.p2Socket?.connected === false) {
-            // console.log("[Game] A player is still disconnected, cannot run the game.");
+        if (this.p1Socket?.connected === false || this.p2Socket?.connected === false)
             return;
-        }
-        if (!this.p1Ready || !this.p2Ready) {
-            // console.log("[Game] Both players are not ready, cannot run the game.");
+        if (!this.p1Ready || !this.p2Ready)
             return;
-        }
 
         if (this.gameState === "waiting" || this.gameState === null) {
             this.gameState = "playing";
             this.services.TimeService!.update();
-            // console.log("[Game] Game started with timestamp:", this.services.TimeService!.getTimestamp());
             if (!this.ball) {
                 this.ball = new Ball(this.services);
                 this.ball.generate(2000, Math.random() < 0.5 ? 1 : 2);
@@ -283,15 +270,6 @@ class Pong extends Game {
             this.truthManager!.resetLastFrameTime();
             this.services.Engine!.stopRenderLoop();
             this.services.Engine!.runRenderLoop(() => {
-
-                //latency comparison test
-                // if (this.services.TimeService!.getRealTimestamp() > 20000)
-                // {
-                //     // console.log("Stopping time for latency test at ", this.services.TimeService!.getTimestamp());
-                //     this.nsp!.to(this.id).emit('latencyTest', { timestamp: this.services.TimeService!.getRealTimestamp(), gameId: this.id, message: `Latency test at ${this.services.TimeService!.getRealTimestamp()}, with timestamp ${this.services.TimeService!.getTimestamp()}.` });
-                //     this.dispose();
-                //     return;
-                // }
                 this.truthManager!.truthUpdate();
             });
         }
@@ -343,7 +321,6 @@ class Pong extends Game {
             isTournamentFinal: this.isFinal
         };
         this.gameService.publishGameFinished(gameFinishedEvent);
-        // console.log(`[Game] Ending game instance ${this.id}, reason: ${reason}, winner: ${winnerId}`);
         this.dispose();
     }
 

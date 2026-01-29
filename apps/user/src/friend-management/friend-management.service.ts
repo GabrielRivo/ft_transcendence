@@ -231,10 +231,8 @@ export class FriendManagementService {
 	}
 
 	private emitToUser(userId: number, event: string, data: any): void {
-		// // console.log('[AAA]',userId, event);
 		for (const [, socket] of this.io.sockets.sockets) {
 			if (socket.data.userId === userId) {
-				// // console.log('[BBB]',Number(socket.data.userId), Number(userId));
 				socket.emit(event, data);
 			}
 		}
@@ -306,19 +304,8 @@ export class FriendManagementService {
 		});
 		//WARN donner le gameTYPE
 
-		// console.log(response);
-
 		if (response.status === 201 || response.status === 409) {
 			const data = (await response.json()) as CreateGameResponseDto;
-
-			if (data.success) {
-				console.info(`[SocialService] [acceptChallenge] Game created | GameId: ${data.gameId}`);
-			} else {
-				console.warn(
-					`[SocialService] [acceptChallenge] Game creation failed | ` +
-					`Error: ${data.error} | Message: ${data.message}`,
-				);
-			}
 			this.emitToUser(otherId, 'challenge_accepted', {
 				friendId: userId,
 				friendUsername: senderUsername,
@@ -354,7 +341,6 @@ export class FriendManagementService {
 			}
 			return { success: true, message: "Match record cleaned" };
 		} catch (error) {
-			console.error("Error cleaning match:", error);
 			return { success: false, message: "Database error" };
 		}
 	}

@@ -110,7 +110,6 @@ export function useTournament(): UseTournamentReturn {
             const maxRound = Math.max(...result.data.matches.map(m => m.round));
             const finalMatch = result.data.matches.find(m => m.round === maxRound);
             if (finalMatch?.winner?.id) {
-               //  // console.log('[useTournament] Tournament finished, winner:', finalMatch.winner.id);
                 setWinnerId(finalMatch.winner.id);
             }
         }
@@ -124,16 +123,13 @@ export function useTournament(): UseTournamentReturn {
 
     const listenToTournament = useCallback((id: string) => {
         if (listeningToIdRef.current === id) {
-         //    // console.log('[useTournament] Already listening to tournament:', id);
             return;
         }
 
-       //  // console.log('[useTournament] Starting to listen to tournament:', id);
         listeningToIdRef.current = id;
         setListeningToId(id);
 
         if (tournamentSocket.connected) {
-        //     // console.log('[useTournament] Emitting listen_tournament');
             tournamentSocket.emit('listen_tournament', {
                 tournamentId: id
             });
@@ -147,8 +143,6 @@ export function useTournament(): UseTournamentReturn {
     useEffect(() => {
         if (!listeningToId) return;
 
-      //   // console.log('[useTournament] Subscribing to tournament updates:', listeningToId);
-
         const unsubscribe = subscribeToTournament(listeningToId, {
             onPlayerJoined: (data) => {
                 const playerId = data.playerId || data.participantId;
@@ -156,13 +150,10 @@ export function useTournament(): UseTournamentReturn {
 
                 const currentTournament = tournamentRef.current;
 
-                // Check if player already exists
                 if (currentTournament?.participants.some(p => p.id === playerId)) {
-                  //   // console.log('[useTournament] Player already in tournament, ignoring:', playerId);
                     return;
                 }
 
-               //  // console.log('[useTournament] Processing join for player:', playerId);
                 setTournament((prev) => {
                     if (!prev) return null;
                     if (prev.participants.some(p => p.id === playerId)) return prev;
@@ -183,12 +174,11 @@ export function useTournament(): UseTournamentReturn {
                 toastRef.current(`Player ${data.displayName} joined!`, 'info');
             },
             onPlayerLeft: (data) => {
-               //  // console.log('[useTournament] PlayerLeft event:', data);
                 const currentUser = userRef.current;
 
                 const playerId = data.playerId;
                 if (currentUser && String(currentUser.id) === playerId) {
-                    // Current user left (e.g. from another tab), redirect
+                    navigateRef.current('/play');
                     navigateRef.current('/play');
                     return;
                 }
@@ -204,19 +194,15 @@ export function useTournament(): UseTournamentReturn {
             onTournamentStarted: () => {
                 const currentTournament = tournamentRef.current;
 
-                // Avoid duplicate updates
                 if (currentTournament?.status === 'STARTED') return;
 
-                // Refetch full tournament data to get matches
                 loadTournament(listeningToId);
                 toastRef.current('Tournament started!', 'success');
             },
             onMatchFinished: () => {
-                // Refetch to update bracket scores/status
                 if (listeningToId) loadTournament(listeningToId);
             },
             onMatchStarted: (data) => {
-                // Redirect player to game if they are a participant
                 const currentUser = userRef.current;
                 if (currentUser) {
                     const userId = String(currentUser.id);
@@ -238,7 +224,6 @@ export function useTournament(): UseTournamentReturn {
                 if (listeningToId) loadTournament(listeningToId);
             },
             onTournamentFinished: (data: TournamentFinishedEvent) => {
-               //  // console.log('[useTournament] TournamentFinished event:', data);
                 setWinnerId(data.winnerId);
                 setTournament(prev => prev ? ({ ...prev, status: 'FINISHED' as TournamentStatus }) : null);
             }
@@ -250,9 +235,7 @@ export function useTournament(): UseTournamentReturn {
     // Handle socket reconnection
     useEffect(() => {
         const onConnect = () => {
-           //  // console.log('[useTournament] Socket connected:', tournamentSocket.id);
             if (listeningToId) {
-               //  // console.log('[useTournament] Re-subscribing to tournament after connect:', listeningToId);
                 tournamentSocket.emit('listen_tournament', {
                     tournamentId: listeningToId,
                     displayName: 'Guest'
@@ -270,7 +253,6 @@ export function useTournament(): UseTournamentReturn {
     // Handle TournamentCancelled separately (not in useTournamentUpdates yet)
     useEffect(() => {
         const onTournamentCancelled = (data: { aggregateId?: string; tournamentId?: string }) => {
-           //  // console.log('[useTournament] TournamentCancelled event:', data);
             const currentTournament = tournamentRef.current;
             const currentListeningId = listeningToId;
 
@@ -279,7 +261,6 @@ export function useTournament(): UseTournamentReturn {
                 return;
             }
 
-            // Avoid duplicate updates
             if (currentTournament?.status === 'CANCELED') return;
 
             setTournament(prev => prev ? ({ ...prev, status: 'CANCELED' as TournamentStatus }) : null);
@@ -316,7 +297,6 @@ export function useTournament(): UseTournamentReturn {
                 toastRef.current(result.error || 'Failed to cancel tournament', 'error');
             }
         } catch (error) {
-            console.error('Failed to cancel tournament', error);
             toastRef.current('An error occurred', 'error');
         }
     }, []);
@@ -340,7 +320,7 @@ export function useTournament(): UseTournamentReturn {
                 toastRef.current(result.error || 'Failed to leave tournament', 'error');
             }
         } catch (error) {
-            console.error('Failed to leave tournament', error);
+            //.error('Failed to leave tournament', error);
             toastRef.current('An error occurred', 'error');
         }
     }, []);

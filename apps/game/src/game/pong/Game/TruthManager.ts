@@ -169,8 +169,6 @@ class TruthManager {
             p1.update(deltaT);
             p2.update(deltaT);
         }
-
-        //return this.getGameState(this.game);
     }
 
     public async truthUpdate(): Promise<void> {
@@ -181,79 +179,15 @@ class TruthManager {
         this.deltaT = time - this.lastFrameTime;
 
         if (this.deltaT >= this.frameDuration) {
-            // let p1Inputs = this.p1InputBuffer.getStatesInRange(this.lastFrameTime, time);
-            // this.computePlayerInputs(this.game.player1!, p1Inputs, this.lastFrameTime, time);
-
-            // let p2Inputs = this.p2InputBuffer.getStatesInRange(this.lastFrameTime, time);
-            // this.computePlayerInputs(this.game.player2!, p2Inputs, this.lastFrameTime, time);
-
             this.computeState(this.lastFrameTime, time);
-
-            //game.player1!.update(this.deltaT);
-            //game.player2!.update(this.deltaT);
-            //game.ball!.update(this.deltaT, game.player1!.paddle, game.player2!.paddle);
-
-
-            //this.game.ball!.update(this.deltaT);
-
             this.game.sendGameState();
-
             this.serverGameStateHistory.addState(this.getGameState(game));
-
-            //// console.log("Gamestate at time ", time, ": ", this.getGameState(game));
-
             this.lastFrameTime = time;
-
             if (time > 300000) {
                 this.game.endGame('timeout');
             }
         }
     }
-
-
-    /*private lastState : GameState | null = null;
-    private initialState : GameState | null = null;
-    public predictionUpdate(): void {
-        const game = this.game;
-        const time = Services.TimeService!.getTimestamp();
-        if (time > 5000)
-        {
-            Services.TimeService!.setTimestamp(3000);
-            this.frame = 1000000;
-            return;
-        }
-        if (this.frame >= 1000000)
-        {
-            let state = this.gameStateHistory.getClosestState(time);
-            if (!state)
-            {
-                // console.log("No state found at time ", time);
-                return;
-            }
-            this.setGameState(game, state);
-            return;
-        }
-        if (time / 16 > this.frame) {
-            this.frame++;
-            if (!this.lastState)
-                this.lastState = this.getGameState(game);
-            if (!this.initialState)
-                this.initialState = this.getGameState(game);
-
-            game.ball!.displayEffect = false;
-
-            this.setGameState(game, this.lastState);
-
-            game.player1!.update();
-            game.player2!.update();
-            game.ball!.update();
-
-            game.ball!.displayEffect = true;
-            this.gameStateHistory.addState(this.getGameState(game));
-            this.lastState = this.getGameState(game);
-            this.setGameState(game, this.initialState);
-        }
-    }*/
 }
 
 export default TruthManager;

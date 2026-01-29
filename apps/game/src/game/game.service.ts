@@ -50,7 +50,6 @@ export class GameService {
 			return { success: false, message: 'Opponent not found' };
 		}
 
-		// console.log(`[GameService] Player ${userId} surrendered game ${game.id}. Winner: ${opponentId}`);
 		game.endGame('surrender', opponentId);
 		return { success: true, message: 'Game surrendered' };
 	}
@@ -58,9 +57,7 @@ export class GameService {
 	public connectPlayer(client: Socket): ConnectPlayerResult {
 		const userId = client.data.userId;
 
-		// Validate that userId is present (should be set by Gateway after auth)
 		if (!userId || typeof userId !== 'string') {
-			console.warn(`[GameService] Connection rejected: Invalid userId for socket ${client.id}`);
 			return {
 				success: false,
 				error: 'INVALID_USER_ID',
@@ -81,8 +78,6 @@ export class GameService {
 
 		// Player has a valid game - connect them
 		game.playerConnected(client);
-		// console.log(`[GameService] Player ${userId} connected to game ${game.id}`);
-
 		return {
 			success: true,
 			gameId: game.id,
@@ -93,7 +88,6 @@ export class GameService {
 		const userId = client.data.userId;
 
 		if (!userId) {
-			// console.log(`[GameService] Disconnect ignored: No userId on socket ${client.id}`);
 			return;
 		}
 
@@ -101,9 +95,6 @@ export class GameService {
 
 		if (game) {
 			game.playerDisconnected(client);
-			// console.log(`[GameService] Player ${userId} disconnected from game ${game.id}`);
-		} else {
-			// console.log(`[GameService] Disconnect: Player ${userId} was not in any active game`);
 		}
 	}
 
@@ -127,7 +118,6 @@ export class GameService {
 
 		// Validate that game ID is unique
 		if (this.games.has(id)) {
-			// console.log(`[GameService] Cannot create game ${id}: Game ID already exists.`);
 			return {
 				success: false,
 				error: 'GAME_ALREADY_EXISTS',
@@ -148,8 +138,6 @@ export class GameService {
 
 		// Increment counter for metrics/debugging
 		this.gameCount++;
-
-		// console.log(`[GameService] Game ${id} created with players ${player1Id} and ${player2Id}`);
 
 		return { success: true, gameId: id };
 	}
@@ -207,7 +195,6 @@ export class GameService {
 
 	public async onPlayerInput(client: Socket, data: any): Promise<void> {
 		const game = this.gamesByPlayer.get(client.data.userId);
-		//// console.log(`[GameService] Received input from player ${client.data.userId} : `, data);
 		if (game && game.inputManager) {
 			game.inputManager.recordInput(client, data);
 		}

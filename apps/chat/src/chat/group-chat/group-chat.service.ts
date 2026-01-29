@@ -111,7 +111,6 @@ export class GroupChatService {
 		try {
 			this.statementAddMember.run({ groupId, userId: otherId });
 		} catch (error: any) {
-			// console.log(error);
 			return { success: false, message: "User is already a member" };
 		}
 		this.emitToUser(userId, 'group_invite', { groupId });
@@ -126,7 +125,6 @@ export class GroupChatService {
 		}
 
 		if (otherId != userId) {
-			// console.log("user : ", userId, "leave")
 			return { success: false, message: "You don't have permission to remove this member" };
 		}
 		
@@ -193,7 +191,7 @@ export class GroupChatService {
 		for (const msg of rows) {
 			const res = await fetch(`${BLOCK_URL}/friend-management/block?userId=${userId}&otherId=${msg.userId}`);
 			if (!res.ok) {
-				console.error(`Error with friend service ${res.status}`);
+				return { success: false, message: "User is blocked" };
 			} else {
 				const data = await res.json() as { isBlocked: boolean };
 				if (data.isBlocked === false) {

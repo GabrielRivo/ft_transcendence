@@ -31,8 +31,6 @@ export class UserConsummer {
 
 	@EventPattern('user.created')
 	async handleUserCreated(@Payload() payload: UserCreatedPayload) {
-		// console.log('[UserConsummer] User created event received:', payload);
-
 		// Recup seulement l'avatar url si le provider est external
 		const avatarUrl = 'avatar_url' in payload ? payload.avatar_url : null;
 
@@ -41,15 +39,11 @@ export class UserConsummer {
 
 	@EventPattern('user.updated.username')
 	async handleUserUpdated(@Payload() payload: UserUpdatedPayload) {
-		// console.log('[UserConsummer] User updated event received:', payload);
-
 		this.userService.updateUsername(payload.id, payload.username);
 	}
 
 	@EventPattern('user.deleted')
 	async handleUserDeleted(@Payload() payload: UserDeletedPayload) {
-		// console.log('[UserConsummer] User deleted event received:', payload);
-
 		this.userService.deleteProfile(payload.id);
 	}
 }

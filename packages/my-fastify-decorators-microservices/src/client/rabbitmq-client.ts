@@ -49,9 +49,6 @@ export class RabbitMQClient {
                     }
                 );
                 this.exchangeAsserted = true;
-                // console.log(`[Microservice] Producer Client connected with exchange "${this.options.exchange.name}" (${this.options.exchange.type})`);
-            } else {
-                // console.log('[Microservice] Producer Client connected');
             }
         }
     }
@@ -147,8 +144,6 @@ export class RabbitMQClient {
         try {
             if (this.channel) await this.channel.close();
             if (this.connection) await this.connection.close();
-        } catch (e) {
-            console.warn('[Microservice] Error while closing client', e);
-        }
+        } catch (e) { }
     }
 }

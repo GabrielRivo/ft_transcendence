@@ -14,14 +14,7 @@ export class MatchmakingController {
 	 */
 	@Get('/queue')
 	public async getQueueStatsHandler() {
-		console.debug('[MatchmakingController] [getQueueStatsHandler] Queue stats requested.');
-
 		const stats = this.matchmakingService.getQueueStats();
-
-		console.debug(
-      `[MatchmakingController] [getQueueStatsHandler] Returning stats | Size: ${stats.size} | Pending: ${stats.pending}`
-    );
-
 		return stats;
 	}
 }

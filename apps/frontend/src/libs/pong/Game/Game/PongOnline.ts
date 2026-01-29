@@ -144,11 +144,7 @@ class PongOnline extends Game {
             this.backgroundMeshes.forEach(mesh => {
                 mesh.isPickable = false;
             });
-        } catch (e) {
-            if (!this.isDisposed) {
-                console.error('[PongOnline] Failed to load pong.glb:', e);
-            }
-        }
+        } catch (e) { }
         let ballMesh: Mesh | undefined = undefined;
         if (this.isDisposed || !Services.Scene) return;
         try {
@@ -158,15 +154,8 @@ class PongOnline extends Game {
                 mesh.isPickable = false;
             });
             ballMesh = ballMeshs[0]! as Mesh;
-        } catch (e) {
-            if (!this.isDisposed) {
-                console.error('[PongOnline] Failed to load pong.glb:', e);
-            }
-        }
-        if (this.isDisposed || !Services.Scene) return;
-        if (ballMesh && this.ball) {
-            this.ball.setModelMesh(ballMesh);
-        }
+        } catch (e) { }
+        if (ballMesh && this.ball) this.ball.setModelMesh(ballMesh);
     }
 
     launch(): void {
@@ -188,11 +177,9 @@ class PongOnline extends Game {
         socket.on("gameUpdate", this.onGameUpdate);
         socket.on("generateBall", this.onGenerateBall);
         socket.on("score", this.onScore);
-        socket.onAny(this.onServerLog);
 
 
         socket.once("connect", () => {
-           //  // console.log("Connected to server, starting Pong game.");
             this.serverState = "connected";
             this.processGameState();
         });
@@ -206,12 +193,10 @@ class PongOnline extends Game {
 
             socket.emit("ping");
             const timeoutId = setTimeout(() => {
-            //     // console.log("Ping timeout");
                 socket.off("pong", onPong);
                 return reject("Ping timeout");
             }, 1000);
             const onPong = () => {
-             //    // console.log(`Ping: ${performance.now() - time} ms`);
                 clearTimeout(timeoutId);
                 return resolve(performance.now() - time);
             };
@@ -230,9 +215,7 @@ class PongOnline extends Game {
                 const p = await this.pingServer();
                 validPings.push(p);
 
-            } catch (error) {
-                console.warn(`Ping number ${i + 1}/${attempts} failed.`);
-            }
+            } catch (error) { }
         }
 
         if (validPings.length === 0) {
@@ -242,7 +225,6 @@ class PongOnline extends Game {
         const sum = validPings.reduce((a, b) => a + b, 0);
         const average = Math.round(sum / validPings.length);
 
-        // // console.log(`Measured latency: ${average} ms (over ${validPings.length} successful attempts)`);
         return average;
     }
 
@@ -252,19 +234,12 @@ class PongOnline extends Game {
             let measuringTime = performance.now();
             const latency: number = await this.measureLatency();
             measuringTime = performance.now() - measuringTime;
-           //  // console.log(`Time taken to measure latency: ${measuringTime} ms`);
             Services.TimeService!.initialize();
             Services.TimeService!.setTimestamp(serverTimestamp + (latency / 2) + measuringTime + timeAheadOfServ);
-           //  // console.log("Time synchronized to:", serverTimestamp, " ahead by ", timeAheadOfServ, " with latency compensation of", latency / 2, "ms. New timestamp:", Services.TimeService!.getTimestamp());
-        } catch (error) {
-            console.error("Error synchronizing time with server:", error);
-            this.onServerLostConnection();
-        }
+        } catch (error) { }
+        this.onServerLostConnection();
         socket.once("latencyTest", (payload: any) => {
             Services.TimeService!.update();
-            const clienttime = Services.TimeService!.getTimestamp();
-           //  // console.log("Latency test from server:", payload);
-           //  // console.log("Current client timestamp:", clienttime, " with a real timestamp of ", Services.TimeService!.getRealTimestamp(), " difference : ", clienttime - payload.timestamp);
         });
     }
 
@@ -272,24 +247,18 @@ class PongOnline extends Game {
         socket.off("connect_error", this.onServerLostConnection);
         socket.off("disconnect", this.onServerLostConnection);
 
-       //  // console.log("Lost connection to server, attempting to reconnect...");
         this.serverState = "disconnected";
-        //this.gameJoined = false;
         this.gameState = "waiting";
         this.processGameState();
-        //let connectionTimeout;
 
         this.connectionTimeoutId = setTimeout(() => {
             this.endGame();
         }, 8000);
         socket.once("connect", () => {
-           //  // console.log("Reconnected to server, resuming game.");
             clearTimeout(this.connectionTimeoutId);
             socket.on("connect_error", this.onServerLostConnection);
             socket.on("disconnect", this.onServerLostConnection);
-            // // console.log("Resuming game after reconnection.");
             this.serverState = "connected";
-            //this.processGameState();
         });
     }
 
@@ -298,14 +267,8 @@ class PongOnline extends Game {
 
     private onGameJoined = (payload: any): void => {
 
-        // // console.log("Game joined with payload:", payload, " timestamp:", performance.now());
         if (payload.gameType) {
             this.gameType = payload.gameType;
-           //  // console.log("Game type received:", this.gameType);
-        }
-        if (payload.tournamentId) {
-            this.tournamentId = payload.tournamentId;
-          //   // console.log("Tournament ID received:", this.tournamentId);
         }
         if (!this.gameJoined) {
             this.camera!.attachControl(Services.Canvas, true);
@@ -321,12 +284,10 @@ class PongOnline extends Game {
             if (payload.player === 1) {
                 this.clientPlayer = this.player1;
                 this.inputManager!.listenToPlayer1();
-                //this.camera!.alpha = -Math.PI/2;
                 rotateCameraAlphaEffect = new RotateCameraAlphaEffect(-Math.PI / 2);
             } else {
                 this.clientPlayer = this.player2;
                 this.inputManager!.listenToPlayer2();
-                //this.camera!.alpha = Math.PI/2;
                 rotateCameraAlphaEffect = new RotateCameraAlphaEffect(Math.PI / 2);
             }
             Services.Scene!.stopAnimation(this.camera!);
@@ -345,25 +306,19 @@ class PongOnline extends Game {
         this.processGameState();
     }
 
-    private onGameStopped = (payload: any): void => {
+    private onGameStopped = (_payload: any): void => {
         this.gameState = "waiting";
         this.processGameState();
     }
 
     private onGameStarted = (payload: any): void => {
         this.gameState = "playing";
-       //  // console.log("Game started by server with payload:", payload, " timestamp:", performance.now());
         this.synchronizeTimeWithServer(payload.timestamp);
         this.processGameState();
     }
 
-    private onGameEnded = (payload: any): void => {
-        // // console.log("Game ended by server:", payload);
+    private onGameEnded = (_payload: any): void => {
         this.endGame();
-    }
-
-    private onServerLog = (event: string, ...args: any[]): void => {
-        //// console.log(`LOG SOCKET FROM SERVER: ${event}`, ...args);
     }
 
     private onGameUpdate = (payload: any): void => {
@@ -390,14 +345,9 @@ class PongOnline extends Game {
 
         cameraShake.play(this.camera!);
         lightUpPillar.play(Services.Scene!.getMaterialByName("PillarTop") as PBRMaterial, pillarColor);
-       //  // console.log("Score update from server:", payload);
         this.player1!.setScore(payload.player1Score);
         this.player2!.setScore(payload.player2Score);
         Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: this.player1!.score, player2Score: this.player2!.score, scoreToWin: 5 });
-
-        if (this.player1!.score == 5 || this.player2!.score == 5) {
-           //  // console.log("Game over detected from score update.");
-        }
     }
 
     private onBallBounce = (payload: any): void => {
@@ -418,21 +368,9 @@ class PongOnline extends Game {
         cameraShake.play(this.camera!);
     }
 
-    private onDeathBarHit = (payload: DeathBarPayload) => {
-        /*if (payload.deathBar.owner == this.player1) {
-            this.player2!.scoreUp();
-            Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: this.player1!.score, player2Score: this.player2!.score, scoreToWin: 5 });
-            // console.log("Player 2 score :", this.player2!.score);
-        }
-        else if (payload.deathBar.owner == this.player2) {
-            this.player1!.scoreUp();
-            Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: this.player1!.score, player2Score: this.player2!.score, scoreToWin: 5 });
-            // console.log("Player 1 score :", this.player1!.score);
-        }*/
+    private onDeathBarHit = (_payload: DeathBarPayload) => {
         this.ball!.setPos(new Vector3(0, -100, 0));
         this.ball!.setModelPos(this.ball!.position);
-        //this.ball = new Ball();
-        //this.ball.setFullPos(new Vector3(0, 0.125, 0));
     }
 
     processGameState(): void {
@@ -440,7 +378,6 @@ class PongOnline extends Game {
             Services.EventBus!.emit("UI:MenuStateChange", "off");
             this.currentGameState = "playing";
             if (this.gameJoined === false) {
-              //   // console.log("Game state is playing but gameJoined is false. Setting clientPlayer to player1 by default.");
                 this.clientPlayer = this.player1;
             }
             this.run();
@@ -457,7 +394,6 @@ class PongOnline extends Game {
     }
 
     run() {
-       //  // console.log("Game running.");
         this.isDisposed = false;
         Services.TimeService!.update();
         this.predictionManager!.resetLastFrameTime();
@@ -467,7 +403,6 @@ class PongOnline extends Game {
 
     private lastPingTime: number = 0;
     private renderLoop = () => {
-        //// console.log("renderLoop online");
         if (this.isDisposed) return;
         this.predictionManager!.predictionUpdate();
 
@@ -477,19 +412,14 @@ class PongOnline extends Game {
                     Services.EventBus!.emit("Game:LatencyUpdate", result);
                 });
             } catch (error) {
-                console.warn("Error pinging server:", error);
                 Services.EventBus!.emit("Game:LatencyUpdate", 999);
             }
             this.lastPingTime = Services.TimeService!.getTimestamp();
         }
-        // this.player1!.update();
-        // this.player2!.update();
-        // this.ball!.update();
         Services.Scene!.render();
     }
 
     stop() {
-        // // console.log("Game stopped.");
         Services.Engine!.stopRenderLoop(this.renderLoop);
         Services.Engine!.runRenderLoop(this.stoppedRenderLoop);
     }
@@ -500,7 +430,6 @@ class PongOnline extends Game {
     }
 
     private endGame(): void {
-        //Services.EventBus!.emit("UI:MenuStateChange", "pongMenu");
         if (!this.tournamentId) {
             const blackScreen = new BlackScreenEffect(0, 1);
             blackScreen.play();
@@ -519,7 +448,6 @@ class PongOnline extends Game {
     }
 
     dispose(): void {
-      //   // console.log("Disposing Pong game instance.");
         this.isDisposed = true;
 
         this.connectionTimeoutId && clearTimeout(this.connectionTimeoutId);
@@ -528,7 +456,6 @@ class PongOnline extends Game {
         Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
         Services.Engine!.stopRenderLoop();
 
-        // Dispose glow layer first to avoid postProcessManager errors
         this.glowLayer?.dispose();
         this.glowLayer = undefined;
 
@@ -555,7 +482,6 @@ class PongOnline extends Game {
         socket.off("gameUpdate", this.onGameUpdate);
         socket.off("generateBall", this.onGenerateBall);
         socket.off("score", this.onScore);
-        socket.offAny(this.onServerLog);
         socket.disconnect();
 
         Services.Scene?.stopAllAnimations();
@@ -577,9 +503,7 @@ class PongOnline extends Game {
             if (Services.Scene!.debugLayer.isVisible()) {
                 Services.Scene!.debugLayer.hide();
             } else {
-                Services.Scene!.debugLayer.show().catch((err) => {
-                    console.error("Impossible to launch the inspector.", err);
-                });
+                Services.Scene!.debugLayer.show().catch(() => { });
             }
         }
     }

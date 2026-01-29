@@ -50,7 +50,6 @@ export class TournamentGateway {
         @MessageBody() payload: JoinTournamentPayload,
         @JWTBody() user: any
     ) {
-        // console.log(`[TournamentGateway] Received join_tournament request for ${payload.tournamentId} from ${user ? user.id : socket.id}`);
         const isGuest = !user;
         const userId = isGuest ? socket.id : user.id;
 
@@ -61,19 +60,15 @@ export class TournamentGateway {
             await this.joinUseCase.execute(payload.tournamentId, command, userId, isGuest);
             const roomId = `tournament:${payload.tournamentId}`;
             await socket.join(roomId);
-            // console.log(`[TournamentGateway] User ${userId} joined room ${roomId}`);
             return { status: 'success', joined: true };
         } catch (error: any) {
-            console.error(`[TournamentGateway] Join failed: ${error.message}`);
             throw error;
         }
     }
 
     @SubscribeMessage('listen_lobby')
     public async handleListenLobby(@ConnectedSocket() socket: Socket) {
-        // console.log(`[TournamentGateway] Socket ${socket.id} requesting to join 'lobby' room`);
         await socket.join('lobby');
-        // console.log(`[TournamentGateway] Socket ${socket.id} joined 'lobby' room`);
         return { status: 'success' };
     }
 
@@ -96,7 +91,6 @@ export class TournamentGateway {
     ) {
         const roomId = `tournament:${payload.tournamentId}`;
         await socket.leave(roomId);
-        // console.log(`[TournamentGateway] Socket ${socket.id} left room ${roomId}`);
         return { status: 'success' };
     }
 }

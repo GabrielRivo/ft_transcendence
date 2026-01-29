@@ -8,9 +8,7 @@ function runCleanupEffects(fiber: Fiber): void {
       if (hook && 'cleanup' in hook && typeof hook.cleanup === 'function') {
         try {
           hook.cleanup();
-        } catch (error) {
-          console.error('[my-react] Error running useEffect cleanup:', error);
-        }
+        } catch (error) { }
         hook.cleanup = null;
       }
     }
