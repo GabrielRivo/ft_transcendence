@@ -106,14 +106,14 @@ export function ChatMessagesPanel({
 								className="rounded p-1 text-purple-400 transition-colors hover:bg-purple-500/20 hover:text-white"
 								title="Add friends"
 							>
-								<Users size={18} />
+								<Users size={35} />
 							</button>
 							<button
 								onClick={onLeaveGroup}
 								className="rounded px-2 py-1 text-xs font-bold text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300"
-								title="Quitter le groupe"
+								title="Leave the group"
 							>
-								Quitter
+								Leave
 							</button>
 						</FragmentComponent>
 					)}
