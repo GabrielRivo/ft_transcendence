@@ -33,7 +33,7 @@ export class UserStatsService {
 		this.statementGetStats = this.db.prepare(
 			`SELECT * FROM user_stats WHERE user_id = ?`);
 
-		this.statementGetAllElos = this.db.prepare('SELECT elo FROM user_stats WHERE user_id >= 0');
+		this.statementGetAllElos = this.db.prepare('SELECT elo FROM user_stats WHERE user_id != 0 AND user_id != -1');
 
 		this.statementUserStats = this.db.prepare(
 		`INSERT INTO user_stats (user_id, elo, total_games, wins, losses, winrate, tournament_played,
