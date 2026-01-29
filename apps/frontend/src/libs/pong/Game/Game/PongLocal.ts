@@ -293,6 +293,8 @@ class PongLocal extends Game {
         this.camera = undefined;
         Services.Scene = undefined;
         Services.Dimensions = undefined;
+
+        Services.Collision!.clear();
     }
 }
 

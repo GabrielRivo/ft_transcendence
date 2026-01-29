@@ -488,6 +488,7 @@ class PongOnline extends Game {
         Services.Scene = undefined;
         Services.Dimensions = undefined;
 
+        Services.Collision!.clear();
     }
 }
 
