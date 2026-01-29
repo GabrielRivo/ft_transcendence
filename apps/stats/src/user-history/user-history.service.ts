@@ -50,7 +50,6 @@ export class UserHistoryService {
 	private statementisGameIdValid!: Statement;
 	private statementIsUserExists!: Statement;
 	private statementMatchTransaction!: (match: any, p1: any, p2: any, isFinal: any) => void;
-	private statementMatchTransaction!: (match: any, p1: any, p2: any, isFinal: any) => void;
 	private statementGetRankedNumber!: Statement<{userId: number}>;
 
 	private statementUpdatePlayer1!: Statement;

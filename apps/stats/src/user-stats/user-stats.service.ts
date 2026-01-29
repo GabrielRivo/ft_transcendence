@@ -25,7 +25,6 @@ export class UserStatsService {
 	private statementRegisterUser!: Statement;
 	private statementChangeUsername!: Statement;
 	private statementGetUserElo!: Statement<{user_id : number}>;
-	private statementGetUserElo!: Statement<{user_id : number}>;
 	private statementIsUserExist!: Statement;
 	private statementRemoveUserStats!: Statement;
 

@@ -1,4 +1,4 @@
-import { Body, BodySchema, Controller, Delete, Get, Inject, JWTBody, Post, Query, QuerySchema } from 'my-fastify-decorators';
+import { Body, BodySchema, Controller, Delete, Get, Inject, JWTBody, Post } from 'my-fastify-decorators';
 import { BlockManagementService } from './block-management.service.js';
 import { InviteByUsernameDto, InviteByUsernameSchema } from './dto/inviteByUsername.dto.js';
 import { FriendManagementService } from './friend-management.service.js';
