@@ -122,7 +122,7 @@ export function BlockedUsersProvider({ children }: BlockedUsersProviderProps) {
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ userId: user.id, otherId }),
+					body: JSON.stringify({ otherId }),
 				});
 
 				if (!response.ok) {

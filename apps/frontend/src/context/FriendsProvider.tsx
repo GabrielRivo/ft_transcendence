@@ -52,7 +52,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 			setLoading(true);
 			setError(null);
 
-			const response = await fetchWithAuth(`${API_BASE}/friends/${user.id}`);
+			const response = await fetchWithAuth(`${API_BASE}/friends`);
 
 			if (!response.ok) {
 				throw new Error('Failed to fetch friends');
@@ -75,7 +75,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 		}
 
 		try {
-			const response = await fetchWithAuth(`${API_BASE}/pending/${user.id}`);
+			const response = await fetchWithAuth(`${API_BASE}/pending`);
 
 			if (response.ok) {
 				const data = await response.json();
@@ -147,9 +147,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 						'Content-Type': 'application/json',
 					},
 					body: JSON.stringify({
-						userId: user.id,
-						senderUsername: user.username,
-						targetUsername,
+						targetUsername
 					}),
 				});
 
@@ -159,7 +157,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 				return { success: false, message: 'Network error' };
 			}
 		},
-		[user?.id, user?.username, user?.isGuest],
+		[user?.isGuest],
 	);
 
 	const sendFriendInvite = useCallback(
@@ -200,7 +198,7 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 					headers: {
 						'Content-Type': 'application/json',
 					},
-					body: JSON.stringify({ userId: user.id, otherId: senderId }),
+					body: JSON.stringify({ otherId: senderId }),
 				});
 
 				if (!response.ok) {
