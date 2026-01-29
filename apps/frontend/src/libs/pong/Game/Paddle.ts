@@ -1,5 +1,5 @@
 
-import {Vector3, Mesh, MeshBuilder, StandardMaterial, Color3, PickingInfo, Quaternion} from "@babylonjs/core";
+import {Vector3, Mesh, MeshBuilder, StandardMaterial, Color3} from "@babylonjs/core";
 import Services from "./Services/Services";
 import { OwnedMesh } from "./globalType";
 import Ball from "./Ball";
@@ -14,7 +14,7 @@ class Paddle {
     direction: Vector3 = new Vector3(0, 0, 0);
     position: Vector3 = new Vector3(0, 0, 0);
     hitboxDirection: Vector3 = new Vector3(0, 1, 0).normalize();
-    speed : number = 4; //9
+    speed : number = 6;
     owner: any;
 
     private visualOffset: Vector3 = new Vector3(0, 0, 0);
@@ -36,7 +36,7 @@ class Paddle {
         this.trigger1 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15}, Services.Scene);
         this.trigger2 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15}, Services.Scene);
         this.trigger3 = MeshBuilder.CreateBox("paddleTrigger", {size: 0.15, width: 7 , height: 0.15}, Services.Scene);
-		// this.hitbox = MeshBuilder.CreateBox("paddle", {size: 0.30, width: 5.0 , height: 0.30});
+
         let material: StandardMaterial;
         if (nbr === 1) {
             material = new StandardMaterial("playerMat1", Services.Scene);
@@ -117,7 +117,7 @@ class Paddle {
     }
 
     move(deltaT: number) {
-        const basePos : Vector3 = this.position;//this.hitbox.position.clone();
+        const basePos : Vector3 = this.position;
         deltaT = deltaT / 1000;
         const distance : number = this.speed * deltaT;
         const displacement : Vector3 = this.direction.scale(distance);
@@ -127,8 +127,6 @@ class Paddle {
         const maxX = Services.Dimensions!.x / 2 - playerBox.x;
         
         newPos.x = Math.min(Math.max(newPos.x, -maxX), maxX);
-        //this.hitbox.position.copyFrom(newPos);
-        //this.position.copyFrom(newPos);
         this.setFullPosition(newPos);
     }
 
@@ -144,16 +142,13 @@ class Paddle {
 
         if (angle < -Math.PI / 3) {
             angle = -Math.PI / 3;
-            //newDir = this.direction.scale(Math.cos(angle)).add(newDir.scale(Math.sin(angle))).normalize();
             newDir = MathUtils.rotateOnXZ(this.hitboxDirection, angle);
         }
         else if (angle > Math.PI / 3) {
             angle = Math.PI / 3;
-            //newDir = new Vector3(Math.sin(angle), 0, Math.cos(angle));
             newDir = MathUtils.rotateOnXZ(this.hitboxDirection, angle);
         }
         ball.setDir(newDir);
-        //ball.bounce(hitInfo);
         ball.speedUp();
         ball.owner = this.owner;
         Services.EventBus!.emit("PaddleHitBall", {paddle: this, ball: ball});
@@ -177,7 +172,6 @@ class Paddle {
     }
 
     render() {
-        //this.visualOffset = Vector3.Lerp(this.visualOffset, Vector3.Zero(), 0.03);
         Vector3.LerpToRef(this.visualOffset, Vector3.Zero(), 0.3, this.visualOffset);
         if (this.visualOffset.lengthSquared() < 0.0001) {
             this.visualOffset.setAll(0);

@@ -1,11 +1,11 @@
 
-import { Scene, Engine, Vector2, Mesh } from "@babylonjs/core";
+import { Scene, Engine, Vector2 } from "@babylonjs/core";
 import GameService from "./GameService";
 import EventBus from "./EventBus";
 import CollisionService from "./CollisionService";
 import TimeService from "./TimeService";
 import AssetCache from "./AssetCache";
-// import SocketService from "./SocketService";
+
 
 class ServicesSingleton {
     private static instance: ServicesSingleton;

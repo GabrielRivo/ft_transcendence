@@ -1,5 +1,5 @@
 
-import { Mesh, Vector3 } from "@babylonjs/core";
+import { Vector3 } from "@babylonjs/core";
 
 class MathUtils {
     static reflectVector(toreflect: Vector3, normal: Vector3): Vector3 {

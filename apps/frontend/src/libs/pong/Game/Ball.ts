@@ -1,5 +1,5 @@
 
-import { Scene, Vector3, Mesh, MeshBuilder, Color4, Ray, Effect, PickingInfo, StandardMaterial, Color3, Quaternion, Space} from "@babylonjs/core";
+import { Vector3, Mesh, MeshBuilder, Color4, Ray, Effect, PickingInfo, StandardMaterial, Color3, Quaternion, Space} from "@babylonjs/core";
 import HitEffect from "./Effects/HitEffect";
 import ShockwaveEffect from "./Effects/ShockwaveEffect";
 import MathUtils from "./MathUtils";
@@ -29,7 +29,6 @@ class Ball {
     owner: any;
 
     private visualOffset: Vector3 = new Vector3(0, 0, 0);
-    //private totalDistance: number = 0;
 
     private generateTImeoutId: NodeJS.Timeout | null = null;
 
@@ -173,9 +172,6 @@ class Ball {
 
         let remainingDeltaT = deltaT / 1000;
         
-        // let distance : number = this.speed * deltaT;
-        // let displacement : Vector3 = this.direction.scale(distance);
-        // let newPos : Vector3 = this.position.add(displacement);
         let distance : number;
         let displacement : Vector3;
         let newPos : Vector3 = this.position;
@@ -202,21 +198,8 @@ class Ball {
             
             distance = this.speed * deltaT;
             displacement = this.direction.scale(distance);
-            //newPos = this.position.add(displacement);
 
-
-            //let paddle1CollisionTime = this.findRelativeCollisionTime(paddle1, displacement, deltaT);
-            //let paddle2CollisionTime = this.findRelativeCollisionTime(paddle2, displacement, deltaT);
             let CollisionTime = this.findCollisionTime(distance, deltaT, excludedMeshes);
-            
-            /*let collisionTimes = [
-                { time: paddle1CollisionTime, id: 0 },
-                { time: paddle2CollisionTime, id: 1 },
-                { time: otherCollisionTime, id: 2 }
-            ].sort((a, b) => {
-                const diff = a.time - b.time;
-                return Math.abs(diff) < Ball.EPSILON ? a.id - b.id : diff;
-            });*/
             
             if (CollisionTime < 0)
                 deltaT = 0;
@@ -228,7 +211,7 @@ class Ball {
 
             distance = this.speed * deltaT;
             displacement = this.direction.scale(distance);
-            newPos = this.position.add(displacement); // distance parcourue sur deltaT
+            newPos = this.position.add(displacement);
 
             ray = new Ray(this.position, this.direction, distance + (this.diameter / 2) + 0.001);
 
@@ -243,12 +226,11 @@ class Ball {
 
             if (!this.hit(hit)) {
                 this.setPos(newPos);
-                //CollisionTime = deltaT;
             }
             if (hit.pickedMesh.name === "paddleTrigger")
                 excludedMeshes.push(hit.pickedMesh as OwnedMesh);
 
-            remainingDeltaT -= deltaT;//CollisionTime;
+            remainingDeltaT -= deltaT;
             if (Math.abs(remainingDeltaT) < Ball.EPSILON) {
                 remainingDeltaT = 0;
             }
@@ -301,7 +283,7 @@ class Ball {
         const pickedMesh : OwnedMesh = hitInfo.pickedMesh as OwnedMesh;
         const name : string = pickedMesh.name;
 
-        if (name === "deathBar" || /*name === "paddle" ||*/ name === "wall" || name === "paddleTrigger") {
+        if (name === "deathBar" || name === "wall" || name === "paddleTrigger") {
             const impact = this.findRadialImpact(pickedMesh);
             if (impact) {
                 const normalVec = impact.getNormal(true);
@@ -312,14 +294,7 @@ class Ball {
                         this.shockwaveEffect.play(impact.pickedPoint, normalVec);
                         this.hitEffect.play(impact.pickedPoint, normalVec);
                     }
-
-                    /*if (impactMesh.name === "paddle")
-                    {
-                        this.bounce(impact);
-                        return true;
-                    }*/
                     impactMesh.owner.onBallHit(this, impact);
-                    //this.bounce(impact);
                     return true;
                 }
             }
@@ -335,10 +310,10 @@ class Ball {
 
     findRadialImpact(collidedMesh : OwnedMesh) : PickingInfo | null {
         const radius = this.diameter / 2;
-        let ray : Ray = new Ray(this.position, this.direction, radius + 0.001); //+1 Test needed
+        let ray : Ray = new Ray(this.position, this.direction, radius + 0.001);
         const accuracy = 8;
 
-        let shortestDist : number = radius + 0.001; //+1
+        let shortestDist : number = radius + 0.001;
         let impact : PickingInfo | null = null;
         
         let rayDirection : Vector3;
@@ -361,7 +336,7 @@ class Ball {
         if (!impact) {
             if (collidedMesh.name === "paddleTrigger")
                 return null;
-            this.findRadialImpactDebug();
+            //this.findRadialImpactDebug();
             this.moving = false;
         }
         return impact;
@@ -379,7 +354,6 @@ class Ball {
         const left = new Vector3(this.direction.z, 0, -this.direction.x);
         const overlapping : Mesh[] = Services.Collision!.isInside(this.position, "paddle");
 
-        //white : origin
         let sphere = MeshBuilder.CreateSphere("debugSphere", {diameter: 0.03}, Services.Scene);
         sphere.isPickable = false;
         sphere.position = ray.origin;
@@ -398,7 +372,6 @@ class Ball {
 
             if (hit && hit.pickedMesh && hit.distance < shortestDist) {
 
-                //red : hit point
                 let sphere = MeshBuilder.CreateSphere("debugSphere", {diameter: 0.03}, Services.Scene);
                 sphere.isPickable = false;
                 sphere.position = hit.pickedPoint as Vector3;
@@ -406,7 +379,6 @@ class Ball {
                 debugMat.emissiveColor = new Color3(1, 0, 0);
                 sphere.material = debugMat;
 
-                //cyan : normal point
                 sphere = MeshBuilder.CreateSphere("debugSphere", {diameter: 0.03}, Services.Scene);
                 sphere.isPickable = false;
                 sphere.position = hit.pickedPoint!.add(hit.getNormal(true)!.scale(0.1));
@@ -449,7 +421,6 @@ class Ball {
 
         if (!impact)
             return null;
-        //green : final impact normal
         let sphere2 = MeshBuilder.CreateSphere("debugSphere", {diameter: 0.03}, Services.Scene);
         sphere2.isPickable = false;
         sphere2.position = impact?.pickedPoint!.add(impact.getNormal(true)!.scale(0.1));
@@ -459,7 +430,6 @@ class Ball {
         sphere.visibility = 0.5;
         
         return impact;
-        //return null;
     }
 
     bounce(hitInfo: PickingInfo) {
@@ -505,11 +475,10 @@ class Ball {
     }
 
     render(deltaT: number) {
-        this.visualOffset = Vector3.Lerp(this.visualOffset, Vector3.Zero(), 0.3);
-        if (this.visualOffset.lengthSquared() < 0.001) {
+        Vector3.LerpToRef(this.visualOffset, Vector3.Zero(), 0.3, this.visualOffset);
+        if (this.visualOffset.lengthSquared() < 0.0001) {
             this.visualOffset.setAll(0);
-        } 
-
+        }
 
         const distanceTraveled = this.speed * (deltaT / 1000);
 

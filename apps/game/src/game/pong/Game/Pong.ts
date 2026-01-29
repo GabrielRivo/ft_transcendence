@@ -201,31 +201,20 @@ class Pong extends Game {
         if (playerScoring.score < 5) {
             playerScoring.scoreUp();
         }
-        /*if (playerScoring === this.player1 && this.player2!.score < 5) {
-            this.player2!.scoreUp();
-        }
-        else if (payload.deathBar.owner == this.player2 && this.player1!.score < 5) {
-            this.player1!.scoreUp();
-        }*/
 
         this.nsp!.to(this.id).emit('score', { scoringPlayer: scoringSide, player1Score: this.player1!.score, player2Score: this.player2!.score });
 
-        // Publish score update to other services (RabbitMQ)
         this.gameService.publishScoreUpdate(this.id, this.p1Id, this.p2Id, this.player1!.score, this.player2!.score);
 
         if (this.player1!.score === 5 || this.player2!.score === 5) {
 
             setTimeout(() => {
-                //const winnerId = this.player1!.score === 5 ? this.p1Id : this.p2Id;
-                //this.dispose('score_limit', winnerId);
                 this.endGame('score_limit');
-            }, this.tournamentId ? 0 : 8000);
+            }, this.tournamentId ? 0 : 3500);
 
             return;
         }
 
-        //this.ball = new Ball(this.services);
-        //this.ball.setFullPos(new Vector3(0, 0.125, 0));
         this.ball!.generate(2000, scoredSide);
 
         this.nsp!.to(this.id).emit('generateBall', { timestamp: this.services.TimeService!.getTimestamp(), ballDirection: this.ball!.getDirection() });
@@ -349,6 +338,8 @@ class Pong extends Game {
             winnerId,
             reason
         }*/);
+
+        this.services.Collision!.clear();
     }
 }
 

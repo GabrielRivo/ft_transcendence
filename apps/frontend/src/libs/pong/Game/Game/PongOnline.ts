@@ -1,6 +1,4 @@
-import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, SetValueAction, Camera, PBRMaterial, AbstractMesh } from "@babylonjs/core";
-import "@babylonjs/core/Debug/debugLayer";
-import "@babylonjs/inspector";
+import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, PBRMaterial, AbstractMesh } from "@babylonjs/core";
 
 import Services from "../Services/Services";
 import type { DeathBarPayload, GameState, OwnedMesh } from "../globalType";
@@ -56,7 +54,6 @@ class PongOnline extends Game {
         Services.TimeService!.initialize();
         Services.Scene = new Scene(Services.Engine!);
         Services.Dimensions = new Vector2(this.width, this.height);
-        window.addEventListener("keydown", this.showDebugLayer);
 
         this.inputManager = new InputManagerOnline(this);
         this.predictionManager = new PredictionManager(this);
@@ -133,26 +130,36 @@ class PongOnline extends Game {
     }
 
     async loadGameAssets(): Promise<void> {
-        // Load 3D background model from cache
         if (this.isDisposed || !Services.Scene) return;
         try {
             this.backgroundMeshes = await Services.AssetCache.loadModel('pong-background', '/models/pong.glb', Services.Scene);
-            if (this.isDisposed) return; // Check again after async operation
+            if (this.isDisposed) return;
             this.backgroundMeshes.forEach(mesh => {
                 mesh.isPickable = false;
             });
-        } catch (e) { }
-        let ballMesh: Mesh | undefined = undefined;
+        } catch (e) {
+            if (!this.isDisposed) {
+                this.endGame();
+            }
+        }
+        let ballMesh : Mesh | undefined = undefined;
         if (this.isDisposed || !Services.Scene) return;
         try {
             const ballMeshs = await Services.AssetCache.loadModel('pong-ball', '/models/ball.glb', Services.Scene);
-            if (this.isDisposed) return; // Check again after async operation
+            if (this.isDisposed) return;
             ballMeshs.forEach(mesh => {
                 mesh.isPickable = false;
             });
             ballMesh = ballMeshs[0]! as Mesh;
-        } catch (e) { }
-        if (ballMesh && this.ball) this.ball.setModelMesh(ballMesh);
+        } catch (e) {
+            if (!this.isDisposed) {
+                this.endGame();
+            }
+        }
+        if (this.isDisposed || !Services.Scene) return;
+        if (ballMesh && this.ball) {
+            this.ball.setModelMesh(ballMesh);
+        }
     }
 
     launch(): void {
@@ -339,7 +346,6 @@ class PongOnline extends Game {
 
         let pillarColor: Color3;
         if (payload.scoringPlayer === 1)
-            //pillarColor = new Color3(0.8, 0, 0.8);
             pillarColor = new Color3(0.2, 0.8, 1);
         else
             pillarColor = new Color3(0.8, 0.3, 0.8);
@@ -376,7 +382,6 @@ class PongOnline extends Game {
 
     processGameState(): void {
         if (this.serverState === "connected" && this.gameState === "playing" && this.currentGameState !== "playing") {
-            Services.EventBus!.emit("UI:MenuStateChange", "off");
             this.currentGameState = "playing";
             if (this.gameJoined === false) {
                 this.clientPlayer = this.player1;
@@ -384,11 +389,6 @@ class PongOnline extends Game {
             this.run();
         }
         else if (this.currentGameState !== "waiting") {
-            if (this.gameJoined === false && this.serverState === "connected") {
-                Services.EventBus!.emit("UI:MenuStateChange", "matchmaking");
-            }
-            else
-                Services.EventBus!.emit("UI:MenuStateChange", "loading");
             this.currentGameState = "waiting";
             this.stop();
         }
@@ -445,7 +445,6 @@ class PongOnline extends Game {
                 tournamentId: this.tournamentId
             });
         }, this.tournamentId ? 0 : 1000);
-        //this.dispose();
     }
 
     dispose(): void {
@@ -494,19 +493,7 @@ class PongOnline extends Game {
         Services.Scene = undefined;
         Services.Dimensions = undefined;
 
-        window.removeEventListener("keydown", this.showDebugLayer);
-    }
-
-    showDebugLayer(ev: KeyboardEvent) {
-        if (ev.ctrlKey && ev.key.toLowerCase() === 'i') {
-            ev.preventDefault();
-
-            if (Services.Scene!.debugLayer.isVisible()) {
-                Services.Scene!.debugLayer.hide();
-            } else {
-                Services.Scene!.debugLayer.show().catch(() => { });
-            }
-        }
+        Services.Collision!.clear();
     }
 }
 

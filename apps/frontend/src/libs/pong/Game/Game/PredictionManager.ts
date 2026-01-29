@@ -73,20 +73,6 @@ class PredictionManager {
         game.ball!.setSpeed(state.ball.speed);
     }
 
-
-    /*public computeState(baseFrame: GameState, currentTime: number): GameState {
-        const deltaT = currentTime - baseFrame.timestamp;
-
-        this.setGameState(this.game, baseFrame);
-        this.game.ball!.displayEffect = false;
-        this.game.player1!.update(deltaT);
-        this.game.player2!.update(deltaT);
-        this.game.ball!.update(deltaT);
-        this.game.ball!.displayEffect = true;
-
-        return this.getGameState(this.game);
-    }*/
-
     public reconcileStates(prediction: GameState, truth: GameState): void {
         const posDiffP1 = prediction.p1.pos.subtract(truth.p1.pos).length();
         const posDiffP2 = prediction.p2.pos.subtract(truth.p2.pos).length();
@@ -96,12 +82,15 @@ class PredictionManager {
 
         if (posDiffP1 > 0.1) {
             this.game.player1!.paddle.reconcile(prediction.p1.pos, truth.p1.pos);
+            console.log("Reconciled P1 Paddle");
         }
         if (posDiffP2 > 0.1) {
             this.game.player2!.paddle.reconcile(prediction.p2.pos, truth.p2.pos);
+            console.log("Reconciled P2 Paddle");
         }
         if (posDiffBall > 0.1 || dirDiffBall > 0.1 || speedDiffBall > 0.1) {
             this.game.ball!.reconcile(prediction.ball.pos, truth.ball.pos, truth.ball.dir, truth.ball.speed);
+            console.log("Reconciled Ball");
         }
     }
 

@@ -1,5 +1,5 @@
 
-import {Vector3, Mesh, MeshBuilder, StandardMaterial, Color3, Color4, PickingInfo } from "@babylonjs/core";
+import {Mesh, MeshBuilder, StandardMaterial, Color3, Color4} from "@babylonjs/core";
 import Services from "./Services/Services";
 import { OwnedMesh, DeathBarPayload } from "./globalType";
 import Ball from "./Ball";

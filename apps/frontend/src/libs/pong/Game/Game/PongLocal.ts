@@ -1,11 +1,8 @@
-import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, PBRMaterial, Engine, AbstractMesh } from "@babylonjs/core";
-import "@babylonjs/core/Debug/debugLayer";
-import "@babylonjs/inspector"; //A ENLEVER
+import { Scene, MeshBuilder, StandardMaterial, Color3, ArcRotateCamera, Vector2, Vector3, GlowLayer, Mesh, PBRMaterial, AbstractMesh } from "@babylonjs/core";
 
 import Services from "../Services/Services";
 import { DeathBarPayload } from "../globalType";
 import Player from "../Player";
-import DeathBar from "../DeathBar";
 import Ball from "../Ball";
 import Wall from "../Wall";
 import InputManager from "../InputManagerLocal";
@@ -40,7 +37,6 @@ class PongLocal extends Game {
         
         Services.Scene = new Scene(Services.Engine!);
         Services.Dimensions = new Vector2(this.width, this.height);
-        window.addEventListener("keydown", this.showDebugLayer);
 
         this.inputManager = new InputManager(this);
         this.inputManager.listenToP1();
@@ -122,11 +118,10 @@ class PongLocal extends Game {
     }
 
     async loadGameAssets(): Promise<void> {
-        // Load 3D background model from cache
         if (this.isDisposed || !Services.Scene) return;
         try {
             this.backgroundMeshes = await Services.AssetCache.loadModel('pong-background', '/models/pong.glb', Services.Scene);
-            if (this.isDisposed) return; // Check again after async operation
+            if (this.isDisposed) return;
             this.backgroundMeshes.forEach(mesh => {
                 mesh.isPickable = false;
             });
@@ -139,7 +134,7 @@ class PongLocal extends Game {
         if (this.isDisposed || !Services.Scene) return;
         try {
             const ballMeshs = await Services.AssetCache.loadModel('pong-ball', '/models/ball.glb', Services.Scene);
-            if (this.isDisposed) return; // Check again after async operation
+            if (this.isDisposed) return;
             ballMeshs.forEach(mesh => {
                 mesh.isPickable = false;
             });
@@ -214,7 +209,7 @@ class PongLocal extends Game {
             setTimeout(() => {
                 if (this.isDisposed) return;
                 this.endGame();
-            }, 8000);
+            }, 3500);
             return;
         }
 
@@ -274,7 +269,6 @@ class PongLocal extends Game {
         Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
         Services.Engine!.stopRenderLoop();
 
-        // Dispose glow layer first to avoid postProcessManager errors
         this.glowLayer?.dispose();
         this.glowLayer = undefined;
 
@@ -299,19 +293,7 @@ class PongLocal extends Game {
         Services.Scene = undefined;
         Services.Dimensions = undefined;
 
-        window.removeEventListener("keydown", this.showDebugLayer);
-    }
-
-    showDebugLayer(ev: KeyboardEvent) {
-        if (ev.ctrlKey && ev.key.toLowerCase() === 'i') {
-            ev.preventDefault();
-
-            if (Services.Scene!.debugLayer.isVisible()) {
-                Services.Scene!.debugLayer.hide();
-            } else {
-                Services.Scene!.debugLayer.show().catch(() => { });
-            }
-        }
+        Services.Collision!.clear();
     }
 }
 

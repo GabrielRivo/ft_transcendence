@@ -14,7 +14,7 @@ class Paddle {
     trigger3: OwnedMesh<Paddle>;
     direction: Vector3 = new Vector3(0, 0, 0);
     modelDirection: Vector3 = new Vector3(0, 1, 0).normalize();
-    speed: number = 4;
+    speed: number = 6;
     owner: any;
 
     constructor(services: Services, owner?: any) {

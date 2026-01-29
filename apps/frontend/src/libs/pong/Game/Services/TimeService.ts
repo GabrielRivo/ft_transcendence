@@ -1,7 +1,4 @@
 
-
-import Services from "./Services";
-
 class TimeService {
     static instance: TimeService;
 
@@ -12,15 +9,11 @@ class TimeService {
 
     private offset: number = 0;
 
-    private timeScale: number;
-
     private constructor() {
         this.deltaTime = 0;
         this.timestamp = 0;
         this.t0 = performance.now();
         this.tLast = this.t0;
-
-        this.timeScale = 1;
     }
 
     static getInstance(): TimeService {
@@ -40,17 +33,10 @@ class TimeService {
 
     public update(): void {
         const t1 = performance.now();
-        this.deltaTime = (t1 - this.tLast) * this.timeScale;
+        this.deltaTime = (t1 - this.tLast);
         this.timestamp = this.timestamp + this.deltaTime;
         this.tLast = t1;
     }
-
-   /*public getTimeScale(): number {
-        return this.timeScale;
-    }
-    public setTimeScale(scale: number): void {
-        this.timeScale = scale;
-    }*/
 
     public getDeltaTime(): number {
         return this.deltaTime;

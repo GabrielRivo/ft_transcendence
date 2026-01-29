@@ -1,9 +1,7 @@
 
-import {Vector3, Mesh, MeshBuilder, StandardMaterial, Color3, Color4 } from "@babylonjs/core";
-import Game from "./Game/Game";
+import { Vector3 } from "@babylonjs/core";
 import DeathBar from "./DeathBar";
 import Paddle from "./Paddle";
-import { OwnedMesh } from "./globalType";
 
 let idDefault = 0;
 

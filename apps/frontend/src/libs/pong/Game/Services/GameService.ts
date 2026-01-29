@@ -50,7 +50,6 @@ class GameService {
      * Launch a new game, disposing of any existing game first.
      */
     public launchGame(game: string): void {
-        // Don't relaunch if same game type
         if (this.currentGameType === game && game === 'PongBackground') {
             return;
         }
