@@ -26,7 +26,7 @@ export class UserStatsService {
 	private statementChangeUsername!: Statement;
 	private statementGetUserElo!: Statement<{user_id : number}>;
 	private statementIsUserExist!: Statement;
-	private statementDeleteStats!: Statement;
+	private statementRemoveUserStats!: Statement;
 
 
 	onModuleInit() {
@@ -47,8 +47,9 @@ export class UserStatsService {
 		this.statementRegisterUser = this.db.prepare(`INSERT INTO user_stats (user_id) VALUES (@user_id)`)
 		this.statementChangeUsername = this.db.prepare(`UPDATE user_stats SET username = @username WHERE user_id = @user_id`)
 		this.statementGetUserElo = this.db.prepare(`SELECT elo FROM user_stats WHERE user_id = @user_id`)
+		this.statementGetUserElo = this.db.prepare(`SELECT elo FROM user_stats WHERE user_id = @user_id`)
 		this.statementIsUserExist = this.db.prepare(`SELECT 1 FROM user_stats WHERE user_id = ?`)
-		this.statementDeleteStats = this.db.prepare(`DELETE FROM user_stats WHERE user_id = @user_id`)
+		this.statementRemoveUserStats = this.db.prepare(`DELETE FROM user_stats WHERE user_id = ?`)
 	}
  
 	async getGlobalStats(userId: number) {
@@ -192,9 +193,8 @@ export class UserStatsService {
 			return true;
 		return false;
 	}
-	deleteStats(userId: number) {
-		if (this.statementIsUserExist.get(userId))
-			throw new NotFoundException('User Id not Found');
-		return this.statementDeleteStats.run(userId); 
+
+	removeUserStats(userId: number) {
+		this.statementRemoveUserStats.run(userId);
 	}
 }

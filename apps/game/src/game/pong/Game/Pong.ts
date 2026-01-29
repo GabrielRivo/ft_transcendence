@@ -92,9 +92,7 @@ class Pong extends Game {
         this.player2 = new Player(this.services, this.p2Id);
         this.walls = [new Wall(this.services), new Wall(this.services)];
         this.walls.forEach(wall => this.services.Scene!.addMesh(wall.model));
-        //this.ball = new Ball(this.services);
 
-        //this.ball.setFullPos(new Vector3(0, 0.125, 0));
         this.player1.paddle.setModelDirection(new Vector3(0, 0, 1));
         this.player2.paddle.setModelDirection(new Vector3(0, 0, -1));
         this.player1.paddle.setPosition(new Vector3(0, 0.15, -this.height / 2 + 2));
@@ -159,7 +157,6 @@ class Pong extends Game {
             else
                 this.run(`Player ${client.data.userId} connected. Starting game...`);
         }
-        //}, 500);
     }
 
     public playerDisconnected(client: Socket) {
@@ -313,7 +310,7 @@ class Pong extends Game {
         this.dispose();
     }
 
-    dispose(/*reason: 'score_limit' | 'surrender' | 'disconnection' | 'timeout' = 'surrender', winnerId: string | null = null*/): void {
+    dispose(): void {
         this.disconnectTimeout.forEach((timeout) => {
             if (timeout) {
                 clearTimeout(timeout);
@@ -332,14 +329,10 @@ class Pong extends Game {
         this.services.Scene!.dispose();
 
         this.nsp?.to(this.id).emit('gameEnded', { gameId: this.id, message: `Game ${this.id} has ended.` });
-        this.gameService.removeGame(this, this.p1Id, this.p2Id/*, {
-            score1: this.player1?.score || 0,
-            score2: this.player2?.score || 0,
-            winnerId,
-            reason
-        }*/);
 
         this.services.Collision!.clear();
+        
+        this.gameService.removeGame(this, this.p1Id, this.p2Id);
     }
 }
 

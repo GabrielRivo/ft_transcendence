@@ -173,17 +173,43 @@ export class UserService {
 		const filename = `${randomUUID()}.${extension}`;
 		const filepath = path.join(IMAGES_DIR, filename);
 
-		const buffer = await file.toBuffer();
+		// STREAMING: Écriture directe sur disque pour éviter de charger 5MB en RAM
+		const writeStream = fs.createWriteStream(filepath);
 
-		if (buffer.length > MAX_FILE_SIZE) {
-			throw new BadRequestException('File too large. Maximum size is 5MB');
+		try {
+			let bytesRead = 0;
+			let isChecked = false;
+
+			for await (const chunk of file.file) {
+				// Vérification Magic Bytes sur le premier chunk
+				if (!isChecked) {
+					if (!this.isValidImageBuffer(chunk, file.mimetype)) {
+						writeStream.destroy();
+						try { fs.unlinkSync(filepath); } catch {} // Clean up partial file
+						throw new BadRequestException('Invalid image file content');
+					}
+					isChecked = true;
+				}
+
+				bytesRead += chunk.length;
+				if (bytesRead > MAX_FILE_SIZE) {
+					writeStream.destroy();
+					try { fs.unlinkSync(filepath); } catch {}
+					throw new BadRequestException('File too large (stream check)');
+				}
+				
+				// writeStream.write retourne false si le buffer kernel est plein, on doit attendre drain
+				if (!writeStream.write(chunk)) {
+					await new Promise<void>(resolve => writeStream.once('drain', () => resolve()));
+				}
+			}
+			writeStream.end();
+		} catch (err: any) {
+			// S'assurer que le stream est fermé et le fichier supprimé en cas d'erreur
+			writeStream.destroy();
+			try { if (fs.existsSync(filepath)) fs.unlinkSync(filepath); } catch {}
+			throw err; 
 		}
-
-		if (!this.isValidImageBuffer(buffer, file.mimetype)) {
-			throw new BadRequestException('Invalid image file');
-		}
-
-		fs.writeFileSync(filepath, buffer);
 
 		const avatarUrl = `/api/images/${filename}`;
 		this.stmtUpdateAvatar.run(avatarUrl, 1, userId);

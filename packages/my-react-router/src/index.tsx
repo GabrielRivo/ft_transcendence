@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, createElement, Fragment, useMemo } from 'my-react';
+import { createContext, useContext, useState, useEffect, createElement, Fragment, useMemo, useCallback } from 'my-react';
 import type { Element } from 'my-react';
 
 const LayoutContext = createContext<string | null>(null);
@@ -77,11 +77,11 @@ export function Router({ groups, NoFound }: { groups: RouteGroup[], NoFound?: El
     return () => window.removeEventListener('popstate', onPopState);
   }, []);
 
-  const push = (path: string) => {
+  const push = useCallback((path: string) => {
     window.history.pushState({}, '', path);
     setCurrentPath(window.location.pathname);
     setQuery(new URLSearchParams(window.location.search));
-  };
+  }, []);
 
   const matchResult = useMemo(() => {
       function findMatch(items: (Route | RouteGroup)[], layouts: any[]): { matchedRoute: Route, matchedParams: Record<string, string>, layouts: any[] } | null {
@@ -109,12 +109,12 @@ export function Router({ groups, NoFound }: { groups: RouteGroup[], NoFound?: El
 
   const { matchedRoute, matchedParams, layouts } = matchResult;
 
-  const routerContextValue = {
+  const routerContextValue = useMemo(() => ({
     push,
     query,
     params: matchedParams,
     path: currentPath
-  };
+  }), [push, query, matchedParams, currentPath]);
 
   const content = matchedRoute
     ? (

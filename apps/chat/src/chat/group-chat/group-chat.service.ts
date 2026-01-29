@@ -2,8 +2,6 @@ import Database, { Statement } from 'better-sqlite3';
 import { InjectPlugin, Service } from 'my-fastify-decorators';
 import { Server } from 'socket.io';
 
-const BLOCK_URL = 'http://user:3000';
-
 const CreateGroup =
 	`INSERT INTO privateGroup (name, ownerId) VALUES (@name, @ownerId)`;
 
@@ -68,6 +66,10 @@ export class GroupChatService {
 	private statementSaveGroupMessage: Statement<{ groupId: number, userId: number, msgContent: string }>;
 	private statementFindGroupByNameAndOwner: Statement<{ ownerId: number, name: string }>;
 
+	private statementDeleteGroupMembersByUser!: Statement<{ userId: number }>;
+	private statementAnonymizeGroupMessagesByUser!: Statement<{ userId: number }>;
+	private statementDeleteGroupsByOwner!: Statement<{ ownerId: number }>;
+
 	onModuleInit() {
 		this.statementCreateGroup = this.db.prepare(CreateGroup);
 		this.statementAddMember = this.db.prepare(AddMember);
@@ -80,6 +82,16 @@ export class GroupChatService {
 		this.statemenGetGroupHistory = this.db.prepare(GetGrpHistory);
 		this.statementSaveGroupMessage = this.db.prepare(SaveGroupMessage);
 		this.statementFindGroupByNameAndOwner = this.db.prepare(FindGroupByNameAndOwner);
+
+		this.statementDeleteGroupMembersByUser = this.db.prepare(
+			`DELETE FROM groupMembers WHERE userId = @userId`
+		);
+		this.statementAnonymizeGroupMessagesByUser = this.db.prepare(
+			`UPDATE groupChatHistory SET userId = 0 WHERE userId = @userId`
+		);
+		this.statementDeleteGroupsByOwner = this.db.prepare(
+			`DELETE FROM privateGroup WHERE ownerId = @ownerId`
+		);
 	}
 
 	createGroup(ownerId: number, name: string): { success: boolean; message: string; groupId?: number } {
@@ -127,7 +139,7 @@ export class GroupChatService {
 		if (otherId != userId) {
 			return { success: false, message: "You don't have permission to remove this member" };
 		}
-		
+
 		const result = this.statementRemoveMember.run({ groupId, userId: otherId });
 		if (result.changes === 0) {
 			return { success: false, message: "User is not a member" };
@@ -186,24 +198,17 @@ export class GroupChatService {
 	}
 
 	async getGroupHistory(groupId: number, userId: number) {
-		const rows = this.statemenGetGroupHistory.all({ groupId, userId }) as any[];
-		const filteredHistory = [];
-		for (const msg of rows) {
-			const res = await fetch(`${BLOCK_URL}/friend-management/block?userId=${userId}&otherId=${msg.userId}`);
-			if (!res.ok) {
-				return { success: false, message: "User is blocked" };
-			} else {
-				const data = await res.json() as { isBlocked: boolean };
-				if (data.isBlocked === false) {
-					filteredHistory.push(msg);
-				}
-			}
-		}
-		return filteredHistory;
+		return this.statemenGetGroupHistory.all({ groupId, userId }) as any[];
 	}
 
 	saveGroupMessage(groupId: number, userId: number, content: string) {
 		return this.statementSaveGroupMessage.run({ groupId, userId, msgContent: content });
 	}
-}
 
+
+	deleteUserFromGroups(userId: number) {
+		this.statementDeleteGroupMembersByUser.run({ userId });
+		this.statementAnonymizeGroupMessagesByUser.run({ userId });
+		this.statementDeleteGroupsByOwner.run({ ownerId: userId });
+	}
+}

@@ -1,37 +1,11 @@
-
-CREATE TABLE IF NOT EXISTS friends (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    userId INTEGER NOT NULL,
-    otherId INTEGER NOT NULL,
-    status TEXT CHECK(status IN ('pending', 'accepted')) NOT NULL DEFAULT 'pending',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_friends_symmetry ON friends ((MIN(userId, otherId)), (MAX(userId, otherId)));
-
-CREATE TABLE IF NOT EXISTS blocklist (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    userId INTEGER NOT NULL,
-    otherId INTEGER NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT no_self_block CHECK (userId <> otherId)
-);
-CREATE UNIQUE INDEX IF NOT EXISTS idx_block_unique ON blocklist (userId, otherId);
-
-CREATE TABLE IF NOT EXISTS matchHistory (
-    gameId INTEGER PRIMARY KEY,
-    userId1 INTEGER NOT NULL, 
-    userId2 INTEGER NOT NULL,
-    scoreUser1 INTEGER NOT NULL,
-    scoreUser2 INTEGER NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+PRAGMA journal_mode = WAL;
+PRAGMA foreign_keys = ON;
 
 CREATE TABLE IF NOT EXISTS generalChatHistory(
     msgId INTEGER PRIMARY KEY AUTOINCREMENT,
     userId INTEGER,
     username VARCHAR(255 ) DEFAULT 'Unknown',
-    msgContent VARCHAR(5000),
+    msgContent VARCHAR(500),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -41,7 +15,7 @@ CREATE TABLE IF NOT EXISTS privateChatHistory(
     userId1 INTEGER NOT NULL,
     userId2 INTEGER NOT NULL,
     senderId INTEGER NOT NULL,
-    msgContent VARCHAR(5000),
+    msgContent VARCHAR(500),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -59,7 +33,6 @@ CREATE TABLE IF NOT EXISTS groupMembers (
     PRIMARY KEY (groupId, userId),
     FOREIGN KEY (groupId) REFERENCES privateGroup(groupId) ON DELETE CASCADE
 );
-
 
 CREATE TABLE IF NOT EXISTS groupChatHistory(
     msgId INTEGER PRIMARY KEY,

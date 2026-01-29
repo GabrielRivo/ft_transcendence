@@ -7,6 +7,7 @@ export class GeneralChatService {
 	private db !: Database.Database;
 	private statementSaveGeneral !: Statement<{ userId: number, username: string, msgContent: string }>;
 	private statementGetGeneralHistory !: Statement<[]>;
+	private statementAnonymizeMessagesByUser !: Statement<{ userId: number }>;
 	private statementGetAllGeneralHistory !: Statement<[]>;
 
 	onModuleInit() {
@@ -17,10 +18,15 @@ export class GeneralChatService {
 			`SELECT * FROM generalChatHistory ORDER BY created_at DESC LIMIT 50`
 		);
 		this.statementGetAllGeneralHistory = this.db.prepare(
-			`SELECT * FROM generalChatHistory ORDER BY created_at DESC LIMIT 100`);
+			`SELECT * FROM generalChatHistory ORDER BY created_at DESC LIMIT 100`
+		);
 		this.statementDeleteTournamentMessage = this.db.prepare(
 			`DELETE FROM generalChatHistory WHERE userId = -1 AND msgContent LIKE ?`
 		);
+		this.statementAnonymizeMessagesByUser = this.db.prepare(
+			`UPDATE generalChatHistory SET userId = 0, username = '[Deleted User]' WHERE userId = @userId`
+		);
+
 	}
 	private statementDeleteTournamentMessage!: Statement<[string]>;
 	async saveGeneralMessage(userId: number, username: string, content: string) {
@@ -55,5 +61,10 @@ export class GeneralChatService {
 
 	getAllGeneralHistory() {
 		return this.statementGetAllGeneralHistory.all();
+	}
+
+	anonymizeMessagesByUserId(userId: number) {
+
+		return this.statementAnonymizeMessagesByUser.run({ userId });
 	}
 }

@@ -12,6 +12,7 @@ import {
 import { Socket } from 'socket.io';
 import { JoinTournamentDto } from '../../application/dtos/join-tournament.dto.js';
 import { JoinTournamentUseCase } from '../../application/use-cases/join-tournament.use-case.js';
+import { LiveScoreService } from '../services/live-score.service.js';
 
 export class JoinTournamentPayload {
     @IsString()
@@ -38,6 +39,9 @@ export class ListenTournamentPayload {
 export class TournamentGateway {
     @Inject(JoinTournamentUseCase)
     private joinUseCase!: JoinTournamentUseCase;
+
+    @Inject(LiveScoreService)
+    private liveScoreService!: LiveScoreService;
 
     @SubscribeConnection()
     public handleConnection(@ConnectedSocket() _socket: Socket) { }
@@ -80,6 +84,20 @@ export class TournamentGateway {
     ) {
         const roomId = `tournament:${payload.tournamentId}`;
         await socket.join(roomId);
+
+        const scores = this.liveScoreService.getScores(payload.tournamentId);
+        for (const [matchId, score] of scores) {
+            socket.emit('match_score_updated', {
+                aggregateId: payload.tournamentId,
+                payload: {
+                    matchId,
+                    scoreA: score.scoreA,
+                    scoreB: score.scoreB
+                },
+                occurredAt: new Date().toISOString()
+            });
+        }
+
         return { status: 'success' };
     }
 

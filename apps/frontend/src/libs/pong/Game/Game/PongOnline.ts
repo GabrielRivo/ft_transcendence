@@ -16,7 +16,6 @@ import RotateCameraAlphaEffect from "../Effects/RotateCameraAlphaEffect";
 import CameraShakeEffect from "../Effects/CameraShakeEffect";
 import LightUpEffect from "../Effects/LightUpEffect";
 
-
 class PongOnline extends Game {
 
     inputManager?: InputManagerOnline;
@@ -275,6 +274,9 @@ class PongOnline extends Game {
 
         if (payload.gameType) {
             this.gameType = payload.gameType;
+        }
+        if (payload.tournamentId) {
+            this.tournamentId = payload.tournamentId;
         }
         if (!this.gameJoined) {
             this.camera!.attachControl(Services.Canvas, true);

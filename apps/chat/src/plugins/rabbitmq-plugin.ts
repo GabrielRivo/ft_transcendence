@@ -11,7 +11,7 @@ declare module 'fastify' {
 async function rabbitmqPlugin(fastify: FastifyInstance) {
     const urls = [process.env.RABBITMQ_URL || 'amqp://guest:guest@rabbitmq:5672'];
 
-    const server = new RabbitMQServer({
+    const tournament = new RabbitMQServer({
         urls,
         queue: 'chat_tournament_sub', // Unique queue name for Chat Service subscription
         exchange: {
@@ -20,14 +20,26 @@ async function rabbitmqPlugin(fastify: FastifyInstance) {
         }
     });
 
+    const user = new RabbitMQServer({
+        queue: 'chat.user.queue',
+        urls,
+        exchange: {
+            name: 'auth.users.exchange',
+            type: 'fanout',
+        },
+        consumeMode: 'exclusive',
+    });
+
     fastify.ready(async () => {
         try {
-            await server.listen();
+            await tournament.listen();
+            await user.listen();
         } catch (err) { }
     });
 
     fastify.addHook('onClose', async () => {
-        await server.close();
+        await tournament.close();
+        await user.close();
     });
 }
 

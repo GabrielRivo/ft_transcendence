@@ -11,10 +11,10 @@ const isProduction = process.env.NODE_ENV === 'production';
 const config = {
 	jwt: {
 		secret: process.env.JWT_SECRET || 'supersecretkeychangeit',
-		expiresIn: '15m',
+		expiresIn: '20m',
 		refreshTokenExpiresIn: '7d',
 		refreshTokenRotation: 7 * 24 * 60 * 60 * 1000,
-		accessTokenMaxAge: 15 * 60 * 1000, // 15 minutes in ms
+		accessTokenMaxAge: 20 * 60 * 1000, // 20 minutes in ms
 		refreshTokenMaxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in ms
 	},
 	cookie: {

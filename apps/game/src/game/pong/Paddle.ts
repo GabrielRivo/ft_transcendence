@@ -14,7 +14,7 @@ class Paddle {
     trigger3: OwnedMesh<Paddle>;
     direction: Vector3 = new Vector3(0, 0, 0);
     modelDirection: Vector3 = new Vector3(0, 1, 0).normalize();
-    speed: number = 4;
+    speed: number = 6;
     owner: any;
 
     constructor(services: Services, owner?: any) {
@@ -34,7 +34,6 @@ class Paddle {
         this.trigger2 = MeshBuilder.CreateBox("paddleTrigger", { size: 0.15, width: 7, height: 0.15 });
         this.trigger3 = MeshBuilder.CreateBox("paddleTrigger", { size: 0.15, width: 7, height: 0.15 });
 
-        // this.model = MeshBuilder.CreateBox("paddle", {size: 0.30, width: 5.0 , height: 0.30});
         let material = new StandardMaterial("playerMat", this.services.Scene);
         material.emissiveColor = new Color3(0.8, 0, 0.2);
         this.model.material = material;
@@ -121,16 +120,13 @@ class Paddle {
 
         if (angle < -Math.PI / 3) {
             angle = -Math.PI / 3;
-            //newDir = this.direction.scale(Math.cos(angle)).add(newDir.scale(Math.sin(angle))).normalize();
             newDir = MathUtils.rotateOnXZ(this.modelDirection, angle);
         }
         else if (angle > Math.PI / 3) {
             angle = Math.PI / 3;
-            //newDir = new Vector3(Math.sin(angle), 0, Math.cos(angle));
             newDir = MathUtils.rotateOnXZ(this.modelDirection, angle);
         }
         ball.setDir(newDir);
-        //ball.bounce(hitInfo);
         ball.speedUp();
         ball.owner = this.owner;
         this.owner.hitCount++;

@@ -26,7 +26,6 @@ export function GameProvider({ children }: GameProviderProps) {
 		player2Score: 0,
 		scoreToWin: 5,
 	});
-	const gameMetadataRef = useRef<{ type?: string; tournamentId?: string; tournamentType?: string; playersCount?: string }>({});
 
 	const currentModeRef = useRef<GameMode>('background');
 
@@ -107,14 +106,9 @@ export function GameProvider({ children }: GameProviderProps) {
 			setIsLoading(false);
 			isInitializedRef.current = false;
 		}
-
 	}, []);
 
 	const setMode = useCallback((newMode: GameMode, newGameId?: string | null, metadata?: { type?: string; tournamentId?: string; tournamentType?: string; playersCount?: string }) => {
-		if (metadata) {
-			gameMetadataRef.current = metadata;
-		}
-
 		if (currentModeRef.current === newMode) {
 			return;
 		}

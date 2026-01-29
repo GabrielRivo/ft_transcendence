@@ -171,37 +171,6 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 		this.cancelMatch(match, [userId], 'declined');
 	}
 
-	/**
-	 * Finalizes a match when both players have accepted the proposal.
-	 *
-	 * This method orchestrates the final phase of the matchmaking workflow:
-	 * 1. Clears the pending match timeout
-	 * 2. Logs the session start to the database (non-blocking)
-	 * 3. Calls the Game Service to create the game instance
-	 * 4. Notifies both players of the result (success or failure)
-	 *
-	 * ## Game Service Integration
-	 *
-	 * The Game Service is called via HTTP POST to create the actual game instance.
-	 * This is a critical step that must succeed for players to start playing.
-	 *
-	 * On success:
-	 * - Players receive 'match_confirmed' with the gameId to connect to the Game Gateway
-	 *
-	 * On failure (network error, game already exists, player in another game):
-	 * - Players receive 'match_failed' with reason and are re-queued with priority
-	 * - This ensures a graceful degradation when the Game Service is unavailable
-	 *
-	 * @param match - The pending match object with both players' information
-	 *
-	 * @remarks
-	 * The GameService.createGame() method uses resilience patterns (@Resilient decorator)
-	 * and will return a fallback response on network errors instead of throwing.
-	 * This allows us to handle failures gracefully without try/catch blocks everywhere.
-	 *
-	 * @see GameService.createGame - HTTP client for game creation
-	 * @see PendingMatch - Data structure for pending matches
-	 */
 	private async finalizeMatch(match: PendingMatch): Promise<void> {
 		// Step 1: Clear the acceptance timeout to prevent race conditions
 		if (match.timeoutId) clearTimeout(match.timeoutId);

@@ -72,6 +72,7 @@ type UserData = {
 	id: number;
 	email: string;
 	avatar_url: string;
+	avatar: string;
 	login: string; // GitHub
 	username: string; // Discord
 	name: string;
@@ -307,11 +308,11 @@ export class AuthService {
 			});
 		}
 
-		if (!tokenRes.ok) throw new BadGatewayException(`${providers[provider].id} login failed 1`);
+		if (!tokenRes.ok) throw new BadGatewayException(`${providers[provider].id} login failed`);
 
 		const tokenData: TokenData = (await tokenRes.json()) as TokenData;
 		if (tokenData.error)
-			throw new UnauthorizedException(`${providers[provider].id} login failed 1`);
+			throw new UnauthorizedException(`${providers[provider].id} login failed`);
 
 		let userRes: Response | null = null;
 		if (tokenData.token_type.toLowerCase() == 'bearer') {
@@ -332,6 +333,14 @@ export class AuthService {
 
 		if (!user) {
 			const info = await this.dbExchange.addUserByProviderId(provider, String(userData.id));
+			if (!userData?.avatar_url && provider === 'discord' && userData.avatar) {
+				if (userData.avatar.startsWith('a_')) {
+					// a_ => animate => image gif
+					userData.avatar_url = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.gif`;
+				} else {
+					userData.avatar_url = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.webp`;
+				}
+			}
 			this.users.publish('user.created', { id: Number(info.lastInsertRowid), provider, avatar_url: userData.avatar_url });
 			user = { id: Number(info.lastInsertRowid), email: userData.email, password_hash: '', username: '' };
 		}

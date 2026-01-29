@@ -14,7 +14,7 @@ class Paddle {
     direction: Vector3 = new Vector3(0, 0, 0);
     position: Vector3 = new Vector3(0, 0, 0);
     hitboxDirection: Vector3 = new Vector3(0, 1, 0).normalize();
-    speed : number = 5;
+    speed : number = 6;
     owner: any;
 
     private visualOffset: Vector3 = new Vector3(0, 0, 0);

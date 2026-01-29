@@ -1,5 +1,5 @@
 import Database, { Statement } from 'better-sqlite3';
-import { InjectPlugin, Service } from 'my-fastify-decorators';
+import { InjectPlugin, Service, BadRequestException } from 'my-fastify-decorators';
 import { randomUUID } from 'node:crypto';
 
 import { Server } from 'socket.io';
@@ -93,6 +93,9 @@ const DeleteFinishedMatch =
 	WHERE ((userId = @userId AND otherId = @otherId) OR (userId = @otherId AND otherId = @userId))
 	AND status = 'accepted'`;
 
+const CheckExist =
+	`SELECT 1 FROM profiles WHERE userId = @userId`;
+
 export interface PendingInvitation {
 	senderId: number;
 	senderUsername: string;
@@ -123,6 +126,7 @@ export class FriendManagementService {
 	private statementCheckPending: Statement<{ userId: number, otherId: number }>;
 	private statementCheckInteraction: Statement<{ userId: number, otherId: number }>;
 	private statementDeleteFinishedMatch: Statement<{ userId: number, otherId: number }>;
+	private statementCheckExist: Statement<{ userId: number}>;
 
 	onModuleInit() {
 		this.statementInvit = this.db.prepare(Invit);
@@ -141,12 +145,19 @@ export class FriendManagementService {
 		this.statementCheckPending = this.db.prepare(CheckPending);
 		this.statementCheckInteraction = this.db.prepare(CheckInteraction);
 		this.statementDeleteFinishedMatch = this.db.prepare(DeleteFinishedMatch);
+		this.statementCheckExist = this.db.prepare(CheckExist);
 	}
 
 	sendInvitation(userId: number, otherId: number, senderUsername: string) {
 		if (userId === otherId)
-			throw new Error("Self-friendship");
+			throw new BadRequestException("Self-friendship");
 		try {
+			const exist = this.statementCheckExist.get({ userId: otherId });
+			if (!exist) {
+				throw new BadRequestException("User not found");
+			}
+
+			
 			this.statementInvit.run({ userId, otherId });
 
 			this.emitToUser(otherId, 'friend_request', {
@@ -162,6 +173,7 @@ export class FriendManagementService {
 	}
 
 	acceptInvitation(myId: number, senderId: number, myUsername: string) {
+		if (myId === senderId) throw new BadRequestException("Self-friendship");
 		const result = this.statementAcceptInvit.run({ userId: myId, otherId: senderId });
 		if (result.changes === 0) {
 			return { success: false, message: "No invitation pending" };
@@ -176,6 +188,7 @@ export class FriendManagementService {
 	}
 
 	declineInvitation(userId: number, otherId: number, _myUsername: string) {
+		if (userId === otherId) throw new BadRequestException("Self-friendship");
 		const result = this.statementDeclineInvit.run({ userId: otherId, otherId: userId });
 		if (result.changes === 0) {
 			return { success: false, message: "No invitation pending" };
@@ -198,6 +211,7 @@ export class FriendManagementService {
 	}
 
 	async is_friend(userId: number, otherId: number): Promise<boolean> {
+		if (userId === otherId) throw new BadRequestException("Self-friendship");
 		return !!this.statementIsFriend.get({ userId, otherId });
 	}
 
@@ -240,7 +254,7 @@ export class FriendManagementService {
 
 	async sendChallenge(userId: number, otherId: number, senderUsername: string) {// VERIFIER SI L'USER EXISTE
 		if (userId === otherId)
-			throw new Error("Can't challenge yourself");
+			throw new BadRequestException("Can't challenge yourself");
 		// const res = await fetch(`${BLOCK_URL}/friend-management/block?userId=${userId}&otherId=${otherId}`);
 		// if (!res.ok)
 		// 	throw new Error(`You can't challenge blocked user`);
@@ -271,7 +285,7 @@ export class FriendManagementService {
 
 	async getChallenge(userId: number, otherId: number, senderUsername: string) {
 		if (userId === otherId)
-			throw new Error("Can't be challenged by yourself");
+			throw new BadRequestException("Can't be challenged by yourself");
 		try {
 
 			const reverseChallenge = this.statementCheckPending.get({ otherId, userId });
@@ -285,6 +299,7 @@ export class FriendManagementService {
 	}
 
 	async acceptChallenge(userId: number, otherId: number, senderUsername: string) {
+		if (userId === otherId) throw new BadRequestException("Can't challenge yourself");
 		this.statementAcceptChallenge.run({ userId: userId, otherId: otherId });
 		// if (result.changes === 0)
 		// 	return { success: false, message: "No challenge pending" };
@@ -321,6 +336,7 @@ export class FriendManagementService {
 	}
 
 	declineChallenge(userId: number, otherId: number, senderUsername: string) {
+		if (userId === otherId) throw new BadRequestException("Can't challenge yourself");
 		const result = this.statementDeclineChallenge.run({ userId: userId, otherId: otherId });
 		if (result.changes === 0)
 			return { success: false, message: "No challenge pending" };
@@ -334,6 +350,7 @@ export class FriendManagementService {
 	}
 
 	deleteMatch(userId: number, otherId: number) { // appel apres le match
+		if (userId === otherId) throw new BadRequestException("Can't challenge yourself");
 		try {
 			const result = this.statementDeleteFinishedMatch.run({ userId: userId, otherId: otherId });
 			if (result.changes === 0) {

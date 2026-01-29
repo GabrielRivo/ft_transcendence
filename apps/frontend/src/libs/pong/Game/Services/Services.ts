@@ -46,7 +46,7 @@ class ServicesSingleton {
         }, { passive: true });
 
         this.Engine = new Engine(this.Canvas, true, {});
-        this.Engine.getCaps().parallelShaderCompile = undefined;
+        this.Engine.getCaps().parallelShaderCompile = undefined; 
         const pixelRatio = window.devicePixelRatio || 1;
         this.Engine!.setHardwareScalingLevel(1 / pixelRatio);
         this.EventBus = EventBus.getInstance();

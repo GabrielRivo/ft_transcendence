@@ -1,4 +1,4 @@
-import { createElement, Element, FragmentComponent, useEffect } from 'my-react';
+import { createElement, Element, FragmentComponent, useCallback, useEffect } from 'my-react';
 import { useNavigate, useRouter } from 'my-react-router';
 import { useAuth } from '@/hook/useAuth';
 
@@ -7,7 +7,7 @@ function useActiveGameRedirect() {
 	const navigate = useNavigate();
 	const { user } = useAuth();
 
-	useEffect(() => {
+	const checkGame = () => {
 		if (!user) return;
 
 		// Don't check/redirect if already on the game page
@@ -39,9 +39,15 @@ function useActiveGameRedirect() {
 					}
 				}
 			})
-			.catch(() => {});
-	}, [router.path, user, navigate]);
+			.catch(() => { });
+	}
+
+
+	useEffect(() => {
+		checkGame();
+	}, [router]);
 }
+
 import { AuthGuard } from '../components/guards';
 import { FriendRequestToastContainer } from '../components/ui/FriendRequestToast';
 

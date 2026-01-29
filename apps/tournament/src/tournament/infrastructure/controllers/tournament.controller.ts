@@ -8,8 +8,6 @@ import {
     JWTBody,
     Inject,
     Post,
-    Query,
-    QuerySchema,
     UnauthorizedException,
     ResponseSchema
 } from 'my-fastify-decorators';
@@ -17,7 +15,6 @@ import {
 import { CancelTournamentUseCase } from '../../application/use-cases/cancel-tournament.use-case.js';
 import { CreateTournamentUseCase } from '../../application/use-cases/create-tournament.use-case.js';
 import { GetTournamentUseCase } from '../../application/use-cases/get-tournament.use-case.js';
-import { ListTournamentsUseCase } from '../../application/use-cases/list-tournaments.use-case.js';
 import { JoinTournamentUseCase } from '../../application/use-cases/join-tournament.use-case.js';
 import { LeaveTournamentUseCase } from '../../application/use-cases/leave-tournament.use-case.js';
 import { GetActiveTournamentUseCase } from '../../application/use-cases/active-tournament.use-case.js';
@@ -27,7 +24,6 @@ import { JoinGuestTournamentUseCase } from '../../application/use-cases/join-gue
 import { CreateTournamentDto, CreateTournamentSchema } from '../../application/dtos/create-tournament.dto.js';
 import { JoinGuestTournamentDto } from '../../application/dtos/join-guest-tournament.dto.js';
 
-import { ListTournamentsDto, ListTournamentsSchema } from '../../application/dtos/list-tournaments.dto.js';
 import { TournamentResponseSchema } from '../dtos/responses/tournament.response.dto.js';
 
 @Controller('/')
@@ -40,9 +36,6 @@ export class TournamentController {
 
     @Inject(GetTournamentUseCase)
     private getTournamentUseCase!: GetTournamentUseCase;
-
-    @Inject(ListTournamentsUseCase)
-    private listTournamentsUseCase!: ListTournamentsUseCase;
 
     @Inject(JoinTournamentUseCase)
     private joinTournamentUseCase!: JoinTournamentUseCase;
@@ -59,17 +52,6 @@ export class TournamentController {
         if (!user) throw new UnauthorizedException();
         const id = await this.createTournamentUseCase.execute(body, String(user.id), user.username);
         return { id };
-    }
-
-    @Get('/')
-    @QuerySchema(ListTournamentsSchema)
-    @ResponseSchema(200, {
-        type: 'array',
-        items: TournamentResponseSchema
-    })
-    public async list(@Query() query: ListTournamentsDto) {
-        const tournaments = await this.listTournamentsUseCase.execute(query);
-        return tournaments;
     }
 
     @Get('/active')
