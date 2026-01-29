@@ -1,5 +1,15 @@
 import { Scene, AbstractMesh, SceneLoader } from '@babylonjs/core';
+import { DracoCompression } from '@babylonjs/core/Meshes/Compression/dracoCompression';
 import '@babylonjs/loaders/glTF';
+
+// Configure Draco decoder paths for glTF compression
+DracoCompression.Configuration = {
+    decoder: {
+        wasmUrl: "/draco/draco_decoder_gltf.js",
+        wasmBinaryUrl: "/draco/draco_decoder_gltf.wasm",
+        fallbackUrl: "/draco/draco_decoder_gltf.js",
+    }
+};
 
 export interface CachedAsset {
     blob: Blob;
