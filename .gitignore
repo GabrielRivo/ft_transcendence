@@ -11,6 +11,8 @@
 .vault-keys
 *.key
 *.token
+nginx/ssl/server.crt
+nginx/ssl/server.key
 
 # On autorise les exemples pour aider les autres développeurs
 !.env.example
