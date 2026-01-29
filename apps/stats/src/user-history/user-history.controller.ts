@@ -29,10 +29,11 @@ export class UserHistoryController {
 		let gain2 = null
 		if (event.gameType == "ranked")
 		{
-			gain1 = await this.userHistoryService.calcElo(parseInt(event.player2Id), parseInt(event.player1Id), 
-						event.score1, event.score2);
+			
+			gain1 = await this.userHistoryService.calcElo(parseInt(event.player1Id), parseInt(event.player1Id), 
+						event.score1, event.score2, parseInt(event.winnerId ?? '0'));
 			gain2 = await this.userHistoryService.calcElo(parseInt(event.player2Id), parseInt(event.player1Id), 
-						event.score2, event.score1);
+						event.score2, event.score1, parseInt(event.winnerId ?? '0'));
 		}
 		try {
 			await this.userHistoryService.add_match_to_history(
