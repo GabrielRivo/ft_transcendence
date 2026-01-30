@@ -84,7 +84,7 @@ function MatchDetails({ match, username }: { match: TransformedMatch; username: 
 	);
 }
 
-export function StatisticsHistoricPageSlug() {
+export function StatisticsHistoryPageSlug() {
 	const params = useParams();
 	const targetUserId = params.statsId ? Number(params.statsId) : 0;
 	const [matches, setMatches] = useState<TransformedMatch[]>([]);

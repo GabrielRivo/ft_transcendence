@@ -88,7 +88,7 @@ function MatchDetails({ match, username }: { match: TransformedMatch; username: 
 	);
 }
 
-export function StatisticsHistoricPage() {
+export function StatisticsHistoryPage() {
 	const { user } = useAuth();
 	const navigate = useNavigate();
 	const { toast } = useToast();
