@@ -16,11 +16,13 @@ interface ChatMessagesPanelProps {
 	isGroup?: boolean;
 	onInviteUser?: (userId: number) => void;
 	onLeaveGroup?: () => void;
+	name: string;
 	onJoinTournament?: (tournamentId: string) => void;
 }
 
 export function ChatMessagesPanel({
 	messages,
+	name = 'Hub',
 	currentRoom,
 	connected,
 	onSendMessage,
@@ -71,6 +73,10 @@ export function ChatMessagesPanel({
 
 	};
 
+	useEffect(() => {
+		console.log(currentRoom);
+	}, [currentRoom]);
+
 	const handleSubmit = (e: Event) => {
 		e.preventDefault();
 		if (inputValue.trim() && connected) {
@@ -84,11 +90,11 @@ export function ChatMessagesPanel({
 		return date.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
 	};
 
-	const getRoomTitle = () => {
-		if (currentRoom === 'hub') return 'CHAT > HUB';
-		if (currentRoom.startsWith('room_') || currentRoom.startsWith('friend_')) return 'CHAT > PRIVÉ';
-		return `CHAT > ${currentRoom.toUpperCase()}`;
-	};
+	// const getRoomTitle = () => {
+	// 	if (currentRoom === 'hub') return 'CHAT > HUB';
+	// 	if (currentRoom.startsWith('room_') || currentRoom.startsWith('friend_')) return 'CHAT > PRIVÉ';
+	// 	return `CHAT > ${currentRoom.toUpperCase()}`;
+	// };
 
 	return (
 		<div
@@ -96,8 +102,8 @@ export function ChatMessagesPanel({
 			className="group shadow-neon-purple-low hover:shadow-neon-purple flex h-full min-h-0 flex-col overflow-hidden border border-purple-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-purple-400"
 		>
 			{/* Header */}
-			<div className="flex shrink-0 justify-between border-b border-purple-500/20 bg-purple-500/10 p-4 text-sm font-bold tracking-widest text-purple-500">
-				<span>{getRoomTitle()}</span>
+			<div className="flex shrink-0 items-center justify-between border-b border-purple-500/20 bg-purple-500/10 px-4 text-sm font-bold tracking-widest text-purple-500 min-h-15">
+				<span>{`CHAT > ${name.toUpperCase()}`}</span>
 				<div className="flex items-center gap-3">
 					{isGroup && (
 						<FragmentComponent>
@@ -118,7 +124,7 @@ export function ChatMessagesPanel({
 						</FragmentComponent>
 					)}
 					<span className={`${connected ? 'animate-pulse text-green-500' : 'text-red-500'}`}>
-						● {connected ? 'LIVE' : 'OFFLINE'}
+						● <span className={`inline md:hidden xl:inline`}>{connected ? 'LIVE' : 'OFFLINE'}</span>
 					</span>
 				</div>
 			</div>
@@ -203,7 +209,7 @@ export function ChatMessagesPanel({
 			</div>
 
 			{/* Input */}
-			<form onSubmit={handleSubmit} className="flex shrink-0 gap-2 border-t border-purple-500/20 bg-purple-500/5 p-3">
+			<form onSubmit={handleSubmit} className="flex shrink-0 gap-2 border-t border-purple-500/20 bg-purple-500/5 p-3 min-h-15">
 				<input
 					type="text"
 					value={inputValue}

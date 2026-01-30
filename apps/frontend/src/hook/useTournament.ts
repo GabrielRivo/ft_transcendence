@@ -179,7 +179,7 @@ export function useTournament(): UseTournamentReturn {
                 const playerId = data.playerId;
                 if (currentUser && String(currentUser.id) === playerId) {
                     navigateRef.current('/play');
-                    navigateRef.current('/play');
+                    // navigateRef.current('/play');
                     return;
                 }
 

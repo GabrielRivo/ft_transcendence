@@ -1,4 +1,4 @@
-import { createElement } from 'my-react';
+import { createElement, useEffect } from 'my-react';
 import { RoomUser } from '../../../hook/useChat';
 import { useAuth } from '../../../hook/useAuth';
 import { UserItem } from './UserItem';
@@ -14,6 +14,10 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 		if (currentRoom === 'hub') return 'Users';
 		return 'O';
 	};
+
+	useEffect(() => {
+		console.log(currentRoom, roomUsers);
+	}, [roomUsers, currentRoom]);
 
 	return (
 		<div className="group shadow-neon-red-low hover:shadow-neon-red h-full min-h-0 overflow-hidden rounded-e-lg border border-red-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-red-400">

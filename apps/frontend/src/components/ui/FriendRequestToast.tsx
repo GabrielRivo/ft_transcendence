@@ -27,7 +27,7 @@ function FriendRequestToastItem({ invitation, onAccept, onDecline, onClose }: Fr
 			<div className="mb-3 flex items-center justify-between">
 				<div className="flex items-center gap-2">
 					<div className="flex size-8 items-center justify-center rounded-full bg-cyan-500/20 text-sm font-bold text-cyan-400">
-						{invitation.senderUsername?.charAt(0).toUpperCase()}
+						{invitation.senderUsername?.charAt(0)?.toUpperCase() || 'Unknown'}
 					</div>
 					<div>
 						<p className="text-sm font-medium text-white">{invitation.senderUsername}</p>

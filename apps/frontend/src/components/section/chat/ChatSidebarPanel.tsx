@@ -1,4 +1,4 @@
-import { createElement, useState } from 'my-react';
+import { createElement, useState, useEffect } from 'my-react';
 import { Friend } from '../../../hook/useFriends';
 import { Group } from '../../../hook/useGroups';
 import { useOnlineUsers } from '../../../hook/useOnlineUsers';
@@ -21,8 +21,8 @@ interface ChatSidebarPanelProps {
 	groups: Group[];
 	groupsLoading: boolean;
 	onSelectHub: () => void;
-	onSelectFriend: (friendId: number) => void;
-	onSelectGroup: (groupId: number) => void;
+	onSelectFriend: (friendId: number, friendName: string) => void;
+	onSelectGroup: (groupId: number, groupName: string) => void;
 	onRemoveFriend: (friendId: number) => Promise<boolean>;
 }
 
@@ -56,10 +56,14 @@ export function ChatSidebarPanel({
 		setShowCreateGroupModal(true);
 	};
 
+	useEffect(() => {
+		console.log(currentRoom, friends, groups);
+	}, [currentRoom, friends, groups]);
+
 	return (
 		<div className="group shadow-neon-cyan-low hover:shadow-neon-cyan flex h-full min-h-0 flex-col overflow-hidden rounded-s-lg border border-cyan-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400">
-			<div className="shrink-0 border-b border-cyan-500/20 bg-cyan-500/10 p-3 text-sm font-bold tracking-widest text-cyan-500">
-				Chats
+			<div className="shrink-0 border-b border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm font-bold tracking-widest text-cyan-500 min-h-15 items-center flex">
+				CHATS
 			</div>
 			<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 font-mono text-xs text-cyan-300 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cyan-500/50 [&::-webkit-scrollbar-track]:bg-slate-800/30">
 				{/* Hub */}
@@ -84,7 +88,7 @@ export function ChatSidebarPanel({
 									key={group.groupId}
 									name={group.name}
 									isSelected={currentRoom === `group_${group.groupId}`}
-									onClick={() => onSelectGroup(group.groupId)}
+									onClick={() => onSelectGroup(group.groupId, group.name)}
 								/>
 							))}
 						</div>
@@ -117,7 +121,7 @@ export function ChatSidebarPanel({
 									isFriend={true}
 									isBlocked={friendIsBlocked}
 									isSelected={currentRoom.includes(String(friend.id))}
-									onClick={() => onSelectFriend(friend.id)}
+									onClick={() => onSelectFriend(friend.id, friend.username)}
 									contextMenuCallbacks={{
 										onChallenge: () => {
 											fetchWithAuth(`/api/user/friend-management/challenge`, {
@@ -166,11 +170,11 @@ export function ChatSidebarPanel({
 			</div>
 
 			{/* Add Button */}
-			<div className="relative shrink-0 border-t border-cyan-500/20 p-3">
+			<div className="relative shrink-0 border-t border-cyan-500/20 px-1 min-h-15 flex items-center justify-center">
 				<button
 					onClick={() => setShowMenu(!showMenu)}
 					disabled={user?.isGuest || false}
-					className="flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-linear-to-r from-cyan-500/20 to-teal-500/20 text-sm font-bold tracking-wider text-cyan-400 transition-all hover:from-cyan-500/30 hover:to-teal-500/30"
+					className="flex h-10 w-full items-center justify-center gap-2 rounded-lg cursor-pointer bg-linear-to-r from-cyan-500/20 to-teal-500/20 text-sm font-bold tracking-wider text-cyan-400 transition-all hover:from-cyan-500/30 hover:to-teal-500/30"
 				>
 					<Add className="text-cyan-400" />
 					ADD

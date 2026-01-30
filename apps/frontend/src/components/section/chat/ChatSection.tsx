@@ -9,7 +9,7 @@ import { OnlineUsersPanel } from './OnlineUsersPanel';
 import { useToast } from '@hook/useToast';
 
 export function ChatSection() {
-	const { connected, currentRoom, messages, sendMessage, joinRoom, joinPrivateRoom, joinGroupRoom } =
+	const { connected, currentRoom, currentRoomName, messages, sendMessage, joinRoom, joinPrivateRoom, joinGroupRoom } =
 		useChat();
 	const { friends, loading: friendsLoading, removeFriend } = useFriends();
 	const { groups, loading: groupsLoading, addMember, leaveGroup } = useGroups();
@@ -18,12 +18,12 @@ export function ChatSection() {
 		joinRoom('hub');
 	};
 
-	const handleSelectFriend = (friendId: number) => {
-		joinPrivateRoom(friendId);
+	const handleSelectFriend = (friendId: number, friendName: string) => {
+		joinPrivateRoom(friendId, friendName);
 	};
 
-	const handleSelectGroup = (groupId: number) => {
-		joinGroupRoom(groupId);
+	const handleSelectGroup = (groupId: number, groupName: string) => {
+		joinGroupRoom(groupId, groupName);
 	};
 
 	const navigate = useNavigate();
@@ -64,6 +64,7 @@ export function ChatSection() {
 			<div className="ff-dashboard-panel-enter ff-dashboard-panel-enter--delay-1 col-span-4 h-full min-h-0">
 				<ChatMessagesPanel
 					messages={messages}
+					name={currentRoomName}
 					currentRoom={currentRoom}
 					connected={connected}
 					onSendMessage={sendMessage}

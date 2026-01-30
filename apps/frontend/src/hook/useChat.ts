@@ -33,6 +33,7 @@ export function useChat() {
 	const { user, isAuthenticated } = useAuth();
 	const [connected, setConnected] = useState(false);
 	const [currentRoom, setCurrentRoom] = useState('hub');
+	const [currentRoomName, setCurrentRoomName] = useState('Hub');
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const isConnectingRef = useRef(false);
 
@@ -157,6 +158,7 @@ export function useChat() {
 			}
 			chatSocket.emit('join_room', { roomId });
 			setCurrentRoom(roomId);
+			setCurrentRoomName("Hub");
 			setMessages([]);
 
 			if (roomId === 'hub') {
@@ -167,19 +169,20 @@ export function useChat() {
 	);
 
 	const joinPrivateRoom = useCallback(
-		(friendId: number) => {
+		(friendId: number, friendName: string) => {
 			if (!connected) return;
 
 			chatSocket.emit('join_private_room', { friendId });
 			const roomId = `room_${Math.min(user?.id || 0, friendId)}_${Math.max(user?.id || 0, friendId)}`;
 			setCurrentRoom(roomId);
+			setCurrentRoomName(friendName);
 			setMessages([]);
 		},
 		[connected, user?.id],
 	);
 
 	const joinGroupRoom = useCallback(
-		(groupId: number) => {
+		(groupId: number, groupName: string) => {
 			if (!connected) return;
 
 			const roomId = `group_${groupId}`;
@@ -189,6 +192,7 @@ export function useChat() {
 			}
 			chatSocket.emit('join_room', { roomId });
 			setCurrentRoom(roomId);
+			setCurrentRoomName(groupName);
 			setMessages([]);
 		},
 		[connected, currentRoom],
@@ -202,5 +206,6 @@ export function useChat() {
 		joinRoom,
 		joinPrivateRoom,
 		joinGroupRoom,
+		currentRoomName
 	};
 }
