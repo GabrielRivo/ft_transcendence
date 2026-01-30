@@ -19,7 +19,7 @@ const GetUserGroups =
 	FROM privateGroup g
 	INNER JOIN groupMembers m ON g.groupId = m.groupId
 	WHERE m.userId = @userId
-	GROUP BY g.groupId`;
+	GROUP BY g.groupId ORDER BY g.created_at DESC LIMIT 50`;
 
 const GetGroupById =
 	`SELECT groupId, name, ownerId, created_at FROM privateGroup WHERE groupId = @groupId`;
