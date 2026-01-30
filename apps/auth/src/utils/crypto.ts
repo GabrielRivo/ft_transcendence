@@ -166,17 +166,21 @@ export function linkTOTPSecret(
 	pad = 6,
 	timeWindow = 30,
 ): string {
+	const encodedIssuer = encodeURIComponent(issuer);
+	const encodedLabel = encodeURIComponent(label);
+	const algorithmUpper = algorithm.toUpperCase();
+
 	return (
 		'otpauth://totp/' +
-		issuer +
+		encodedIssuer +
 		':' +
-		label +
+		encodedLabel +
 		'?secret=' +
 		bufferToBase32(secret) +
 		'&issuer=' +
-		issuer +
+		encodedIssuer +
 		'&algorithm=' +
-		algorithm +
+		algorithmUpper +
 		'&digits=' +
 		pad +
 		'&period=' +
