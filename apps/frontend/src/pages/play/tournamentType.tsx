@@ -23,7 +23,7 @@ export function TournamentTypePage() {
 	}, [params]);
 
 	return (<div className="flex flex-col items-center justify-center h-full gap-24">
-		<h2 className="text-4xl font-bold text-white font-pirulen tracking-widest">Play</h2>
+		<h2 className="text-4xl font-bold text-white font-pirulen tracking-widest select-none">Play</h2>
 		<div className="flex flex-col gap-8 ">
 			{Array.from({ length: players_max_iterations - 1 }, (_, index) => {
 				const playerCount = Math.pow(2, index + 2);

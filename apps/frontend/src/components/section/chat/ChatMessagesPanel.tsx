@@ -102,9 +102,9 @@ export function ChatMessagesPanel({
 			className="group shadow-neon-purple-low hover:shadow-neon-purple flex h-full min-h-0 flex-col overflow-hidden border border-purple-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-purple-400"
 		>
 			{/* Header */}
-			<div className="flex shrink-0 items-center justify-between border-b border-purple-500/20 bg-purple-500/10 px-4 text-sm font-bold tracking-widest text-purple-500 min-h-15">
+			<div className="flex shrink-0 items-center select-none justify-between border-b border-purple-500/20 bg-purple-500/10 px-4 text-sm font-bold tracking-widest text-purple-500 min-h-15">
 				<span>{`CHAT > ${name.toUpperCase()}`}</span>
-				<div className="flex items-center gap-3">
+				<div className="flex items-center gap-3 ">
 					{isGroup && (
 						<FragmentComponent>
 							<button
@@ -209,7 +209,7 @@ export function ChatMessagesPanel({
 			</div>
 
 			{/* Input */}
-			<form onSubmit={handleSubmit} className="flex shrink-0 gap-2 border-t border-purple-500/20 bg-purple-500/5 p-3 min-h-15">
+			<form onSubmit={handleSubmit} className="flex shrink-0 gap-2 select-none border-t border-purple-500/20 bg-purple-500/5 p-3 min-h-15">
 				<input
 					type="text"
 					value={inputValue}

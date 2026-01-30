@@ -62,13 +62,13 @@ export function ChatSidebarPanel({
 
 	return (
 		<div className="group shadow-neon-cyan-low hover:shadow-neon-cyan flex h-full min-h-0 flex-col overflow-hidden rounded-s-lg border border-cyan-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400">
-			<div className="shrink-0 border-b border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm font-bold tracking-widest text-cyan-500 min-h-15 items-center flex">
+			<div className="shrink-0 select-none border-b border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm font-bold tracking-widest text-cyan-500 min-h-15 items-center flex" >
 				CHATS
 			</div>
 			<div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto p-4 font-mono text-xs text-cyan-300 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-cyan-500/50 [&::-webkit-scrollbar-track]:bg-slate-800/30">
 				{/* Hub */}
-				<div className="border-b border-cyan-500/20 pb-3">
-					<div className="mb-2 text-[10px] text-gray-500 uppercase">General</div>
+				<div className="border-b border-cyan-500/20 pb-3 select-none">
+					<div className="mb-2 text-[10px] text-gray-500 uppercase ">General</div>
 					{!user?.isGuest && (
 						<UserItem name="Hub" isOnline={true} isSelected={currentRoom === 'hub'} onClick={onSelectHub} />
 					)}
@@ -76,11 +76,11 @@ export function ChatSidebarPanel({
 
 				{/* Groupes */}
 				<div className="border-b border-cyan-500/20 pb-3">
-					<div className="mb-2 text-[10px] text-gray-500 uppercase">Groups</div>
+					<div className="mb-2 text-[10px] text-gray-500 uppercase select-none">Groups</div>
 					{groupsLoading ? (
-						<div className="text-gray-500">Loading...</div>
+						<div className="text-gray-500 select-none">Loading...</div>
 					) : groups.length === 0 ? (
-						<div className="text-gray-500">No groups</div>
+						<div className="text-gray-500 select-none">No groups</div>
 					) : (
 						<div className="flex flex-col gap-3">
 							{groups.map((group) => (
@@ -97,11 +97,11 @@ export function ChatSidebarPanel({
 
 				{/* Amis */}
 				<div>
-					<div className="mb-2 text-[10px] text-gray-500 uppercase">Friends</div>
+					<div className="mb-2 text-[10px] text-gray-500 uppercase select-none">Friends</div>
 					{friendsLoading ? (
-						<div className="text-gray-500">Loading...</div>
+						<div className="text-gray-500 select-none">Loading...</div>
 					) : friends.length === 0 ? (
-						<div className="text-gray-500">No friends</div>
+						<div className="text-gray-500 select-none">No friends</div>
 					) : (
 						<div className="flex flex-col gap-3">
 							{friends.map((friend) => {
@@ -170,7 +170,7 @@ export function ChatSidebarPanel({
 			</div>
 
 			{/* Add Button */}
-			<div className="relative shrink-0 border-t border-cyan-500/20 px-1 min-h-15 flex items-center justify-center">
+			<div className="relative  select-none shrink-0 border-t border-cyan-500/20 px-1 min-h-15 flex items-center justify-center">
 				<button
 					onClick={() => setShowMenu(!showMenu)}
 					disabled={user?.isGuest || false}
