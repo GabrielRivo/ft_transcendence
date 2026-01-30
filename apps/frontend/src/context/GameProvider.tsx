@@ -30,6 +30,10 @@ export function GameProvider({ children }: GameProviderProps) {
 	// Game result state for end-of-game modal (ranked games)
 	const [gameResult, setGameResult] = useState<GameResult | null>(null);
 
+	// Pause state for opponent disconnection overlay
+	const [isPaused, setIsPaused] = useState(false);
+	const [pauseMessage, setPauseMessage] = useState<string | null>(null);
+
 	const currentModeRef = useRef<GameMode>('background');
 	
 	// Store metadata for tournament redirects
@@ -67,6 +71,11 @@ export function GameProvider({ children }: GameProviderProps) {
 
 			Services.EventBus?.on('Game:ScoreUpdated', (event: GameScores) => {
 				handleScoreUpdateRef.current(event);
+			});
+
+			Services.EventBus?.on('Game:Paused', (event: { paused: boolean; message?: string }) => {
+				setIsPaused(event.paused);
+				setPauseMessage(event.paused ? (event.message || 'Waiting for opponent...') : null);
 			});
 
 			Services.EventBus?.on('Game:Ended', (event: { 
@@ -194,7 +203,9 @@ export function GameProvider({ children }: GameProviderProps) {
 		isInitialized,
 		gameResult,
 		clearGameResult,
-	}), [mode, setMode, isLoading, error, gameId, scores, isInitialized, gameResult, clearGameResult]);
+		isPaused,
+		pauseMessage,
+	}), [mode, setMode, isLoading, error, gameId, scores, isInitialized, gameResult, clearGameResult, isPaused, pauseMessage]);
 
 	return (
 		<GameContext.Provider value={contextValue}>

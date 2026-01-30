@@ -31,6 +31,8 @@ export interface GameContextType {
 	isInitialized: boolean;
 	gameResult: GameResult | null;
 	clearGameResult: () => void;
+	isPaused: boolean;
+	pauseMessage: string | null;
 }
 
 export const GameContext = createContext<GameContextType | null>(null);

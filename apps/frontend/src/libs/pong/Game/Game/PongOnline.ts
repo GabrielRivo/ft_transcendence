@@ -314,13 +314,20 @@ class PongOnline extends Game {
         this.processGameState();
     }
 
-    private onGameStopped = (_payload: any): void => {
+    private onGameStopped = (payload: any): void => {
         this.gameState = "waiting";
+        // Notify UI that game is paused (opponent disconnected)
+        Services.EventBus!.emit("Game:Paused", {
+            paused: true,
+            message: payload?.message || "Waiting for opponent to reconnect..."
+        });
         this.processGameState();
     }
 
     private onGameStarted = (payload: any): void => {
         this.gameState = "playing";
+        // Notify UI that game resumed
+        Services.EventBus!.emit("Game:Paused", { paused: false });
         this.synchronizeTimeWithServer(payload.timestamp);
         this.processGameState();
     }

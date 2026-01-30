@@ -59,6 +59,47 @@ function ScoreOverlay({
 }
 
 /**
+ * Pause overlay component.
+ * Displayed when opponent disconnects temporarily.
+ */
+function PauseOverlay({ message }: { message: string }) {
+	return (
+		<div className="pointer-events-none absolute inset-0 z-35 flex items-center justify-center">
+			<div className="flex flex-col items-center gap-4 rounded-xl border border-yellow-500/40 bg-slate-950/70 px-8 py-6 backdrop-blur-sm">
+				{/* Animated waiting icon */}
+				<div className="relative h-12 w-12">
+					<div className="absolute inset-0 animate-ping rounded-full border-2 border-yellow-500/30" />
+					<div className="absolute inset-0 flex items-center justify-center">
+						<svg
+							className="h-8 w-8 animate-pulse text-yellow-400"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+					</div>
+				</div>
+
+				{/* Title */}
+				<h3 className="font-pirulen text-sm tracking-widest text-yellow-400">GAME PAUSED</h3>
+
+				{/* Message */}
+				<p className="max-w-xs text-center text-xs text-gray-300">{message}</p>
+
+				{/* Additional info */}
+				<p className="text-xs text-gray-500">The game will resume automatically...</p>
+			</div>
+		</div>
+	);
+}
+
+/**
  * Error overlay component.
  * Displayed when game initialization or connection fails.
  */
@@ -113,7 +154,7 @@ function ErrorOverlay({ message, onRetry }: { message: string; onRetry: () => vo
 export const Game = () => {
 	const navigate = useNavigate();
 	const query = useQuery();
-	const { setMode, mode, error, isLoading, gameId, scores, gameResult, clearGameResult } = useGame();
+	const { setMode, mode, error, isLoading, gameId, scores, gameResult, clearGameResult, isPaused, pauseMessage } = useGame();
 
 	// Get gameId from URL query
 	const urlGameId = query.get('id');
@@ -179,6 +220,11 @@ export const Game = () => {
 					player2Score={scores.player2Score}
 					scoreToWin={scores.scoreToWin}
 				/>
+			)}
+
+			{/* Pause overlay (shown when opponent disconnects) */}
+			{!isLoading && !error && isPaused && pauseMessage && (
+				<PauseOverlay message={pauseMessage} />
 			)}
 
 			{/* Game info overlay (shown during gameplay for online mode) */}
