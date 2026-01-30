@@ -118,7 +118,7 @@ export function UserItem({
 					}${className}`}
 
 			>
-				<div className="relative">
+				<div className="relative select-none">
 					{avatar ? (
 						<img
 							src={avatar}

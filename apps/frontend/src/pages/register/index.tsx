@@ -46,7 +46,7 @@ export function Register() {
 
 			if (success) {
 				toast('Registered!', 'success');
-				navigate('/play');
+				navigate('/set-username');
 			} else {
 				toast("Register failed, the mail may be already used", 'error');
 			}
@@ -64,6 +64,10 @@ export function Register() {
 
 	const emailError = getFieldError(errors, 'email');
 	const passwordError = getFieldError(errors, 'password');
+
+	const testStrongPassword = (password: string): boolean => {
+		return /[A-Z]/.test(password) && /[a-z]/.test(password) && /[0-9]/.test(password) && /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+	};
 
 	return (
 		<div className="relative size-full">
@@ -107,6 +111,20 @@ export function Register() {
 									placeholder="••••••••"
 								/>
 								{passwordError && <span className="text-xs text-red-400">{passwordError}</span>}
+								<div className="mt-1 grid grid-cols-2 gap-1 text-xs">
+									<span className={/[A-Z]/.test(password) ? 'text-green-400' : 'text-gray-500'}>
+										{/[A-Z]/.test(password) ? '✓' : '○'} Uppercase
+									</span>
+									<span className={/[a-z]/.test(password) ? 'text-green-400' : 'text-gray-500'}>
+										{/[a-z]/.test(password) ? '✓' : '○'} Lowercase
+									</span>
+									<span className={/[0-9]/.test(password) ? 'text-green-400' : 'text-gray-500'}>
+										{/[0-9]/.test(password) ? '✓' : '○'} Number
+									</span>
+									<span className={/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password) ? 'text-green-400' : 'text-gray-500'}>
+										{/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password) ? '✓' : '○'} Special char
+									</span>
+								</div>
 							</div>
 							<div className="group flex flex-col gap-2">
 								<label
@@ -127,7 +145,7 @@ export function Register() {
 								{confirmError && <span className="text-xs text-red-400">{confirmError}</span>}
 							</div>
 							<div className="mt-4 flex flex-col justify-center gap-2">
-								<ButtonStyle4 type="submit">{isLoading ? 'INSCRIPTION...' : "SUBSCRIBE"}</ButtonStyle4>
+								<ButtonStyle4 type="submit"  disabled={!(password === confirmPassword && testStrongPassword(password))}>{isLoading ? 'INSCRIPTION...' : "SUBSCRIBE"}</ButtonStyle4>
 								<ButtonStyle3 onClick={handleClickReturn}>Return</ButtonStyle3>
 							</div>
 						</form>

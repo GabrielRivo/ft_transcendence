@@ -106,6 +106,7 @@ export class UserService {
 			username: profile.username,
 			avatar: profile.avatar,
 			bio: profile.bio,
+			selfHosted: !!profile.self_hosted,
 		};
 	}
 

@@ -161,8 +161,8 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 	);
 
 	const sendFriendInvite = useCallback(
-		async (otherId: number): Promise<boolean> => {
-			if (!user || user?.isGuest) return false;
+		async (otherId: number): Promise<FriendInviteResult> => {
+			if (!user || user?.isGuest) return { success: false, message: 'Not authenticated' };
 
 			try {
 				const response = await fetchWithAuth(`${API_BASE}/invite`, {
@@ -173,14 +173,10 @@ export function FriendsProvider({ children }: FriendsProviderProps) {
 					body: JSON.stringify({ otherId }),
 				});
 
-				if (!response.ok) {
-					return false;
-				}
-
 				const result = await response.json();
-				return result.success;
+				return { success: result.success, message: result.message };
 			} catch {
-				return false;
+				return { success: false, message: 'Network error' };
 			}
 		},
 		[user?.id, user?.isGuest],

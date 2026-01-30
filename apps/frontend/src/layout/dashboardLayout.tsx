@@ -27,7 +27,7 @@ function Menu() {
 	const { user } = useAuth();
 
 	return (
-		<nav className="flex h-14 w-full shrink-0 items-center justify-center gap-8 pb-12">
+		<nav className="flex h-14 w-full shrink-0 items-center justify-center gap-8 pb-12 select-none">
 			<NavLink path="/play" label="Play" className="text-shadow-sm bg-white/2 rounded-4xl px-4 py-2" />
 			{!user?.isGuest && (
 				<FragmentComponent>

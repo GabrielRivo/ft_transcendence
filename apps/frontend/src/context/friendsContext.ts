@@ -24,7 +24,7 @@ export interface FriendsContextType {
 	isOnline: (friendId: number) => boolean;
 	refreshFriends: () => Promise<void>;
 	refreshPendingInvitations: () => Promise<void>;
-	sendFriendInvite: (otherId: number) => Promise<boolean>;
+	sendFriendInvite: (otherId: number) => Promise<FriendInviteResult>;
 	sendFriendInviteByUsername: (targetUsername: string) => Promise<FriendInviteResult>;
 	acceptFriendInvite: (senderId: number, senderUsername?: string) => Promise<boolean>;
 	declineFriendInvite: (senderId: number) => Promise<boolean>;

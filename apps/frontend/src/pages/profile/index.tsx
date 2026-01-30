@@ -31,6 +31,8 @@ export function ProfilePage() {
 	// Avatar state
 	const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 	const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+	const [isDeletingAvatar, setIsDeletingAvatar] = useState(false);
+	const [selfHosted, setSelfHosted] = useState(false);
 
 	// Bio state
 	const [bio, setBio] = useState('');
@@ -74,11 +76,12 @@ export function ProfilePage() {
 
 			const [result, result2] = await Promise.all([resultPromise, result2Promise]);
 
-			if (result.ok && result2.ok && result.data && result2.data) {
-				setAvatarPreview(result.data.avatar);
-				setBio(result.data.bio || '');
-				setStats(result2.data);
-			}
+		if (result.ok && result2.ok && result.data && result2.data) {
+			setAvatarPreview(result.data.avatar);
+			setBio(result.data.bio || '');
+			setSelfHosted(result.data.selfHosted);
+			setStats(result2.data);
+		}
 		};
 
 		fetchProfile();
@@ -109,12 +112,32 @@ export function ProfilePage() {
 
 		if (response.ok) {
 			toast('Avatar updated', 'success');
+			setSelfHosted(true);
 		} else {
 			const errorData = await response.json().catch(() => ({}));
 			toast(errorData.message || errorData.error || 'Error while downloading', 'error');
 			setAvatarPreview(null);
 		}
 		setIsUploadingAvatar(false);
+	}, [toast]);
+
+	// Delete avatar handler
+	const handleDeleteAvatar = useCallback(async () => {
+		setIsDeletingAvatar(true);
+
+		const result = await fetchJsonWithAuth<{ message: string; avatarUrl: string | null }>('/api/user/avatar', {
+			method: 'DELETE',
+			body: JSON.stringify({}),
+		});
+
+		if (result.ok && result.data) {
+			toast('Avatar deleted', 'success');
+			setAvatarPreview(result.data.avatarUrl);
+			setSelfHosted(false);
+		} else {
+			toast(result.error || 'Error during deletion', 'error');
+		}
+		setIsDeletingAvatar(false);
 	}, [toast]);
 
 	// Bio handler
@@ -316,12 +339,15 @@ export function ProfilePage() {
 				<div className="grid gap-6 lg:grid-cols-3">
 					{/* Left Column - Avatar & Quick Stats */}
 					<div className="space-y-6">
-						<AvatarCard
-							avatarPreview={avatarPreview}
-							username={user?.username}
-							onAvatarChange={handleAvatarChange}
-							isUploading={isUploadingAvatar}
-						/>
+					<AvatarCard
+						avatarPreview={avatarPreview}
+						username={user?.username}
+						onAvatarChange={handleAvatarChange}
+						isUploading={isUploadingAvatar}
+						onAvatarDelete={handleDeleteAvatar}
+						isDeletingAvatar={isDeletingAvatar}
+						canDeleteAvatar={selfHosted}
+					/>
 						<QuickStatsCard stats={stats} />
 					</div>
 

@@ -11,6 +11,7 @@ export interface ProfileData {
 	username: string;
 	avatar: string | null;
 	bio: string;
+	selfHosted: boolean;
 }
 
 export interface TwoFactorSetupResponse {
@@ -24,6 +25,9 @@ export interface AvatarCardProps {
 	username?: string;
 	onAvatarChange: (e: Event) => void;
 	isUploading: boolean;
+	onAvatarDelete?: () => void;
+	isDeletingAvatar?: boolean;
+	canDeleteAvatar?: boolean;
 }
 
 export interface QuickStatsCardProps {

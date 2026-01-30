@@ -15,7 +15,7 @@ export function TournamentPage() {
 
     
 	return( <div className="flex flex-col items-center justify-center h-full gap-24">
-			<h2 className="text-4xl font-bold text-white font-pirulen tracking-widest">Play</h2>
+			<h2 className="text-4xl font-bold text-white font-pirulen tracking-widest select-none">Play</h2>
 			<div className="flex flex-col gap-8 ">
                 <ButtonStyle4 onClick={() => navigate(`/play/tournament/public`)} className="text-2xl">Public Tournament</ButtonStyle4>
                 <ButtonStyle4 onClick={() => navigate(`/play/tournament/private`)} className="text-2xl">Private Tournament</ButtonStyle4>

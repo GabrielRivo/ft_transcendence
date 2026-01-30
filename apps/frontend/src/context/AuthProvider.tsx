@@ -129,7 +129,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
 		}
 	}, [refreshToken]);
 
-	const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+	const login = useCallback(async (email: string, password: string): Promise<{
+		success: boolean;
+		twoFAEnabled: boolean;
+	}> => {
 		try {
 			const response = await fetch(`${API_BASE}/login`, {
 				method: 'POST',
@@ -140,14 +143,15 @@ export function AuthProvider({ children }: AuthProviderProps) {
 				body: JSON.stringify({ email, password }),
 			});
 
+			const data = await response.json();
 			if (!response.ok) {
-				return false;
+				return {success: false, twoFAEnabled: false};
 			}
 
 			await checkAuth();
-			return true;
+			return {success: true, twoFAEnabled: data.twoFAEnabled};
 		} catch {
-			return false;
+			return {success: false, twoFAEnabled: false};
 		}
 	}, [checkAuth]);
 

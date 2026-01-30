@@ -15,6 +15,7 @@ export class ResetPasswordDto {
 	@IsRequired()
 	@IsString()
 	@MinLength(8)
+	@MaxLength(100)
 	newPassword!: string;
 }
 

@@ -52,6 +52,9 @@ function parseErrors(errors: Ajv['errors']): ValidationError[] {
 					message = 'Invalid mail';
 				}
 				break;
+			case 'isStrongPassword':
+				message = 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character';
+				break;
 			case 'type':
 				message = `Invalid type (expected: ${err.params?.type})`;
 				break;

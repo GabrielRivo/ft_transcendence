@@ -35,11 +35,16 @@ export function Login() {
 		setIsLoading(true);
 
 		try {
-			const success = await login(email, password);
+			const {success, twoFAEnabled} = await login(email, password);
 
 			if (success) {
 				toast('Connection success', 'success');
-				navigate('/play');
+				if (twoFAEnabled) {
+					navigate('/otp');
+				}
+				else {
+					navigate('/play');
+				}
 			} else {
 				toast('Mail or password incorrect', 'error');
 			}

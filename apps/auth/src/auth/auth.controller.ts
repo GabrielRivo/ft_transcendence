@@ -18,7 +18,7 @@ import {
 } from 'my-fastify-decorators';
 
 import config from '../config.js';
-import { AuthService, AuthTokens, JwtPayload } from './auth.service.js';
+import { AuthService, AuthTokens, JwtPayload, LoginResult } from './auth.service.js';
 
 import { ChangeEmailDto, ChangeEmailSchema } from './dto/changeEmail.dto.js';
 import { ChangePasswordDto, ChangePasswordSchema } from './dto/changePassword.dto.js';
@@ -83,9 +83,9 @@ export class AuthController {
 		// }
 		// // Je pourrais faire un guard...
 
-		const tokens = await this.authService.login(dto);
+		const { tokens, twoFAEnabled } = await this.authService.login(dto);
 		this.setAuthCookies(res, tokens);
-		return { success: true, message: 'Login successful' };
+		return { success: true, message: 'Login successful', twoFAEnabled };
 	}
 
 	@Post('/guest')

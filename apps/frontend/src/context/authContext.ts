@@ -15,7 +15,10 @@ export interface AuthContextType {
 	isAuthenticated: boolean;
 	user: User | null;
 	loading: boolean;
-	login: (email: string, password: string) => Promise<boolean>;
+	login: (email: string, password: string) => Promise<{
+		success: boolean;
+		twoFAEnabled: boolean;
+	}>;
 	register: (email: string, password: string) => Promise<boolean>;
 	loginAsGuest: (username: string) => Promise<boolean>;
 	logout: () => Promise<void>;

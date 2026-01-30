@@ -129,12 +129,22 @@ export function ProfileSlugPage() {
 
 	const handleAddFriend = async () => {
 		if (!profile) return;
-		sendFriendInvite(profile.id);
+		const result = await sendFriendInvite(profile.id);
+		if (result.success) {
+			toast('Friend request sent!', 'success');
+		} else {
+			toast(result.message || 'Failed to send friend request', 'error');
+		}
 	};
 
 	const handleRemoveFriend = async () => {
 		if (!profile) return;
-		removeFriend(profile.id);
+		const success = await removeFriend(profile.id);
+		if (success) {
+			toast('Friend removed', 'success');
+		} else {
+			toast('Failed to remove friend', 'error');
+		}
 	};
 
 	if (isLoading) {
