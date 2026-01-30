@@ -213,7 +213,7 @@ export class UserHistoryService {
 		const diffScore = score_player1 - score_player2;
 		const diffElo = p2Stats.elo - p1Stats.elo;
 		const hope = 1 / (1 + Math.pow(10, diffElo / 400));
-		const newElo = p1Stats.elo + kfactor * (( 0.5 + diffScore / 10)- hope);
+		const newElo = p1Stats.elo + kfactor * (( 0.6 + diffScore / 10)- hope);
 		const res = newElo - p1Stats.elo
 		let result = Math.round(res)
 		if (result == 0)
