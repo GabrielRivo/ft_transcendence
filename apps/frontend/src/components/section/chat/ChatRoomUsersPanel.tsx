@@ -15,10 +15,6 @@ export function ChatRoomUsersPanel({ roomUsers, currentRoom }: { roomUsers: Room
 		return 'O';
 	};
 
-	useEffect(() => {
-		console.log(currentRoom, roomUsers);
-	}, [roomUsers, currentRoom]);
-
 	return (
 		<div className="group shadow-neon-red-low hover:shadow-neon-red h-full min-h-0 overflow-hidden rounded-e-lg border border-red-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-red-400">
 			<div className="border-b select-none border-red-500/20 bg-red-500/10 p-3 text-right text-sm font-bold tracking-widest text-red-500">

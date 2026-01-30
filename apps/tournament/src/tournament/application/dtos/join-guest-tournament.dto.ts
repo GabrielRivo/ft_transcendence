@@ -1,7 +1,9 @@
-import { IsNumber, IsRequired } from "my-class-validator";
+import { IsRequired, IsString, MinLength, MaxLength } from "my-class-validator";
 
 export class JoinGuestTournamentDto {
-    @IsNumber()
+    @IsString()
     @IsRequired()
-    otp!: number;
+    @MinLength(6)
+    @MaxLength(6)
+    otp!: string;
 }

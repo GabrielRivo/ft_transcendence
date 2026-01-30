@@ -56,10 +56,6 @@ export function ChatSidebarPanel({
 		setShowCreateGroupModal(true);
 	};
 
-	useEffect(() => {
-		console.log(currentRoom, friends, groups);
-	}, [currentRoom, friends, groups]);
-
 	return (
 		<div className="group shadow-neon-cyan-low hover:shadow-neon-cyan flex h-full min-h-0 flex-col overflow-hidden rounded-s-lg border border-cyan-500/40 bg-slate-950/60 backdrop-blur-md transition-all duration-300 hover:-translate-y-2 hover:border-cyan-400">
 			<div className="shrink-0 select-none border-b border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-sm font-bold tracking-widest text-cyan-500 min-h-15 items-center flex" >
