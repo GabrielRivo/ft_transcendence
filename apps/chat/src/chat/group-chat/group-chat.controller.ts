@@ -51,4 +51,3 @@ export class GroupController {
 		return this.groupService.deleteGroup(data.groupId, user.id);
 	}
 }
-

@@ -4,9 +4,10 @@ import ApexCharts, { ApexOptions } from 'apexcharts';
 interface EloHistogramProps {
   userElo: number;
   allPlayersData: number[];
+  username : string;
 }
 
-const EloHistogram = ({ userElo, allPlayersData }: EloHistogramProps) => {
+const EloHistogram = ({ userElo, allPlayersData, username }: EloHistogramProps) => {
   const chartRef = useRef<HTMLDivElement | null>(null);
   const chartInstance = useRef<ApexCharts | null>(null);
 
@@ -170,7 +171,7 @@ const EloHistogram = ({ userElo, allPlayersData }: EloHistogramProps) => {
                 fontWeight: 'bold',
                 padding: { left: 8, right: 8, top: 4, bottom: 4 }
               },
-              text: `YOU (${userElo})`,
+              text: `(${username}) (${userElo})`,
               orientation: 'horizontal',
               offsetY: -25,
             }

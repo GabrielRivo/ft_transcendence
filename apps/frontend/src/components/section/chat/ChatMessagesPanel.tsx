@@ -106,14 +106,14 @@ export function ChatMessagesPanel({
 								className="rounded p-1 text-purple-400 transition-colors hover:bg-purple-500/20 hover:text-white"
 								title="Add friends"
 							>
-								<Users size={18} />
+								<Users size={35} />
 							</button>
 							<button
 								onClick={onLeaveGroup}
 								className="rounded px-2 py-1 text-xs font-bold text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300"
-								title="Quitter le groupe"
+								title="Leave the group"
 							>
-								Quitter
+								Leave
 							</button>
 						</FragmentComponent>
 					)}
@@ -159,7 +159,7 @@ export function ChatMessagesPanel({
 											{isSystem ? (
 												<span className="font-bold text-yellow-400">SYSTEM</span>
 											) : (
-												<span className={`font-bold ${isOwn ? 'text-cyan-400' : ''} ${isBlockedUser ? 'text-gray-500' : ''}`}>{displayUsername}</span>
+												<span className={`font-bold ${isOwn ? 'text-cyan-400' : ''} ${isBlockedUser ? 'text-gray-400' : ''}`}>{displayUsername}</span>
 											)}
 											{` >_`}
 										</span>
@@ -171,7 +171,7 @@ export function ChatMessagesPanel({
 												className="cursor-pointer select-none rounded bg-gray-800/50 px-2 py-1 text-gray-500 italic transition-colors hover:bg-gray-700/50 hover:text-gray-400"
 											>
 												<span className="blur-[3px]">Hidden message</span>
-												<span className="ml-2 text-xs opacity-70">[Clic to reveal]</span>
+												<span className="ml-2 text-xs text-orange-400 opacity-70">[Clic to reveal]</span>
 											</div>
 										) : (
 											(() => {

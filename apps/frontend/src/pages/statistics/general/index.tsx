@@ -194,7 +194,7 @@ export function StatisticsGeneralPage() {
 					<div className="mb-2">
 						<h3 className="font-pirulen text-sm tracking-wider text-cyan-400">Elo :</h3>
 					</div>
-					<EloHistogram userElo={stats.elo} allPlayersData={stats.allPlayersElo} />
+					<EloHistogram userElo={stats.elo} allPlayersData={stats.allPlayersElo} username='You'/>
 				</div>
 
 				{/* Parties jouées */}

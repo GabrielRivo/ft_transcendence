@@ -191,6 +191,18 @@ export function StatisticsGeneralPageSlug() {
 			</div>
 		);
 	}
+	if (error || !stats?.gamesPlayed) {
+		return (
+			<div className="flex w-full flex-col gap-6 p-4">
+				<div className="rounded-lg border border-purple-500/30 bg-slate-900/50 p-4 text-center">
+					<p className="font-pirulen text-lg tracking-wider text-purple-400">Stats of "{stats.username}"</p>
+				</div>
+				<div className="flex h-full w-full items-center justify-center">
+					<p className="font-pirulen text-red-400">{error || 'No stats yet'}</p> 
+				</div> 
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex w-full flex-col gap-6 p-4">
@@ -198,6 +210,7 @@ export function StatisticsGeneralPageSlug() {
 			<div className="rounded-lg border border-purple-500/30 bg-slate-900/50 p-4 text-center">
 				<p className="font-pirulen text-lg tracking-wider text-purple-400">Stats of "{stats.username}"</p>
 			</div>
+			
 
 			{/* Ligne 1 : Histogramme Elo + Parties jouées */}
 			<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -206,7 +219,7 @@ export function StatisticsGeneralPageSlug() {
 					<div className="mb-2">
 						<h3 className="font-pirulen text-sm tracking-wider text-cyan-400">Elo :</h3>
 					</div>
-					<EloHistogram userElo={stats.elo} allPlayersData={stats.allPlayersElo} />
+					<EloHistogram userElo={stats.elo} allPlayersData={stats.allPlayersElo} username={stats.username}/>
 				</div>
 
 				{/* Parties jouées */}
