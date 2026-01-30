@@ -265,7 +265,6 @@ class PongLocal extends Game {
         Services.Engine!.stopRenderLoop(this.renderLoop);
         Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
         Services.Engine!.stopRenderLoop();
-        Services.Engine!.clearInternalTexturesCache();
 
         this.glowLayer?.dispose();
         this.glowLayer = undefined;
