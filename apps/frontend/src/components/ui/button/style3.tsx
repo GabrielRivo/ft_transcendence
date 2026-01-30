@@ -18,7 +18,7 @@ export function ButtonStyle3({ children, onClick, type = 'button', disabled = fa
 		>
 			<span className="absolute bottom-0 left-0 z-0 h-0.5 bg-white transition-all duration-300 group-hover:w-full"></span>
 
-			<span className="tracking-[0.2em z-10 text-xs">{children}</span>
+			<span className="tracking-[0.2em z-10 text-xs text-shadow-2xs">{children}</span>
 		</button>
 	);
 }

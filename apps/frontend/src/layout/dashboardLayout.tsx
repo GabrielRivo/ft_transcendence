@@ -28,18 +28,18 @@ function Menu() {
 
 	return (
 		<nav className="flex h-14 w-full shrink-0 items-center justify-center gap-8 pb-12">
-			<NavLink path="/play" label="Play" />
+			<NavLink path="/play" label="Play" className="text-shadow-sm bg-white/2 rounded-4xl px-4 py-2" />
 			{!user?.isGuest && (
 				<FragmentComponent>
 					{/* <span>|</span> */}
-					<NavLink path="/profile" label="Profile" />
+					<NavLink path="/profile" label="Profile" className="text-shadow-sm bg-white/2 rounded-4xl px-4 py-2" />
 					{/* <span>|</span> */}
-					<NavLink path="/statistics/general" label="Stats" />
+					<NavLink path="/statistics/general" label="Stats" className="text-shadow-sm bg-white/2 rounded-4xl px-4 py-2" />
 				</FragmentComponent>
 			)}
 			{/* <span>|</span> */}
 
-			<Link className="font-pirulen text-cyan-500 hover:text-white/80" to="/logout">
+			<Link className="font-pirulen text-cyan-400 text-shadow-white text-shadow-2xs hover:text-white/80 bg-white/2 rounded-4xl px-4 py-2" to="/logout">
 				Logout
 			</Link>
 		</nav>

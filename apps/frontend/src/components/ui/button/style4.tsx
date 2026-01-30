@@ -19,7 +19,7 @@ export function ButtonStyle4({ children, onClick, type = 'button', disabled = fa
 		>
 			<div className="absolute -top-1/2 -left-1/2 h-[200%] w-1/2 rotate-45 bg-linear-to-r from-transparent via-white/10 to-transparent transition-all duration-700 group-hover:left-full"></div>
 
-			<span className="tracking-widest">{children}</span>
+			<span className="tracking-widest text-shadow-2xs">{children}</span>
 		</button>
 	);
 }

@@ -40,7 +40,7 @@ export function ButtonStyle2({ children, onClick, className = 'text-white' }: Bu
 			<div className="absolute top-0 right-0 size-2 border-t-2 border-r-2 border-current opacity-50  group-hover:size-3 transition-all duration-200 "></div>
 			<div className="absolute bottom-0 left-0 size-2 border-b-2 border-l-2 border-current opacity-50 group-hover:size-1 transition-all duration-200 "></div>
 
-			<span className="relative z-10 font-bold uppercase">{children}</span>
+			<span className="relative z-10 font-bold text-shadow-2xs uppercase">{children}</span>
 		</button>
 	);
 }
