@@ -1,9 +1,10 @@
 import { createElement } from 'my-react';
 import type { Element } from 'my-react';
 import { useGame } from '../hook/useGame';
+import { GameResultModal } from '@/components/game/GameResultModal';
 
 export function MainLayout({ children }: { children?: Element }) {
-	const { canvasRef, mode } = useGame();
+	const { canvasRef, mode, gameResult, clearGameResult } = useGame();
 
 	// Apply blur only in background mode
 	const canvasClasses = `block size-full ${mode === 'background' ? 'blur-sm' : ''}`;
@@ -30,6 +31,11 @@ export function MainLayout({ children }: { children?: Element }) {
 					</div>
 				</div>
 			</div>
+
+			{/* Game Result Modal - shown globally after ranked games */}
+			{gameResult && (
+				<GameResultModal result={gameResult} onClose={clearGameResult} />
+			)}
 		</div>
 	);
 }

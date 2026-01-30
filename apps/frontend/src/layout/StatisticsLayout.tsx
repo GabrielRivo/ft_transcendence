@@ -5,7 +5,7 @@ export function StatisticsLayout({ children }: { children: Element }) {
 	const params = useParams();
 	const { path } = useRouter();
 	const isGeneral = path.includes('/statistics/general');
-	const isHistoric = path.includes('/statistics/historic');
+	const isHistory = path.includes('/statistics/history');
 	return (
 		<div className="flex size-full flex-col overflow-hidden text-white">
 			<header className="p-2 shrink-0">
@@ -19,8 +19,8 @@ export function StatisticsLayout({ children }: { children: Element }) {
 					</Link>
 					<span>|</span>
 					<Link
-						to={params?.statsId ? `/statistics/historic/${params.statsId}` : '/statistics/historic'}
-						className={`hover:text-cyan-500 ${isHistoric ? 'text-cyan-400' : ''}`}
+						to={params?.statsId ? `/statistics/history/${params.statsId}` : '/statistics/history'}
+						className={`hover:text-cyan-500 ${isHistory ? 'text-cyan-400' : ''}`}
 					>
 						History
 					</Link>

@@ -145,7 +145,7 @@ export function Register() {
 								{confirmError && <span className="text-xs text-red-400">{confirmError}</span>}
 							</div>
 							<div className="mt-4 flex flex-col justify-center gap-2">
-								<ButtonStyle4 type="submit"  disabled={!(password === confirmPassword && testStrongPassword(password))}>{isLoading ? 'INSCRIPTION...' : "SUBSCRIBE"}</ButtonStyle4>
+								<ButtonStyle4 type="submit"  disabled={!(password === confirmPassword && testStrongPassword(password))}>{isLoading ? 'INSCRIPTION...' : "REGISTER"}</ButtonStyle4>
 								<ButtonStyle3 onClick={handleClickReturn}>Return</ButtonStyle3>
 							</div>
 						</form>

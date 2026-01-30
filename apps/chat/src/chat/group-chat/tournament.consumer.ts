@@ -68,6 +68,7 @@ export class TournamentConsumer {
         }
 
         if (aggregateId) {
+            await this.generalChatService.deleteTournamentSystemMessage(aggregateId);
             this.io.to('hub').emit('invalidate_history');
         }
     }
@@ -104,7 +105,7 @@ export class TournamentConsumer {
 
     @EventPattern('tournament.finished')
     async handleTournamentFinished(@Payload() data: { aggregateId: string, winnerId: string, name: string, ownerId: string }) {
-        const { name, ownerId } = data;
+        const { aggregateId, name, ownerId } = data;
 
         if (name && ownerId) {
             const ownerIdNum = Number(ownerId);
@@ -113,6 +114,11 @@ export class TournamentConsumer {
             if (group) {
                 this.groupService.deleteGroup(group.groupId, ownerIdNum);
             }
+        }
+
+        if (aggregateId) {
+            await this.generalChatService.deleteTournamentSystemMessage(aggregateId);
+            this.io.to('hub').emit('invalidate_history');
         }
     }
 }

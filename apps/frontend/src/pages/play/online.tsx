@@ -34,7 +34,7 @@ export function OnlinePlayPage() {
 		setIsLoading(true);
 
 		try {
-			const response = await fetch('/api/tournament/guest/join', {
+			const response = await fetch('/api/tournament/join-by-code', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ export function OnlinePlayPage() {
 				<ButtonStyle4 disabled={user?.isGuest} onClick={handleClickMatchmaking} className="text-2xl">Matchmaking</ButtonStyle4>
 				{/* <ButtonStyle4 disabled={user?.isGuest} onClick={handleClickLocal} className="text-2xl">Challenge a Friend</ButtonStyle4> */}
 				<ButtonStyle4 disabled={user?.isGuest}onClick={() => navigate('/play/tournament')} className="text-2xl">Tournament</ButtonStyle4>
-				{user?.isGuest && <ButtonStyle4 onClick={() => setShowInviteModal(true)} className="text-2xl">Join Tournament with Code</ButtonStyle4>}
+				<ButtonStyle4 onClick={() => setShowInviteModal(true)} className="text-2xl">Join Tournament with Code</ButtonStyle4>
 				<Link to="/play"  className="text-white text-center font-pirulen font-bold tracking-widest hover:text-neon-blue text-lg">Return</Link>
 			</div>
 

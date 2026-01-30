@@ -30,8 +30,8 @@ export function TournamentLobby({
     const isFull = currentCount >= maxCount;
 
     return (
-        <CardStyle2 className="flex h-full w-full max-w-3xl flex-col justify-between overflow-hidden">
-            <div className="flex w-full flex-col gap-2">
+        <CardStyle2 className="w-full max-w-3xl">
+            <div className="flex w-full flex-col gap-4">
                 {/* Header */}
                 <div className="flex flex-col items-center">
                     <h3 className="font-pirulen text-xl tracking-widest text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">
@@ -40,7 +40,6 @@ export function TournamentLobby({
                     <p className="mt-2 text-sm text-gray-400">
                         Waiting for players to join...
                     </p>
-                    {/* Invite Code - Small and subtle at top */}
                     {tournament?.inviteCode && (
                         <div className="mt-3 flex items-center gap-2">
                             <span className="text-xs text-gray-500">Code:</span>
@@ -127,7 +126,7 @@ export function TournamentLobby({
                         <div className="rounded-lg border border-white/10 bg-black/30 p-4">
                             <h4 className="font-pirulen text-xs tracking-widest text-cyan-400 mb-3">PLAYERS</h4>
                             {tournament.participants.length > 0 ? (
-                                <ul className="flex flex-col gap-2">
+                                <ul className="flex max-h-48 flex-col gap-2 overflow-y-auto pr-1">
                                     {tournament.participants.map((participant, index) => (
                                         <li
                                             key={participant.id}
@@ -161,10 +160,9 @@ export function TournamentLobby({
                         </div>
                     </div>
                 )}
-            </div>
 
-            {/* Actions */}
-            <div className="mt-6 flex flex-col items-center gap-2">
+                {/* Actions */}
+                <div className="flex flex-col items-center gap-2 pt-2">
                 {isOwner ? (
                     <button
                         onClick={onCancel}
@@ -180,6 +178,7 @@ export function TournamentLobby({
                         Leave Tournament
                     </button>
                 )}
+            </div>
             </div>
         </CardStyle2>
     );

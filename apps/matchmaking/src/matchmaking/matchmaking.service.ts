@@ -1,9 +1,9 @@
 import { Server } from 'socket.io';
 import { randomUUID } from 'crypto';
-import { Service, Inject, type OnModuleInit, type OnModuleDestroy } from 'my-fastify-decorators';
+import { Service, Inject, InjectPlugin, type OnModuleInit, type OnModuleDestroy } from 'my-fastify-decorators';
+import { RabbitMQClient } from 'my-fastify-decorators-microservices';
 import { MatchHistoryRepository } from './repositories/match-history.repository.js';
 import { PenaltyRepository } from './repositories/penalty.repository.js';
-import { GameService } from './game.service.js';
 import { createQueuedPlayer, type QueuedPlayer, type PendingMatch } from './types.js';
 import {
 	BASE_TOLERANCE,
@@ -39,10 +39,12 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 
 	private matchmakingInterval: NodeJS.Timeout | undefined;
 
+	@InjectPlugin('mq')
+	private mq!: RabbitMQClient;
+
 	constructor(
 		@Inject(MatchHistoryRepository) private matchHistoryRepository: MatchHistoryRepository,
 		@Inject(PenaltyRepository) private penaltyRepository: PenaltyRepository,
-		@Inject(GameService) private gameService: GameService,
 	) { }
 
 	public onModuleInit(): void {
@@ -188,24 +190,21 @@ export class MatchmakingService implements OnModuleInit, OnModuleDestroy {
 			});
 		} catch (e) {}
 
-		// Step 3: Call Game Service to create the game instance
-		// The GameService handles retries and returns a typed response
-		const gameCreationResult = await this.gameService.createGame({
-			gameId: match.matchId,
-			player1Id: match.player1.userId,
-			player2Id: match.player2.userId,
-			type: 'ranked',
-		});
+		// Step 3: Publish game.create event to RabbitMQ
+		// The Game Service will receive this and create the game instance
+		try {
+			await this.mq.publish('game.create', {
+				gameId: match.matchId,
+				player1Id: match.player1.userId,
+				player2Id: match.player2.userId,
+				type: 'ranked',
+			});
 
-		// Step 4: Handle the game creation result
-		if (gameCreationResult.success) {
-			// SUCCESS: Game was created in the Game Service
-			// Notify both players to connect to the Game Gateway
-			this.handleGameCreationSuccess(match, gameCreationResult.gameId);
-		} else {
-			// FAILURE: Game Service returned an error or was unreachable
-			// Re-queue both players with priority and notify them of the failure
-			this.handleGameCreationFailure(match, gameCreationResult.error, gameCreationResult.message);
+			// Success: Notify both players to connect to the Game Gateway
+			this.handleGameCreationSuccess(match, match.matchId);
+		} catch (e) {
+			// Failure: Re-queue both players with priority
+			this.handleGameCreationFailure(match, 'GAME_CREATION_FAILED', 'Failed to create game');
 		}
 
 		this.emitQueueStats();

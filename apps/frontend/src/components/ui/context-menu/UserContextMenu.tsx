@@ -146,7 +146,7 @@ export function UserContextMenu({ isOpen, position, onClose, isFriend = false, i
 				{/* <MenuItem label="Challenge" onClick={() => handleAction(callbacks.onChallenge)} /> */}
 				<Divider />
 				<MenuItem label="Stats" onClick={() => handleAction(callbacks.onStatistics)} />
-				<MenuItem label="Profil" onClick={() => handleAction(callbacks.onProfile)} />
+				<MenuItem label="Profile" onClick={() => handleAction(callbacks.onProfile)} />
 				<Divider />
 				<MenuItem
 					label={isFriend ? 'Remove friends': 'Add as friend'}

@@ -1,6 +1,6 @@
 import { Service, Inject } from 'my-fastify-decorators';
 import { TournamentRepository } from '../../domain/ports/tournament.repository.js';
-import { HttpGameGateway } from '../../infrastructure/gateways/http-game.gateway.js';
+import { RabbitMqGameGateway } from '../../infrastructure/gateways/http-game.gateway.js';
 import { SocketTournamentEventsPublisher } from '../../infrastructure/publishers/socket-tournament-events.publisher.js';
 
 @Service()
@@ -8,8 +8,8 @@ export class StartRoundUseCase {
     @Inject(TournamentRepository)
     private repository!: TournamentRepository;
 
-    @Inject(HttpGameGateway)
-    private gameGateway!: HttpGameGateway;
+    @Inject(RabbitMqGameGateway)
+    private gameGateway!: RabbitMqGameGateway;
 
     @Inject(SocketTournamentEventsPublisher)
     private socketPublisher!: SocketTournamentEventsPublisher;

@@ -182,6 +182,7 @@ services:
       - ./apps/matchmaking:/app/apps/matchmaking
       - ./packages/my-fastify-decorators:/app/packages/my-fastify-decorators
       - ./packages/my-class-validator:/app/packages/my-class-validator
+      - ./packages/my-fastify-decorators-microservices:/app/packages/my-fastify-decorators-microservices
       - matchmaking-node-modules:/app/node_modules
       - matchmaking-data:/app/apps/matchmaking/db
     networks:

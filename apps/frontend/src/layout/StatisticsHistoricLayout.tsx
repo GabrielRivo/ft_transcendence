@@ -1,5 +1,5 @@
 import { createElement } from 'my-react';
 
-export function StatisticsHistoricLayout({ children }: { children: Element }) {
+export function StatisticsHistoryLayout({ children }: { children: Element }) {
 	return <div>{children}</div>;
 }

@@ -5,6 +5,7 @@ import { RabbitMQClient, RabbitMQServer } from 'my-fastify-decorators-microservi
 declare module 'fastify' {
     interface FastifyInstance {
         mq: RabbitMQClient;
+        gameCreationMq: RabbitMQClient;
     }
 }
 
@@ -16,6 +17,15 @@ async function rabbitmqPlugin(fastify: FastifyInstance) {
         urls,
         exchange: {
             name: 'tournament.fanout',
+            type: 'fanout'
+        }
+    });
+
+    // Client for publishing game creation events
+    const gameCreationClient = new RabbitMQClient({
+        urls,
+        exchange: {
+            name: 'matchmaking.fanout',
             type: 'fanout'
         }
     });
@@ -32,16 +42,19 @@ async function rabbitmqPlugin(fastify: FastifyInstance) {
     });
 
     fastify.decorate('mq', client);
+    fastify.decorate('gameCreationMq', gameCreationClient);
 
     fastify.ready(async () => {
         try {
             await client.connect();
+            await gameCreationClient.connect();
             await gameEventsSubscriber.listen();
         } catch (err) { }
     });
 
     fastify.addHook('onClose', async () => {
         await client.close();
+        await gameCreationClient.close();
         await gameEventsSubscriber.close();
     });
 }

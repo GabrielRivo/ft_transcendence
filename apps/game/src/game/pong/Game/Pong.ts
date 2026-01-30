@@ -50,6 +50,13 @@ class Pong extends Game {
     private tournamentId?: string | undefined;
     private isFinal: boolean = false;
 
+    // Store game result for socket emission in dispose()
+    private gameEndResult?: {
+        winnerId: string | null;
+        player1Score: number;
+        player2Score: number;
+    };
+
     constructor(id: string, p1Id: string, p2Id: string, gameType: GameType, gameService: GameService, tournamentId?: string, isFinal?: boolean) {
         super();
         this.id = id;
@@ -136,6 +143,8 @@ class Pong extends Game {
 
         client.emit("gameJoined", {
             gameId: this.id,
+            player1Id: this.p1Id,
+            player2Id: this.p2Id,
             player1Score: this.player1!.score,
             player2Score: this.player2!.score,
             message: `Joined game ${this.id} successfully!`,
@@ -306,6 +315,14 @@ class Pong extends Game {
             hitPlayer2: this.player2?.hitCount || 0,
             isTournamentFinal: this.isFinal
         };
+
+        // Store result for socket emission in dispose()
+        this.gameEndResult = {
+            winnerId: winnerId,
+            player1Score: this.player1?.score || 0,
+            player2Score: this.player2?.score || 0,
+        };
+
         this.gameService.publishGameFinished(gameFinishedEvent);
         this.dispose();
     }
@@ -328,7 +345,17 @@ class Pong extends Game {
         this.services.EventBus!.off("DeathBarHit", this.onDeathBarHit);
         this.services.Scene!.dispose();
 
-        this.nsp?.to(this.id).emit('gameEnded', { gameId: this.id, message: `Game ${this.id} has ended.` });
+        // Emit enriched gameEnded event with all necessary data for frontend redirection
+        this.nsp?.to(this.id).emit('gameEnded', {
+            gameId: this.id,
+            winnerId: this.gameEndResult?.winnerId || null,
+            player1Id: this.p1Id,
+            player2Id: this.p2Id,
+            player1Score: this.gameEndResult?.player1Score || 0,
+            player2Score: this.gameEndResult?.player2Score || 0,
+            gameType: this.gameType,
+            tournamentId: this.tournamentId,
+        });
 
         this.services.Collision!.clear();
         

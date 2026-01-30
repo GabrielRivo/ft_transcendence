@@ -5,6 +5,7 @@ import { registerValidators } from 'my-class-validator';
 import bootstrapPlugin from './plugins/bootstrap-plugin.js';
 import socketPlugin from './plugins/socket-plugin.js';
 import sqlitePlugin from './plugins/sqlite-plugin.js';
+import rabbitmqPlugin from './plugins/rabbitmq-plugin.js';
 
 const app = Fastify({ logger: true, routerOptions: { ignoreTrailingSlash: true } });
 
@@ -16,6 +17,7 @@ addAjvErrors(ajv);
 registerValidators(ajv);
 
 app.register(sqlitePlugin);
+app.register(rabbitmqPlugin);
 app.register(socketPlugin);
 app.register(bootstrapPlugin);
 

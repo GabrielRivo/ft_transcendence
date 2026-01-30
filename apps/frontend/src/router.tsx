@@ -19,8 +19,8 @@ import { StatisticsPage } from './pages/statistics';
 // import { StatisticsPageSlug } from './pages/statistics/slug';
 import { StatisticsGeneralPage } from './pages/statistics/general';
 import { StatisticsGeneralPageSlug } from './pages/statistics/general/slug';
-import { StatisticsHistoricPage } from './pages/statistics/historic';
-import { StatisticsHistoricPageSlug } from './pages/statistics/historic/slug';
+import { StatisticsHistoryPage } from './pages/statistics/historic';
+import { StatisticsHistoryPageSlug } from './pages/statistics/historic/slug';
 
 import { Game } from './pages/game';
 import { GuestLayout } from './layout/GuestLayout';
@@ -38,7 +38,7 @@ import { TournamentPage } from './pages/play/tournament';
 import { TournamentTypePage } from './pages/play/tournamentType';
 import { TournamentPlayersPage } from './pages/play/tournamentPlayers';
 import { StatisticsLayout } from './layout/StatisticsLayout';
-import { StatisticsHistoricLayout } from './layout/StatisticsHistoricLayout';
+import { StatisticsHistoryLayout } from './layout/StatisticsHistoricLayout';
 
 function GameLayout({ children }: { children: any }) {
 	return (
@@ -140,15 +140,15 @@ const routes = [
 										component: StatisticsGeneralPage,
 									},
 									{
-										layout: StatisticsHistoricLayout,
+										layout: StatisticsHistoryLayout,
 										routes: [
 											{
-												path: '/statistics/historic/:statsId',
-												component: StatisticsHistoricPageSlug,
+												path: '/statistics/history/:statsId',
+												component: StatisticsHistoryPageSlug,
 											},
 											{
-												path: '/statistics/historic',
-												component: StatisticsHistoricPage,
+												path: '/statistics/history',
+												component: StatisticsHistoryPage,
 											},
 										],
 									},

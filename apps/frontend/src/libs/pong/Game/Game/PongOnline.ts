@@ -309,24 +309,47 @@ class PongOnline extends Game {
 
             Services.EventBus!.emit("Game:ScoreUpdated", { player1Score: payload.player1Score, player2Score: payload.player2Score, scoreToWin: 5 });
 
+            // Emit player info for UI (avatars, usernames)
+            Services.EventBus!.emit("Game:PlayersInfo", {
+                player1Id: payload.player1Id,
+                player2Id: payload.player2Id,
+                currentPlayer: payload.player
+            });
+
             this.gameJoined = true;
         }
         this.processGameState();
     }
 
-    private onGameStopped = (_payload: any): void => {
+    private onGameStopped = (payload: any): void => {
         this.gameState = "waiting";
+        // Notify UI that game is paused (opponent disconnected)
+        Services.EventBus!.emit("Game:Paused", {
+            paused: true,
+            message: payload?.message || "Waiting for opponent to reconnect..."
+        });
         this.processGameState();
     }
 
     private onGameStarted = (payload: any): void => {
         this.gameState = "playing";
+        // Notify UI that game resumed
+        Services.EventBus!.emit("Game:Paused", { paused: false });
         this.synchronizeTimeWithServer(payload.timestamp);
         this.processGameState();
     }
 
-    private onGameEnded = (_payload: any): void => {
-        this.endGame();
+    private onGameEnded = (payload: any): void => {
+        // Use data from server if available, fallback to stored values
+        const gameType = payload?.gameType || this.gameType;
+        const tournamentId = payload?.tournamentId || this.tournamentId;
+        const winnerId = payload?.winnerId;
+        const player1Id = payload?.player1Id;
+        const player2Id = payload?.player2Id;
+        const player1Score = payload?.player1Score ?? this.player1?.score ?? 0;
+        const player2Score = payload?.player2Score ?? this.player2?.score ?? 0;
+
+        this.endGame(gameType, tournamentId, winnerId, player1Id, player2Id, player1Score, player2Score);
     }
 
     private onGameUpdate = (payload: any): void => {
@@ -430,8 +453,18 @@ class PongOnline extends Game {
         Services.Scene!.render();
     }
 
-    private endGame(): void {
-        if (!this.tournamentId) {
+    private endGame(
+        gameType?: string,
+        tournamentId?: string,
+        winnerId?: string | null,
+        player1Id?: string,
+        player2Id?: string,
+        player1Score?: number,
+        player2Score?: number
+    ): void {
+        const isTournament = gameType === 'tournament' && tournamentId;
+
+        if (!isTournament) {
             const blackScreen = new BlackScreenEffect(0, 1);
             blackScreen.play();
         }
@@ -439,12 +472,15 @@ class PongOnline extends Game {
         setTimeout(() => {
             Services.EventBus!.emit("Game:Ended", {
                 name: "PongOnline",
-                winnerId: null,
-                score: { player1: this.player1!.score, player2: this.player2!.score },
-                gameType: this.gameType,
-                tournamentId: this.tournamentId
+                winnerId: winnerId ?? null,
+                player1Id: player1Id,
+                player2Id: player2Id,
+                player1Score: player1Score ?? this.player1?.score ?? 0,
+                player2Score: player2Score ?? this.player2?.score ?? 0,
+                gameType: gameType || this.gameType,
+                tournamentId: tournamentId || this.tournamentId
             });
-        }, this.tournamentId ? 0 : 1000);
+        }, isTournament ? 0 : 1000);
     }
 
     dispose(): void {

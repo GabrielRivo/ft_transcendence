@@ -1,7 +1,7 @@
 import { createElement, useState, useEffect, useRef, useCallback, useMemo } from 'my-react';
 import { useNavigate } from 'my-react-router';
 import type { Element } from 'my-react';
-import { GameContext, GameMode, GameScores } from './gameContext';
+import { GameContext, GameMode, GameScores, GameResult, GamePlayers, PlayerInfo } from './gameContext';
 import Game from '../libs/pong/Game/index';
 import Services from '../libs/pong/Game/Services/Services';
 import { useToast } from '@/hook/useToast';
@@ -27,7 +27,24 @@ export function GameProvider({ children }: GameProviderProps) {
 		scoreToWin: 5,
 	});
 
+	// Game result state for end-of-game modal (ranked games)
+	const [gameResult, setGameResult] = useState<GameResult | null>(null);
+
+	// Pause state for opponent disconnection overlay
+	const [isPaused, setIsPaused] = useState(false);
+	const [pauseMessage, setPauseMessage] = useState<string | null>(null);
+
+	// Players info for score overlay
+	const [players, setPlayers] = useState<GamePlayers>({
+		player1: null,
+		player2: null,
+		currentPlayer: null,
+	});
+
 	const currentModeRef = useRef<GameMode>('background');
+	
+	// Store metadata for tournament redirects
+	const gameMetadataRef = useRef<{ type?: string; tournamentId?: string; tournamentType?: string; playersCount?: string } | null>(null);
 
 
 	// Handler for score updates
@@ -63,36 +80,77 @@ export function GameProvider({ children }: GameProviderProps) {
 				handleScoreUpdateRef.current(event);
 			});
 
-			Services.EventBus?.on('Game:Ended', (event: { gameType?: string; tournamentId?: string }) => {
+			Services.EventBus?.on('Game:Paused', (event: { paused: boolean; message?: string }) => {
+				setIsPaused(event.paused);
+				setPauseMessage(event.paused ? (event.message || 'Waiting for opponent...') : null);
+			});
+
+			Services.EventBus?.on('Game:PlayersInfo', async (event: { player1Id: string; player2Id: string; currentPlayer: 1 | 2 }) => {
+				// Fetch player profiles
+				const fetchProfile = async (userId: string): Promise<PlayerInfo | null> => {
+					try {
+						const response = await fetch(`/api/user/profile/${userId}`, { credentials: 'include' });
+						if (response.ok) {
+							const data = await response.json();
+							return { id: String(data.id), username: data.username, avatar: data.avatar };
+						}
+					} catch (e) {
+						// console.error('Failed to fetch player profile:', e);
+					}
+					return null;
+				};
+
+				const [p1, p2] = await Promise.all([
+					fetchProfile(event.player1Id),
+					fetchProfile(event.player2Id),
+				]);
+
+				setPlayers({
+					player1: p1,
+					player2: p2,
+					currentPlayer: event.currentPlayer,
+				});
+			});
+
+			Services.EventBus?.on('Game:Ended', (event: { 
+				gameType?: string; 
+				tournamentId?: string;
+				winnerId?: string | null;
+				player1Id?: string;
+				player2Id?: string;
+				player1Score?: number;
+				player2Score?: number;
+			}) => {
 				setModeState('background');
 
 				const gameType = event?.gameType;
 				const eventTournamentId = event?.tournamentId;
+				const metadata = gameMetadataRef.current;
 
-				if (gameType === 'ranked') {
+				// Clear metadata after use
+				gameMetadataRef.current = null;
+
+				if (gameType === 'tournament' && eventTournamentId) {
+					// Tournament: Direct redirect using stored metadata
+					const tournamentType = metadata?.tournamentType || 'private';
+					const playersCount = metadata?.playersCount || '8';
+					const targetUrl = `/play/tournament/${tournamentType}/${playersCount}?id=${eventTournamentId}`;
+					navigate(targetUrl);
+				} else if (gameType === 'ranked') {
+					// Ranked: Set result for modal and navigate to /play
+					setGameResult({
+						gameId: metadata?.tournamentId || 'unknown',
+						winnerId: event.winnerId ?? null,
+						player1Id: event.player1Id ?? '',
+						player2Id: event.player2Id ?? '',
+						player1Score: event.player1Score ?? 0,
+						player2Score: event.player2Score ?? 0,
+						gameType: 'ranked',
+					});
+					// Navigate to /play - the modal will be shown there
 					navigate('/play');
-				} else if (gameType === 'tournament' && eventTournamentId) {
-					fetch(`/api/tournament/${eventTournamentId}`, {
-						method: 'GET',
-						credentials: 'include',
-						headers: { 'Content-Type': 'application/json' },
-					})
-						.then(res => res.ok ? res.json() : null)
-						.then(tournament => {
-							if (tournament && tournament.visibility && tournament.size) {
-								const tournamentType = tournament.visibility.toLowerCase();
-								const playersCount = tournament.size;
-								const targetUrl = `/play/tournament/${tournamentType}/${playersCount}?id=${eventTournamentId}`;
-								navigate(targetUrl);
-							} else {
-								navigate('/play');
-							}
-						})
-						.catch(err => {
-							navigate('/play');
-						});
-				}
-				else {
+				} else {
+					// Fallback: always navigate away from game page
 					navigate('/play');
 				}
 			});
@@ -116,6 +174,11 @@ export function GameProvider({ children }: GameProviderProps) {
 		currentModeRef.current = newMode;
 		setModeState(newMode);
 
+		// Store metadata for later use in Game:Ended handler
+		if (metadata) {
+			gameMetadataRef.current = metadata;
+		}
+
 		if (newGameId !== undefined) {
 			setGameId(newGameId);
 		} else if (newMode === 'background') {
@@ -130,6 +193,13 @@ export function GameProvider({ children }: GameProviderProps) {
 			player1Score: 0,
 			player2Score: 0,
 			scoreToWin: 5,
+		});
+
+		// Reset players info when switching modes
+		setPlayers({
+			player1: null,
+			player2: null,
+			currentPlayer: null,
 		});
 
 		setIsLoading(true);
@@ -161,6 +231,10 @@ export function GameProvider({ children }: GameProviderProps) {
 		}
 	}, [isInitialized]);
 
+	const clearGameResult = useCallback(() => {
+		setGameResult(null);
+	}, []);
+
 	const contextValue = useMemo(() => ({
 		mode,
 		setMode,
@@ -170,7 +244,12 @@ export function GameProvider({ children }: GameProviderProps) {
 		gameId,
 		scores,
 		isInitialized,
-	}), [mode, setMode, isLoading, error, gameId, scores, isInitialized]);
+		gameResult,
+		clearGameResult,
+		isPaused,
+		pauseMessage,
+		players,
+	}), [mode, setMode, isLoading, error, gameId, scores, isInitialized, gameResult, clearGameResult, isPaused, pauseMessage, players]);
 
 	return (
 		<GameContext.Provider value={contextValue}>

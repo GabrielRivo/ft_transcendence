@@ -2,6 +2,7 @@
 import { createElement, useEffect } from 'my-react';
 import { useNavigate, useQuery } from 'my-react-router';
 import { useGame } from '../../hook/useGame';
+import { PlayerInfo } from '@/context/gameContext';
 
 function LoadingOverlay() {
 	return (
@@ -18,40 +19,129 @@ function LoadingOverlay() {
 	);
 }
 
+function PlayerAvatar({ player, fallbackLabel, colorClass }: { player: PlayerInfo | null; fallbackLabel: string; colorClass: string }) {
+	if (!player) {
+		return (
+			<div className={`flex h-8 w-8 items-center justify-center rounded-full border ${colorClass} bg-slate-800`}>
+				<span className="text-xs font-bold text-gray-400">{fallbackLabel}</span>
+			</div>
+		);
+	}
+
+	return (
+		<div className={`h-8 w-8 overflow-hidden rounded-full border ${colorClass}`}>
+			{player.avatar ? (
+				<img src={player.avatar} alt={player.username} className="h-full w-full object-cover" />
+			) : (
+				<div className="flex h-full w-full items-center justify-center bg-slate-800 text-xs font-bold text-gray-400">
+					{player.username?.charAt(0)?.toUpperCase() || '?'}
+				</div>
+			)}
+		</div>
+	);
+}
+
 function ScoreOverlay({
 	player1Score,
 	player2Score,
 	scoreToWin,
+	player1,
+	player2,
+	currentPlayer,
 }: {
 	player1Score: number;
 	player2Score: number;
 	scoreToWin: number;
+	player1: PlayerInfo | null;
+	player2: PlayerInfo | null;
+	currentPlayer: 1 | 2 | null;
 }) {
 	return (
 		<div className="pointer-events-none absolute top-4 left-1/2 z-30 -translate-x-1/2">
-			<div className="flex flex-col items-center gap-1">
+			<div className="flex flex-col items-center gap-2">
 				{/* Score display */}
-				<div className="flex items-center gap-6 rounded-lg border border-cyan-500/40 bg-slate-950/80 px-8 py-3 backdrop-blur-md">
-					{/* Player 1 score */}
-					<div className="flex flex-col items-center">
-						<span className="font-mono text-xs text-gray-400">P1</span>
-						<span className="font-pirulen text-3xl text-cyan-400">{player1Score}</span>
+				<div className="flex items-center gap-4 rounded-lg border border-cyan-500/40 bg-slate-950/80 px-6 py-3 backdrop-blur-md">
+					{/* Player 1 */}
+					<div className="flex flex-col items-center gap-1">
+						<div className="flex items-center gap-2">
+							<PlayerAvatar player={player1} fallbackLabel="P1" colorClass="border-cyan-500/60" />
+							<span className="font-orbitron text-xs text-cyan-400 max-w-16 truncate">
+								{player1?.username || 'Player 1'}
+							</span>
+						</div>
+						<span className={`font-pirulen text-3xl ${currentPlayer === 1 ? 'text-cyan-400' : 'text-cyan-400/70'}`}>
+							{player1Score}
+						</span>
 					</div>
 
 					{/* Separator */}
-					<div className="flex flex-col items-center">
-						<span className="font-pirulen text-xl text-gray-500">VS</span>
+					<div className="flex flex-col items-center px-2">
+						<span className="font-pirulen text-lg text-gray-500">VS</span>
 					</div>
 
-					{/* Player 2 score */}
-					<div className="flex flex-col items-center">
-						<span className="font-mono text-xs text-gray-400">P2</span>
-						<span className="font-pirulen text-3xl text-pink-400">{player2Score}</span>
+					{/* Player 2 */}
+					<div className="flex flex-col items-center gap-1">
+						<div className="flex items-center gap-2">
+							<span className="font-orbitron text-xs text-pink-400 max-w-16 truncate">
+								{player2?.username || 'Player 2'}
+							</span>
+							<PlayerAvatar player={player2} fallbackLabel="P2" colorClass="border-pink-500/60" />
+						</div>
+						<span className={`font-pirulen text-3xl ${currentPlayer === 2 ? 'text-pink-400' : 'text-pink-400/70'}`}>
+							{player2Score}
+						</span>
 					</div>
 				</div>
 
-				{/* Victory condition */}
-				<span className="font-mono text-xs text-gray-500">First to {scoreToWin} wins</span>
+				{/* Controls hint */}
+				<div className="flex items-center gap-4">
+					<span className="font-mono text-xs text-gray-500">First to {scoreToWin} wins</span>
+					<span className="text-gray-600">•</span>
+					<span className="font-mono text-xs text-gray-500">
+						<span className="text-cyan-400/70">A</span>/<span className="text-cyan-400/70">D</span> or <span className="text-cyan-400/70">←</span>/<span className="text-cyan-400/70">→</span> to move
+					</span>
+				</div>
+			</div>
+		</div>
+	);
+}
+
+/**
+ * Pause overlay component.
+ * Displayed when opponent disconnects temporarily.
+ */
+function PauseOverlay({ message }: { message: string }) {
+	return (
+		<div className="pointer-events-none absolute inset-0 z-35 flex items-center justify-center">
+			<div className="flex flex-col items-center gap-4 rounded-xl border border-yellow-500/40 bg-slate-950/70 px-8 py-6 backdrop-blur-sm">
+				{/* Animated waiting icon */}
+				<div className="relative h-12 w-12">
+					<div className="absolute inset-0 animate-ping rounded-full border-2 border-yellow-500/30" />
+					<div className="absolute inset-0 flex items-center justify-center">
+						<svg
+							className="h-8 w-8 animate-pulse text-yellow-400"
+							fill="none"
+							viewBox="0 0 24 24"
+							stroke="currentColor"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								strokeWidth={2}
+								d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+							/>
+						</svg>
+					</div>
+				</div>
+
+				{/* Title */}
+				<h3 className="font-pirulen text-sm tracking-widest text-yellow-400">GAME PAUSED</h3>
+
+				{/* Message */}
+				<p className="max-w-xs text-center text-xs text-gray-300">{message}</p>
+
+				{/* Additional info */}
+				<p className="text-xs text-gray-500">The game will resume automatically...</p>
 			</div>
 		</div>
 	);
@@ -112,7 +202,7 @@ function ErrorOverlay({ message, onRetry }: { message: string; onRetry: () => vo
 export const Game = () => {
 	const navigate = useNavigate();
 	const query = useQuery();
-	const { setMode, mode, error, isLoading, gameId, scores } = useGame();
+	const { setMode, mode, error, isLoading, scores, isPaused, pauseMessage, players } = useGame();
 
 	// Get gameId from URL query
 	const urlGameId = query.get('id');
@@ -177,18 +267,15 @@ export const Game = () => {
 					player1Score={scores.player1Score}
 					player2Score={scores.player2Score}
 					scoreToWin={scores.scoreToWin}
+					player1={players.player1}
+					player2={players.player2}
+					currentPlayer={players.currentPlayer}
 				/>
 			)}
 
-			{/* Game info overlay (shown during gameplay for online mode) */}
-			{!isLoading && !error && gameId && (
-				<div className="pointer-events-none absolute top-4 left-4 z-30">
-					<div className="rounded border border-cyan-500/30 bg-slate-950/60 px-3 py-1.5 backdrop-blur-sm">
-						<p className="font-mono text-xs text-cyan-400">
-							Game: <span className="text-white">{gameId.slice(0, 8)}...</span>
-						</p>
-					</div>
-				</div>
+			{/* Pause overlay (shown when opponent disconnects) */}
+			{!isLoading && !error && isPaused && pauseMessage && (
+				<PauseOverlay message={pauseMessage} />
 			)}
 
 			{/* Back button - needs pointer-events-auto to be clickable */}
