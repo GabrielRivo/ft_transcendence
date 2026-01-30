@@ -170,8 +170,6 @@ export function useTournament(): UseTournamentReturn {
                         ]
                     };
                 });
-
-                toastRef.current(`Player ${data.displayName} joined!`, 'info');
             },
             onPlayerLeft: (data) => {
                 const currentUser = userRef.current;

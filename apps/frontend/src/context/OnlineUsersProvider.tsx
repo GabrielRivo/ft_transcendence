@@ -160,7 +160,7 @@ export function OnlineUsersProvider({ children }: OnlineUsersProviderProps) {
 
 		try {
 			const idsParam = missingIds.join(',');
-			const response = await fetchWithAuth(`${API_BASE}/profiles?ids=${idsParam}`);
+			const response = await fetchWithAuth(`${API_BASE}/es?ids=${idsParam}`);
 
 			if (response.ok) {
 				const data = await response.json();
