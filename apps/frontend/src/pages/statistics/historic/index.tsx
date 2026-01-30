@@ -203,14 +203,14 @@ export function StatisticsHistoryPage() {
 	const username = user?.username || 'Vous';
 
 	return (
-		<div className="flex gap-6 p-4 h-full w-full min-h-[500px]">
+		<div className="flex gap-6 p-4 h-full w-full min-h-125">
 			{/* Colonne gauche : Détails du match */}
-			<div className="flex-[3]">
+			<div className="flex-3">
 				{selectedMatch && <MatchDetails match={selectedMatch} username={username} />}
 			</div>
 
 			{/* Colonne droite : Liste des matchs */}
-			<div className="flex-[2] flex flex-col gap-4 overflow-y-auto max-h-[600px] p-2 scrollbar-neon">
+			<div className="flex-2 flex flex-col gap-4 overflow-y-auto max-h-150 p-2 scrollbar-neon">
 				{matches.map((match) => (
 					<MatchCard
 						key={match.id}

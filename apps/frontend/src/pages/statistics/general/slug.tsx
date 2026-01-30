@@ -101,7 +101,7 @@ function WinRatePieChart({ winRate }: { winRate: number }) {
 		};
 	}, [winRate]);
 
-	return <div ref={chartRef} className="h-[200px] w-full" />;
+	return <div ref={chartRef} className="h-50 w-full" />;
 }
 
 function StatCard({ title, value, subtitle }: { title: string; value: string | number; subtitle?: string }) {
