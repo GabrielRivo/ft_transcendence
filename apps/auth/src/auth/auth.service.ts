@@ -42,6 +42,11 @@ export type AuthTokens = {
 	refreshToken: string;
 };
 
+export type LoginResult = {
+	tokens: AuthTokens;
+	twoFAEnabled: boolean;
+};
+
 // WARNING a rajouter dans my-fastify-decorators
 class BadGatewayException extends HttpException {
 	constructor(message = 'Bad Gateway', payload?: unknown) {
@@ -132,7 +137,7 @@ export class AuthService {
 		return this.generateTokens(guestId, '', username, 'guest', { isGuest: true });
 	}
 
-	async login(dto: LoginDto): Promise<AuthTokens> {
+	async login(dto: LoginDto): Promise<LoginResult> {
 		const { email, password } = dto;
 
 		const user = await this.dbExchange.getUserByEmail(email);
@@ -158,18 +163,21 @@ export class AuthService {
 				data.twoFA = true;
 				data.twoFAVerified = false;
 			}
-			return this.generateTokens(user.id, user.email, '', 'email', data);
+			const tokens = await this.generateTokens(user.id, user.email, '', 'email', data);
+			return { tokens, twoFAEnabled: has2FA };
 		}
 
 		// Si 2FA enable genere un token avec twoFAVerified: false
 		if (has2FA) {
-			return this.generateTokens(user.id, user.email, user.username, 'email', {
+			const tokens = await this.generateTokens(user.id, user.email, user.username, 'email', {
 				twoFA: true,
 				twoFAVerified: false,
 			});
+			return { tokens, twoFAEnabled: true };
 		}
 
-		return this.generateTokens(user.id, user.email, user.username, 'email');
+		const tokens = await this.generateTokens(user.id, user.email, user.username, 'email');
+		return { tokens, twoFAEnabled: false };
 	}
 
 

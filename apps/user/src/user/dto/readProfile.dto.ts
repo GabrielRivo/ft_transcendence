@@ -1,4 +1,4 @@
-import { AdditionalProperties, IsNullable, IsRequired, IsString, IsNumber, generateSchema } from "my-class-validator";
+import { AdditionalProperties, IsBoolean, IsNullable, IsRequired, IsString, IsNumber, generateSchema } from "my-class-validator";
 
 @AdditionalProperties(false)
 export class ReadProfileDtoResponse {
@@ -18,6 +18,10 @@ export class ReadProfileDtoResponse {
     @IsRequired()
     @IsString()
     bio : string;
+
+    @IsRequired()
+    @IsBoolean()
+    selfHosted : boolean; // true if avatar is uploaded by user, false if from provider
 }
 
 export const ReadProfileDtoSchemaResponse = generateSchema(ReadProfileDtoResponse);
