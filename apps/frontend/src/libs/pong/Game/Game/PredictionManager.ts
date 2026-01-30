@@ -82,15 +82,12 @@ class PredictionManager {
 
         if (posDiffP1 > 0.1) {
             this.game.player1!.paddle.reconcile(prediction.p1.pos, truth.p1.pos);
-            console.log("Reconciled P1 Paddle");
         }
         if (posDiffP2 > 0.1) {
             this.game.player2!.paddle.reconcile(prediction.p2.pos, truth.p2.pos);
-            console.log("Reconciled P2 Paddle");
         }
         if (posDiffBall > 0.1 || dirDiffBall > 0.1 || speedDiffBall > 0.1) {
             this.game.ball!.reconcile(prediction.ball.pos, truth.ball.pos, truth.ball.dir, truth.ball.speed);
-            console.log("Reconciled Ball");
         }
     }
 
