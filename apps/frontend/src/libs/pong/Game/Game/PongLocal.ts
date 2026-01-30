@@ -183,7 +183,6 @@ class PongLocal extends Game {
 
         let pillarColor: Color3;
         if (payload.deathBar.owner == this.player2)
-            //pillarColor = new Color3(0.8, 0, 0.8);
             pillarColor = new Color3(0.2, 0.8, 1);
         else
             pillarColor = new Color3(0.8, 0.3, 0.8);
@@ -197,14 +196,12 @@ class PongLocal extends Game {
             this.player1!.scoreUp();
         }
         
-        // Emit score update event
         Services.EventBus!.emit("Game:ScoreUpdated", {
             player1Score: this.player1!.score,
             player2Score: this.player2!.score,
             scoreToWin: 5
         });
 
-        // Check for game end
         if (this.player1!.score == 5 || this.player2!.score == 5) {
             setTimeout(() => {
                 if (this.isDisposed) return;
@@ -268,6 +265,7 @@ class PongLocal extends Game {
         Services.Engine!.stopRenderLoop(this.renderLoop);
         Services.Engine!.stopRenderLoop(this.stoppedRenderLoop);
         Services.Engine!.stopRenderLoop();
+        Services.Engine!.clearInternalTexturesCache();
 
         this.glowLayer?.dispose();
         this.glowLayer = undefined;

@@ -234,6 +234,7 @@ class PongBackground extends Game {
 		this.isDisposed = true;
 
 		Services.Engine!.stopRenderLoop(this.renderLoop);
+		Services.Engine!.clearInternalTexturesCache();
 
 		this.glowLayer?.dispose();
 		this.glowLayer = undefined;
