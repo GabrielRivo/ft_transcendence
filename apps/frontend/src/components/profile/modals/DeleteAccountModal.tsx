@@ -31,6 +31,7 @@ export function DeleteAccountModal({ onClose, onConfirmDelete, isDeleting }: Del
 						onInput={(e: Event) => setDeleteConfirmText((e.target as HTMLInputElement).value)}
 						placeholder="DELETE"
 						className="w-full rounded-sm border border-red-500/30 bg-transparent p-3 text-center text-white outline-none focus:border-red-500"
+						maxlength={6}
 					/>
 				</div>
 				<button

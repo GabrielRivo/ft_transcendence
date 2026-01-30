@@ -94,6 +94,7 @@ export function SetUsername() {
 									className={`focus:border-neon-blue w-full rounded-sm border bg-transparent p-3 text-sm text-white transition-all duration-300 outline-none placeholder:text-gray-600 focus:bg-white/5 ${usernameError ? 'border-red-500' : 'border-white/10'}`}
 									placeholder="Username123"
 									autoFocus
+									maxlength={200}
 								/>
 								{usernameError && <span className="text-xs text-red-400">{usernameError}</span>}
 								<p className="text-xs text-gray-500">3-20 characters, letters, numbers and underscores only</p>

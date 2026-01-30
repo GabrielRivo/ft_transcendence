@@ -91,6 +91,7 @@ export function Register() {
 									onInput={(e: Event) => setEmail((e.target as HTMLInputElement).value)}
 									className={`focus:border-neon-blue w-full rounded-sm border bg-transparent p-3 text-sm text-white transition-all duration-300 outline-none placeholder:text-gray-600 focus:bg-white/5 ${emailError ? 'border-red-500' : 'border-white/10'}`}
 									placeholder="name@example.com"
+									maxlength={200}
 								/>
 								{emailError && <span className="text-xs text-red-400">{emailError}</span>}
 							</div>
@@ -109,6 +110,7 @@ export function Register() {
 									onInput={(e: Event) => setPassword((e.target as HTMLInputElement).value)}
 									className={`focus:border-neon-blue w-full rounded-sm border bg-transparent p-3 text-sm text-white transition-all duration-300 outline-none placeholder:text-gray-600 focus:bg-white/5 ${passwordError ? 'border-red-500' : 'border-white/10'}`}
 									placeholder="••••••••"
+									maxlength={200}
 								/>
 								{passwordError && <span className="text-xs text-red-400">{passwordError}</span>}
 								<div className="mt-1 grid grid-cols-2 gap-1 text-xs">
@@ -141,6 +143,7 @@ export function Register() {
 									onInput={(e: Event) => setConfirmPassword((e.target as HTMLInputElement).value)}
 									className={`focus:border-neon-blue w-full rounded-sm border bg-transparent p-3 text-sm text-white transition-all duration-300 outline-none placeholder:text-gray-600 focus:bg-white/5 ${confirmError ? 'border-red-500' : 'border-white/10'}`}
 									placeholder="••••••••"
+									maxlength={200}
 								/>
 								{confirmError && <span className="text-xs text-red-400">{confirmError}</span>}
 							</div>

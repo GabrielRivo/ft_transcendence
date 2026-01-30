@@ -64,6 +64,7 @@ export function AddFriendModal({ onClose }: AddFriendModalProps) {
 								placeholder="Enter nickname..."
 								className="w-full rounded-lg border-2 border-cyan-500/30 bg-slate-900/80 py-3 pr-4 pl-9 font-mono text-sm text-white placeholder-gray-500 shadow-[inset_0_0_20px_rgba(6,182,212,0.1)] transition-all duration-200 outline-none focus:border-cyan-400 focus:shadow-[inset_0_0_30px_rgba(6,182,212,0.2),0_0_20px_rgba(6,182,212,0.2)]"
 								autoFocus
+								maxlength={200}
 							/>
 						</div>
 						{error && (

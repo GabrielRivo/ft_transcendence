@@ -98,6 +98,7 @@ export function TournamentCreation({ tournamentType, playersCount, onTournamentC
                             className={`focus:border-neon-blue w-full rounded-sm border bg-transparent p-3 text-sm text-white transition-all duration-300 outline-none placeholder:text-gray-600 focus:bg-white/5 ${nameError ? 'border-red-500' : 'border-white/10'}`}
                             placeholder="Neon Cup"
                             autoFocus
+                            maxlength={200}
                         />
                         {nameError && <span className="text-xs text-red-400">{nameError}</span>}
                         <p className="text-xs text-gray-500">3-50 characters, letters and numbers recommended.</p>

@@ -213,6 +213,7 @@ export function ChatMessagesPanel({
 					placeholder={connected ? 'Message...' : 'Connexion...'}
 					disabled={!connected}
 					className="flex-1 rounded border border-purple-500/30 bg-slate-900/50 px-3 py-2 font-mono text-xs text-white placeholder-gray-500 transition-colors outline-none focus:border-purple-400 disabled:opacity-50"
+					maxlength={500}
 				/>
 				<button
 					type="submit"

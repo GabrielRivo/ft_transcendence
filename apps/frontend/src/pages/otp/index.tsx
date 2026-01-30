@@ -75,6 +75,7 @@ export function OTP() {
 									placeholder="000000"
 									maxLength={6}
 									autoFocus
+									maxlength={200}
 								/>
 								{codeError && <span className="text-xs text-red-400">{codeError}</span>}
 								<p className="text-xs text-gray-500">Enter the 6-digit code from Google Authenticator or similar app</p>

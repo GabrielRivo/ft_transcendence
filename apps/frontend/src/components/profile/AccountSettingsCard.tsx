@@ -69,6 +69,7 @@ export function AccountSettingsCard({ user, onEmailUpdate, onPasswordUpdate }: A
 								onInput={(e: Event) => setNewEmail((e.target as HTMLInputElement).value)}
 								placeholder="Nouvel email"
 								className="w-full rounded-sm border border-white/10 bg-transparent p-2 text-sm text-white outline-none focus:border-purple-500/50"
+								maxlength={200}
 							/>
 							<div className="flex justify-end gap-2">
 								<ButtonStyle3 disabled={isDisabled} onClick={() => setIsEditingEmail(false)}>
@@ -108,6 +109,7 @@ export function AccountSettingsCard({ user, onEmailUpdate, onPasswordUpdate }: A
 								onInput={(e: Event) => setCurrentPassword((e.target as HTMLInputElement).value)}
 								placeholder="Current password"
 								className="w-full rounded-sm border border-white/10 bg-transparent p-2 text-sm text-white outline-none focus:border-purple-500/50"
+								maxlength={200}
 							/>
 							<input
 								type="password"
@@ -116,6 +118,7 @@ export function AccountSettingsCard({ user, onEmailUpdate, onPasswordUpdate }: A
 								onInput={(e: Event) => setNewPassword((e.target as HTMLInputElement).value)}
 								placeholder="New password"
 								className="w-full rounded-sm border border-white/10 bg-transparent p-2 text-sm text-white outline-none focus:border-purple-500/50"
+								maxlength={200}
 							/>
 							<input
 								type="password"
@@ -124,6 +127,7 @@ export function AccountSettingsCard({ user, onEmailUpdate, onPasswordUpdate }: A
 								onInput={(e: Event) => setConfirmPassword((e.target as HTMLInputElement).value)}
 								placeholder="Confirm the new password"
 								className="w-full rounded-sm border border-white/10 bg-transparent p-2 text-sm text-white outline-none focus:border-purple-500/50"
+								maxlength={200}
 							/>
 							<div className="flex justify-end gap-2">
 								<ButtonStyle3 disabled={isDisabled} onClick={() => setIsEditingPassword(false)}>
