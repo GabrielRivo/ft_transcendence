@@ -73,10 +73,6 @@ export function ChatMessagesPanel({
 
 	};
 
-	useEffect(() => {
-		console.log(currentRoom);
-	}, [currentRoom]);
-
 	const handleSubmit = (e: Event) => {
 		e.preventDefault();
 		if (inputValue.trim() && connected) {

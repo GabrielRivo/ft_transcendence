@@ -47,16 +47,6 @@ export class UserController {
 		return { users: this.userService.getProfilesBatch(userIds) };
 	}
 
-	// @Put('/profile/:userId')
-	// @BodySchema(UpdateProfileDtoSchema)
-	// @ResponseSchema(200, UpdateProfileDtoSchemaResponse)
-	// async update_profile(
-	// 	@Param('userId') userId: string,
-	// 	@Body() data: UpdateProfileDto
-	// ): Promise<UpdateProfileDtoResponse> {
-	// 	return this.userService.update_profile(userId, data);
-	// }
-
 	@Put('/bio')
 	@BodySchema(UpdateProfileDtoSchema)
 	@ResponseSchema(200, UpdateProfileDtoSchemaResponse)
