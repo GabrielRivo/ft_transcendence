@@ -12,7 +12,7 @@ import { JoinTournamentUseCase } from './application/use-cases/join-tournament.u
 import { StartRoundUseCase } from './application/use-cases/start-round.use-case.js';
 import { GetActiveTournamentUseCase } from './application/use-cases/active-tournament.use-case.js';
 import { LeaveTournamentUseCase } from './application/use-cases/leave-tournament.use-case.js';
-import { HttpGameGateway } from './infrastructure/gateways/http-game.gateway.js';
+import { RabbitMqGameGateway } from './infrastructure/gateways/http-game.gateway.js';
 import { TimerAdapter } from './infrastructure/adapters/timer.adapter.js';
 import { TournamentEventsController } from './infrastructure/controllers/tournament-events.controller.js';
 import { LiveScoreService } from './infrastructure/services/live-score.service.js';
@@ -32,7 +32,7 @@ import { LiveScoreService } from './infrastructure/services/live-score.service.j
         StartRoundUseCase,
         GetActiveTournamentUseCase,
         LeaveTournamentUseCase,
-        HttpGameGateway,
+        RabbitMqGameGateway,
         TimerAdapter,
         LiveScoreService,
     ]

@@ -46,6 +46,7 @@
 		"fastify-plugin": "^5.0.1",
 		"my-class-validator": "workspace:*",
 		"my-fastify-decorators": "workspace:*",
+		"my-fastify-decorators-microservices": "workspace:*",
 		"reflect-metadata": "^0.2.2",
 		"socket.io": "^4.8.1",
 		"supertest": "^7.1.4"
