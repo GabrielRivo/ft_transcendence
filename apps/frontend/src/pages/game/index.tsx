@@ -2,6 +2,7 @@
 import { createElement, useEffect } from 'my-react';
 import { useNavigate, useQuery } from 'my-react-router';
 import { useGame } from '../../hook/useGame';
+import { GameResultModal } from '@/components/game/GameResultModal';
 
 function LoadingOverlay() {
 	return (
@@ -112,7 +113,7 @@ function ErrorOverlay({ message, onRetry }: { message: string; onRetry: () => vo
 export const Game = () => {
 	const navigate = useNavigate();
 	const query = useQuery();
-	const { setMode, mode, error, isLoading, gameId, scores } = useGame();
+	const { setMode, mode, error, isLoading, gameId, scores, gameResult, clearGameResult } = useGame();
 
 	// Get gameId from URL query
 	const urlGameId = query.get('id');
@@ -200,6 +201,11 @@ export const Game = () => {
 					← Exit
 				</button>
 			</div>
+
+			{/* Game Result Modal (shown after ranked game ends) */}
+			{gameResult && (
+				<GameResultModal result={gameResult} onClose={clearGameResult} />
+			)}
 		</div>
 	);
 };
