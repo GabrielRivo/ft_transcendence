@@ -101,13 +101,14 @@ export class TournamentController {
     @Inject(JoinGuestTournamentUseCase)
     private joinGuestTournamentUseCase!: JoinGuestTournamentUseCase;
 
-    @Post('/guest/join')
-    public async joinGuest(@Body() body: JoinGuestTournamentDto, @JWTBody() user: any) {
+    @Post('/join-by-code')
+    public async joinByCode(@Body() body: JoinGuestTournamentDto, @JWTBody() user: any) {
         if (!user) throw new UnauthorizedException();
         const tournament = await this.joinGuestTournamentUseCase.execute(
             body,
             String(user.id),
-            user.username
+            user.username,
+            user.isGuest === true
         );
         return tournament;
     }

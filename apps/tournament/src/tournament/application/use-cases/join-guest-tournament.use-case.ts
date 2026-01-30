@@ -26,12 +26,13 @@ export class JoinGuestTournamentUseCase {
 
     public async execute(
         command: JoinGuestTournamentDto,
-        guestId: string,
-        guestUsername: string,
+        userId: string,
+        username: string,
+        isGuest: boolean = true,
     ): Promise<Tournament> {
-        const activeTournament = await this.repository.findActiveByParticipantId(guestId);
+        const activeTournament = await this.repository.findActiveByParticipantId(userId);
         if (activeTournament) {
-            throw new PlayerAlreadyInActiveTournamentException(guestId, activeTournament.id);
+            throw new PlayerAlreadyInActiveTournamentException(userId, activeTournament.id);
         }
 
         const tournament = await this.repository.findByInviteCode(command.otp.toString());
@@ -39,7 +40,9 @@ export class JoinGuestTournamentUseCase {
             throw new NotFoundException(`Tournament with invite code ${command.otp} not found`);
         }
 
-        const participant = Participant.createGuest(guestId, guestUsername);
+        const participant = isGuest
+            ? Participant.createGuest(userId, username)
+            : Participant.createUser(userId, username);
 
         const wasStarted = tournament.status === 'STARTED';
         tournament.join(participant);
