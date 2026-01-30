@@ -68,7 +68,7 @@ clean: ## Stop application and remove volumes (production) (Warning: database da
 
 prune: ## Remove unused docker objects (production context)
 	@echo "$(RED)Pruning unused docker objects...$(NC)"
-	@docker system prune -fa --volumes
+	@docker stop $(docker ps -qa) 2>/dev/null; docker rm $(docker ps -qa) 2>/dev/null; docker volume rm $(docker volume ls -q) 2>/dev/null; docker network prune -f; docker system prune -a --volumes -f
 	@echo "$(GREEN)System pruned.$(NC)"
 
 # ------------------------------------------------------------------------------
