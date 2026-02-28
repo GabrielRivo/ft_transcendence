@@ -1,6 +1,6 @@
 # Ft_Transcendence
 
-> Last project of the 42 School common core, featuring a Single Page Application allowing users to play a Pong game. This project is completed by a large selection of optional features and modules chosen by the team members.
+> Final project of the 42 School common core. A group project featuring a heavily enhanced and complete implementation of a Pong SPA.
 
 ![Status](https://img.shields.io/badge/Status-Completed-success)
 &emsp;
@@ -16,7 +16,7 @@
 
 ## Introduction
 
-This project is a heavily enhanced and complete implementation of a **Pong game SPA (Single Page Application)** including tournaments, built with strict technical constraints.
+This project consists of a **Pong game SPA (Single Page Application)** including tournaments, built under strict technical constraints. It is expanded with by a large selection of optional features and modules chosen by the team members.
 
 **Note:** Some frameworks and tools had to be recoded from scratch to comply with the school's subject (e.g., React / NestJS architectures).
 The project was completed on 31/01/2026 by a team of 4 developers, over a span of 2 months.
