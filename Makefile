@@ -44,7 +44,7 @@ up: ## Start the application in production mode (generates SSL certs if missing)
 	@echo "$(BLUE)Starting production environment...$(NC)"
 	@$(DOCKER_COMPOSE_PROD) -f $(DOCKER_COMPOSE_PROD_FILE) up -d --build
 	@echo "$(GREEN)Production environment started!$(NC)"
-	@echo "App available at https://localhost"
+	@echo "App available at https://localhost:8443 by default"
 
 down: ## Stop the production environment
 	@echo "$(BLUE)Stopping production environment...$(NC)"
