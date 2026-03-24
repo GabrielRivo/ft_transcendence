@@ -70,8 +70,10 @@ make up
 ```
 <br><br>
 
-## Demo Video
-
+## Try it yourself
+[![Online demo](https://img.shields.io/badge/Demo-Live_Preview-cyan?style=for-the-badge&logo=google-chrome&logoColor=white)](https://transcendence.wartro.fr/)
+<br>
+## Demo video
 <a href="https://youtu.be/7qPfisuVZOc">
    <img src="https://img.youtube.com/vi/7qPfisuVZOc/maxresdefault.jpg" width="400" alt="Watch the video">
 </a>
