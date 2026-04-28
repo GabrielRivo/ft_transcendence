@@ -46,8 +46,12 @@ The project was completed on 31/01/2026 by a team of 4 developers, over a span o
 
 ## My work
 
-My tasks were mainly focused on the game development and integration. 
-I built the game in 3D using Babylon.js with custom assets created in Blender. I implemented a continuous collision detection (CCD) system using raycasting for precise and efficient physics.
+My main tasks were focused on the game development and integration :
+
+
+I built the game in 3D using Babylon.js with custom assets created in Blender.
+
+I implemented a continuous collision detection (CCD) system using raycasting for precise and efficient physics.
 
 To ensure a smooth and competitive online experience, I developed a dedicated backend using WebSockets, featuring client-side prediction and server reconciliation. This architecture relies on strict determinism to provide a lag-free, secure, and synchronized gameplay for all clients, while greatly increasing server performances.
 
